@@ -1,0 +1,388 @@
+﻿<Page x:Class="SistemaGimnacionOptimusCAI.Paginas.UsuariosPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:helpers="clr-namespace:TPFinal_LPOO2_AsistenciaEscolar_Baca_Abalos_Mamani_WPF.Helpers"
+      mc:Ignorable="d"
+      d:DesignHeight="720" d:DesignWidth="1200"
+      Title="Usuarios"
+      Background="{StaticResource ColorInputFondo}">
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Importa tu diccionario de estilos existente -->
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <!-- Converter que ya tenés en el proyecto -->
+            <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <!-- GRID PRINCIPAL: dos columnas (tabla + formulario) -->
+    <Grid Margin="30">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <!-- Tabla -->
+            <ColumnDefinition Width="Auto"/>
+            <!-- Panel formulario -->
+        </Grid.ColumnDefinitions>
+
+        <!-- ================================================== -->
+        <!-- COLUMNA IZQUIERDA: Header + Buscador + DataGrid    -->
+        <!-- ================================================== -->
+        <Grid Grid.Column="0" Margin="0,0,20,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Header -->
+                <RowDefinition Height="*"/>
+                <!-- DataGrid -->
+            </Grid.RowDefinitions>
+
+            <!-- ── Header ─────────────────────────────────── -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,15">
+
+                <TextBlock Text="Gestión de Usuarios"
+                           Style="{StaticResource TituloEstilo}"/>
+                <TextBlock Text="Administrá los administradores e instructores del sistema."
+                           Style="{StaticResource SubtituloEstilo}"
+                           Margin="0,0,0,15"/>
+
+                <!-- Buscador + Botón Nuevo -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Buscador con texto placeholder -->
+                    <Grid Grid.Column="0" Margin="0,0,15,0">
+                        <TextBox x:Name="txtBuscar"
+                                 Style="{StaticResource InputEstilo}"
+                                 Margin="0"
+                                 TextChanged="txtBuscar_TextChanged"/>
+                        <!-- Placeholder visible cuando el TextBox está vacío -->
+                        <TextBlock Text="🔍  Buscar por nombre, apellido o DNI..."
+                                   IsHitTestVisible="False"
+                                   VerticalAlignment="Center"
+                                   Margin="15,0,0,0"
+                                   Foreground="{StaticResource ColorTextoSecundario}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Botón Nuevo Usuario -->
+                    <Button Grid.Column="1"
+                            Content="＋  Nuevo Usuario"
+                            Style="{StaticResource BotonPrincipalEstilo}"
+                            Width="170"
+                            Click="btnNuevo_Click"/>
+                </Grid>
+            </StackPanel>
+
+            <!-- ── DataGrid ────────────────────────────────── -->
+            <Border Grid.Row="1"
+                    Background="{StaticResource ColorBlanco}"
+                    CornerRadius="12" Padding="5">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="12" Color="#CCCCCC" Opacity="0.35" ShadowDepth="2"/>
+                </Border.Effect>
+
+                <DataGrid x:Name="gridUsuarios"
+                          IsReadOnly="True"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserResizeRows="False"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          RowHeaderWidth="0"
+                          RowHeight="62"
+                          GridLinesVisibility="Horizontal"
+                          HorizontalGridLinesBrush="{StaticResource ColorInputFondo}"
+                          SelectionChanged="gridUsuarios_SelectionChanged">
+
+                    <DataGrid.Columns>
+
+                        <!-- FOTO circular -->
+                        <DataGridTemplateColumn Width="75" Header="">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Ellipse Width="44" Height="44"
+                                             HorizontalAlignment="Center"
+                                             Stroke="{StaticResource ColorPrimario}"
+                                             StrokeThickness="1.5">
+                                        <Ellipse.Fill>
+                                            <ImageBrush
+                                                ImageSource="{Binding Foto, Converter={StaticResource BytesAImagen}}"
+                                                Stretch="UniformToFill"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- NOMBRE COMPLETO -->
+                        <DataGridTextColumn Header="NOMBRE COMPLETO"
+                                            Binding="{Binding NombreCompleto}"
+                                            Width="1.8*"/>
+
+                        <!-- DNI -->
+                        <DataGridTextColumn Header="DNI"
+                                            Binding="{Binding Dni}"
+                                            Width="0.9*"/>
+
+                        <!-- EMAIL -->
+                        <DataGridTextColumn Header="EMAIL"
+                                            Binding="{Binding Email}"
+                                            Width="2*"/>
+
+                        <!-- ROL -->
+                        <DataGridTextColumn Header="ROL"
+                                            Binding="{Binding RolTexto}"
+                                            Width="1.2*"/>
+
+                        <!-- ESTADO con badge de color -->
+                        <DataGridTemplateColumn Header="ESTADO" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="12" Padding="12,4"
+                                            HorizontalAlignment="Left">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#FFECEC"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Activo}" Value="True">
+                                                        <Setter Property="Background" Value="#E8F5E9"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock x:Name="txtEstado"
+                                                   Text="Inactivo"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#C62828">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="Inactivo"/>
+                                                    <Setter Property="Foreground" Value="#C62828"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Activo}" Value="True">
+                                                            <Setter Property="Text" Value="Activo"/>
+                                                            <Setter Property="Foreground" Value="#2E7D32"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- ACCIONES: editar + activar/desactivar -->
+                        <DataGridTemplateColumn Header="ACCIONES" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+                                        <!-- Editar -->
+                                        <Button Click="btnEditar_Click"
+                                                ToolTip="Editar usuario"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Cursor="Hand"
+                                                Margin="0,0,8,0">
+                                            <TextBlock Text="✏️" FontSize="18"/>
+                                        </Button>
+
+                                        <!-- Toggle activo/inactivo -->
+                                        <Button Click="btnToggleEstado_Click"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Cursor="Hand">
+                                            <TextBlock FontSize="18">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="🗑️"/>
+                                                        <Setter Property="ToolTip" Value="Desactivar"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Activo}" Value="False">
+                                                                <Setter Property="Text" Value="♻️"/>
+                                                                <Setter Property="ToolTip" Value="Reactivar"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Button>
+
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+
+        <!-- ================================================== -->
+        <!-- COLUMNA DERECHA: Panel formulario CRUD             -->
+        <!-- Visible solo al crear o editar un usuario          -->
+        <!-- ================================================== -->
+        <Border x:Name="panelFormulario"
+                Grid.Column="1"
+                Width="360"
+                Background="{StaticResource ColorBlanco}"
+                CornerRadius="12"
+                Padding="25"
+                Visibility="Collapsed">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30" Color="#000000" Opacity="0.1" ShadowDepth="0"/>
+            </Border.Effect>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- Título -->
+                    <RowDefinition Height="*"/>
+                    <!-- Campos (scroll) -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Botones -->
+                </Grid.RowDefinitions>
+
+                <!-- Título del panel -->
+                <TextBlock x:Name="lblTituloFormulario"
+                           Text="Nuevo Usuario"
+                           Style="{StaticResource TituloEstilo}"
+                           Margin="0,0,0,20"/>
+
+                <!-- Campos con scroll por si la ventana es chica -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+                    <StackPanel>
+
+                        <!-- Foto circular + botón de cámara -->
+                        <StackPanel HorizontalAlignment="Center" Margin="0,0,0,25">
+                            <Grid>
+                                <Ellipse Width="100" Height="100"
+                                         Stroke="{StaticResource ColorPrimario}"
+                                         StrokeThickness="2.5">
+                                    <Ellipse.Fill>
+                                        <ImageBrush x:Name="imgFotoFormulario"
+                                                    Stretch="UniformToFill"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+
+                                <!-- Botón cámara sobre la foto -->
+                                <Button Width="32" Height="32"
+                                        VerticalAlignment="Bottom"
+                                        HorizontalAlignment="Right"
+                                        Background="{StaticResource ColorPrimario}"
+                                        BorderThickness="0"
+                                        Cursor="Hand"
+                                        ToolTip="Cambiar foto"
+                                        Click="btnSubirFoto_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="16">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <TextBlock Text="📷" VerticalAlignment="Center"
+                                               HorizontalAlignment="Center" Margin="0,0,0,1"/>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Nombre -->
+                        <TextBlock Text="Nombre *" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtNombre" Style="{StaticResource InputEstilo}"/>
+
+                        <!-- Apellido -->
+                        <TextBlock Text="Apellido *" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtApellido" Style="{StaticResource InputEstilo}"/>
+
+                        <!-- DNI -->
+                        <TextBlock Text="DNI *" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtDni" Style="{StaticResource InputEstilo}" MaxLength="8"/>
+
+                        <!-- Email -->
+                        <TextBlock Text="Email" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtEmail" Style="{StaticResource InputEstilo}"/>
+
+                        <!-- Teléfono -->
+                        <TextBlock Text="Teléfono" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
+                        <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"/>
+
+                        <!-- Contraseña (solo obligatoria al crear) -->
+                        <TextBlock x:Name="lblClave"
+                                   Text="Contraseña *"
+                                   Style="{StaticResource SubtituloEstilo}"
+                                   Margin="0,0,0,5"/>
+                        <PasswordBox x:Name="txtClave" Style="{StaticResource PasswordEstilo}"/>
+                        <!-- Aclaración para edición -->
+                        <TextBlock x:Name="lblClaveAclaracion"
+                                   Text="Dejá vacío para mantener la contraseña actual."
+                                   FontSize="11"
+                                   Foreground="{StaticResource ColorTextoSecundario}"
+                                   Margin="0,-10,0,10"
+                                   Visibility="Collapsed"/>
+
+                        <!-- Rol -->
+                        <TextBlock Text="Rol *" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
+                        <Border Background="{StaticResource ColorInputFondo}"
+                                CornerRadius="10" Height="45" Margin="0,0,0,15">
+                            <ComboBox x:Name="cmbRol"
+                                      BorderThickness="0"
+                                      Background="Transparent"
+                                      VerticalContentAlignment="Center"
+                                      FontSize="14"
+                                      Padding="10,0">
+                                <!-- El valor Tag es el RolId de la tabla roles -->
+                                <ComboBoxItem Content="Administrador" Tag="1"/>
+                                <ComboBoxItem Content="Empleado / Instructor" Tag="2"/>
+                            </ComboBox>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Botones Cancelar / Guardar -->
+                <Grid Grid.Row="2" Margin="0,20,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Content="Cancelar"
+                            Style="{StaticResource BotonCerrarEstilo}"
+                            Margin="0,0,8,0"
+                            Click="btnCancelar_Click"/>
+
+                    <Button x:Name="btnGuardar"
+                            Grid.Column="1"
+                            Content="Guardar"
+                            Style="{StaticResource BotonPrincipalEstilo}"
+                            Margin="8,0,0,0"
+                            Click="btnGuardar_Click"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Page>
