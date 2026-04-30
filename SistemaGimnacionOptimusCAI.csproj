@@ -107,11 +107,11 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Controllers\Controllers.csproj">
+    <ProjectReference Include="Controllers\Controllers.csproj">
       <Project>{3ec31869-eac3-4b7c-b750-3b72f0ae5c15}</Project>
       <Name>Controllers</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Entities\Entities.csproj">
+    <ProjectReference Include="Entities\Entities.csproj">
       <Project>{1c76a908-bb27-41b5-936e-d375d3566521}</Project>
       <Name>Entities</Name>
     </ProjectReference>
