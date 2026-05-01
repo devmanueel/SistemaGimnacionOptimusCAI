@@ -3,386 +3,642 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:helpers="clr-namespace:TPFinal_LPOO2_AsistenciaEscolar_Baca_Abalos_Mamani_WPF.Helpers"
+      xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       mc:Ignorable="d"
-      d:DesignHeight="720" d:DesignWidth="1200"
-      Title="Usuarios"
-      Background="{StaticResource ColorInputFondo}">
+      d:DesignHeight="768" d:DesignWidth="1280"
+      Title="Usuarios">
+
+    <Page.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0A0A14" Offset="0"/>
+            <GradientStop Color="#0D0D22" Offset="1"/>
+        </LinearGradientBrush>
+    </Page.Background>
 
     <Page.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Importa tu diccionario de estilos existente -->
                 <ResourceDictionary Source="/MiDiccionario.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <!-- Converter que ya tenés en el proyecto -->
+
+            <!-- Converter para foto: misma clase que ya tenés funcionando -->
             <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
+
+            <!-- Input con error: hereda InputEstilo (Background + BorderBrush
+                 se aplican por TemplateBinding, funciona con BasedOn) -->
+            <Style x:Key="InputErrorEstilo" TargetType="TextBox"
+                   BasedOn="{StaticResource InputEstilo}">
+                <Setter Property="Background"      Value="#1E0A0A"/>
+                <Setter Property="BorderBrush"     Value="#FF4444"/>
+                <Setter Property="BorderThickness" Value="1.5"/>
+            </Style>
+
+            <!-- Label de error debajo de cada campo -->
+            <Style x:Key="LabelErrorEstilo" TargetType="TextBlock">
+                <Setter Property="FontSize"     Value="11"/>
+                <Setter Property="Foreground"   Value="#FF5555"/>
+                <Setter Property="Margin"       Value="4,-10,0,8"/>
+                <Setter Property="FontStyle"    Value="Italic"/>
+                <Setter Property="Visibility"   Value="Collapsed"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
         </ResourceDictionary>
     </Page.Resources>
 
-    <!-- GRID PRINCIPAL: dos columnas (tabla + formulario) -->
-    <Grid Margin="30">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <!-- Tabla -->
-            <ColumnDefinition Width="Auto"/>
-            <!-- Panel formulario -->
-        </Grid.ColumnDefinitions>
+    <!-- Grid raíz con animación fade-in al cargar -->
+    <Grid x:Name="gridRaiz" Margin="24,20,24,20" Opacity="0">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation
+                            Storyboard.TargetName="gridRaiz"
+                            Storyboard.TargetProperty="Opacity"
+                            From="0" To="1"
+                            Duration="0:0:0.5"
+                            DecelerationRatio="0.6"/>
+                        <DoubleAnimation
+                            Storyboard.TargetName="translateEntrada"
+                            Storyboard.TargetProperty="Y"
+                            From="20" To="0"
+                            Duration="0:0:0.5"
+                            DecelerationRatio="0.8"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
 
-        <!-- ================================================== -->
-        <!-- COLUMNA IZQUIERDA: Header + Buscador + DataGrid    -->
-        <!-- ================================================== -->
-        <Grid Grid.Column="0" Margin="0,0,20,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <!-- Header -->
-                <RowDefinition Height="*"/>
-                <!-- DataGrid -->
-            </Grid.RowDefinitions>
+        <Grid.RenderTransform>
+            <TranslateTransform x:Name="translateEntrada" Y="20"/>
+        </Grid.RenderTransform>
 
-            <!-- ── Header ─────────────────────────────────── -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Header -->
+            <RowDefinition Height="Auto"/>
+            <!-- Stats -->
+            <RowDefinition Height="*"/>
+            <!-- DataGrid + Formulario -->
+        </Grid.RowDefinitions>
 
-                <TextBlock Text="Gestión de Usuarios"
-                           Style="{StaticResource TituloEstilo}"/>
-                <TextBlock Text="Administrá los administradores e instructores del sistema."
-                           Style="{StaticResource SubtituloEstilo}"
-                           Margin="0,0,0,15"/>
+        <!-- ══════════════════════════════════════════════════════
+             HEADER: Título + Buscador + Botón Nuevo
+        ══════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-                <!-- Buscador + Botón Nuevo -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Buscador con texto placeholder -->
-                    <Grid Grid.Column="0" Margin="0,0,15,0">
-                        <TextBox x:Name="txtBuscar"
-                                 Style="{StaticResource InputEstilo}"
-                                 Margin="0"
-                                 TextChanged="txtBuscar_TextChanged"/>
-                        <!-- Placeholder visible cuando el TextBox está vacío -->
-                        <TextBlock Text="🔍  Buscar por nombre, apellido o DNI..."
-                                   IsHitTestVisible="False"
-                                   VerticalAlignment="Center"
-                                   Margin="15,0,0,0"
-                                   Foreground="{StaticResource ColorTextoSecundario}">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Grid>
-
-                    <!-- Botón Nuevo Usuario -->
-                    <Button Grid.Column="1"
-                            Content="＋  Nuevo Usuario"
-                            Style="{StaticResource BotonPrincipalEstilo}"
-                            Width="170"
-                            Click="btnNuevo_Click"/>
-                </Grid>
+            <!-- Título con barra naranja lateral -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#FF6B35" Offset="0"/>
+                            <GradientStop Color="#FF3D1F" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="GESTIÓN DE USUARIOS"
+                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                               FontSize="19" FontWeight="Bold"
+                               Foreground="#E8E8FF"/>
+                    <TextBlock Text="Administradores e instructores del sistema"
+                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
             </StackPanel>
 
-            <!-- ── DataGrid ────────────────────────────────── -->
-            <Border Grid.Row="1"
-                    Background="{StaticResource ColorBlanco}"
-                    CornerRadius="12" Padding="5">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="12" Color="#CCCCCC" Opacity="0.35" ShadowDepth="2"/>
-                </Border.Effect>
+            <!-- Buscador + Botón -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
 
-                <DataGrid x:Name="gridUsuarios"
-                          IsReadOnly="True"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          CanUserResizeRows="False"
-                          Background="Transparent"
-                          BorderThickness="0"
-                          RowHeaderWidth="0"
-                          RowHeight="62"
-                          GridLinesVisibility="Horizontal"
-                          HorizontalGridLinesBrush="{StaticResource ColorInputFondo}"
-                          SelectionChanged="gridUsuarios_SelectionChanged">
+                <!-- Buscador oscuro -->
+                <Border Background="#16162A" CornerRadius="10"
+                        BorderBrush="#252540" BorderThickness="1.5"
+                        Width="290" Height="46" Margin="0,0,12,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🔍" FontSize="15"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <Grid Grid.Column="1">
+                            <TextBox x:Name="txtBuscar"
+                                     Height="44" BorderThickness="0"
+                                     Background="Transparent"
+                                     Foreground="#E8E8FF" CaretBrush="#00CFFF"
+                                     FontSize="14"
+                                     VerticalContentAlignment="Center"
+                                     Padding="0,0,10,0"
+                                     TextChanged="txtBuscar_TextChanged"/>
+                            <TextBlock Text="Buscar por nombre, apellido o DNI..."
+                                       IsHitTestVisible="False"
+                                       VerticalAlignment="Center"
+                                       FontSize="12" Foreground="#3A3A5C">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Grid>
+                </Border>
 
-                    <DataGrid.Columns>
+                <!-- Botón Nuevo Usuario naranja -->
+                <Button Content="＋  NUEVO USUARIO"
+                        Style="{StaticResource BotonNaranjaEstilo}"
+                        Width="178" Height="46"
+                        Click="btnNuevo_Click"/>
+            </StackPanel>
+        </Grid>
 
-                        <!-- FOTO circular -->
-                        <DataGridTemplateColumn Width="75" Header="">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Ellipse Width="44" Height="44"
-                                             HorizontalAlignment="Center"
-                                             Stroke="{StaticResource ColorPrimario}"
-                                             StrokeThickness="1.5">
-                                        <Ellipse.Fill>
-                                            <ImageBrush
-                                                ImageSource="{Binding Foto, Converter={StaticResource BytesAImagen}}"
-                                                Stretch="UniformToFill"/>
-                                        </Ellipse.Fill>
-                                    </Ellipse>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+        <!-- ══════════════════════════════════════════════════════
+             STATS: 4 tarjetas de métricas
+        ══════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="1" Margin="0,0,0,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                        <!-- NOMBRE COMPLETO -->
-                        <DataGridTextColumn Header="NOMBRE COMPLETO"
-                                            Binding="{Binding NombreCompleto}"
-                                            Width="1.8*"/>
+            <!-- Total -->
+            <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1"
+                    Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statTotal" Text="—"
+                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                               FontSize="26" FontWeight="Bold" Foreground="#00CFFF"/>
+                    <TextBlock Text="TOTAL USUARIOS"
+                               FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
 
-                        <!-- DNI -->
-                        <DataGridTextColumn Header="DNI"
-                                            Binding="{Binding Dni}"
-                                            Width="0.9*"/>
+            <!-- Activos -->
+            <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1"
+                    Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statActivos" Text="—"
+                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                               FontSize="26" FontWeight="Bold" Foreground="#00E676"/>
+                    <TextBlock Text="ACTIVOS"
+                               FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
 
-                        <!-- EMAIL -->
-                        <DataGridTextColumn Header="EMAIL"
-                                            Binding="{Binding Email}"
-                                            Width="2*"/>
+            <!-- Admins -->
+            <Border Grid.Column="2" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1"
+                    Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statAdmins" Text="—"
+                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                               FontSize="26" FontWeight="Bold" Foreground="#FF6B35"/>
+                    <TextBlock Text="ADMINISTRADORES"
+                               FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
 
-                        <!-- ROL -->
-                        <DataGridTextColumn Header="ROL"
-                                            Binding="{Binding RolTexto}"
-                                            Width="1.2*"/>
+            <!-- Instructores -->
+            <Border Grid.Column="3" Margin="8,0,0,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1"
+                    Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statInstructores" Text="—"
+                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                               FontSize="26" FontWeight="Bold" Foreground="#A78BFA"/>
+                    <TextBlock Text="INSTRUCTORES"
+                               FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
 
-                        <!-- ESTADO con badge de color -->
-                        <DataGridTemplateColumn Header="ESTADO" Width="110">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border CornerRadius="12" Padding="12,4"
-                                            HorizontalAlignment="Left">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Background" Value="#FFECEC"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Activo}" Value="True">
-                                                        <Setter Property="Background" Value="#E8F5E9"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock x:Name="txtEstado"
-                                                   Text="Inactivo"
-                                                   FontSize="12"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="#C62828">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="Inactivo"/>
-                                                    <Setter Property="Foreground" Value="#C62828"/>
+        <!-- ══════════════════════════════════════════════════════
+             CONTENIDO: DataGrid + Panel Formulario
+        ══════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- DATAGRID -->
+            <Border Grid.Column="0" Background="#12121E"
+                    CornerRadius="12" BorderBrush="#252540" BorderThickness="1"
+                    Margin="0,0,14,0" ClipToBounds="True">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3"/>
+                        <!-- Línea decorativa superior -->
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Línea cyan/violeta decorativa -->
+                    <Border Grid.Row="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#00CFFF" Offset="0"/>
+                                <GradientStop Color="#A78BFA" Offset="0.5"/>
+                                <GradientStop Color="#12121E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <DataGrid Grid.Row="1"
+                              x:Name="gridUsuarios"
+                              IsReadOnly="True"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserResizeRows="False"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              RowHeaderWidth="0"
+                              RowHeight="64"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#1A1A2E"
+                              SelectionChanged="gridUsuarios_SelectionChanged">
+
+                        <DataGrid.Columns>
+
+                            <!-- Foto con anillo degradado -->
+                            <DataGridTemplateColumn Width="78" Header="">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid HorizontalAlignment="Center">
+                                            <Ellipse Width="48" Height="48">
+                                                <Ellipse.Fill>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#00CFFF" Offset="0"/>
+                                                        <GradientStop Color="#A78BFA" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                            <Ellipse Width="44" Height="44">
+                                                <Ellipse.Fill>
+                                                    <ImageBrush ImageSource="{Binding Foto, Converter={StaticResource BytesAImagen}}"
+                                                                Stretch="UniformToFill"/>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="NOMBRE COMPLETO"
+                                                Binding="{Binding NombreCompleto}"
+                                                Width="1.8*"/>
+
+                            <DataGridTextColumn Header="DNI"
+                                                Binding="{Binding Dni}"
+                                                Width="0.8*"/>
+
+                            <DataGridTextColumn Header="EMAIL"
+                                                Binding="{Binding Email}"
+                                                Width="2*"/>
+
+                            <!-- ROL badge -->
+                            <DataGridTemplateColumn Header="ROL" Width="1.2*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="6" Padding="10,4"
+                                                HorizontalAlignment="Left">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#1E1840"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Activo}" Value="True">
-                                                            <Setter Property="Text" Value="Activo"/>
-                                                            <Setter Property="Foreground" Value="#2E7D32"/>
+                                                        <DataTrigger Binding="{Binding RolNombre}" Value="admin">
+                                                            <Setter Property="Background" Value="#2A1600"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </Border>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <!-- ACCIONES: editar + activar/desactivar -->
-                        <DataGridTemplateColumn Header="ACCIONES" Width="100">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-
-                                        <!-- Editar -->
-                                        <Button Click="btnEditar_Click"
-                                                ToolTip="Editar usuario"
-                                                Background="Transparent"
-                                                BorderThickness="0"
-                                                Cursor="Hand"
-                                                Margin="0,0,8,0">
-                                            <TextBlock Text="✏️" FontSize="18"/>
-                                        </Button>
-
-                                        <!-- Toggle activo/inactivo -->
-                                        <Button Click="btnToggleEstado_Click"
-                                                Background="Transparent"
-                                                BorderThickness="0"
-                                                Cursor="Hand">
-                                            <TextBlock FontSize="18">
+                                            </Border.Style>
+                                            <TextBlock FontSize="12" FontWeight="SemiBold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
-                                                        <Setter Property="Text" Value="🗑️"/>
-                                                        <Setter Property="ToolTip" Value="Desactivar"/>
+                                                        <Setter Property="Text"       Value="Instructor"/>
+                                                        <Setter Property="Foreground" Value="#A78BFA"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Activo}" Value="False">
-                                                                <Setter Property="Text" Value="♻️"/>
-                                                                <Setter Property="ToolTip" Value="Reactivar"/>
+                                                            <DataTrigger Binding="{Binding RolNombre}" Value="admin">
+                                                                <Setter Property="Text"       Value="Admin"/>
+                                                                <Setter Property="Foreground" Value="#FF6B35"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
-                                        </Button>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                            <!-- ESTADO badge con punto indicador -->
+                            <DataGridTemplateColumn Header="ESTADO" Width="115">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="20" Padding="10,4"
+                                                HorizontalAlignment="Left">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#2A0A0A"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Activo}" Value="True">
+                                                            <Setter Property="Background" Value="#0A2A14"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Ellipse Width="7" Height="7"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,6,0">
+                                                    <Ellipse.Style>
+                                                        <Style TargetType="Ellipse">
+                                                            <Setter Property="Fill" Value="#FF4444"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Activo}" Value="True">
+                                                                    <Setter Property="Fill" Value="#00E676"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Ellipse.Style>
+                                                </Ellipse>
+                                                <TextBlock FontSize="12" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text"       Value="Inactivo"/>
+                                                            <Setter Property="Foreground" Value="#FF6666"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Activo}" Value="True">
+                                                                    <Setter Property="Text"       Value="Activo"/>
+                                                                    <Setter Property="Foreground" Value="#00E676"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Border>
-        </Grid>
-
-        <!-- ================================================== -->
-        <!-- COLUMNA DERECHA: Panel formulario CRUD             -->
-        <!-- Visible solo al crear o editar un usuario          -->
-        <!-- ================================================== -->
-        <Border x:Name="panelFormulario"
-                Grid.Column="1"
-                Width="360"
-                Background="{StaticResource ColorBlanco}"
-                CornerRadius="12"
-                Padding="25"
-                Visibility="Collapsed">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="30" Color="#000000" Opacity="0.1" ShadowDepth="0"/>
-            </Border.Effect>
-
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <!-- Título -->
-                    <RowDefinition Height="*"/>
-                    <!-- Campos (scroll) -->
-                    <RowDefinition Height="Auto"/>
-                    <!-- Botones -->
-                </Grid.RowDefinitions>
-
-                <!-- Título del panel -->
-                <TextBlock x:Name="lblTituloFormulario"
-                           Text="Nuevo Usuario"
-                           Style="{StaticResource TituloEstilo}"
-                           Margin="0,0,0,20"/>
-
-                <!-- Campos con scroll por si la ventana es chica -->
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
-                    <StackPanel>
-
-                        <!-- Foto circular + botón de cámara -->
-                        <StackPanel HorizontalAlignment="Center" Margin="0,0,0,25">
-                            <Grid>
-                                <Ellipse Width="100" Height="100"
-                                         Stroke="{StaticResource ColorPrimario}"
-                                         StrokeThickness="2.5">
-                                    <Ellipse.Fill>
-                                        <ImageBrush x:Name="imgFotoFormulario"
-                                                    Stretch="UniformToFill"/>
-                                    </Ellipse.Fill>
-                                </Ellipse>
-
-                                <!-- Botón cámara sobre la foto -->
-                                <Button Width="32" Height="32"
-                                        VerticalAlignment="Bottom"
-                                        HorizontalAlignment="Right"
-                                        Background="{StaticResource ColorPrimario}"
-                                        BorderThickness="0"
-                                        Cursor="Hand"
-                                        ToolTip="Cambiar foto"
-                                        Click="btnSubirFoto_Click">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    CornerRadius="16">
-                                                <ContentPresenter HorizontalAlignment="Center"
-                                                                  VerticalAlignment="Center"/>
+                            <!-- ACCIONES -->
+                            <DataGridTemplateColumn Header="ACCIONES" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal"
+                                                    HorizontalAlignment="Center">
+                                            <Border Width="34" Height="34" CornerRadius="8"
+                                                    Background="#1A1A30" Margin="0,0,8,0">
+                                                <Button Click="btnEditar_Click"
+                                                        Background="Transparent"
+                                                        BorderThickness="0" Cursor="Hand"
+                                                        ToolTip="Editar usuario">
+                                                    <TextBlock Text="✏" FontSize="15"
+                                                               Foreground="#00CFFF"/>
+                                                </Button>
                                             </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                    <TextBlock Text="📷" VerticalAlignment="Center"
-                                               HorizontalAlignment="Center" Margin="0,0,0,1"/>
-                                </Button>
-                            </Grid>
-                        </StackPanel>
+                                            <Border Width="34" Height="34" CornerRadius="8"
+                                                    Background="#1A1A30">
+                                                <Button Click="btnToggleEstado_Click"
+                                                        Background="Transparent"
+                                                        BorderThickness="0" Cursor="Hand">
+                                                    <TextBlock FontSize="15">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Text"       Value="🗑"/>
+                                                                <Setter Property="Foreground" Value="#FF5555"/>
+                                                                <Setter Property="ToolTip"    Value="Desactivar"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Activo}" Value="False">
+                                                                        <Setter Property="Text"       Value="♻"/>
+                                                                        <Setter Property="Foreground" Value="#00E676"/>
+                                                                        <Setter Property="ToolTip"    Value="Reactivar"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Button>
+                                            </Border>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
 
-                        <!-- Nombre -->
-                        <TextBlock Text="Nombre *" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtNombre" Style="{StaticResource InputEstilo}"/>
-
-                        <!-- Apellido -->
-                        <TextBlock Text="Apellido *" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtApellido" Style="{StaticResource InputEstilo}"/>
-
-                        <!-- DNI -->
-                        <TextBlock Text="DNI *" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtDni" Style="{StaticResource InputEstilo}" MaxLength="8"/>
-
-                        <!-- Email -->
-                        <TextBlock Text="Email" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtEmail" Style="{StaticResource InputEstilo}"/>
-
-                        <!-- Teléfono -->
-                        <TextBlock Text="Teléfono" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"/>
-
-                        <!-- Contraseña (solo obligatoria al crear) -->
-                        <TextBlock x:Name="lblClave"
-                                   Text="Contraseña *"
-                                   Style="{StaticResource SubtituloEstilo}"
-                                   Margin="0,0,0,5"/>
-                        <PasswordBox x:Name="txtClave" Style="{StaticResource PasswordEstilo}"/>
-                        <!-- Aclaración para edición -->
-                        <TextBlock x:Name="lblClaveAclaracion"
-                                   Text="Dejá vacío para mantener la contraseña actual."
-                                   FontSize="11"
-                                   Foreground="{StaticResource ColorTextoSecundario}"
-                                   Margin="0,-10,0,10"
-                                   Visibility="Collapsed"/>
-
-                        <!-- Rol -->
-                        <TextBlock Text="Rol *" Style="{StaticResource SubtituloEstilo}" Margin="0,0,0,5"/>
-                        <Border Background="{StaticResource ColorInputFondo}"
-                                CornerRadius="10" Height="45" Margin="0,0,0,15">
-                            <ComboBox x:Name="cmbRol"
-                                      BorderThickness="0"
-                                      Background="Transparent"
-                                      VerticalContentAlignment="Center"
-                                      FontSize="14"
-                                      Padding="10,0">
-                                <!-- El valor Tag es el RolId de la tabla roles -->
-                                <ComboBoxItem Content="Administrador" Tag="1"/>
-                                <ComboBoxItem Content="Empleado / Instructor" Tag="2"/>
-                            </ComboBox>
-                        </Border>
-
-                    </StackPanel>
-                </ScrollViewer>
-
-                <!-- Botones Cancelar / Guardar -->
-                <Grid Grid.Row="2" Margin="0,20,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Button Grid.Column="0"
-                            Content="Cancelar"
-                            Style="{StaticResource BotonCerrarEstilo}"
-                            Margin="0,0,8,0"
-                            Click="btnCancelar_Click"/>
-
-                    <Button x:Name="btnGuardar"
-                            Grid.Column="1"
-                            Content="Guardar"
-                            Style="{StaticResource BotonPrincipalEstilo}"
-                            Margin="8,0,0,0"
-                            Click="btnGuardar_Click"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
-            </Grid>
-        </Border>
+            </Border>
 
+            <!-- ══════════════════════════════════
+                 PANEL FORMULARIO LATERAL
+            ══════════════════════════════════ -->
+            <Border x:Name="panelFormulario"
+                    Grid.Column="1" Width="370"
+                    Background="#12121E"
+                    CornerRadius="12"
+                    BorderBrush="#252540"
+                    BorderThickness="1"
+                    Visibility="Collapsed"
+                    ClipToBounds="True">
+
+                <Border.RenderTransform>
+                    <TranslateTransform x:Name="panelTranslate"/>
+                </Border.RenderTransform>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4"/>
+                        <!-- Línea top degradada -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Título -->
+                        <RowDefinition Height="*"/>
+                        <!-- Campos scroll -->
+                        <RowDefinition Height="Auto"/>
+                        <!-- Botones -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Línea superior tricolor -->
+                    <Border Grid.Row="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#FF6B35" Offset="0"/>
+                                <GradientStop Color="#A78BFA" Offset="0.5"/>
+                                <GradientStop Color="#00CFFF" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <!-- Título del formulario -->
+                    <StackPanel Grid.Row="1" Margin="22,18,22,0">
+                        <TextBlock x:Name="lblTituloFormulario" Text="NUEVO USUARIO"
+                                   FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                   FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"/>
+                        <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
+                    </StackPanel>
+
+                    <!-- Campos -->
+                    <ScrollViewer Grid.Row="2"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Margin="22,14,22,0">
+                        <StackPanel>
+
+                            <!-- Foto circular con anillo degradado -->
+                            <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
+                                <Grid>
+                                    <Ellipse Width="106" Height="106">
+                                        <Ellipse.Fill>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#FF6B35" Offset="0"/>
+                                                <GradientStop Color="#A78BFA" Offset="0.5"/>
+                                                <GradientStop Color="#00CFFF" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                    <Ellipse Width="100" Height="100" HorizontalAlignment="Center">
+                                        <Ellipse.Fill>
+                                            <ImageBrush x:Name="imgFotoFormulario" Stretch="UniformToFill"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                    <Button Width="28" Height="28"
+                                            VerticalAlignment="Bottom"
+                                            HorizontalAlignment="Right"
+                                            Cursor="Hand" ToolTip="Cambiar foto"
+                                            Click="btnSubirFoto_Click">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border CornerRadius="14">
+                                                    <Border.Background>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                            <GradientStop Color="#FF6B35" Offset="0"/>
+                                                            <GradientStop Color="#FF3D1F" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Border.Background>
+                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <TextBlock Text="📷" FontSize="12" Margin="0,0,0,1"/>
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- Macro para etiqueta de campo: caps pequeñas -->
+                            <TextBlock Text="NOMBRE *" Foreground="#4A4A7A"
+                                       FontSize="10" FontWeight="Bold"
+                                       FontFamily="Segoe UI Semibold, Segoe UI"
+                                       Margin="2,0,0,6"/>
+                            <TextBox x:Name="txtNombre" Style="{StaticResource InputEstilo}"
+                                     LostFocus="txtNombre_LostFocus"/>
+                            <TextBlock x:Name="errNombre" Style="{StaticResource LabelErrorEstilo}"/>
+
+                            <TextBlock Text="APELLIDO *" Foreground="#4A4A7A"
+                                       FontSize="10" FontWeight="Bold"
+                                       FontFamily="Segoe UI Semibold, Segoe UI"
+                                       Margin="2,0,0,6"/>
+                            <TextBox x:Name="txtApellido" Style="{StaticResource InputEstilo}"
+                                     LostFocus="txtApellido_LostFocus"/>
+                            <TextBlock x:Name="errApellido" Style="{StaticResource LabelErrorEstilo}"/>
+
+                            <TextBlock Text="DNI *  (7 u 8 dígitos)" Foreground="#4A4A7A"
+                                       FontSize="10" FontWeight="Bold"
+                                       FontFamily="Segoe UI Semibold, Segoe UI"
+                                       Margin="2,0,0,6"/>
+                            <TextBox x:Name="txtDni" Style="{StaticResource InputEstilo}"
+                                     MaxLength="8"
+                                     PreviewTextInput="txtDni_PreviewTextInput"
+                                     DataObject.Pasting="txtDni_Pasting"
+                                     LostFocus="txtDni_LostFocus"/>
+                            <TextBlock x:Name="errDni" Style="{StaticResource LabelErrorEstilo}"/>
+
+                            <TextBlock Text="EMAIL  (opcional)" Foreground="#4A4A7A"
+                                       FontSize="10" FontWeight="Bold"
+                                       FontFamily="Segoe UI Semibold, Segoe UI"
+                                       Margin="2,0,0,6"/>
+                            <TextBox x:Name="txtEmail" Style="{StaticResource InputEstilo}"
+                                     LostFocus="txtEmail_LostFocus"/>
+                            <TextBlock x:Name="errEmail" Style="{StaticResource LabelErrorEstilo}"/>
+
+                            <TextBlock Text="TELÉFONO  (opcional)" Foreground="#4A4A7A"
+                                       FontSize="10" FontWeight="Bold"
+                                       FontFamily="Segoe UI Semibold, Segoe UI"
+                                       Margin="2,0,0,6"/>
+                            <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"
+                                     MaxLength="20" LostFocus="txtTelefono_LostFocus"/>
+                            <TextBlock x:Name="errTelefono" Style="{StaticResource LabelErrorEstilo}"/>
+
+                            <TextBlock x:Name="lblClave" Text="CONTRASEÑA *"
+                                       Foreground="#4A4A7A"
+                                       FontSize="10" FontWeight="Bold"
+                                       FontFamily="Segoe UI Semibold, Segoe UI"
+                                       Margin="2,0,0,6"/>
+                            <PasswordBox x:Name="txtClave" Style="{StaticResource PasswordEstilo}"
+                                         PasswordChanged="txtClave_PasswordChanged"/>
+                            <TextBlock x:Name="errClave" Style="{StaticResource LabelErrorEstilo}"/>
+                            <TextBlock x:Name="lblClaveAclaracion"
+                                       Text="Dejá vacío para no cambiar la contraseña."
+                                       FontSize="11" Foreground="#4A4A7A" FontStyle="Italic"
+                                       Margin="0,-8,0,12" Visibility="Collapsed"/>
+
+                            <TextBlock Text="ROL *" Foreground="#4A4A7A"
+                                       FontSize="10" FontWeight="Bold"
+                                       FontFamily="Segoe UI Semibold, Segoe UI"
+                                       Margin="2,0,0,6"/>
+                            <Border Background="#16162A" CornerRadius="10" Height="46"
+                                    BorderBrush="#252540" BorderThickness="1.5"
+                                    Margin="0,0,0,4">
+                                <ComboBox x:Name="cmbRol"
+                                          BorderThickness="0"
+                                          Background="Transparent"
+                                          Foreground="#E8E8FF"
+                                          VerticalContentAlignment="Center"
+                                          FontSize="14" Padding="10,0">
+                                    <ComboBox.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}"
+                                                         Color="#1A1A2E"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}"
+                                                         Color="#E8E8FF"/>
+                                    </ComboBox.Resources>
+                                    <ComboBoxItem Content="Administrador"          Tag="1" Foreground="#E8E8FF"/>
+                                    <ComboBoxItem Content="Empleado / Instructor"  Tag="2" Foreground="#E8E8FF"/>
+                                </ComboBox>
+                            </Border>
+                            <TextBlock x:Name="errRol" Style="{StaticResource LabelErrorEstilo}"/>
+
+                            <Border Height="1" Background="#1A1A30" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Botones Cancelar / Guardar -->
+                    <Grid Grid.Row="3" Margin="22,12,22,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Cancelar"
+                                Style="{StaticResource BotonCerrarEstilo}"
+                                Margin="0,0,8,0" Click="btnCancelar_Click"/>
+                        <Button x:Name="btnGuardar" Grid.Column="1" Content="GUARDAR"
+                                Style="{StaticResource BotonPrincipalEstilo}"
+                                Margin="8,0,0,0" Click="btnGuardar_Click"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+        </Grid>
     </Grid>
 </Page>

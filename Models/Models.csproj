@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DAO\ConnectionToDB.cs" />
+    <Compile Include="DAO\SocioDao.cs" />
     <Compile Include="DAO\UsuarioDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

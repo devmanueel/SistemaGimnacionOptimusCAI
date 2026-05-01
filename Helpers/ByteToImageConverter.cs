@@ -4,7 +4,7 @@ using System.IO;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
-namespace TPFinal_LPOO2_AsistenciaEscolar_Baca_Abalos_Mamani_WPF.Helpers
+namespace SistemaGimnacionOptimusCAI.Helpers
 {
     public class ByteToImageConverter : IValueConverter
     {

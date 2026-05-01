@@ -64,11 +64,20 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Helpers\ByteToImageConverter.cs" />
+    <Compile Include="Helpers\Validador.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Page Include="MiDiccionario.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Paginas\NotificacionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Paginas\SociosPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -78,6 +87,12 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Paginas\NotificacionWindow.xaml.cs">
+      <DependentUpon>NotificacionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\SociosPage.xaml.cs">
+      <DependentUpon>SociosPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Paginas\UsuariosPage.xaml.cs">
       <DependentUpon>UsuariosPage.xaml</DependentUpon>
     </Compile>

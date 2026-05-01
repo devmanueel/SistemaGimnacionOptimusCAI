@@ -1,0 +1,238 @@
+﻿// ============================================================
+//  CAPA: Models / DAO
+//  Archivo: SocioDao.cs
+//
+//  Acceso a datos para Socio. TODO va por Stored Procedures.
+//  Hereda ConnectionToDB.
+// ============================================================
+
+using Entities;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+
+namespace Models.Dao
+{
+    public class SocioDao : ConnectionToDB
+    {
+        // Helper: convierte una fila DataReader a Socio
+        private static Socio MapearSocio(SqlDataReader r)
+        {
+            return new Socio
+            {
+                Id = Convert.ToInt64(r["id"]),
+                NumeroSocio = Convert.ToInt32(r["numero_socio"]),
+                Nombre = r["nombre"].ToString(),
+                Apellido = r["apellido"].ToString(),
+                Dni = r["dni"].ToString(),
+                DniPin = r["dni_pin"].ToString(),
+                Foto = r["foto"] != DBNull.Value ? (byte[])r["foto"] : null,
+                FechaNacimiento = r["fecha_nacimiento"] != DBNull.Value ? (DateTime?)r["fecha_nacimiento"] : null,
+                Sexo = r["sexo"] as string ?? "Otro",
+                Telefono = r["telefono"] as string,
+                Domicilio = r["domicilio"] as string,
+                Profesion = r["profesion"] as string,
+                Email = r["email"] as string,
+                ComoNosConocio = r["como_nos_conocio"] as string,
+                Observaciones = r["observaciones"] as string,
+                Activo = Convert.ToBoolean(r["activo"]),
+                RegistradoPor = r["registrado_por"] != DBNull.Value ? (long?)Convert.ToInt64(r["registrado_por"]) : null,
+                RegistradoPorNombre = r["registrado_por_nombre"] as string,
+                CreadoEn = Convert.ToDateTime(r["creado_en"]),
+                ActualizadoEn = Convert.ToDateTime(r["actualizado_en"])
+            };
+        }
+
+        // ──────────────────────────────────────────────────────
+        // OBTENER TODOS
+        // ──────────────────────────────────────────────────────
+        public List<Socio> ObtenerSocios()
+        {
+            var lista = new List<Socio>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ObtenerSocios", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (var reader = cmd.ExecuteReader())
+                        while (reader.Read())
+                            lista.Add(MapearSocio(reader));
+                }
+            }
+            return lista;
+        }
+
+        // ──────────────────────────────────────────────────────
+        // OBTENER POR ID
+        // ──────────────────────────────────────────────────────
+        public Socio ObtenerSocioPorId(long id)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ObtenerSocioPorId", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    using (var reader = cmd.ExecuteReader())
+                        if (reader.Read()) return MapearSocio(reader);
+                }
+            }
+            return null;
+        }
+
+        // ──────────────────────────────────────────────────────
+        // BUSCAR (con filtro de estado)
+        // ──────────────────────────────────────────────────────
+        public List<Socio> BuscarSocios(string texto, string filtroEstado = "todos")
+        {
+            var lista = new List<Socio>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_BuscarSocios", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Texto", texto ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@FiltroEstado", filtroEstado);
+                    using (var reader = cmd.ExecuteReader())
+                        while (reader.Read())
+                            lista.Add(MapearSocio(reader));
+                }
+            }
+            return lista;
+        }
+
+        // ──────────────────────────────────────────────────────
+        // SIGUIENTE NÚMERO DE SOCIO (preview en pantalla)
+        // ──────────────────────────────────────────────────────
+        public int ObtenerSiguienteNumeroSocio()
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ObtenerSiguienteNumeroSocio", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    var result = cmd.ExecuteScalar();
+                    return result != null ? Convert.ToInt32(result) : 1;
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // INSERTAR
+        // Retorna: > 0 = ID generado / -1 = DNI duplicado / 0 = error
+        // ──────────────────────────────────────────────────────
+        public long InsertarSocio(Socio s)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_InsertarSocio", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Nombre", s.Nombre);
+                    cmd.Parameters.AddWithValue("@Apellido", s.Apellido);
+                    cmd.Parameters.AddWithValue("@Dni", s.Dni);
+                    cmd.Parameters.AddWithValue("@DniPin", s.DniPin);
+                    cmd.Parameters.AddWithValue("@FechaNacimiento", (object)s.FechaNacimiento ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Sexo", s.Sexo ?? "Otro");
+                    cmd.Parameters.AddWithValue("@Telefono", (object)s.Telefono ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Domicilio", (object)s.Domicilio ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Profesion", (object)s.Profesion ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Email", (object)s.Email ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@ComoNosConocio", (object)s.ComoNosConocio ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Observaciones", (object)s.Observaciones ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@RegistradoPor", (object)s.RegistradoPor ?? DBNull.Value);
+
+                    var fotoParam = new SqlParameter("@Foto", SqlDbType.VarBinary);
+                    fotoParam.Value = s.Foto != null ? (object)s.Foto : DBNull.Value;
+                    cmd.Parameters.Add(fotoParam);
+
+                    var resultado = cmd.ExecuteScalar();
+                    return resultado != null ? Convert.ToInt64(resultado) : 0;
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // MODIFICAR
+        // Si cambiarPin = false → no se manda PIN (mantiene el actual).
+        // Si cambiarFoto = false → no se manda foto (mantiene la actual).
+        // ──────────────────────────────────────────────────────
+        public bool ModificarSocio(Socio s, bool cambiarPin = false, bool cambiarFoto = false)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ModificarSocio", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", s.Id);
+                    cmd.Parameters.AddWithValue("@Nombre", s.Nombre);
+                    cmd.Parameters.AddWithValue("@Apellido", s.Apellido);
+                    cmd.Parameters.AddWithValue("@Dni", s.Dni);
+
+                    cmd.Parameters.AddWithValue("@DniPin",
+                        cambiarPin ? (object)s.DniPin : DBNull.Value);
+
+                    cmd.Parameters.AddWithValue("@FechaNacimiento", (object)s.FechaNacimiento ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Sexo", s.Sexo ?? "Otro");
+                    cmd.Parameters.AddWithValue("@Telefono", (object)s.Telefono ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Domicilio", (object)s.Domicilio ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Profesion", (object)s.Profesion ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Email", (object)s.Email ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@ComoNosConocio", (object)s.ComoNosConocio ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Observaciones", (object)s.Observaciones ?? DBNull.Value);
+
+                    var fotoParam = new SqlParameter("@Foto", SqlDbType.VarBinary);
+                    fotoParam.Value = cambiarFoto && s.Foto != null ? (object)s.Foto : DBNull.Value;
+                    cmd.Parameters.Add(fotoParam);
+
+                    var filas = cmd.ExecuteScalar();
+                    return filas != null && Convert.ToInt32(filas) > 0;
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // CAMBIAR ESTADO
+        // ──────────────────────────────────────────────────────
+        public bool CambiarEstadoSocio(long id, bool nuevoEstado)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_CambiarEstadoSocio", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    cmd.Parameters.AddWithValue("@Activo", nuevoEstado);
+                    var filas = cmd.ExecuteScalar();
+                    return filas != null && Convert.ToInt32(filas) > 0;
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // ELIMINAR (soft-delete)
+        // ──────────────────────────────────────────────────────
+        public bool EliminarSocio(long id)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_EliminarSocio", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    var filas = cmd.ExecuteScalar();
+                    return filas != null && Convert.ToInt32(filas) > 0;
+                }
+            }
+        }
+    }
+}
