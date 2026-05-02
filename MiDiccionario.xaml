@@ -465,4 +465,49 @@
         </Style.Triggers>
     </Style>
 
+    <!--
+    ════════════════════════════════════════════════════════════
+    SNIPPET PARA AGREGAR A MiDiccionario.xaml
+
+    Pegá este Style ANTES del </ResourceDictionary> de cierre
+    en tu archivo MiDiccionario.xaml. Es el chip de filtro
+    reutilizable, así no tenés que duplicar el código en cada
+    página (Socios, Actividades, Membresías, etc.)
+    ════════════════════════════════════════════════════════════
+-->
+
+    <!-- Chip de filtro (Todos / Activos / Inactivos / etc.) -->
+    <Style x:Key="BotonChipEstilo" TargetType="Button">
+        <Setter Property="Background"      Value="Transparent"/>
+        <Setter Property="Foreground"      Value="#6A6A9A"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush"     Value="#252540"/>
+        <Setter Property="Cursor"          Value="Hand"/>
+        <Setter Property="Padding"         Value="14,6"/>
+        <Setter Property="FontSize"        Value="12"/>
+        <Setter Property="FontWeight"      Value="SemiBold"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="borde"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="14">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="borde" Property="Background" Value="#16162A"/>
+                            <Setter Property="Foreground" Value="#E8E8FF"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+
 </ResourceDictionary>

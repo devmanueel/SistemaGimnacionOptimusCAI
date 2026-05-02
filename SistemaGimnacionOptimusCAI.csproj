@@ -73,6 +73,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Paginas\ActividadesPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Paginas\MembresiasPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Paginas\NotificacionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -87,6 +95,12 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Paginas\ActividadesPage.xaml.cs">
+      <DependentUpon>ActividadesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\MembresiasPage.xaml.cs">
+      <DependentUpon>MembresiasPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Paginas\NotificacionWindow.xaml.cs">
       <DependentUpon>NotificacionWindow.xaml</DependentUpon>
     </Compile>

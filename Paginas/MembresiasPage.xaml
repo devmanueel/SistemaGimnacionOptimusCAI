@@ -1,0 +1,616 @@
+﻿<Page x:Class="SistemaGimnacionOptimusCAI.Paginas.MembresiasPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      mc:Ignorable="d"
+      d:DesignHeight="768" d:DesignWidth="1280"
+      Title="Membresías">
+
+    <Page.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0A0A14" Offset="0"/>
+            <GradientStop Color="#0D0D22" Offset="1"/>
+        </LinearGradientBrush>
+    </Page.Background>
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
+
+            <Style x:Key="InputErrorEstilo" TargetType="TextBox" BasedOn="{StaticResource InputEstilo}">
+                <Setter Property="Background"      Value="#1E0A0A"/>
+                <Setter Property="BorderBrush"     Value="#FF4444"/>
+                <Setter Property="BorderThickness" Value="1.5"/>
+            </Style>
+
+            <Style x:Key="LabelErrorEstilo" TargetType="TextBlock">
+                <Setter Property="FontSize"     Value="11"/>
+                <Setter Property="Foreground"   Value="#FF5555"/>
+                <Setter Property="Margin"       Value="4,-10,0,8"/>
+                <Setter Property="FontStyle"    Value="Italic"/>
+                <Setter Property="Visibility"   Value="Collapsed"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+
+            <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
+                <Setter Property="Foreground"  Value="#4A4A7A"/>
+                <Setter Property="FontSize"    Value="10"/>
+                <Setter Property="FontWeight"  Value="Bold"/>
+                <Setter Property="FontFamily"  Value="Segoe UI Semibold, Segoe UI"/>
+                <Setter Property="Margin"      Value="2,0,0,6"/>
+            </Style>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid x:Name="gridRaiz" Margin="24,20,24,20" Opacity="0">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetName="gridRaiz"
+                                         Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" Duration="0:0:0.5"
+                                         DecelerationRatio="0.6"/>
+                        <DoubleAnimation Storyboard.TargetName="translateEntrada"
+                                         Storyboard.TargetProperty="Y"
+                                         From="20" To="0" Duration="0:0:0.5"
+                                         DecelerationRatio="0.8"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+        <Grid.RenderTransform>
+            <TranslateTransform x:Name="translateEntrada" Y="20"/>
+        </Grid.RenderTransform>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ══════════════════ HEADER ══════════════════ -->
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#00CFFF" Offset="0"/>
+                            <GradientStop Color="#00E676" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="MEMBRESÍAS Y CUOTAS"
+                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                    <TextBlock Text="Cobros, vencimientos y renovaciones"
+                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Border Background="#16162A" CornerRadius="10"
+                        BorderBrush="#252540" BorderThickness="1.5"
+                        Width="290" Height="46" Margin="0,0,12,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🔍" FontSize="15"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <Grid Grid.Column="1">
+                            <TextBox x:Name="txtBuscar" Height="44" BorderThickness="0"
+                                     Background="Transparent" Foreground="#E8E8FF"
+                                     CaretBrush="#00CFFF" FontSize="14"
+                                     VerticalContentAlignment="Center" Padding="0,0,10,0"
+                                     TextChanged="txtBuscar_TextChanged"/>
+                            <TextBlock Text="Buscar por socio, DNI, N° o actividad..."
+                                       IsHitTestVisible="False" VerticalAlignment="Center"
+                                       FontSize="12" Foreground="#3A3A5C">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Button Content="＋  COBRAR CUOTA"
+                        Style="{StaticResource BotonNaranjaEstilo}"
+                        Width="180" Height="46" Click="btnNuevo_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- ══════════════════ STATS ══════════════════ -->
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statActivas" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#00E676"/>
+                    <TextBlock Text="ACTIVAS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statPorVencer" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#FFA726"/>
+                    <TextBlock Text="POR VENCER (≤ 7 DÍAS)" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statVencidas" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#FF5555"/>
+                    <TextBlock Text="VENCIDAS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="3" Margin="8,0,0,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statRecaudadoMes" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="22" FontWeight="Bold" Foreground="#00CFFF"/>
+                    <TextBlock Text="RECAUDADO ESTE MES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ══════════════════ FILTROS ══════════════════ -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Text="MOSTRAR:" Foreground="#4A4A7A" FontSize="11"
+                       FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
+
+            <Button x:Name="chipTodos"     Content="Todas"     Click="chipFiltro_Click" Tag="todos"
+                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
+            <Button x:Name="chipActivas"   Content="Activas"   Click="chipFiltro_Click" Tag="activa"
+                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
+            <Button x:Name="chipPorVencer" Content="Por vencer" Click="chipFiltro_Click" Tag="por_vencer"
+                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
+            <Button x:Name="chipVencidas"  Content="Vencidas"  Click="chipFiltro_Click" Tag="vencida"
+                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
+            <Button x:Name="chipCanceladas" Content="Canceladas" Click="chipFiltro_Click" Tag="cancelada"
+                    Style="{StaticResource BotonChipEstilo}"/>
+        </StackPanel>
+
+        <!-- ══════════════════ CONTENIDO ══════════════════ -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- DATAGRID -->
+            <Border Grid.Column="0" Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1" Margin="0,0,14,0" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#00CFFF" Offset="0"/>
+                                <GradientStop Color="#00E676" Offset="0.5"/>
+                                <GradientStop Color="#12121E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <DataGrid Grid.Row="1" x:Name="gridMembresias"
+                              IsReadOnly="True" AutoGenerateColumns="False"
+                              CanUserAddRows="False" CanUserResizeRows="False"
+                              Background="Transparent" BorderThickness="0"
+                              RowHeaderWidth="0" RowHeight="64"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#1A1A2E">
+                        <DataGrid.Columns>
+
+                            <!-- Foto + N° de socio -->
+                            <DataGridTemplateColumn Width="160" Header="SOCIO">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Grid Margin="0,0,10,0">
+                                                <Ellipse Width="42" Height="42">
+                                                    <Ellipse.Fill>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                            <GradientStop Color="#00CFFF" Offset="0"/>
+                                                            <GradientStop Color="#A78BFA" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Ellipse.Fill>
+                                                </Ellipse>
+                                                <Ellipse Width="38" Height="38">
+                                                    <Ellipse.Fill>
+                                                        <ImageBrush ImageSource="{Binding SocioFoto, Converter={StaticResource BytesAImagen}}"
+                                                                    Stretch="UniformToFill"/>
+                                                    </Ellipse.Fill>
+                                                </Ellipse>
+                                            </Grid>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding SocioNombre}" FontSize="13"
+                                                           FontWeight="SemiBold" Foreground="#E8E8FF"/>
+                                                <TextBlock Text="{Binding NumeroSocioFormateado}"
+                                                           FontFamily="Consolas" FontSize="11"
+                                                           Foreground="#FF6B35"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Actividad badge -->
+                            <DataGridTemplateColumn Header="ACTIVIDAD" Width="1.4*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#1A1840" CornerRadius="6"
+                                                Padding="10,4" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding ActividadNombre}" FontSize="12"
+                                                       FontWeight="SemiBold" Foreground="#A78BFA"
+                                                       TextWrapping="Wrap"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Monto -->
+                            <DataGridTemplateColumn Header="MONTO" Width="0.9*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding MontoTexto}" FontWeight="Bold"
+                                                   FontFamily="Consolas" Foreground="#00E676" FontSize="14"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="VENCE"
+                                                Binding="{Binding FechaVencimientoTexto}" Width="0.8*"/>
+
+                            <!-- Días para vencer -->
+                            <DataGridTemplateColumn Header="ESTADO TIEMPO" Width="1.1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DiasParaVencerTexto}" FontSize="11"
+                                                   FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#6A6A9A"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="por_vencer">
+                                                            <Setter Property="Foreground" Value="#FFA726"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Estado}" Value="vencida">
+                                                            <Setter Property="Foreground" Value="#FF5555"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Estado}" Value="cancelada">
+                                                            <Setter Property="Foreground" Value="#3A3A5C"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Estado badge -->
+                            <DataGridTemplateColumn Header="ESTADO" Width="115">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="20" Padding="10,4" HorizontalAlignment="Left">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#1A1A30"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="activa">
+                                                            <Setter Property="Background" Value="#0A2A14"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="por_vencer">
+                                                            <Setter Property="Background" Value="#2A1F00"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="vencida">
+                                                            <Setter Property="Background" Value="#2A0A0A"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="cancelada">
+                                                            <Setter Property="Background" Value="#1A1A2A"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Ellipse Width="7" Height="7" VerticalAlignment="Center" Margin="0,0,6,0">
+                                                    <Ellipse.Style>
+                                                        <Style TargetType="Ellipse">
+                                                            <Setter Property="Fill" Value="#6A6A9A"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="activa">
+                                                                    <Setter Property="Fill" Value="#00E676"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="por_vencer">
+                                                                    <Setter Property="Fill" Value="#FFA726"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="vencida">
+                                                                    <Setter Property="Fill" Value="#FF4444"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Ellipse.Style>
+                                                </Ellipse>
+                                                <TextBlock FontSize="12" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="{Binding EstadoTexto}"/>
+                                                            <Setter Property="Foreground" Value="#6A6A9A"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="activa">
+                                                                    <Setter Property="Foreground" Value="#00E676"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="por_vencer">
+                                                                    <Setter Property="Text" Value="Por vencer"/>
+                                                                    <Setter Property="Foreground" Value="#FFA726"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="vencida">
+                                                                    <Setter Property="Foreground" Value="#FF6666"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Acciones: Renovar / Editar / Cancelar -->
+                            <DataGridTemplateColumn Header="ACCIONES" Width="155">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <!-- RENOVAR -->
+                                            <Border Width="52" Height="34" CornerRadius="8"
+                                                    Background="#0A2A14" Margin="0,0,6,0"
+                                                    BorderBrush="#00E676" BorderThickness="1"
+                                                    ToolTip="Renovar membresía (+30 días)">
+                                                <Button Click="btnRenovar_Click" Background="Transparent"
+                                                        BorderThickness="0" Cursor="Hand">
+                                                    <TextBlock Text="+30d" FontSize="11" FontWeight="Bold"
+                                                               Foreground="#00E676"/>
+                                                </Button>
+                                            </Border>
+                                            <!-- EDITAR -->
+                                            <Border Width="34" Height="34" CornerRadius="8"
+                                                    Background="#1A1A30" Margin="0,0,6,0">
+                                                <Button Click="btnEditar_Click" Background="Transparent"
+                                                        BorderThickness="0" Cursor="Hand" ToolTip="Editar">
+                                                    <TextBlock Text="✏" FontSize="15" Foreground="#00CFFF"/>
+                                                </Button>
+                                            </Border>
+                                            <!-- CANCELAR -->
+                                            <Border Width="34" Height="34" CornerRadius="8" Background="#1A1A30">
+                                                <Button Click="btnCancelar_Click" Background="Transparent"
+                                                        BorderThickness="0" Cursor="Hand" ToolTip="Cancelar membresía">
+                                                    <TextBlock Text="✕" FontSize="14" FontWeight="Bold"
+                                                               Foreground="#FF5555"/>
+                                                </Button>
+                                            </Border>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- ══════════════════ PANEL FORMULARIO ══════════════════ -->
+            <Border x:Name="panelFormulario" Grid.Column="1" Width="400"
+                    Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1"
+                    Visibility="Collapsed" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#00CFFF" Offset="0"/>
+                                <GradientStop Color="#00E676" Offset="0.5"/>
+                                <GradientStop Color="#FFA726" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <StackPanel Grid.Row="1" Margin="22,18,22,0">
+                        <TextBlock x:Name="lblTituloFormulario" Text="COBRAR CUOTA"
+                                   FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                   FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"/>
+                        <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="22,14,22,0">
+                        <StackPanel>
+
+                            <!-- SOCIO -->
+                            <TextBlock Text="SOCIO *" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="#16162A" CornerRadius="10" Height="46"
+                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                                <ComboBox x:Name="cmbSocio" BorderThickness="0" Background="Transparent"
+                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
+                                          FontSize="13" Padding="10,0" IsEditable="True"
+                                          IsTextSearchEnabled="True"
+                                          DisplayMemberPath="TextoCombo">
+                                    <ComboBox.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                    </ComboBox.Resources>
+                                </ComboBox>
+                            </Border>
+
+                            <!-- ACTIVIDAD -->
+                            <TextBlock Text="ACTIVIDAD *" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="#16162A" CornerRadius="10" Height="46"
+                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                                <ComboBox x:Name="cmbActividad" BorderThickness="0" Background="Transparent"
+                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
+                                          FontSize="13" Padding="10,0"
+                                          DisplayMemberPath="TextoCombo"
+                                          SelectionChanged="cmbActividad_SelectionChanged">
+                                    <ComboBox.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                    </ComboBox.Resources>
+                                </ComboBox>
+                            </Border>
+
+                            <!-- INSTRUCTOR -->
+                            <TextBlock Text="INSTRUCTOR" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="#16162A" CornerRadius="10" Height="46"
+                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                                <ComboBox x:Name="cmbInstructor" BorderThickness="0" Background="Transparent"
+                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
+                                          FontSize="13" Padding="10,0"
+                                          DisplayMemberPath="TextoCombo">
+                                    <ComboBox.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                    </ComboBox.Resources>
+                                </ComboBox>
+                            </Border>
+
+                            <!-- FECHAS lado a lado -->
+                            <Grid Margin="0,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                    <TextBlock Text="INICIO *" Style="{StaticResource LabelCampoEstilo}"/>
+                                    <Border Background="#16162A" CornerRadius="10" Height="46"
+                                            BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                                        <DatePicker x:Name="dpInicio"
+                                                    BorderThickness="0" Background="Transparent"
+                                                    FontSize="13" VerticalContentAlignment="Center"
+                                                    Padding="6,0" Foreground="#E8E8FF"
+                                                    SelectedDateChanged="dpInicio_SelectedDateChanged"/>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                    <TextBlock Text="VENCIMIENTO *" Style="{StaticResource LabelCampoEstilo}"/>
+                                    <Border Background="#16162A" CornerRadius="10" Height="46"
+                                            BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                                        <DatePicker x:Name="dpVencimiento"
+                                                    BorderThickness="0" Background="Transparent"
+                                                    FontSize="13" VerticalContentAlignment="Center"
+                                                    Padding="6,0" Foreground="#E8E8FF"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- MONTO -->
+                            <TextBlock Text="MONTO PAGADO * ($)" Style="{StaticResource LabelCampoEstilo}"/>
+                            <TextBox x:Name="txtMonto" Style="{StaticResource InputEstilo}"
+                                     PreviewTextInput="txtMonto_PreviewTextInput"
+                                     LostFocus="txtMonto_LostFocus"/>
+                            <TextBlock x:Name="errMonto" Style="{StaticResource LabelErrorEstilo}"/>
+
+                            <!-- Preview del monto -->
+                            <Border x:Name="panelPreviewMonto" Background="#0A1A0A" CornerRadius="8"
+                                    Padding="12,8" Margin="0,0,0,14" Visibility="Collapsed">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="💰" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="lblPreviewMonto" Text="$0"
+                                               FontFamily="Consolas" FontSize="18" FontWeight="Bold"
+                                               Foreground="#00E676" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- MÉTODO DE PAGO -->
+                            <TextBlock Text="MÉTODO DE PAGO *" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="#16162A" CornerRadius="10" Height="46"
+                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                                <ComboBox x:Name="cmbMetodoPago" BorderThickness="0" Background="Transparent"
+                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
+                                          FontSize="13" Padding="10,0">
+                                    <ComboBox.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                    </ComboBox.Resources>
+                                    <ComboBoxItem Content="Efectivo"      Tag="efectivo"      Foreground="#E8E8FF" IsSelected="True"/>
+                                    <ComboBoxItem Content="Transferencia" Tag="transferencia" Foreground="#E8E8FF"/>
+                                    <ComboBoxItem Content="Tarjeta"       Tag="tarjeta"       Foreground="#E8E8FF"/>
+                                    <ComboBoxItem Content="Otro"          Tag="otro"          Foreground="#E8E8FF"/>
+                                </ComboBox>
+                            </Border>
+
+                            <!-- OBSERVACIONES -->
+                            <TextBlock Text="OBSERVACIONES" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="#16162A" CornerRadius="10"
+                                    BorderBrush="#252540" BorderThickness="1.5"
+                                    Margin="0,0,0,14">
+                                <TextBox x:Name="txtObservaciones"
+                                         Background="Transparent" BorderThickness="0"
+                                         Foreground="#E8E8FF" CaretBrush="#00CFFF"
+                                         FontSize="13" Padding="14,10"
+                                         AcceptsReturn="True" TextWrapping="Wrap"
+                                         Height="80" VerticalScrollBarVisibility="Auto"/>
+                            </Border>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Botones -->
+                    <Grid Grid.Row="3" Margin="22,12,22,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Cancelar"
+                                Style="{StaticResource BotonCerrarEstilo}"
+                                Margin="0,0,8,0" Click="btnCancelarFormulario_Click"/>
+                        <Button x:Name="btnGuardar" Grid.Column="1" Content="GUARDAR"
+                                Style="{StaticResource BotonPrincipalEstilo}"
+                                Margin="8,0,0,0" Click="btnGuardar_Click"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>
