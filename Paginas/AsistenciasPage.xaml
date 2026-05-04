@@ -1,0 +1,526 @@
+﻿<Page x:Class="SistemaGimnacionOptimusCAI.Paginas.AsistenciasPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      mc:Ignorable="d"
+      d:DesignHeight="768" d:DesignWidth="1280"
+      Title="Control de Acceso">
+
+    <Page.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0A0A14" Offset="0"/>
+            <GradientStop Color="#0D0D22" Offset="1"/>
+        </LinearGradientBrush>
+    </Page.Background>
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
+
+            <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#4A4A7A"/>
+                <Setter Property="FontSize"   Value="10"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Margin"     Value="2,0,0,6"/>
+            </Style>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid x:Name="gridRaiz" Margin="24,20,24,20" Opacity="0">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetName="gridRaiz"
+                                         Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" Duration="0:0:0.5"
+                                         DecelerationRatio="0.6"/>
+                        <DoubleAnimation Storyboard.TargetName="translateEntrada"
+                                         Storyboard.TargetProperty="Y"
+                                         From="20" To="0" Duration="0:0:0.5"
+                                         DecelerationRatio="0.8"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+        <Grid.RenderTransform>
+            <TranslateTransform x:Name="translateEntrada" Y="20"/>
+        </Grid.RenderTransform>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ══════════════════ HEADER ══════════════════ -->
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#00CFFF" Offset="0"/>
+                            <GradientStop Color="#00E676" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="CONTROL DE ACCESO"
+                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                    <TextBlock Text="Registro de ingresos al gimnasio"
+                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Reloj en vivo -->
+            <Border Grid.Column="1" Background="#12121E" CornerRadius="10"
+                    BorderBrush="#252540" BorderThickness="1" Padding="16,8">
+                <StackPanel>
+                    <TextBlock x:Name="lblReloj" Text="00:00:00"
+                               FontFamily="Bahnschrift SemiBold, Consolas"
+                               FontSize="22" FontWeight="Bold"
+                               Foreground="#00CFFF" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="lblFecha" Text="—"
+                               FontSize="10" Foreground="#6A6A9A"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ══════════════════ STATS ══════════════════ -->
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statPermitidos" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#00E676"/>
+                    <TextBlock Text="ACCESOS HOY" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statDenegados" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#FF5555"/>
+                    <TextBlock Text="DENEGADOS HOY" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statSociosUnicos" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#00CFFF"/>
+                    <TextBlock Text="SOCIOS DISTINTOS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="3" Margin="8,0,0,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statSemana" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#A78BFA"/>
+                    <TextBlock Text="ACCESOS ÚLTIMA SEMANA" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ══════════════════ CONTENIDO PRINCIPAL ══════════════════ -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="380"/>
+                <!-- Panel de validación -->
+                <ColumnDefinition Width="*"/>
+                <!-- Lista accesos del día -->
+            </Grid.ColumnDefinitions>
+
+            <!-- ══════════════════ PANEL VALIDACIÓN ══════════════════ -->
+            <Border Grid.Column="0" Background="#12121E"
+                    CornerRadius="12" BorderBrush="#252540" BorderThickness="1"
+                    Margin="0,0,14,0" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#00CFFF" Offset="0"/>
+                                <GradientStop Color="#00E676" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <!-- Título + DNI input -->
+                    <StackPanel Grid.Row="1" Margin="22,22,22,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <TextBlock Text="🚪" FontSize="20" Margin="0,0,8,0"/>
+                            <TextBlock Text="REGISTRAR INGRESO"
+                                       FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                       FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <TextBlock Text="DNI DEL SOCIO" Style="{StaticResource LabelCampoEstilo}"/>
+
+                        <!-- Input de DNI muy grande, con foco automático -->
+                        <Border Background="#16162A" CornerRadius="12" Height="64"
+                                BorderBrush="#00CFFF" BorderThickness="2" Margin="0,0,0,12">
+                            <TextBox x:Name="txtDni"
+                                     Background="Transparent" BorderThickness="0"
+                                     Foreground="#E8E8FF" CaretBrush="#00CFFF"
+                                     FontSize="28" FontFamily="Consolas, Segoe UI"
+                                     FontWeight="Bold"
+                                     VerticalContentAlignment="Center"
+                                     HorizontalContentAlignment="Center"
+                                     MaxLength="8"
+                                     PreviewTextInput="txtDni_PreviewTextInput"
+                                     DataObject.Pasting="txtDni_Pasting"
+                                     KeyDown="txtDni_KeyDown"/>
+                        </Border>
+
+                        <TextBlock Text="Ingresá el DNI y presioná ENTER"
+                                   FontSize="11" Foreground="#6A6A9A"
+                                   FontStyle="Italic" HorizontalAlignment="Center"
+                                   Margin="0,0,0,12"/>
+
+                        <Button x:Name="btnValidar" Content="VALIDAR ACCESO ►"
+                                Style="{StaticResource BotonPrincipalEstilo}"
+                                Height="48" FontSize="14"
+                                Click="btnValidar_Click"/>
+
+                        <Border Height="1" Background="#252540" Margin="0,18,0,12"/>
+                    </StackPanel>
+
+                    <!-- Tarjeta de resultado (cambia según permitido/denegado) -->
+                    <Border Grid.Row="3" x:Name="panelResultado"
+                            Margin="22,4,22,22" CornerRadius="12"
+                            Visibility="Collapsed">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="scaleResultado" ScaleX="1" ScaleY="1"
+                                            CenterX="170" CenterY="180"/>
+                        </Border.RenderTransform>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Ícono grande estado -->
+                            <TextBlock Grid.Row="0" x:Name="lblIcono" Text="✓"
+                                       FontSize="64" FontWeight="Bold"
+                                       HorizontalAlignment="Center" Margin="0,18,0,4"/>
+
+                            <!-- Foto del socio -->
+                            <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="0,8,0,12">
+                                <Ellipse Width="92" Height="92">
+                                    <Ellipse.Fill>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="#00CFFF" Offset="0"/>
+                                            <GradientStop Color="#A78BFA" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                                <Ellipse Width="86" Height="86">
+                                    <Ellipse.Fill>
+                                        <ImageBrush x:Name="imgFoto" Stretch="UniformToFill"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                            </Grid>
+
+                            <!-- Nombre del socio -->
+                            <TextBlock Grid.Row="2" x:Name="lblSocioNombre"
+                                       Text="—"
+                                       FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                       FontSize="16" FontWeight="Bold" Foreground="#E8E8FF"
+                                       HorizontalAlignment="Center" Margin="0,0,0,2"/>
+
+                            <!-- Número de socio -->
+                            <TextBlock Grid.Row="3" x:Name="lblNumeroSocio"
+                                       Text="#0000"
+                                       FontFamily="Consolas" FontSize="12"
+                                       Foreground="#FF6B35" HorizontalAlignment="Center"
+                                       Margin="0,0,0,12"/>
+
+                            <!-- Mensaje + detalles -->
+                            <Border Grid.Row="4" x:Name="panelDetalles"
+                                    CornerRadius="10" Padding="16,14"
+                                    Margin="20,0,20,20">
+                                <StackPanel>
+                                    <TextBlock x:Name="lblMensaje" Text="—"
+                                               FontSize="14" FontWeight="SemiBold"
+                                               TextWrapping="Wrap"
+                                               HorizontalAlignment="Center"
+                                               TextAlignment="Center"
+                                               Margin="0,0,0,8"/>
+
+                                    <StackPanel x:Name="panelInfoMembresia" Visibility="Collapsed">
+                                        <Border Height="1" Background="#33FFFFFF" Margin="0,4,0,8"/>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Plan: "
+                                                       FontSize="11" Foreground="#AAAACC"/>
+                                            <TextBlock Grid.Column="1" x:Name="lblActividad"
+                                                       Text="—" FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#E8E8FF"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Vence: "
+                                                       FontSize="11" Foreground="#AAAACC"/>
+                                            <TextBlock Grid.Column="1" x:Name="lblVencimiento"
+                                                       Text="—" FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#E8E8FF"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Estado vacío (cuando no hay nada validado todavía) -->
+                    <StackPanel Grid.Row="3" x:Name="panelEsperando"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Margin="20">
+                        <TextBlock Text="🔒" FontSize="56" Foreground="#3A3A5C"
+                                   HorizontalAlignment="Center" Opacity="0.6"/>
+                        <TextBlock Text="ESPERANDO INGRESO..."
+                                   FontFamily="Bahnschrift SemiBold"
+                                   FontSize="13" FontWeight="Bold"
+                                   Foreground="#3A3A5C"
+                                   HorizontalAlignment="Center" Margin="0,12,0,0"/>
+                    </StackPanel>
+
+                </Grid>
+            </Border>
+
+            <!-- ══════════════════ LISTA ACCESOS ══════════════════ -->
+            <Border Grid.Column="1" Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#A78BFA" Offset="0"/>
+                                <GradientStop Color="#12121E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <!-- Header de la lista -->
+                    <Grid Grid.Row="1" Margin="22,18,22,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="📋" FontSize="16" Margin="0,0,8,0"/>
+                            <TextBlock Text="ACCESOS DEL DÍA"
+                                       FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                       FontSize="14" FontWeight="Bold" Foreground="#E8E8FF"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Filtros chips -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button x:Name="chipTodos"     Content="Todos"     Click="chipFiltro_Click" Tag="todos"
+                                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,6,0"/>
+                            <Button x:Name="chipPermitidos" Content="Permitidos" Click="chipFiltro_Click" Tag="permitido"
+                                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,6,0"/>
+                            <Button x:Name="chipDenegados" Content="Denegados" Click="chipFiltro_Click" Tag="denegado"
+                                    Style="{StaticResource BotonChipEstilo}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Grid.Row="2" Height="1" Background="#252540" Margin="0,14,0,0"/>
+
+                    <!-- DataGrid de accesos -->
+                    <DataGrid Grid.Row="3" x:Name="gridAccesos"
+                              IsReadOnly="True" AutoGenerateColumns="False"
+                              CanUserAddRows="False" CanUserResizeRows="False"
+                              Background="Transparent" BorderThickness="0"
+                              RowHeaderWidth="0" RowHeight="58"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#1A1A2E">
+                        <DataGrid.Columns>
+
+                            <!-- Indicador lateral de color -->
+                            <DataGridTemplateColumn Width="6" Header="">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Width="4" CornerRadius="2" Margin="2,8">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#FF5555"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding EsPermitido}" Value="True">
+                                                            <Setter Property="Background" Value="#00E676"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Hora grande -->
+                            <DataGridTemplateColumn Header="HORA" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding HoraAcceso}"
+                                                   FontFamily="Consolas" FontWeight="Bold"
+                                                   FontSize="14" Foreground="#E8E8FF"
+                                                   VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Foto + nombre -->
+                            <DataGridTemplateColumn Header="SOCIO" Width="2*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Grid Margin="0,0,10,0">
+                                                <Ellipse Width="38" Height="38">
+                                                    <Ellipse.Fill>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                            <GradientStop Color="#00CFFF" Offset="0"/>
+                                                            <GradientStop Color="#A78BFA" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Ellipse.Fill>
+                                                </Ellipse>
+                                                <Ellipse Width="34" Height="34">
+                                                    <Ellipse.Fill>
+                                                        <ImageBrush ImageSource="{Binding SocioFoto, Converter={StaticResource BytesAImagen}}"
+                                                                    Stretch="UniformToFill"/>
+                                                    </Ellipse.Fill>
+                                                </Ellipse>
+                                            </Grid>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding SocioNombre}" FontSize="13"
+                                                           FontWeight="SemiBold" Foreground="#E8E8FF"/>
+                                                <TextBlock Text="{Binding NumeroSocioFormateado}"
+                                                           FontFamily="Consolas" FontSize="11"
+                                                           Foreground="#FF6B35"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="ACTIVIDAD"
+                                                Binding="{Binding ActividadNombre}" Width="1.5*"/>
+
+                            <!-- Resultado badge -->
+                            <DataGridTemplateColumn Header="RESULTADO" Width="155">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="20" Padding="10,4" HorizontalAlignment="Left">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#2A0A0A"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding EsPermitido}" Value="True">
+                                                            <Setter Property="Background" Value="#0A2A14"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock FontSize="13" FontWeight="Bold" Margin="0,0,4,0">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="✕"/>
+                                                            <Setter Property="Foreground" Value="#FF6666"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding EsPermitido}" Value="True">
+                                                                    <Setter Property="Text" Value="✓"/>
+                                                                    <Setter Property="Foreground" Value="#00E676"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding ResultadoTexto}" FontSize="12"
+                                                           FontWeight="SemiBold" VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#FF6666"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding EsPermitido}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#00E676"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Método -->
+                            <DataGridTemplateColumn Header="MÉTODO" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#1A1A30" CornerRadius="6"
+                                                Padding="8,3" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding MetodoTexto}"
+                                                       FontSize="10" Foreground="#A0A0C0"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>

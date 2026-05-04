@@ -77,11 +77,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Paginas\AsistenciasPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Paginas\CajaPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Paginas\CasillerosPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Paginas\MembresiasPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Paginas\NotificacionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Paginas\ProductosPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -98,11 +114,23 @@
     <Compile Include="Paginas\ActividadesPage.xaml.cs">
       <DependentUpon>ActividadesPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Paginas\AsistenciasPage.xaml.cs">
+      <DependentUpon>AsistenciasPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\CajaPage.xaml.cs">
+      <DependentUpon>CajaPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\CasillerosPage.xaml.cs">
+      <DependentUpon>CasillerosPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Paginas\MembresiasPage.xaml.cs">
       <DependentUpon>MembresiasPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\NotificacionWindow.xaml.cs">
       <DependentUpon>NotificacionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\ProductosPage.xaml.cs">
+      <DependentUpon>ProductosPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\SociosPage.xaml.cs">
       <DependentUpon>SociosPage.xaml</DependentUpon>

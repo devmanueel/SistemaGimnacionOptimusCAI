@@ -42,8 +42,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActividadController.cs" />
+    <Compile Include="AsistenciaController.cs" />
+    <Compile Include="CajaController.cs" />
+    <Compile Include="CasilleroController.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="MembresiaController.cs" />
+    <Compile Include="ProductoController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SocioController.cs" />
     <Compile Include="UsuarioController.cs" />

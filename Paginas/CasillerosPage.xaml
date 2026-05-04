@@ -1,0 +1,543 @@
+﻿<Page x:Class="SistemaGimnacionOptimusCAI.Paginas.CasillerosPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      mc:Ignorable="d"
+      d:DesignHeight="768" d:DesignWidth="1280"
+      Title="Casilleros">
+
+    <Page.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0A0A14" Offset="0"/>
+            <GradientStop Color="#0D0D22" Offset="1"/>
+        </LinearGradientBrush>
+    </Page.Background>
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
+
+            <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#4A4A7A"/>
+                <Setter Property="FontSize"   Value="10"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Margin"     Value="2,0,0,6"/>
+            </Style>
+
+            <!-- ESTILO DEL CASILLERO (botón visual tipo locker) -->
+            <Style x:Key="CasilleroBtnEstilo" TargetType="Button">
+                <Setter Property="Width"      Value="92"/>
+                <Setter Property="Height"     Value="118"/>
+                <Setter Property="Margin"     Value="6"/>
+                <Setter Property="Cursor"     Value="Hand"/>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="borde"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10">
+                                <Border.RenderTransform>
+                                    <ScaleTransform x:Name="esc" ScaleX="1" ScaleY="1" CenterX="46" CenterY="59"/>
+                                </Border.RenderTransform>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="esc"
+                                                                 Storyboard.TargetProperty="ScaleX"
+                                                                 To="1.05" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="esc"
+                                                                 Storyboard.TargetProperty="ScaleY"
+                                                                 To="1.05" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="esc"
+                                                                 Storyboard.TargetProperty="ScaleX"
+                                                                 To="1.0" Duration="0:0:0.15"/>
+                                                <DoubleAnimation Storyboard.TargetName="esc"
+                                                                 Storyboard.TargetProperty="ScaleY"
+                                                                 To="1.0" Duration="0:0:0.15"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid x:Name="gridRaiz" Margin="24,20,24,20" Opacity="0">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetName="gridRaiz"
+                                         Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" Duration="0:0:0.5"
+                                         DecelerationRatio="0.6"/>
+                        <DoubleAnimation Storyboard.TargetName="translateEntrada"
+                                         Storyboard.TargetProperty="Y"
+                                         From="20" To="0" Duration="0:0:0.5"
+                                         DecelerationRatio="0.8"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+        <Grid.RenderTransform>
+            <TranslateTransform x:Name="translateEntrada" Y="20"/>
+        </Grid.RenderTransform>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ══════════════════ HEADER ══════════════════ -->
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#A78BFA" Offset="0"/>
+                            <GradientStop Color="#00CFFF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="CASILLEROS"
+                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                    <TextBlock Text="Asignación, mantenimiento y disponibilidad"
+                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="＋ AGREGAR"
+                        Style="{StaticResource BotonNaranjaEstilo}"
+                        Width="135" Height="46" Margin="0,0,8,0"
+                        Click="btnAgregar_Click"/>
+                <Button Content="📦 CREAR EN MASA"
+                        Background="#1A1840" Foreground="#A78BFA"
+                        BorderThickness="1.5" BorderBrush="#A78BFA"
+                        FontWeight="Bold" FontSize="13"
+                        Cursor="Hand" Width="170" Height="46"
+                        Click="btnCrearMasa_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- ══════════════════ STATS ══════════════════ -->
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statTotal" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#E8E8FF"/>
+                    <TextBlock Text="TOTAL CASILLEROS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statLibres" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#00E676"/>
+                    <TextBlock Text="LIBRES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statOcupados" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#FF6B35"/>
+                    <TextBlock Text="OCUPADOS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="3" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statMantenimiento" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#FFA726"/>
+                    <TextBlock Text="MANTENIMIENTO" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="4" Margin="8,0,0,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statIngresoPotencial" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="22" FontWeight="Bold" Foreground="#00CFFF"/>
+                    <TextBlock Text="INGRESO POTENCIAL/MES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ══════════════════ FILTROS + LEYENDA ══════════════════ -->
+        <Grid Grid.Row="2" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Filtros -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <TextBlock Text="MOSTRAR:" Foreground="#4A4A7A" FontSize="11"
+                           FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <Button x:Name="chipTodos"      Content="Todos"        Click="chipFiltro_Click" Tag="todos"
+                        Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
+                <Button x:Name="chipLibres"     Content="Libres"       Click="chipFiltro_Click" Tag="libre"
+                        Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
+                <Button x:Name="chipOcupados"   Content="Ocupados"     Click="chipFiltro_Click" Tag="ocupado"
+                        Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
+                <Button x:Name="chipManten"     Content="Mantenimiento" Click="chipFiltro_Click" Tag="mantenimiento"
+                        Style="{StaticResource BotonChipEstilo}"/>
+            </StackPanel>
+
+            <!-- Buscador en el medio -->
+            <Border Grid.Column="2" Background="#16162A" CornerRadius="10"
+                    BorderBrush="#252540" BorderThickness="1.5"
+                    Width="220" Height="36">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="36"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="🔍" FontSize="13"
+                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Grid Grid.Column="1">
+                        <TextBox x:Name="txtBuscar" Height="34" BorderThickness="0"
+                                 Background="Transparent" Foreground="#E8E8FF"
+                                 CaretBrush="#00CFFF" FontSize="12"
+                                 VerticalContentAlignment="Center" Padding="0,0,8,0"
+                                 TextChanged="txtBuscar_TextChanged"/>
+                        <TextBlock Text="Buscar por número o socio..."
+                                   IsHitTestVisible="False" VerticalAlignment="Center"
+                                   FontSize="11" Foreground="#3A3A5C">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ══════════════════ CONTENIDO ══════════════════ -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ══════ GRILLA DE LOCKERS ══════ -->
+            <Border Grid.Column="0" Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1" Margin="0,0,14,0" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#A78BFA" Offset="0"/>
+                                <GradientStop Color="#00CFFF" Offset="0.5"/>
+                                <GradientStop Color="#12121E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled" Padding="14">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Estado vacío (cuando no hay casilleros) -->
+                            <StackPanel Grid.Row="0" x:Name="panelVacio"
+                                        VerticalAlignment="Center" HorizontalAlignment="Center"
+                                        Margin="0,80,0,0" Visibility="Collapsed">
+                                <TextBlock Text="🗄️" FontSize="64" HorizontalAlignment="Center"
+                                           Opacity="0.4"/>
+                                <TextBlock Text="No hay casilleros todavía"
+                                           FontFamily="Bahnschrift SemiBold"
+                                           FontSize="16" FontWeight="Bold"
+                                           Foreground="#6A6A9A"
+                                           HorizontalAlignment="Center" Margin="0,12,0,4"/>
+                                <TextBlock Text="Usá &quot;Crear en masa&quot; para agregar muchos a la vez"
+                                           FontSize="12" Foreground="#4A4A7A"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- WrapPanel donde se generan los casilleros -->
+                            <WrapPanel Grid.Row="1" x:Name="panelCasilleros"
+                                       Orientation="Horizontal"
+                                       HorizontalAlignment="Left"/>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- ══════ PANEL DETALLE ══════ -->
+            <Border x:Name="panelDetalle" Grid.Column="1" Width="380"
+                    Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1"
+                    Visibility="Collapsed" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border x:Name="lineaSuperior" Grid.Row="0" Background="#00CFFF"/>
+
+                    <!-- Header del panel -->
+                    <Grid Grid.Row="1" Margin="22,20,22,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="DETALLE DEL CASILLERO"
+                                       Foreground="#6A6A9A" FontSize="10"
+                                       FontWeight="Bold"/>
+                            <TextBlock x:Name="lblNumeroDetalle" Text="#000"
+                                       FontFamily="Bahnschrift SemiBold, Consolas"
+                                       FontSize="32" FontWeight="Bold" Foreground="#E8E8FF"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" x:Name="badgeEstado"
+                                CornerRadius="20" Padding="12,6" VerticalAlignment="Center"
+                                Background="#0A2A14">
+                            <TextBlock x:Name="lblEstadoDetalle" Text="Libre"
+                                       FontSize="12" FontWeight="Bold" Foreground="#00E676"/>
+                        </Border>
+                    </Grid>
+
+                    <Border Grid.Row="1" Height="1" Background="#252540"
+                            VerticalAlignment="Bottom" Margin="22,12,22,0"/>
+
+                    <!-- Contenido scroll -->
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                                  Margin="22,18,22,0">
+                        <StackPanel>
+
+                            <!-- ── Sección SOCIO ASIGNADO (solo si está ocupado) ── -->
+                            <Border x:Name="panelSocio" Background="#0A1A2A"
+                                    BorderBrush="#1A3A5A" BorderThickness="1"
+                                    CornerRadius="10" Padding="16" Margin="0,0,0,16"
+                                    Visibility="Collapsed">
+                                <StackPanel>
+                                    <TextBlock Text="ASIGNADO A" Foreground="#6A8AAA"
+                                               FontSize="10" FontWeight="Bold" Margin="0,0,0,12"/>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Grid Margin="0,0,12,0">
+                                            <Ellipse Width="56" Height="56">
+                                                <Ellipse.Fill>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                        <GradientStop Color="#00CFFF" Offset="0"/>
+                                                        <GradientStop Color="#A78BFA" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                            <Ellipse Width="50" Height="50">
+                                                <Ellipse.Fill>
+                                                    <ImageBrush x:Name="imgSocio" Stretch="UniformToFill"/>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                        </Grid>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock x:Name="lblSocioNombre" Text="—"
+                                                       FontSize="14" FontWeight="SemiBold"
+                                                       Foreground="#E8E8FF"/>
+                                            <TextBlock x:Name="lblSocioNumero" Text="#0000"
+                                                       FontFamily="Consolas" FontSize="11"
+                                                       Foreground="#FF6B35"/>
+                                            <TextBlock x:Name="lblAsignadoDesde" Text="—"
+                                                       FontSize="11" Foreground="#6A8AAA"
+                                                       Margin="0,4,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- ── Asignar a un socio (solo si libre) ── -->
+                            <StackPanel x:Name="panelAsignar" Visibility="Collapsed">
+                                <TextBlock Text="ASIGNAR A SOCIO" Style="{StaticResource LabelCampoEstilo}"/>
+                                <Border Background="#16162A" CornerRadius="10" Height="46"
+                                        BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                                    <ComboBox x:Name="cmbSocio" BorderThickness="0" Background="Transparent"
+                                              Foreground="#E8E8FF" VerticalContentAlignment="Center"
+                                              FontSize="13" Padding="10,0" IsEditable="True"
+                                              IsTextSearchEnabled="True"
+                                              DisplayMemberPath="TextoCombo">
+                                        <ComboBox.Resources>
+                                            <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                                            <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                        </ComboBox.Resources>
+                                    </ComboBox>
+                                </Border>
+                                <Button Content="ASIGNAR CASILLERO"
+                                        Style="{StaticResource BotonPrincipalEstilo}"
+                                        Height="44" FontSize="13" Margin="0,0,0,16"
+                                        Click="btnAsignar_Click"/>
+                            </StackPanel>
+
+                            <!-- ── Datos del casillero ── -->
+                            <TextBlock Text="PRECIO MENSUAL" Style="{StaticResource LabelCampoEstilo}"/>
+                            <TextBox x:Name="txtPrecio" Style="{StaticResource InputEstilo}"
+                                     PreviewTextInput="txtPrecio_PreviewTextInput"/>
+
+                            <TextBlock Text="OBSERVACIONES" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="#16162A" CornerRadius="10"
+                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                                <TextBox x:Name="txtObservaciones"
+                                         Background="Transparent" BorderThickness="0"
+                                         Foreground="#E8E8FF" CaretBrush="#00CFFF"
+                                         FontSize="13" Padding="14,10"
+                                         AcceptsReturn="True" TextWrapping="Wrap"
+                                         Height="70" VerticalScrollBarVisibility="Auto"/>
+                            </Border>
+
+                            <Button Content="GUARDAR CAMBIOS"
+                                    Style="{StaticResource BotonPrincipalEstilo}"
+                                    Height="40" FontSize="12" Margin="0,0,0,18"
+                                    Click="btnGuardarCambios_Click"/>
+
+                            <Border Height="1" Background="#252540" Margin="0,0,0,16"/>
+
+                            <!-- ── Acciones según estado ── -->
+                            <StackPanel x:Name="panelAcciones">
+
+                                <!-- Liberar (solo si ocupado) -->
+                                <Button x:Name="btnLiberar" Content="🔓  LIBERAR CASILLERO"
+                                        Background="#2A1F00" Foreground="#FFA726"
+                                        BorderThickness="1.5" BorderBrush="#FFA726"
+                                        FontWeight="Bold" FontSize="13"
+                                        Cursor="Hand" Height="42" Margin="0,0,0,8"
+                                        Visibility="Collapsed"
+                                        Click="btnLiberar_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="10">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <!-- Mantenimiento (solo si libre o si en mantenimiento → vuelve a libre) -->
+                                <Button x:Name="btnMantenimiento" Content="🔧  PONER EN MANTENIMIENTO"
+                                        Background="#2A1F00" Foreground="#FFA726"
+                                        BorderThickness="1.5" BorderBrush="#FFA726"
+                                        FontWeight="Bold" FontSize="12"
+                                        Cursor="Hand" Height="40" Margin="0,0,0,8"
+                                        Click="btnMantenimiento_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="10">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <Button x:Name="btnEliminar" Content="🗑️  ELIMINAR CASILLERO"
+                                        Background="Transparent" Foreground="#FF5555"
+                                        BorderThickness="1" BorderBrush="#5A1A1A"
+                                        FontWeight="SemiBold" FontSize="12"
+                                        Cursor="Hand" Height="36"
+                                        Click="btnEliminar_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="10">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Botón cerrar -->
+                    <Button Grid.Row="3" Content="Cerrar"
+                            Style="{StaticResource BotonCerrarEstilo}"
+                            Margin="22,12,22,18" Click="btnCerrar_Click"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>
