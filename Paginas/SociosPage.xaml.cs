@@ -131,11 +131,22 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─────────────────────────────────────────────────────
         // TABS DEL FORMULARIO
         // ─────────────────────────────────────────────────────
-        private void btnTab_Click(object sender, RoutedEventArgs e)
+        private void BtnTab_Click(object sender, RoutedEventArgs e)
         {
-            var btn = sender as Button;
-            if (btn == null) return;
-            CambiarTab(btn.Tag.ToString());
+            Button btnSeleccionado = sender as Button;
+            if (btnSeleccionado == null) return;
+
+            // Resetear todos para que la barra se apague en los otros
+            btnTabDatos.IsEnabled = true;
+            btnTabContacto.IsEnabled = true;
+            btnTabOtros.IsEnabled = true;
+
+            // Activar el que clickeamos (enciende la barra neón)
+            btnSeleccionado.IsEnabled = false;
+
+            // Aquí tu lógica de cambio de paneles según el Tag
+            string tab = btnSeleccionado.Tag.ToString();
+            CambiarTab(tab);
         }
 
         private void CambiarTab(string tab)
@@ -157,6 +168,26 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 btn.Foreground = new SolidColorBrush(Color.FromRgb(0, 207, 255));
                 btn.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 207, 255));
+
+                // Animar la barra
+                var trans = barraTab.RenderTransform as TranslateTransform;
+
+                if (trans != null)
+                {
+                    double offset = 0;
+                    if (btn == btnTabContacto) offset = 118;
+                    else if (btn == btnTabOtros) offset = 236;
+
+                    var animation = new DoubleAnimation
+                    {
+                        To = offset,
+                        Duration = new Duration(TimeSpan.FromMilliseconds(350)),
+                        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+                    };
+
+                    // Usamos la variable 'trans' en lugar del nombre directo
+                    trans.BeginAnimation(TranslateTransform.XProperty, animation);
+                }
             }
             else
             {
