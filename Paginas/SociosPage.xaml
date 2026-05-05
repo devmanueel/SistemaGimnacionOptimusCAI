@@ -411,70 +411,34 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
                                             <!-- BOTÓN EDITAR -->
-                                            <Border x:Name="borderEditar" Width="34" Height="34" CornerRadius="8"
-                        Background="#0D0D1F" Margin="0,0,8,0" BorderBrush="#252540" BorderThickness="1">
-                                                <Button Click="btnEditar_Click" Background="Transparent" BorderThickness="0" Cursor="Hand">
-                                                    <Button.Style>
-                                                        <Style TargetType="Button">
-                                                            <Setter Property="Template">
-                                                                <Setter.Value>
-                                                                    <ControlTemplate TargetType="Button">
-                                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                                    </ControlTemplate>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                        </Style>
-                                                    </Button.Style>
-                                                    <TextBlock Text="✏" FontSize="14" Foreground="#00CFFF" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                                </Button>
-                                            </Border>
+                                            <Button Click="btnEditar_Click" 
+            Style="{StaticResource ButtonStyleEditar}" 
+            Margin="0,0,8,0">
+                                                <fa:ImageAwesome Icon="Edit" Foreground="#00CFFF" Height="14"/>
+                                            </Button>
 
                                             <!-- BOTÓN ESTADO -->
-                                            <Border x:Name="borderEstado" Width="34" Height="34" CornerRadius="8"
-                        Background="#0D0D1F" BorderBrush="#252540" BorderThickness="1">
-                                                <Button Click="btnToggleEstado_Click" Background="Transparent" BorderThickness="0" Cursor="Hand">
-
-                                                    <Button.Style>
-                                                        <Style TargetType="Button">
-                                                            <Setter Property="Template">
-                                                                <Setter.Value>
-                                                                    <ControlTemplate TargetType="Button">
-                                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                                    </ControlTemplate>
-                                                                </Setter.Value>
-                                                            </Setter>
+                                            <Button Click="btnToggleEstado_Click" 
+            Style="{StaticResource ButtonStyleEstado}">
+                                                <fa:ImageAwesome Height="14">
+                                                    <fa:ImageAwesome.Style>
+                                                        <Style TargetType="fa:ImageAwesome">
+                                                            <Setter Property="Icon" Value="Trash"/>
+                                                            <Setter Property="Foreground" Value="#FF5555"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Activo}" Value="False">
+                                                                    <Setter Property="Icon" Value="Undo"/>
+                                                                    <Setter Property="Foreground" Value="#00E676"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
                                                         </Style>
-                                                    </Button.Style>
-                                                    <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Text" Value="🗑"/>
-                                                                <Setter Property="Foreground" Value="#FF5555"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Activo}" Value="False">
-                                                                        <Setter Property="Text" Value="♻"/>
-                                                                        <Setter Property="Foreground" Value="#00E676"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                </Button>
-                                            </Border>
-                                        </StackPanel>
+                                                    </fa:ImageAwesome.Style>
+                                                </fa:ImageAwesome>
+                                            </Button>
 
-                                        <DataTemplate.Triggers>
-                                            <!-- Al pasar el mouse, el botón se aclara pero sigue siendo más oscuro que la fila -->
-                                            <Trigger SourceName="borderEditar" Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="borderEditar" Property="Background" Value="#1A1A35"/>
-                                                <Setter TargetName="borderEditar" Property="BorderBrush" Value="#00CFFF"/>
-                                            </Trigger>
-                                            <Trigger SourceName="borderEstado" Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="borderEstado" Property="Background" Value="#1A1A35"/>
-                                                <Setter TargetName="borderEstado" Property="BorderBrush" Value="#FF5555"/>
-                                            </Trigger>
-                                        </DataTemplate.Triggers>
+                                        </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

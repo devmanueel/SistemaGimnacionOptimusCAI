@@ -840,5 +840,55 @@
         </Setter>
     </Style>
 
+    <!-- Cambios de JoakoG -->
+    <!-- Estilo Base para los Botones de Acción -->
+    <Style x:Key="ButtonStyleAccionBase" TargetType="Button">
+        <Setter Property="Width" Value="34"/>
+        <Setter Property="Height" Value="34"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Background" Value="#0D0D1F"/>
+        <Setter Property="BorderBrush" Value="#252540"/>
+        <!-- Color de borde por defecto -->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <!-- Usamos TemplateBinding para que el Border responda a las propiedades del Button -->
+                    <Border x:Name="InternalBorder" 
+                        Background="{TemplateBinding Background}" 
+                        BorderBrush="{TemplateBinding BorderBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="8">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <!-- Trigger de iluminación general al pasar el mouse -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="InternalBorder" Property="Background" Value="#1A1A35"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Estilo para BOTÓN EDITAR -->
+    <Style x:Key="ButtonStyleEditar" BasedOn="{StaticResource ButtonStyleAccionBase}" TargetType="Button">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="#00CFFF"/>
+                <!-- Iluminación Azul -->
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Estilo para BOTÓN ESTADO -->
+    <Style x:Key="ButtonStyleEstado" BasedOn="{StaticResource ButtonStyleAccionBase}" TargetType="Button">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="#FF5555"/>
+                <!-- Iluminación Roja -->
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
 </ResourceDictionary>
