@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1280"
@@ -151,8 +152,8 @@
                             <ColumnDefinition Width="40"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="🔍" FontSize="15"
-                                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        
+                        <fa:ImageAwesome Icon="Search" Foreground="White" Height="20" Width="20" />
                         <Grid Grid.Column="1">
                             <TextBox x:Name="txtBuscar" Height="44" BorderThickness="0"
                                      Background="Transparent" Foreground="#E8E8FF"
@@ -689,7 +690,7 @@
                                         Padding="16" Margin="0,0,0,16">
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                            <TextBlock Text="🔒" FontSize="18" Margin="0,0,8,0"/>
+                                            <fa:ImageAwesome Icon="Lock" Foreground="White" Height="18" Width="18" Margin="0,0,8,0" />
                                             <TextBlock Text="HUELLA / PIN DE ACCESO"
                                                        Foreground="#00CFFF" FontSize="12"
                                                        FontWeight="Bold" VerticalAlignment="Center"/>
