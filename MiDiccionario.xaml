@@ -84,7 +84,7 @@
         <Setter Property="FontSize"                 Value="14"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Padding"                  Value="14,0"/>
-        <Setter Property="Margin"                   Value="0,0,0,14"/>
+        <Setter Property="Margin"                   Value="0,0,0,20"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
@@ -119,6 +119,119 @@
         </Setter>
     </Style>
 
+    <!-- Cambios de JoakoG -->
+    <!-- ═══════════════════════════════════════════════════════════
+     DataPiker TextBox OSCURO
+     FEAT: Borro los estilos por defecto del DataPiker y defino
+     unos estilos personalizados para mantener la consistencia del diseño original.
+═══════════════════════════════════════════════════════════ -->
+    <!-- 1. Estilo para el cuadro de texto interno del DatePicker (DatePickerTextBox) -->
+    <!-- Es necesario para quitar los bordes blancos por defecto y poner el cursor cian -->
+    <Style x:Key="DatePickerInputInternoEstilo" TargetType="{x:Type DatePickerTextBox}">
+        <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <!-- ESTO HACE LA BARRITA CIAN -->
+        <Setter Property="CaretBrush" Value="{StaticResource ColorPrimario}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DatePickerTextBox}">
+                    <!-- Usamos un Grid simple para evitar Chrome (bordes) del sistema -->
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal"/>
+                                <VisualState x:Name="Disabled"/>
+                                <VisualState x:Name="ReadOnly"/>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ScrollViewer x:Name="PART_ContentHost" 
+                                  Focusable="False" 
+                                  Margin="4, 0"
+                                  Height="19"
+                                  FontSize="14"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- 2. Estilo principal para el DatePicker -->
+    <Style x:Key="DatePickerEstilo" TargetType="{x:Type DatePicker}">
+        <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type DatePicker}">
+                    <!-- Contenedor visual principal con bordes redondeados -->
+                    <Border x:Name="borde"
+                        Background="{StaticResource ColorInput}"
+                        BorderBrush="{StaticResource ColorBorde}"
+                        BorderThickness="1.5"
+                        CornerRadius="10"
+                        Height="46">
+                        <Grid x:Name="PART_Root">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Usamos el estilo que creamos arriba para el texto interno -->
+                            <DatePickerTextBox x:Name="PART_TextBox"
+                                           Grid.Column="0"
+                                           Style="{StaticResource DatePickerInputInternoEstilo}"
+                                           Focusable="{TemplateBinding Focusable}"
+                                           HorizontalContentAlignment="Stretch"
+                                           VerticalContentAlignment="Center"/>
+
+                            <!-- Botón del calendario -->
+                            <Button x:Name="PART_Button"
+                                Grid.Column="1"
+                                Margin="0,0,5,0"
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Focusable="False">
+                                <!-- Ícono de calendario que combina con el texto -->
+                                <Path Data="M19,4H18V2H16V4H8V2H6V4H5C3.89,4 3,4.9 3,6V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V6A2,2 0 0,0 19,4M19,20H5V10H19V20M19,8H5V6H19V8Z" 
+                                  Fill="{StaticResource ColorTextoPrincipal}" 
+                                  Stretch="Uniform" Height="18" Width="18"/>
+                            </Button>
+
+                            <!-- Pop-up del calendario (no tocamos su estilo por ahora) -->
+                            <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Placement="Bottom"
+                               PlacementTarget="{Binding ElementName=bordeOuter}"
+                               StaysOpen="False"/>
+                        </Grid>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <!-- 1. HOVER (Igual que tu TextBox) -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="borde" Property="Background" Value="{StaticResource ColorInputHover}"/>
+                            <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource ColorBordeAlto}"/>
+                        </Trigger>
+
+                        <!-- 2. FOCUS (Gana al Hover por estar debajo) -->
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="borde" Property="Background" Value="{StaticResource ColorInputFoco}"/>
+                            <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                            <Setter TargetName="borde" Property="BorderThickness" Value="2"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <!-- PasswordBox — misma estructura, sin DropShadowEffect en triggers -->
     <Style x:Key="PasswordEstilo" TargetType="PasswordBox">
@@ -162,6 +275,167 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+     Estilo ComboBox
+     FEAT: Borro los estilos por defecto del DataPiker y defino
+     unos estilos personalizados para mantener la consistencia del diseño original.
+═══════════════════════════════════════════════════════════ -->
+    <!-- 2. ESTILO PARA EL COMBOBOX (EL CONTENEDOR) -->
+    <Style x:Key="ComboBoxEstilo" TargetType="{x:Type ComboBox}">
+        <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
+        <Setter Property="Height" Value="46"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ComboBox}">
+                    <Grid>
+                        <!-- El ToggleButton abarca todo el control para que sea cliqueable en cualquier parte -->
+                        <ToggleButton x:Name="toggleButton"
+                                  Grid.ColumnSpan="2"
+                                  Focusable="False"
+                                  ClickMode="Press"
+                                  IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                    <Border x:Name="borde"
+                                        Background="{StaticResource ColorInput}"
+                                        BorderBrush="{StaticResource ColorBorde}"
+                                        BorderThickness="1.5"
+                                        CornerRadius="10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="30"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Path x:Name="arrow"
+                                              Grid.Column="1"
+                                              Data="M0,0 L4,4 L8,0 Z"
+                                              Fill="{StaticResource ColorTextoPrincipal}"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource ColorBordeAlto}"/>
+                                            <Setter TargetName="borde" Property="Background" Value="{StaticResource ColorInputHover}"/>
+                                        </Trigger>
+                                        <DataTrigger Binding="{Binding IsDropDownOpen, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="True">
+                                            <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                                            <Setter TargetName="borde" Property="BorderThickness" Value="2"/>
+                                        </DataTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+
+                        <!-- Presentador del texto seleccionado (No interfiere con el clic) -->
+                        <ContentPresenter x:Name="contentPresenter"
+                                      IsHitTestVisible="False"
+                                      Content="{TemplateBinding SelectionBoxItem}"
+                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                      Margin="14,0,30,0"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Left"/>
+
+                        <Popup x:Name="PART_Popup"
+                           AllowsTransparency="True"
+                           IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                           Placement="Bottom"
+                           PopupAnimation="Fade">
+                            <Border Background="#16162A"
+                                BorderBrush="{StaticResource ColorBorde}"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Margin="0,2,0,0"
+                                MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ScrollViewer MaxHeight="300">
+                                    <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════
+     Estilo ComboBoxItem
+     FEAT: Borro los estilos por defecto del DataPiker y defino
+     unos estilos personalizados para mantener la consistencia del diseño original.
+═══════════════════════════════════════════════════════════ -->
+    <!-- 1. ESTILO PARA LOS ÍTEMS (LAS OPCIONES) -->
+    <Style TargetType="{x:Type ComboBoxItem}">
+        <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                    <Border x:Name="gd" Background="{TemplateBinding Background}" 
+                        Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <!-- HOVER: Fondo cian y texto oscuro para legibilidad -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="gd" Property="Background" Value="{StaticResource ColorPrimario}"/>
+                            <Setter Property="Foreground" Value="#16162A"/>
+                        </Trigger>
+                        <!-- SELECCIONADO: Resaltado sutil -->
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="gd" Property="Background" Value="#3300CFFF"/>
+                            <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Cambios de JoakoG-->
+
+    <!-- Cambios de JoakoG -->
+    <!-- Estilos para los botones de filtro en SociosPage -->
+    <Style x:Key="ChipFiltroEstilo" TargetType="{x:Type Button}">
+        <Setter Property="Padding" Value="14,6"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="bordeChip"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="14">
+                        <ContentPresenter x:Name="content"
+                                  HorizontalAlignment="Center" 
+                                  VerticalAlignment="Center"
+                                  Margin="{TemplateBinding Padding}"/>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <!-- HOVER: Usando el mismo color que el DataPicker -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bordeChip" Property="Background" Value="{StaticResource ColorInputHover}"/>
+                        </Trigger>
+
+                        <!-- EFECTO CLIC: Un poco más oscuro para feedback -->
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="bordeChip" Property="Background" Value="{StaticResource ColorBorde}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Cambios de JoakoG -->
 
 
     <!-- ═══════════════════════════════════════════════════════════
@@ -315,7 +589,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridCell">
-                    <Border Background="Transparent" BorderThickness="0" Padding="14,0">
+                    <Border Background="Transparent" BorderThickness="0" Padding="12,0">
                         <ContentPresenter VerticalAlignment="Center"/>
                     </Border>
                 </ControlTemplate>
@@ -464,6 +738,63 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
+
+    <!-- Cambios de JoakoG -->
+
+    <!-- ESTILO PARA LOS BOTONES -->
+    <Style x:Key="TabBtnEstilo" TargetType="Button">
+        <Setter Property="Background"      Value="Transparent"/>
+        <Setter Property="Foreground"      Value="#6A6A9A"/>
+        <Setter Property="FontSize"        Value="12"/>
+        <Setter Property="FontWeight"      Value="Bold"/>
+        <!-- Importante: Ponemos el borde en 0 para que el botón no dibuje su propia línea -->
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor"          Value="Hand"/>
+        <Setter Property="Padding"         Value="16,10"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Foreground" Value="#E8E8FF"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="#00CFFF"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ESTILO PARA LA BARRA DESLIZANTE (Aquí vive el diseño neón) -->
+    <Style x:Key="BarraNeonEstilo" TargetType="Border">
+        <Setter Property="Height" Value="3"/>
+        <Setter Property="CornerRadius" Value="1.5"/>
+        <Setter Property="Margin" Value="0,8,0,0"/>
+        <!-- Esto le da el aire abajo del texto -->
+        <Setter Property="Background">
+            <Setter.Value>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="#00CFFF" Offset="0"/>
+                    <GradientStop Color="#A78BFA" Offset="0.5"/>
+                    <GradientStop Color="#FF6B35" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <!-- El resplandor que tanto nos gusta -->
+                <DropShadowEffect Color="#00CFFF" BlurRadius="15" ShadowDepth="0" Opacity="0.8"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Cambios de JoakoG-->
 
     <!--
     ════════════════════════════════════════════════════════════

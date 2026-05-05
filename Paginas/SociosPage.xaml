@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1280"
@@ -42,11 +43,11 @@
                 <Setter Property="FontSize"    Value="10"/>
                 <Setter Property="FontWeight"  Value="Bold"/>
                 <Setter Property="FontFamily"  Value="Segoe UI Semibold, Segoe UI"/>
-                <Setter Property="Margin"      Value="2,0,0,6"/>
+                <Setter Property="Margin"      Value="2,0,0,15"/>
             </Style>
 
             <!-- Botón de tab del formulario -->
-            <Style x:Key="TabBtnEstilo" TargetType="Button">
+            <Style x:Key="TabBtnEstilo2" TargetType="Button">
                 <Setter Property="Background"      Value="Transparent"/>
                 <Setter Property="Foreground"      Value="#6A6A9A"/>
                 <Setter Property="FontSize"        Value="12"/>
@@ -151,8 +152,8 @@
                             <ColumnDefinition Width="40"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="🔍" FontSize="15"
-                                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        
+                        <fa:ImageAwesome Icon="Search" Foreground="White" Height="20" Width="20" />
                         <Grid Grid.Column="1">
                             <TextBox x:Name="txtBuscar" Height="44" BorderThickness="0"
                                      Background="Transparent" Foreground="#E8E8FF"
@@ -244,59 +245,26 @@
             <TextBlock Text="MOSTRAR:" Foreground="#4A4A7A" FontSize="11"
                        FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
 
+            <!-- CHIP SELECCIONADO (TODOS) -->
             <Button x:Name="chipTodos" Content="Todos"
-                    Click="chipFiltro_Click" Tag="todos"
-                    Background="#1E1E38" Foreground="#E8E8FF"
-                    BorderThickness="0" Cursor="Hand"
-                    Padding="14,6" FontSize="12" FontWeight="SemiBold"
-                    Margin="0,0,8,0">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="14">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
+            Click="chipFiltro_Click" Tag="todos"
+            Style="{StaticResource ChipFiltroEstilo}"
+            Background="#1E1E38" Foreground="#E8E8FF"
+            BorderThickness="0" Margin="0,0,8,0"/>
 
+            <!-- CHIP DESELECCIONADO (ACTIVOS) -->
             <Button x:Name="chipActivos" Content="Activos"
-                    Click="chipFiltro_Click" Tag="activos"
-                    Background="Transparent" Foreground="#6A6A9A"
-                    BorderThickness="1" BorderBrush="#252540" Cursor="Hand"
-                    Padding="14,6" FontSize="12" FontWeight="SemiBold"
-                    Margin="0,0,8,0">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="14">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
+            Click="chipFiltro_Click" Tag="activos"
+            Style="{StaticResource ChipFiltroEstilo}"
+            Background="Transparent" Foreground="#6A6A9A"
+            BorderThickness="1" BorderBrush="#252540" Margin="0,0,8,0"/>
 
+            <!-- CHIP DESELECCIONADO (INACTIVOS) -->
             <Button x:Name="chipInactivos" Content="Inactivos"
-                    Click="chipFiltro_Click" Tag="inactivos"
-                    Background="Transparent" Foreground="#6A6A9A"
-                    BorderThickness="1" BorderBrush="#252540" Cursor="Hand"
-                    Padding="14,6" FontSize="12" FontWeight="SemiBold">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="14">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
+            Click="chipFiltro_Click" Tag="inactivos"
+            Style="{StaticResource ChipFiltroEstilo}"
+            Background="Transparent" Foreground="#6A6A9A"
+            BorderThickness="1" BorderBrush="#252540"/>
         </StackPanel>
 
         <!-- ══════════════════════════════════════════════════
@@ -351,7 +319,7 @@
                                                     </LinearGradientBrush>
                                                 </Ellipse.Fill>
                                             </Ellipse>
-                                            <Ellipse Width="44" Height="44">
+                                            <Ellipse Width="40" Height="40">
                                                 <Ellipse.Fill>
                                                     <ImageBrush ImageSource="{Binding Foto, Converter={StaticResource BytesAImagen}}"
                                                                 Stretch="UniformToFill"/>
@@ -363,15 +331,19 @@
                             </DataGridTemplateColumn>
 
                             <!-- Número de socio: badge naranja -->
+                            <!-- Cambios de JoakoG -->
                             <DataGridTemplateColumn Header="N°" Width="80">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Background="#2A1600" CornerRadius="6"
-                                                Padding="8,4" HorizontalAlignment="Left">
+                                        <Border Background="#25FF00FF" CornerRadius="6"
+                                                Padding="6,4" HorizontalAlignment="Left">
                                             <TextBlock Text="{Binding NumeroFormateado}"
-                                                       FontFamily="Consolas"
-                                                       FontSize="12" FontWeight="Bold"
-                                                       Foreground="#FF6B35"/>
+                                                       FontWeight="Bold" FontSize="13"
+                                                       Foreground="#FF00FF">
+                                                <TextBlock.Effect>
+                                                    <DropShadowEffect Color="#FFFFFF" BlurRadius="5" ShadowDepth="0" Opacity="0.6"/>
+                                                </TextBlock.Effect>
+                                            </TextBlock>
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -387,7 +359,7 @@
                             <DataGridTemplateColumn Header="ESTADO" Width="115">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border CornerRadius="20" Padding="10,4" HorizontalAlignment="Left">
+                                        <Border CornerRadius="5" Padding="10,4" HorizontalAlignment="Left">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="#2A0A0A"/>
@@ -400,7 +372,7 @@
                                             </Border.Style>
                                             <StackPanel Orientation="Horizontal">
                                                 <Ellipse Width="7" Height="7" VerticalAlignment="Center"
-                                                         Margin="0,0,6,0">
+                                                         Margin="0,2,6,0">
                                                     <Ellipse.Style>
                                                         <Style TargetType="Ellipse">
                                                             <Setter Property="Fill" Value="#FF4444"/>
@@ -432,34 +404,57 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
+
+                            <!-- Cambios de JoakoG-->
                             <!-- Acciones -->
                             <DataGridTemplateColumn Header="ACCIONES" Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <Border Width="34" Height="34" CornerRadius="8"
-                                                    Background="#1A1A30" Margin="0,0,8,0">
-                                                <Button Click="btnEditar_Click" Background="Transparent"
-                                                        BorderThickness="0" Cursor="Hand"
-                                                        ToolTip="Editar socio">
-                                                    <TextBlock Text="✏" FontSize="15" Foreground="#00CFFF"/>
+                                            <!-- BOTÓN EDITAR -->
+                                            <Border x:Name="borderEditar" Width="34" Height="34" CornerRadius="8"
+                        Background="#0D0D1F" Margin="0,0,8,0" BorderBrush="#252540" BorderThickness="1">
+                                                <Button Click="btnEditar_Click" Background="Transparent" BorderThickness="0" Cursor="Hand">
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="Button">
+                                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </Button.Style>
+                                                    <TextBlock Text="✏" FontSize="14" Foreground="#00CFFF" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                                 </Button>
                                             </Border>
-                                            <Border Width="34" Height="34" CornerRadius="8"
-                                                    Background="#1A1A30">
-                                                <Button Click="btnToggleEstado_Click" Background="Transparent"
-                                                        BorderThickness="0" Cursor="Hand">
-                                                    <TextBlock FontSize="15">
+
+                                            <!-- BOTÓN ESTADO -->
+                                            <Border x:Name="borderEstado" Width="34" Height="34" CornerRadius="8"
+                        Background="#0D0D1F" BorderBrush="#252540" BorderThickness="1">
+                                                <Button Click="btnToggleEstado_Click" Background="Transparent" BorderThickness="0" Cursor="Hand">
+
+                                                    <Button.Style>
+                                                        <Style TargetType="Button">
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="Button">
+                                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </Button.Style>
+                                                    <TextBlock FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Center">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
                                                                 <Setter Property="Text" Value="🗑"/>
                                                                 <Setter Property="Foreground" Value="#FF5555"/>
-                                                                <Setter Property="ToolTip" Value="Desactivar"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Activo}" Value="False">
                                                                         <Setter Property="Text" Value="♻"/>
                                                                         <Setter Property="Foreground" Value="#00E676"/>
-                                                                        <Setter Property="ToolTip" Value="Reactivar"/>
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
@@ -468,6 +463,18 @@
                                                 </Button>
                                             </Border>
                                         </StackPanel>
+
+                                        <DataTemplate.Triggers>
+                                            <!-- Al pasar el mouse, el botón se aclara pero sigue siendo más oscuro que la fila -->
+                                            <Trigger SourceName="borderEditar" Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="borderEditar" Property="Background" Value="#1A1A35"/>
+                                                <Setter TargetName="borderEditar" Property="BorderBrush" Value="#00CFFF"/>
+                                            </Trigger>
+                                            <Trigger SourceName="borderEstado" Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="borderEstado" Property="Background" Value="#1A1A35"/>
+                                                <Setter TargetName="borderEstado" Property="BorderBrush" Value="#FF5555"/>
+                                            </Trigger>
+                                        </DataTemplate.Triggers>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -519,37 +526,51 @@
                                        FontFamily="Bahnschrift SemiBold, Segoe UI"
                                        FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"/>
                         </StackPanel>
-                        <Border Grid.Column="1" Background="#2A1600" CornerRadius="6" Padding="10,4">
+
+                        <!-- Cambios de JoakoG-->
+                        <Border Grid.Column="1" Background="#25FF00FF" CornerRadius="6" Padding="10,4">
                             <TextBlock x:Name="lblNumeroSocio" Text="#0001"
-                                       FontFamily="Consolas" FontSize="13" FontWeight="Bold"
-                                       Foreground="#FF6B35"/>
+                                       FontSize="13" FontWeight="Bold"
+                                       Foreground="#FF00FF">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="#FFFFFF" BlurRadius="5" ShadowDepth="0" Opacity="0.3"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+
                         </Border>
                     </Grid>
 
-                    <!-- TABS: Datos / Contacto / Otros -->
+                    <!-- TABS: Datos / Contacto / Otros CON BARRA ANIMADA -->
                     <Grid Grid.Row="2" Margin="22,14,22,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <!-- Fila para los botones -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- Fila para la barra -->
+                        </Grid.RowDefinitions>
 
-                        <Button x:Name="btnTabDatos"      Grid.Column="0"
-                                Content="DATOS"          Tag="datos"
-                                Style="{StaticResource TabBtnEstilo}"
-                                Click="btnTab_Click"/>
-                        <Button x:Name="btnTabContacto"  Grid.Column="1"
-                                Content="CONTACTO"       Tag="contacto"
-                                Style="{StaticResource TabBtnEstilo}"
-                                Click="btnTab_Click"/>
-                        <Button x:Name="btnTabOtros"     Grid.Column="2"
-                                Content="OTROS / HUELLA" Tag="otros"
-                                Style="{StaticResource TabBtnEstilo}"
-                                Click="btnTab_Click"/>
+                        <!-- 1. Los Botones -->
+                        <UniformGrid Grid.Row="0" Columns="3">
+                            <Button x:Name="btnTabDatos" Tag="datos"  Content="DATOS" Style="{StaticResource TabBtnEstilo}" Click="BtnTab_Click" IsEnabled="False"/>
+                            <Button x:Name="btnTabContacto" Tag="contacto" Content="CONTACTO" Style="{StaticResource TabBtnEstilo}" Click="BtnTab_Click"/>
+                            <Button x:Name="btnTabOtros" Tag="otros" Content="OTROS / HUELLA" Style="{StaticResource TabBtnEstilo}" Click="BtnTab_Click"/>
+                        </UniformGrid>
+
+                        <!-- 2. La Barra (Ahora con estilo del diccionario) -->
+                        <Border x:Name="barraTab" Grid.Row="1" 
+            Style="{StaticResource BarraNeonEstilo}"
+            HorizontalAlignment="Left" 
+            Width="118">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="barraTranslate" X="0"/>
+                            </Border.RenderTransform>
+                        </Border>
                     </Grid>
+                    <!-- Cambios de JoakoG-->
+
 
                     <!-- CONTENIDO de los tabs -->
-                    <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto"
+                    <ScrollViewer Padding="0,0,15,0"  Grid.Row="3" VerticalScrollBarVisibility="Auto"
                                   Margin="22,14,22,0">
                         <Grid>
                             <!-- ── TAB 1: DATOS PERSONALES ───────────── -->
@@ -557,7 +578,7 @@
 
                                 <!-- Foto -->
                                 <StackPanel HorizontalAlignment="Center" Margin="0,0,0,18">
-                                    <Grid>
+                                    <Grid Margin="0, 15, 0, 0">
                                         <Ellipse Width="106" Height="106">
                                             <Ellipse.Fill>
                                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -613,25 +634,18 @@
                                 <TextBlock x:Name="errDni" Style="{StaticResource LabelErrorEstilo}"/>
 
                                 <TextBlock Text="FECHA DE NACIMIENTO" Style="{StaticResource LabelCampoEstilo}"/>
-                                <Border Background="#16162A" CornerRadius="10" Height="46"
-                                        BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                    <DatePicker x:Name="dpNacimiento"
-                                                BorderThickness="0" Background="Transparent"
-                                                FontSize="14" VerticalContentAlignment="Center"
-                                                Padding="10,0" Foreground="#E8E8FF"/>
-                                </Border>
+                                <DatePicker x:Name="dpNacimiento" 
+                                            Style="{StaticResource DatePickerEstilo}"
+                                            Margin="0,0,0,20"/>
 
-                                <TextBlock Text="SEXO" Style="{StaticResource LabelCampoEstilo}"/>
-                                <Border Background="#16162A" CornerRadius="10" Height="46"
-                                        BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                    <ComboBox x:Name="cmbSexo" BorderThickness="0" Background="Transparent"
-                                              Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                              FontSize="14" Padding="10,0">
-                                        <ComboBoxItem Content="Masculino" Tag="M"   Foreground="#E8E8FF"/>
-                                        <ComboBoxItem Content="Femenino"  Tag="F"   Foreground="#E8E8FF"/>
-                                        <ComboBoxItem Content="Otro"      Tag="Otro" Foreground="#E8E8FF" IsSelected="True"/>
-                                    </ComboBox>
-                                </Border>
+                                <TextBlock Margin="0,0,0,10" Text="SEXO" Style="{StaticResource LabelCampoEstilo}"/>
+                                <ComboBox x:Name="cmbSexo" 
+          Style="{StaticResource ComboBoxEstilo}"
+          Margin="0,0,0,14">
+                                    <ComboBoxItem Content="Masculino" Tag="M" />
+                                    <ComboBoxItem Content="Femenino"  Tag="F" />
+                                    <ComboBoxItem Content="Otro"      Tag="Otro" IsSelected="True"/>
+                                </ComboBox>
                             </StackPanel>
 
                             <!-- ── TAB 2: CONTACTO ───────────── -->
@@ -654,19 +668,16 @@
                                 <TextBox x:Name="txtProfesion" Style="{StaticResource InputEstilo}"/>
 
                                 <TextBlock Text="¿CÓMO NOS CONOCIÓ?" Style="{StaticResource LabelCampoEstilo}"/>
-                                <Border Background="#16162A" CornerRadius="10" Height="46"
-                                        BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                    <ComboBox x:Name="cmbComoConocio" BorderThickness="0" Background="Transparent"
-                                              Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                              FontSize="14" Padding="10,0" IsEditable="True">
-                                        <ComboBoxItem Content="Recomendación de amigo" Foreground="#E8E8FF"/>
-                                        <ComboBoxItem Content="Redes sociales"          Foreground="#E8E8FF"/>
-                                        <ComboBoxItem Content="Pasé por la calle"       Foreground="#E8E8FF"/>
-                                        <ComboBoxItem Content="Publicidad"              Foreground="#E8E8FF"/>
-                                        <ComboBoxItem Content="Familiar"                Foreground="#E8E8FF"/>
-                                        <ComboBoxItem Content="Otro"                    Foreground="#E8E8FF"/>
-                                    </ComboBox>
-                                </Border>
+
+                                <ComboBox x:Name="cmbComoConocio"
+                                              FontSize="14" Padding="10,0" IsEditable="True" Style="{StaticResource ComboBoxEstilo}">
+                                    <ComboBoxItem Content="Recomendación de amigo"/>
+                                    <ComboBoxItem Content="Redes sociales"/>
+                                    <ComboBoxItem Content="Pasé por la calle"/>
+                                    <ComboBoxItem Content="Publicidad"/>
+                                    <ComboBoxItem Content="Familiar"/>
+                                    <ComboBoxItem Content="Otro"/>
+                                </ComboBox>
 
                             </StackPanel>
 
@@ -679,7 +690,7 @@
                                         Padding="16" Margin="0,0,0,16">
                                     <StackPanel>
                                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                            <TextBlock Text="🔒" FontSize="18" Margin="0,0,8,0"/>
+                                            <fa:ImageAwesome Icon="Lock" Foreground="White" Height="18" Width="18" Margin="0,0,8,0" />
                                             <TextBlock Text="HUELLA / PIN DE ACCESO"
                                                        Foreground="#00CFFF" FontSize="12"
                                                        FontWeight="Bold" VerticalAlignment="Center"/>
