@@ -577,8 +577,17 @@
                                        FontSize="10" FontWeight="Bold"
                                        FontFamily="Segoe UI Semibold, Segoe UI"
                                        Margin="2,0,0,6"/>
+
                             <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"
                                      MaxLength="20" LostFocus="txtTelefono_LostFocus"/>
+
+                            <TextBlock Text="DOMICILIO  (opcional)" Foreground="#4A4A7A"
+                                       FontSize="10" FontWeight="Bold"
+                                       FontFamily="Segoe UI Semibold, Segoe UI"
+                                       Margin="2,0,0,6"/>
+                            <TextBox x:Name="txtDomicilio" Style="{StaticResource InputEstilo}"
+                                     MaxLength="200"/>
+
                             <TextBlock x:Name="errTelefono" Style="{StaticResource LabelErrorEstilo}"/>
 
                             <TextBlock x:Name="lblClave" Text="CONTRASEÑA *"

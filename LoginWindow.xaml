@@ -1,0 +1,200 @@
+﻿<Window x:Class="SistemaGimnacionOptimusCAI.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="OptimusCAI — Acceso"
+        Height="520" Width="420"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Background="Transparent">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <!-- Permite mover la ventana arrastrando -->
+    <Border x:Name="borderRaiz" CornerRadius="16"
+            BorderBrush="#252540" BorderThickness="1"
+            MouseLeftButtonDown="Window_MouseLeftButtonDown">
+
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#0A0A14" Offset="0"/>
+                <GradientStop Color="#0D0D22" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="4"/>
+                <!-- Franja de color superior -->
+                <RowDefinition Height="Auto"/>
+                <!-- Logo + título -->
+                <RowDefinition Height="*"/>
+                <!-- Formulario -->
+                <RowDefinition Height="Auto"/>
+                <!-- Footer -->
+            </Grid.RowDefinitions>
+
+            <!-- Franja naranja-violeta -->
+            <Border Grid.Row="0" CornerRadius="16,16,0,0">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#FF6B35" Offset="0"/>
+                        <GradientStop Color="#A78BFA" Offset="0.5"/>
+                        <GradientStop Color="#00CFFF" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- Logo + título -->
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,36,0,28">
+                <!-- Ícono circular con gradiente -->
+                <Border Width="80" Height="80" CornerRadius="40"
+                        HorizontalAlignment="Center" Margin="0,0,0,18">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FF6B35" Offset="0"/>
+                            <GradientStop Color="#A78BFA" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <TextBlock Text="🥊" FontSize="36"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+
+                <TextBlock Text="OPTIMUS CAI"
+                           FontFamily="Bahnschrift SemiBold, Segoe UI"
+                           FontSize="22" FontWeight="Bold"
+                           Foreground="#E8E8FF"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Sistema de Gestión"
+                           FontSize="12" Foreground="#6A6A9A"
+                           HorizontalAlignment="Center" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- Formulario -->
+            <StackPanel Grid.Row="2" Margin="40,0,40,0">
+
+                <!-- DNI -->
+                <TextBlock Text="DNI" Foreground="#4A4A7A" FontSize="10"
+                           FontWeight="Bold" Margin="2,0,0,6"/>
+                <Border Background="#16162A" CornerRadius="10" Height="48"
+                        BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="44"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="👤" FontSize="16"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                        <TextBox x:Name="txtDni" Grid.Column="1"
+                                 Background="Transparent" BorderThickness="0"
+                                 Foreground="#E8E8FF" CaretBrush="#FF6B35"
+                                 FontSize="16" FontFamily="Consolas"
+                                 VerticalContentAlignment="Center"
+                                 MaxLength="8"
+                                 PreviewTextInput="txtDni_PreviewTextInput"
+                                 KeyDown="txtDni_KeyDown"/>
+                    </Grid>
+                </Border>
+                <TextBlock x:Name="errDni" Text="" Foreground="#FF5555"
+                           FontSize="11" FontStyle="Italic"
+                           Margin="4,0,0,12" Visibility="Collapsed"/>
+
+                <!-- Contraseña -->
+                <TextBlock Text="CONTRASEÑA" Foreground="#4A4A7A" FontSize="10"
+                           FontWeight="Bold" Margin="2,0,0,6"/>
+                <Border Background="#16162A" CornerRadius="10" Height="48"
+                        BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="44"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="44"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🔒" FontSize="16"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                        <PasswordBox x:Name="txtPassword" Grid.Column="1"
+                                     Background="Transparent" BorderThickness="0"
+                                     Foreground="#E8E8FF" CaretBrush="#FF6B35"
+                                     FontSize="16" VerticalContentAlignment="Center"
+                                     PasswordChar="●"
+                                     KeyDown="txtPassword_KeyDown"/>
+                        <!-- Mostrar/ocultar contraseña -->
+                        <Button Grid.Column="2" x:Name="btnTogglePass"
+                                Click="btnTogglePass_Click"
+                                Background="Transparent" BorderThickness="0"
+                                Cursor="Hand" ToolTip="Mostrar/ocultar">
+                            <TextBlock x:Name="lblTogglePass" Text="👁" FontSize="15"
+                                       Foreground="#4A4A7A"/>
+                        </Button>
+                    </Grid>
+                </Border>
+                <TextBlock x:Name="errPassword" Text="" Foreground="#FF5555"
+                           FontSize="11" FontStyle="Italic"
+                           Margin="4,0,0,14" Visibility="Collapsed"/>
+
+                <!-- Mensaje de error general -->
+                <Border x:Name="panelError" Background="#2A0A0A"
+                        BorderBrush="#FF4444" BorderThickness="1"
+                        CornerRadius="8" Padding="12,10" Margin="0,0,0,16"
+                        Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚠" FontSize="14" Foreground="#FF5555"
+                                   Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="lblError" Text=""
+                                   Foreground="#FF8888" FontSize="12"
+                                   TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Botón ingresar -->
+                <Button x:Name="btnIngresar" 
+        Height="50" FontSize="14" FontWeight="Bold"
+        Cursor="Hand" Margin="0,0,0,0"
+        Click="btnIngresar_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="borde" CornerRadius="10">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#FF6B35" Offset="0"/>
+                                        <GradientStop Color="#A78BFA" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+
+                    <TextBlock Text="INGRESAR" FontFamily="Bahnschrift SemiBold, Segoe UI"
+               FontSize="15" FontWeight="Bold" Foreground="White"/>
+                </Button>
+
+            </StackPanel>
+
+            <!-- Footer -->
+            <StackPanel Grid.Row="3" Margin="0,18,0,22">
+                <TextBlock Text="OptimusCAI — Gestión de Gimnasio"
+                           FontSize="10" Foreground="#3A3A5C"
+                           HorizontalAlignment="Center"/>
+                <!-- Botón cerrar -->
+                <Button Content="✕ Salir" Click="btnSalir_Click"
+                        Background="Transparent" BorderThickness="0"
+                        Foreground="#3A3A5C" FontSize="10"
+                        Cursor="Hand" HorizontalAlignment="Center"
+                        Margin="0,6,0,0"/>
+            </StackPanel>
+
+        </Grid>
+    </Border>
+</Window>
