@@ -29,14 +29,21 @@ namespace Models.Dao
                 Nombre = r["nombre"].ToString(),
                 Apellido = r["apellido"].ToString(),
                 Dni = r["dni"].ToString(),
-                Domicilio = r["domicilio"] as string,
-                Telefono = r["telefono"] as string,
-                Email = r["email"] as string,
-                PasswordHash = r["password_hash"].ToString(),
-                // Foto puede ser NULL en la BD → manejamos con DBNull
+                Domicilio = LeerColumnaSegura(r, "domicilio"),
+                Telefono = LeerColumnaSegura(r, "telefono"),
+                Email = LeerColumnaSegura(r, "email"),
+                PasswordHash = LeerColumnaSegura(r, "password_hash") ?? string.Empty,
                 Foto = r["foto"] != DBNull.Value ? (byte[])r["foto"] : null,
                 Activo = Convert.ToBoolean(r["activo"])
             };
+        }
+
+        private static string LeerColumnaSegura(SqlDataReader r, string columna)
+        {
+            for (int i = 0; i < r.FieldCount; i++)
+                if (r.GetName(i).Equals(columna, StringComparison.OrdinalIgnoreCase))
+                    return r[columna] as string;
+            return null;
         }
 
         // ──────────────────────────────────────────────────────────

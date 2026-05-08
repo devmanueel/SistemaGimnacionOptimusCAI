@@ -1,0 +1,600 @@
+﻿<Page x:Class="SistemaGimnacionOptimusCAI.Paginas.VentasPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      mc:Ignorable="d"
+      d:DesignHeight="768" d:DesignWidth="1280"
+      Title="Ventas">
+
+    <Page.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0A0A14" Offset="0"/>
+            <GradientStop Color="#0D0D22" Offset="1"/>
+        </LinearGradientBrush>
+    </Page.Background>
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
+            <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#4A4A7A"/>
+                <Setter Property="FontSize"   Value="10"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Margin"     Value="2,0,0,6"/>
+            </Style>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid>
+
+        <!-- ══ VISTA LISTADO ══════════════════════════════════ -->
+        <Grid x:Name="vistaListado" Margin="24,20,24,20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- HEADER -->
+            <Grid Grid.Row="0" Margin="0,0,0,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#FF6B35" Offset="0"/>
+                                <GradientStop Color="#00E676" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <StackPanel>
+                        <TextBlock Text="VENTAS" FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                   FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                        <TextBlock Text="Kiosco — registro de ventas y tickets"
+                                   FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Border Background="#16162A" CornerRadius="10" BorderBrush="#252540"
+                            BorderThickness="1.5" Width="240" Height="46" Margin="0,0,12,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="🔍" FontSize="15"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Grid Grid.Column="1">
+                                <TextBox x:Name="txtBuscar" Height="44" BorderThickness="0"
+                                         Background="Transparent" Foreground="#E8E8FF"
+                                         CaretBrush="#00CFFF" FontSize="14"
+                                         VerticalContentAlignment="Center" Padding="0,0,10,0"
+                                         TextChanged="txtBuscar_TextChanged"/>
+                                <TextBlock Text="Buscar venta..." IsHitTestVisible="False"
+                                           VerticalAlignment="Center" FontSize="12" Foreground="#3A3A5C">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                    <Button Content="🛒  NUEVA VENTA" Style="{StaticResource BotonNaranjaEstilo}"
+                            Width="180" Height="46" Click="btnNuevaVenta_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- STATS -->
+            <Grid Grid.Row="1" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
+                        Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock x:Name="statVentasHoy" Text="—" FontFamily="Bahnschrift SemiBold"
+                                   FontSize="26" FontWeight="Bold" Foreground="#00CFFF"/>
+                        <TextBlock Text="VENTAS HOY" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
+                        Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock x:Name="statTotalHoy" Text="—" FontFamily="Bahnschrift SemiBold"
+                                   FontSize="22" FontWeight="Bold" Foreground="#00E676"/>
+                        <TextBlock Text="RECAUDADO HOY" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Margin="4,0,4,0" CornerRadius="10"
+                        Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock x:Name="statVentasMes" Text="—" FontFamily="Bahnschrift SemiBold"
+                                   FontSize="26" FontWeight="Bold" Foreground="#A78BFA"/>
+                        <TextBlock Text="VENTAS DEL MES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="3" Margin="8,0,0,0" CornerRadius="10"
+                        Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock x:Name="statTotalMes" Text="—" FontFamily="Bahnschrift SemiBold"
+                                   FontSize="22" FontWeight="Bold" Foreground="#FF6B35"/>
+                        <TextBlock Text="RECAUDADO DEL MES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- FILTROS -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
+                <TextBlock Text="METODO:" Foreground="#4A4A7A" FontSize="11"
+                           FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <Button x:Name="chipTodos"    Content="Todos"         Tag="todos"
+                        Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
+                <Button x:Name="chipEfectivo" Content="Efectivo"      Tag="efectivo"
+                        Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
+                <Button x:Name="chipTransfer" Content="Transferencia" Tag="transferencia"
+                        Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
+                <Button x:Name="chipTarjeta"  Content="Tarjeta"       Tag="tarjeta"
+                        Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click"/>
+            </StackPanel>
+
+            <!-- DATAGRID -->
+            <Border Grid.Row="3" Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#FF6B35" Offset="0"/>
+                                <GradientStop Color="#00E676" Offset="0.5"/>
+                                <GradientStop Color="#12121E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <DataGrid Grid.Row="1" x:Name="gridVentas"
+                              IsReadOnly="True" AutoGenerateColumns="False"
+                              CanUserAddRows="False" CanUserResizeRows="False"
+                              Background="Transparent" BorderThickness="0"
+                              RowHeaderWidth="0" RowHeight="64"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#1A1A2E">
+                        <DataGrid.Columns>
+
+                            <DataGridTemplateColumn Header="N°" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#1A1840" CornerRadius="6"
+                                                Padding="8,4" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding NumeroVenta}"
+                                                       FontFamily="Consolas" FontWeight="Bold"
+                                                       FontSize="12" Foreground="#A78BFA"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="CLIENTE" Width="2*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Grid Margin="0,0,10,0">
+                                                <Ellipse Width="38" Height="38">
+                                                    <Ellipse.Fill>
+                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                            <GradientStop Color="#00CFFF" Offset="0"/>
+                                                            <GradientStop Color="#A78BFA" Offset="1"/>
+                                                        </LinearGradientBrush>
+                                                    </Ellipse.Fill>
+                                                </Ellipse>
+                                                <Ellipse Width="34" Height="34">
+                                                    <Ellipse.Fill>
+                                                        <ImageBrush ImageSource="{Binding SocioFoto, Converter={StaticResource BytesAImagen}}"
+                                                                    Stretch="UniformToFill"/>
+                                                    </Ellipse.Fill>
+                                                </Ellipse>
+                                                <TextBlock Text="🛒" FontSize="14"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding EsPublicoGeneral}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Grid>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding SocioNombre}" FontSize="13"
+                                                           FontWeight="SemiBold" Foreground="#E8E8FF"/>
+                                                <TextBlock Text="{Binding NumeroSocioTexto}"
+                                                           FontFamily="Consolas" FontSize="11"
+                                                           Foreground="#FF6B35"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="ITEMS" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#0A1A2A" CornerRadius="6"
+                                                Padding="8,4" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding CantidadItemsTexto}"
+                                                       FontSize="11" Foreground="#00CFFF"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="TOTAL" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding TotalTexto}"
+                                                   FontWeight="Bold" FontFamily="Consolas"
+                                                   Foreground="#00E676" FontSize="15"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="METODO" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#1A1A30" CornerRadius="6"
+                                                Padding="8,3" HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding MetodoPagoTexto}"
+                                                       FontSize="11" Foreground="#A0A0C0"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="FECHA"
+                                                Binding="{Binding FechaCorta}" Width="120"/>
+
+                            <DataGridTemplateColumn Header="ACCIONES" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <Border Width="34" Height="34" CornerRadius="8"
+                                                    Background="#1A1A30" Margin="0,0,6,0">
+                                                <Button Click="btnVerDetalle_Click" Background="Transparent"
+                                                        BorderThickness="0" Cursor="Hand" ToolTip="Ver detalle">
+                                                    <TextBlock Text="👁" FontSize="13" Foreground="#00CFFF"/>
+                                                </Button>
+                                            </Border>
+                                            <Border Width="34" Height="34" CornerRadius="8" Background="#1A1A30">
+                                                <Button Click="btnAnular_Click" Background="Transparent"
+                                                        BorderThickness="0" Cursor="Hand" ToolTip="Anular">
+                                                    <TextBlock Text="✕" FontSize="14" FontWeight="Bold"
+                                                               Foreground="#FF5555"/>
+                                                </Button>
+                                            </Border>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ══ VISTA POS ═════════════════════════════════════ -->
+        <Grid x:Name="vistaPOS" Margin="24,20,24,20" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header POS -->
+            <Grid Grid.Row="0" Margin="0,0,0,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Click="btnVolver_Click"
+                        Background="Transparent" Foreground="#6A6A9A"
+                        BorderThickness="1" BorderBrush="#252540"
+                        Cursor="Hand" Width="46" Height="46" Margin="0,0,14,0">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock Text="←" FontSize="20" FontWeight="Bold"/>
+                </Button>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#FF6B35" Offset="0"/>
+                                <GradientStop Color="#00E676" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <StackPanel>
+                        <TextBlock Text="NUEVA VENTA" FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                   FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                        <TextBlock Text="Selecciona productos y arma el ticket"
+                                   FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <!-- Layout POS -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="380"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Catalogo -->
+                <Border Grid.Column="0" Background="#12121E" CornerRadius="12"
+                        BorderBrush="#252540" BorderThickness="1" Margin="0,0,14,0" ClipToBounds="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#FF6B35" Offset="0"/>
+                                    <GradientStop Color="#A78BFA" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <Border Grid.Row="1" Background="#16162A" CornerRadius="10"
+                                BorderBrush="#252540" BorderThickness="1.5"
+                                Margin="14,14,14,0" Height="42">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="🔍" FontSize="14"
+                                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <Grid Grid.Column="1">
+                                    <TextBox x:Name="txtBuscarProducto" Height="40" BorderThickness="0"
+                                             Background="Transparent" Foreground="#E8E8FF"
+                                             CaretBrush="#00CFFF" FontSize="13"
+                                             VerticalContentAlignment="Center" Padding="0,0,10,0"
+                                             TextChanged="txtBuscarProducto_TextChanged"/>
+                                    <TextBlock Text="Buscar producto..." IsHitTestVisible="False"
+                                               VerticalAlignment="Center" FontSize="11" Foreground="#3A3A5C">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Text, ElementName=txtBuscarProducto}" Value="">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled" Padding="14,12,14,14">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" x:Name="panelSinProductos"
+                                            HorizontalAlignment="Center" Margin="0,80,0,0"
+                                            Visibility="Collapsed">
+                                    <TextBlock Text="📦" FontSize="56" HorizontalAlignment="Center" Opacity="0.4"/>
+                                    <TextBlock Text="No hay productos disponibles"
+                                               FontSize="14" Foreground="#6A6A9A"
+                                               HorizontalAlignment="Center" Margin="0,12,0,0"/>
+                                </StackPanel>
+                                <WrapPanel Grid.Row="1" x:Name="panelCatalogo" Orientation="Horizontal"/>
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <!-- Carrito -->
+                <Border Grid.Column="1" Background="#12121E" CornerRadius="12"
+                        BorderBrush="#252540" BorderThickness="1" ClipToBounds="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="4"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Background="#00E676"/>
+
+                        <Grid Grid.Row="1" Margin="22,18,22,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                <TextBlock Text="🛒" FontSize="18" Margin="0,0,8,0"/>
+                                <TextBlock Text="CARRITO" FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                           FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <Border Grid.Column="1" Background="#0A2A14" CornerRadius="14" Padding="10,3">
+                                <TextBlock x:Name="lblCantidadItems" Text="0 items"
+                                           FontSize="11" FontWeight="Bold" Foreground="#00E676"/>
+                            </Border>
+                        </Grid>
+
+                        <!-- Socio + metodo -->
+                        <StackPanel Grid.Row="2" Margin="22,0,22,12">
+                            <TextBlock Text="CLIENTE" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="#16162A" CornerRadius="10" Height="42"
+                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,4">
+                                <ComboBox x:Name="cmbSocio" BorderThickness="0" Background="Transparent"
+                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
+                                          FontSize="12" Padding="10,0" IsEditable="True"
+                                          IsTextSearchEnabled="True" DisplayMemberPath="TextoCombo">
+                                    <ComboBox.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                    </ComboBox.Resources>
+                                </ComboBox>
+                            </Border>
+                            <TextBlock Text="Dejar vacio para venta a publico general"
+                                       FontSize="10" Foreground="#4A4A7A"
+                                       FontStyle="Italic" Margin="2,0,0,10"/>
+
+                            <TextBlock Text="METODO DE PAGO" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="#16162A" CornerRadius="10" Height="42"
+                                    BorderBrush="#252540" BorderThickness="1.5">
+                                <ComboBox x:Name="cmbMetodoPago" BorderThickness="0" Background="Transparent"
+                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
+                                          FontSize="12" Padding="10,0">
+                                    <ComboBox.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                    </ComboBox.Resources>
+                                    <ComboBoxItem Content="Efectivo"      Tag="efectivo"      Foreground="#E8E8FF" IsSelected="True"/>
+                                    <ComboBoxItem Content="Transferencia" Tag="transferencia" Foreground="#E8E8FF"/>
+                                    <ComboBoxItem Content="Tarjeta"       Tag="tarjeta"       Foreground="#E8E8FF"/>
+                                    <ComboBoxItem Content="Otro"          Tag="otro"          Foreground="#E8E8FF"/>
+                                </ComboBox>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Items carrito -->
+                        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" Margin="14,8,14,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <StackPanel Grid.Row="0" x:Name="panelCarritoVacio"
+                                            HorizontalAlignment="Center" Margin="0,40,0,0">
+                                    <TextBlock Text="🛒" FontSize="42" HorizontalAlignment="Center" Opacity="0.3"/>
+                                    <TextBlock Text="Tu carrito esta vacio"
+                                               FontSize="13" Foreground="#6A6A9A"
+                                               HorizontalAlignment="Center" Margin="0,8,0,4"/>
+                                    <TextBlock Text="Hace click en un producto para agregarlo"
+                                               FontSize="11" Foreground="#4A4A7A"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="1" x:Name="panelCarrito"/>
+                            </Grid>
+                        </ScrollViewer>
+
+                        <!-- Total + cobrar -->
+                        <Border Grid.Row="4" Background="#0A1A0A"
+                                BorderBrush="#1A3A1A" BorderThickness="1,1,0,0">
+                            <StackPanel Margin="22,16,22,18">
+                                <Grid Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="TOTAL"
+                                               Foreground="#6A8A6A" FontSize="11"
+                                               FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" x:Name="lblTotal" Text="$0"
+                                               FontFamily="Bahnschrift SemiBold, Consolas"
+                                               FontSize="32" FontWeight="Bold" Foreground="#00E676"/>
+                                </Grid>
+                                <Button x:Name="btnCobrar" Content="💰  CERRAR Y COBRAR"
+                                        Style="{StaticResource BotonPrincipalEstilo}"
+                                        Height="50" FontSize="14" Click="btnCobrar_Click"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- ══ MODAL TICKET ══════════════════════════════════ -->
+        <Border x:Name="modalTicket" Background="#CC000000" Visibility="Collapsed">
+            <Border Width="380" Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#00E676"/>
+                    <StackPanel Grid.Row="1" Margin="24,22,24,12" HorizontalAlignment="Center">
+                        <TextBlock Text="✓" FontSize="48" FontWeight="Bold"
+                                   Foreground="#00E676" HorizontalAlignment="Center"/>
+                        <TextBlock Text="VENTA REGISTRADA"
+                                   FontFamily="Bahnschrift SemiBold"
+                                   FontSize="16" FontWeight="Bold" Foreground="#E8E8FF"
+                                   HorizontalAlignment="Center" Margin="0,4,0,2"/>
+                        <TextBlock x:Name="lblTicketNumero" Text="#00001"
+                                   FontFamily="Consolas" FontSize="13"
+                                   Foreground="#A78BFA" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                                  Margin="24,8,24,0" MaxHeight="320">
+                        <StackPanel x:Name="panelTicket"/>
+                    </ScrollViewer>
+                    <StackPanel Grid.Row="3" Margin="24,16,24,18">
+                        <Border Background="#0A1A0A" CornerRadius="8" Padding="14,10" Margin="0,0,0,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="TOTAL"
+                                           Foreground="#6A8A6A" FontSize="11" FontWeight="Bold"
+                                           VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" x:Name="lblTicketTotal" Text="$0"
+                                           FontFamily="Bahnschrift SemiBold, Consolas"
+                                           FontSize="22" FontWeight="Bold" Foreground="#00E676"/>
+                            </Grid>
+                        </Border>
+                        <Button Content="LISTO" Click="btnCerrarTicket_Click"
+                                Style="{StaticResource BotonPrincipalEstilo}" Height="44"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Border>
+
+    </Grid>
+</Page>

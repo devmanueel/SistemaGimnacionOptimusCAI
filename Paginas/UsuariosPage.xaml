@@ -465,9 +465,14 @@ Style="{StaticResource ButtonStyleEstado}">
                             <TextBlock x:Name="errEmail" Style="{StaticResource LabelErrorEstilo}"/>
 
                             <TextBlock Text="TELÉFONO  (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
+
                             <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"
                                      MaxLength="20" LostFocus="txtTelefono_LostFocus"/>
                             <TextBlock x:Name="errTelefono" Style="{StaticResource LabelErrorEstilo}"/>
+
+                            <TextBlock Text="DOMICILIO  (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
+                            <TextBox x:Name="txtDomicilio" Style="{StaticResource InputEstilo}"
+                                     MaxLength="200"/>
 
                             <TextBlock x:Name="lblClave" Text="CONTRASEÑA *"
                                        Style="{StaticResource LabelCampoEstilo}"/>

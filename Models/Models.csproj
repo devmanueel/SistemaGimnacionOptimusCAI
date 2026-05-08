@@ -50,6 +50,7 @@
     <Compile Include="DAO\ProductoDao.cs" />
     <Compile Include="DAO\SocioDao.cs" />
     <Compile Include="DAO\UsuarioDao.cs" />
+    <Compile Include="DAO\VentaDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
