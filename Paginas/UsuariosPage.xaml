@@ -282,7 +282,8 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource RolBadgeStyle}">
-                                            <TextBlock Style="{StaticResource RolTextStyle}"/>
+                                            <TextBlock Style="{StaticResource RolTextStyle}"  />
+                                            <!-- AGREGAR PARA QUE MUESTRE admin o empleado Text="{Binding RolNombre}"-->
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -394,7 +395,8 @@ Style="{StaticResource ButtonStyleEstado}">
                     <!-- Campos -->
                     <ScrollViewer Grid.Row="2"
                                   VerticalScrollBarVisibility="Auto"
-                                  Margin="22,14,22,0">
+                                  Margin="22,14,22,0"
+                                  Style="{StaticResource PanelScrollViewerStyle}">
                         <StackPanel Margin="8, 0">
 
                             <!-- Foto circular con anillo degradado -->
