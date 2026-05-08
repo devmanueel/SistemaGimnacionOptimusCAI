@@ -158,6 +158,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtNombre.Text = act.Nombre;
             txtDias.Text = act.DiasSesiones.ToString();
             txtPrecio.Text = act.Precio.ToString("F0");
+
+            // Llamamos al método para que el panel aparezca animado
             ActualizarPreviewPrecio();
 
             // Seleccionar tipo
@@ -342,14 +344,15 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private void ActualizarPreviewPrecio()
         {
             decimal precio = 0;
+            // Eliminamos cualquier referencia a panelPreviewPrecio.Visibility aquí
             if (decimal.TryParse(txtPrecio.Text, out precio) && precio > 0)
             {
                 lblPreviewPrecio.Text = "$" + precio.ToString("N0");
-                panelPreviewPrecio.Visibility = Visibility.Visible;
             }
             else
             {
-                panelPreviewPrecio.Visibility = Visibility.Collapsed;
+                // Esto es la LLAVE: al poner "$0", el XAML activa la animación de salida
+                lblPreviewPrecio.Text = "$0";
             }
         }
 
@@ -489,7 +492,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtPrecio.Text = string.Empty;
             cmbTipo.SelectedIndex = 0;
             DesmarcarDias();
-            panelPreviewPrecio.Visibility = Visibility.Collapsed;
+
+            // CORRECCIÓN: No uses Visibility = Collapsed. 
+            // Usamos esto para que el trigger de XAML oculte el panel suavemente.
+            lblPreviewPrecio.Text = "$0";
+
             _idEditar = 0;
         }
 
