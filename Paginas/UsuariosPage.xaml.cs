@@ -116,6 +116,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtDni.Text = usuario.Dni;
             txtEmail.Text = usuario.Email ?? string.Empty;
             txtTelefono.Text = usuario.Telefono ?? string.Empty;
+            txtDomicilio.Text = usuario.Domicilio ?? string.Empty;
             txtClave.Password = string.Empty;
             _fotoBytes = null;
 
@@ -227,6 +228,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     apellido: txtApellido.Text,
                     dni: txtDni.Text,
                     clave: txtClave.Password,
+                    domicilio: txtDomicilio.Text,
                     telefono: txtTelefono.Text,
                     email: txtEmail.Text,
                     foto: _fotoBytes);
@@ -243,6 +245,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     apellido: txtApellido.Text,
                     dni: txtDni.Text,
                     claveNueva: txtClave.Password,
+                    domicilio: txtDomicilio.Text,
                     telefono: txtTelefono.Text,
                     email: txtEmail.Text,
                     foto: _fotoBytes);
@@ -379,7 +382,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             TextBlock[] labels = { errNombre, errApellido, errDni,
                                    errEmail, errTelefono, errClave, errRol };
             TextBox[] campos = { txtNombre, txtApellido, txtDni,
-                                   txtEmail, txtTelefono };
+                                   txtEmail, txtTelefono, txtDomicilio };
 
             foreach (var lbl in labels)
             { lbl.Text = string.Empty; lbl.Visibility = Visibility.Collapsed; }
@@ -446,6 +449,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtDni.Text = string.Empty;
             txtEmail.Text = string.Empty;
             txtTelefono.Text = string.Empty;
+            txtDomicilio.Text = string.Empty;
             txtClave.Password = string.Empty;
             cmbRol.SelectedIndex = 0;
             imgFotoFormulario.ImageSource = null;
