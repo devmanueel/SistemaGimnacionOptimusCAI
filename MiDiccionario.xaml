@@ -50,7 +50,24 @@
     <Color x:Key="ColorNaranjaOscuroColor"      >#FF3D1F</Color>
     <Color x:Key="ColorCyanColor"               >#00CFFF</Color>
     <Color x:Key="ColorVioletaColor"            >#A78BFA</Color>
+    
+    <!-- Colores para los badge -->
+    <SolidColorBrush x:Key="BadgeVioletaFondo" Color="#1E1840"/>
+    <SolidColorBrush x:Key="BadgeVioletaBorde" Color="#4C3A8E"/>
+    <SolidColorBrush x:Key="BadgeVioletaHover" Color="#2D2460"/>
 
+    <SolidColorBrush x:Key="BadgeNaranjaFondo" Color="#2A1600"/>
+    <SolidColorBrush x:Key="BadgeNaranjaBorde" Color="#85451A"/>
+    <SolidColorBrush x:Key="BadgeNaranjaHover" Color="#402200"/>
+
+    <SolidColorBrush x:Key="BadgeCyanFondo"    Color="#0A1A2A"/>
+    <SolidColorBrush x:Key="BadgeCyanBorde"    Color="#007A99"/>
+    <SolidColorBrush x:Key="BadgeCyanHover"    Color="#0F253A"/>
+
+    <!-- Colores para los Checkbox del panel lateral -->
+    <SolidColorBrush x:Key="DiaFondoNormal" Color="#16162A"/>
+    <SolidColorBrush x:Key="DiaFondoSeleccionado" Color="#00CFFF"/>
+    <SolidColorBrush x:Key="DiaTextoSeleccionado" Color="#0A0A14"/>
 
     <!-- ═══════════════════════════════════════════════════════════
          TIPOGRAFÍA
@@ -944,7 +961,7 @@
 
 
     <!-- ===========================================================
-ESTILOS PARA EL SCROLL DEL COSTADO
+ESTILOS PARA EL SCROLL DEL PANEL LATERAL PARA QUE SEA GLOBAL
 Usando la paleta oficial de Optimus CAI
 =========================================================== -->
     <!-- Estilo para el "Thumb" (la parte que se desliza) -->
@@ -955,7 +972,7 @@ Usando la paleta oficial de Optimus CAI
                     <!-- Usamos ColorBordeAlto para que resalte un poco sobre el fondo -->
                     <Border Background="{StaticResource ColorBorde}" 
                         CornerRadius="4" 
-                        Margin="8,0,0,0"/>
+                        Margin="8, 8, 4, 0"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
@@ -963,14 +980,14 @@ Usando la paleta oficial de Optimus CAI
 
     <!-- Estilo General de la ScrollBar -->
     <Style x:Key="ModernScrollStyle" TargetType="ScrollBar">
-        <Setter Property="Width" Value="8"/>
+        <Setter Property="Width" Value="10"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
                     <Grid>
                         <!-- El carril de fondo -->
-                        <Border Background="Transparent" CornerRadius="4"/>
+                        <Border Background="Transparent" CornerRadius="4" HorizontalAlignment="Left" />
                         <Track x:Name="PART_Track" IsDirectionReversed="true">
                             <Track.Thumb>
                                 <Thumb Style="{StaticResource ScrollBarThumbStyle}"/>
@@ -982,10 +999,8 @@ Usando la paleta oficial de Optimus CAI
         </Setter>
     </Style>
 
-
-    
-    <!-- Estilo para aplicar automáticamente a cualquier ScrollViewer -->
-    <Style TargetType="ScrollViewer">
+    <!-- Estilo del ScrollBar para paneles laterales -->
+    <Style x:Key="PanelScrollViewerStyle" TargetType="ScrollViewer">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollViewer">
@@ -994,14 +1009,9 @@ Usando la paleta oficial de Optimus CAI
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
 
-                        <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
+                        <ScrollContentPresenter Grid.Column="0"/>
 
-                        <!-- Aquí aplicamos nuestra ScrollBar personalizada -->
                         <ScrollBar x:Name="PART_VerticalScrollBar"
                                Grid.Column="1"
                                Value="{TemplateBinding VerticalOffset}"
@@ -1015,53 +1025,155 @@ Usando la paleta oficial de Optimus CAI
         </Setter>
     </Style>
 
+    <!-- Estilo para aplicar estilo al Scroll en el DataGrid con x:key -->
+    <Style x:Key="DataGridScrollViewerStyle" TargetType="ScrollViewer">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollViewer">
+                    <Grid Background="{TemplateBinding Background}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <ScrollContentPresenter Grid.Column="0" Grid.Row="0"/>
+                        <ScrollBar x:Name="PART_VerticalScrollBar"
+                               Grid.Column="1"
+                               Value="{TemplateBinding VerticalOffset}"
+                               Maximum="{TemplateBinding ScrollableHeight}"
+                               ViewportSize="{TemplateBinding ViewportHeight}"
+                               Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                               Style="{StaticResource ModernScrollStyle}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Modificar el scroll en DataGrid -->
+    <Style TargetType="DataGrid">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGrid">
+                    <Border Background="{TemplateBinding Background}" 
+                        BorderBrush="{TemplateBinding BorderBrush}" 
+                        BorderThickness="{TemplateBinding BorderThickness}">
+
+                        <ScrollViewer x:Name="DG_ScrollViewer" 
+                                  Focusable="false"
+                                  Style="{StaticResource DataGridScrollViewerStyle}">
+
+                            <ScrollViewer.Template>
+                                <ControlTemplate TargetType="ScrollViewer">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+
+                                        <DataGridColumnHeadersPresenter x:Name="PART_ColumnHeadersPresenter" 
+                                                                  Grid.Column="0" Grid.Row="0"
+                                                                  Visibility="{Binding HeadersVisibility, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+
+                                        <ScrollContentPresenter x:Name="PART_ScrollContentPresenter" 
+                                                          Grid.Column="0" Grid.Row="1"
+                                                          CanContentScroll="{TemplateBinding CanContentScroll}"/>
+
+                                        <ScrollBar x:Name="PART_VerticalScrollBar"
+                                               Grid.Column="1" Grid.Row="1"
+                                               Value="{TemplateBinding VerticalOffset}"
+                                               Maximum="{TemplateBinding ScrollableHeight}"
+                                               ViewportSize="{TemplateBinding ViewportHeight}"
+                                               Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                               Style="{StaticResource ModernScrollStyle}"/>
+                                    </Grid>
+                                </ControlTemplate>
+                            </ScrollViewer.Template>
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ===========================================================
-ESTILOS PARA EL BADGE DE ROL DEL DATAGRID USUARIOS
+ESTILOS PARA EL BADGE EN GENERAL
 Usando la paleta oficial de Optimus CAI
 =========================================================== -->
 
-    <Style x:Key="RolBadgeStyle" TargetType="Border">
+    <Style x:Key="BadgeBaseStyle" TargetType="Border">
         <Setter Property="CornerRadius" Value="6"/>
-        <Setter Property="Padding" Value="8,2"/>
+        <Setter Property="Padding" Value="10,4"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="{StaticResource BadgeVioletaFondo}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BadgeVioletaBorde}"/>
+    </Style>
 
-        <Setter Property="Background" Value="#1E1840"/>
-        <Setter Property="BorderBrush" Value="#4C3A8E"/>
-
+    <Style x:Key="RolBadgeStyle" TargetType="Border" BasedOn="{StaticResource BadgeBaseStyle}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding RolNombre}" Value="admin">
-                <Setter Property="Background" Value="#2A1600"/>
-                <Setter Property="BorderBrush" Value="#85451A"/>
+                <Setter Property="Background" Value="{StaticResource BadgeNaranjaFondo}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource BadgeNaranjaBorde}"/>
             </DataTrigger>
+            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                <Setter Property="Background" Value="{StaticResource BadgeVioletaHover}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
 
+    <Style x:Key="TipoBadgeStyle" TargetType="Border" BasedOn="{StaticResource BadgeBaseStyle}">
+        <Style.Triggers>
             <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
                 <Setter Property="Background" Value="#2D2460"/>
             </DataTrigger>
-
-            <MultiDataTrigger>
-                <MultiDataTrigger.Conditions>
-                    <Condition Binding="{Binding RolNombre}" Value="admin"/>
-                    <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True"/>
-                </MultiDataTrigger.Conditions>
-                <Setter Property="Background" Value="#402200"/>
-            </MultiDataTrigger>
         </Style.Triggers>
     </Style>
 
     <Style x:Key="RolTextStyle" TargetType="TextBlock">
+        <Setter Property="Text" Value="INSTRUCTOR"/>
         <Setter Property="FontSize" Value="11"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Text" Value="Instructor"/>
         <Setter Property="Foreground" Value="{StaticResource ColorVioleta}"/>
-
         <Style.Triggers>
             <DataTrigger Binding="{Binding RolNombre}" Value="admin">
-                <Setter Property="Text" Value="ADMIN"/>
                 <Setter Property="Foreground" Value="{StaticResource ColorNaranja}"/>
+                <Setter Property="Text" Value="ADMIN"/>
             </DataTrigger>
         </Style.Triggers>
+    </Style>
+
+    <Style x:Key="TipoTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource ColorVioleta}"/>
+    </Style>
+
+    <Style x:Key="SociosBadgeStyle" TargetType="Border" BasedOn="{StaticResource BadgeBaseStyle}">
+        <Setter Property="Background" Value="{StaticResource BadgeCyanFondo}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BadgeCyanBorde}"/>
+
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=DataGridRow}}" Value="True">
+                <Setter Property="Background" Value="{StaticResource BadgeCyanHover}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SociosTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="#00CFFF"/>
     </Style>
 
     <!-- ===========================================================
@@ -1089,7 +1201,7 @@ Usando la paleta oficial de Optimus CAI
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <fa:ImageAwesome Icon="Search" Foreground="Gray" Height="16" Width="16" Grid.Column="0"/>
+                            <fa:ImageAwesome Icon="Search" Foreground="White" Height="16" Width="16" Grid.Column="0"/>
 
                             <Grid Grid.Column="1">
                                 <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
@@ -1181,6 +1293,53 @@ Usando la paleta oficial de Optimus CAI
                 <Setter Property="Foreground" Value="#00E676"/>
             </DataTrigger>
         </Style.Triggers>
+    </Style>
+
+    <!-- ===========================================================
+ESTILOS PARA LOS CHECKBOXS DEL PANEL LATERAL
+Usando la paleta oficial de Optimus CAI
+=========================================================== -->
+    <Style x:Key="DiaCheckEstilo" TargetType="{x:Type CheckBox}">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Margin" Value="0,4,8,4"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <Border x:Name="diaBorder" 
+            Background="{StaticResource DiaFondoNormal}"
+            BorderBrush="{StaticResource ColorBorde}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Padding="12,6"
+            SnapsToDevicePixels="True">
+                        <ContentPresenter x:Name="contentPresenter"
+                          HorizontalAlignment="Center" 
+                          VerticalAlignment="Center"
+                          RecognizesAccessKey="True">
+                            <ContentPresenter.Resources>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=CheckBox}}"/>
+                                </Style>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="diaBorder" Property="Background" Value="{StaticResource DiaFondoSeleccionado}"/>
+                            <Setter TargetName="diaBorder" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                            <Setter Property="Foreground" Value="{StaticResource DiaTextoSeleccionado}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="diaBorder" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>
