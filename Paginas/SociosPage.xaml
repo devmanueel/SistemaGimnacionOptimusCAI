@@ -144,39 +144,11 @@
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <!-- Buscador -->
-                <Border Background="#16162A" CornerRadius="10"
-                        BorderBrush="#252540" BorderThickness="1.5"
-                        Width="290" Height="46" Margin="0,0,12,0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="40"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        
-                        <fa:ImageAwesome Icon="Search" Foreground="White" Height="20" Width="20" />
-                        <Grid Grid.Column="1">
-                            <TextBox x:Name="txtBuscar" Height="44" BorderThickness="0"
-                                     Background="Transparent" Foreground="#E8E8FF"
-                                     CaretBrush="#00CFFF" FontSize="14"
-                                     VerticalContentAlignment="Center" Padding="0,0,10,0"
-                                     TextChanged="txtBuscar_TextChanged"/>
-                            <TextBlock Text="Buscar por nombre, DNI o N° de socio..."
-                                       IsHitTestVisible="False" VerticalAlignment="Center"
-                                       FontSize="12" Foreground="#3A3A5C">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <TextBox x:Name="txtBuscar" 
+Style="{StaticResource BuscadorStyle}"
+Width="290" 
+Margin="0,0,12,0"
+TextChanged="txtBuscar_TextChanged"/>
 
                 <!-- Botón Nuevo Socio -->
                 <Button Content="＋  NUEVO SOCIO"
@@ -534,7 +506,7 @@
 
 
                     <!-- CONTENIDO de los tabs -->
-                    <ScrollViewer Padding="0,0,15,0"  Grid.Row="3" VerticalScrollBarVisibility="Auto"
+                    <ScrollViewer Style="{StaticResource PanelScrollViewerStyle}" Padding="0,0,15,0"  Grid.Row="3" VerticalScrollBarVisibility="Auto"
                                   Margin="22,14,22,0">
                         <Grid>
                             <!-- ── TAB 1: DATOS PERSONALES ───────────── -->
