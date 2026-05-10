@@ -38,11 +38,15 @@
             </Style>
 
             <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
-                <Setter Property="Foreground"  Value="#4A4A7A"/>
+                <Setter Property="Foreground"  Value="#A0A8BA"/>
                 <Setter Property="FontSize"    Value="10"/>
                 <Setter Property="FontWeight"  Value="Bold"/>
                 <Setter Property="FontFamily"  Value="Segoe UI Semibold, Segoe UI"/>
-                <Setter Property="Margin"      Value="2,0,0,6"/>
+                <!-- Margin: 2 (izq), 18 (arriba para separar del campo anterior), 0 (der), 6 (abajo para pegar al input) -->
+                <Setter Property="Margin"      Value="2,15"/>
+
+                <!-- Opcional: Un toque de opacidad si querés un look más moderno -->
+                <Setter Property="Opacity"     Value="0.9"/>
             </Style>
         </ResourceDictionary>
     </Page.Resources>
@@ -100,40 +104,13 @@
                 </StackPanel>
             </StackPanel>
 
+            <!-- Buscador -->
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Border Background="#16162A" CornerRadius="10"
-                        BorderBrush="#252540" BorderThickness="1.5"
-                        Width="290" Height="46" Margin="0,0,12,0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="40"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="🔍" FontSize="15"
-                                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        <Grid Grid.Column="1">
-                            <TextBox x:Name="txtBuscar" Height="44" BorderThickness="0"
-                                     Background="Transparent" Foreground="#E8E8FF"
-                                     CaretBrush="#00CFFF" FontSize="14"
-                                     VerticalContentAlignment="Center" Padding="0,0,10,0"
-                                     TextChanged="txtBuscar_TextChanged"/>
-                            <TextBlock Text="Buscar por socio, DNI, N° o actividad..."
-                                       IsHitTestVisible="False" VerticalAlignment="Center"
-                                       FontSize="12" Foreground="#3A3A5C">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <TextBox x:Name="txtBuscar" 
+Style="{StaticResource BuscadorStyle}"
+Width="290" 
+Margin="0,0,12,0"
+TextChanged="txtBuscar_TextChanged"/>
 
                 <Button Content="＋  COBRAR CUOTA"
                         Style="{StaticResource BotonNaranjaEstilo}"
@@ -142,7 +119,7 @@
         </Grid>
 
         <!-- ══════════════════ STATS ══════════════════ -->
-        <Grid Grid.Row="1" Margin="0,0,0,16">
+        <Grid Grid.Row="1" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -150,50 +127,104 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statActivas" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#00E676"/>
-                    <TextBlock Text="ACTIVAS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Style="{StaticResource BorderStyleStatCard}" Grid.Column="0">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock x:Name="statActivas" Text="1" Foreground="#00E676" Style="{StaticResource TextBlockStatValor}">
+                            <TextBlock.Effect>
+                                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="#00E676" Opacity="0.3"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        <TextBlock Text="MEMBRESÍAS ACTIVAS" Style="{StaticResource TextBlockStatEtiqueta}"/>
+                    </StackPanel>
+
+                    <Path Data="{StaticResource IconRayo}" Fill="#00E676" Opacity="0.12" Width="32" Height="32" Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statPorVencer" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#FFA726"/>
-                    <TextBlock Text="POR VENCER (≤ 7 DÍAS)" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="1" Style="{StaticResource BorderStyleStatCard}" Margin="4,0,4,0">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock x:Name="statPorVencer" Text="0" Foreground="#FFA726" Style="{StaticResource TextBlockStatValor}">
+                            <TextBlock.Effect>
+                                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="#FFA726" Opacity="0.25"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        <TextBlock Text="PRÓXIMOS VENCIMIENTOS" Style="{StaticResource TextBlockStatEtiqueta}"/>
+                    </StackPanel>
+                    <Path Data="{StaticResource IconReloj}" Fill="#FFA726" Opacity="0.12" Width="35" Height="35" Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="2" Margin="4,0,4,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statVencidas" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#FF5555"/>
-                    <TextBlock Text="VENCIDAS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="2" Style="{StaticResource BorderStyleStatCard}" Margin="4,0,4,0">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock x:Name="statVencidas" Text="0" Foreground="#FF5555" Style="{StaticResource TextBlockStatValor}">
+                            <TextBlock.Effect>
+                                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="#FF5555" Opacity="0.25"/>
+                            </TextBlock.Effect>
+                        </TextBlock>
+                        <TextBlock Text="MEMBRESÍAS EXPIRADAS" Style="{StaticResource TextBlockStatEtiqueta}"/>
+                    </StackPanel>
+                    <Path Data="{StaticResource IconAlerta}" Fill="#FF5555" Opacity="0.12" Width="35" Height="35" Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="3" Margin="8,0,0,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statRecaudadoMes" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="22" FontWeight="Bold" Foreground="#00CFFF"/>
-                    <TextBlock Text="RECAUDADO ESTE MES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="3" 
+        Margin="8,0,0,0" 
+        Style="{StaticResource BorderStyleStatCard}"
+        BorderBrush="{StaticResource BrushGlowFinanciero}" 
+        BorderThickness="0,0,0,4">
+                <Grid>
+                    <Border Background="#1A00CFFF" Opacity="0.05" CornerRadius="12" Margin="-18,-14"/>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="INGRESOS MENSUALES" 
+                       Style="{StaticResource TextBlockStatEtiqueta}" 
+                       Foreground="#00CFFF" 
+                       Opacity="0.9"
+                       Margin="0,0,0,4"/>
+
+                        <Grid>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock x:Name="statRecaudadoMes" 
+                               Text="$25.000" 
+                               Foreground="White" 
+                               Style="{StaticResource TextBlockStatValor}" 
+                               FontSize="30">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="20" ShadowDepth="0" Color="#00CFFF" Opacity="0.5"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+
+                                <Path Data="M7,14l5-5 5 5H7z" 
+                          Fill="#00E676" 
+                          Width="12" Height="12" 
+                          Margin="8,0,0,10" 
+                          VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+
+                    <Path Data="{StaticResource IconGraficoCrecimiento}" 
+              Fill="{StaticResource BrushGlowFinanciero}" 
+              Opacity="0.2" 
+              Width="45" Height="45" 
+              Stretch="Uniform" 
+              HorizontalAlignment="Right" 
+              VerticalAlignment="Center"/>
+                </Grid>
             </Border>
         </Grid>
 
         <!-- ══════════════════ FILTROS ══════════════════ -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
+        <!-- Agregamos un poco de Padding al StackPanel para que el resplandor no se corte -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12" ClipToBounds="False">
             <TextBlock Text="MOSTRAR:" Foreground="#4A4A7A" FontSize="11"
                        FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
 
             <Button x:Name="chipTodos"     Content="Todas"     Click="chipFiltro_Click" Tag="todos"
-                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
+                    Style="{StaticResource BotonChipActivoEstilo}" Margin="0,0,8,0"/>
             <Button x:Name="chipActivas"   Content="Activas"   Click="chipFiltro_Click" Tag="activa"
                     Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
             <Button x:Name="chipPorVencer" Content="Por vencer" Click="chipFiltro_Click" Tag="por_vencer"
@@ -239,7 +270,7 @@
                         <DataGrid.Columns>
 
                             <!-- Foto + N° de socio -->
-                            <DataGridTemplateColumn Width="160" Header="SOCIO">
+                            <DataGridTemplateColumn Width="250" Header="SOCIO">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -261,10 +292,13 @@
                                             </Grid>
                                             <StackPanel VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding SocioNombre}" FontSize="13"
-                                                           FontWeight="SemiBold" Foreground="#E8E8FF"/>
+                                                           FontWeight="Bold" Foreground="#E8E8FF"
+                                                           Padding="4, 4"/>
                                                 <TextBlock Text="{Binding NumeroSocioFormateado}"
-                                                           FontFamily="Consolas" FontSize="11"
-                                                           Foreground="#FF6B35"/>
+                                                           Padding="4, 0"
+                                                           FontWeight="Bold"
+                                                           FontFamily="Consolas" FontSize="13"
+                                                           Foreground="#6C757D"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </DataTemplate>
@@ -275,8 +309,7 @@
                             <DataGridTemplateColumn Header="ACTIVIDAD" Width="1.4*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Background="#1A1840" CornerRadius="6"
-                                                Padding="10,4" HorizontalAlignment="Left">
+                                        <Border HorizontalAlignment="Left" Style="{StaticResource TipoBadgeStyle}">
                                             <TextBlock Text="{Binding ActividadNombre}" FontSize="12"
                                                        FontWeight="SemiBold" Foreground="#A78BFA"
                                                        TextWrapping="Wrap"/>
@@ -298,134 +331,65 @@
                             <DataGridTextColumn Header="VENCE"
                                                 Binding="{Binding FechaVencimientoTexto}" Width="0.8*"/>
 
-                            <!-- Días para vencer -->
-                            <DataGridTemplateColumn Header="ESTADO TIEMPO" Width="1.1*">
+                            <DataGridTemplateColumn Header="ESTADO" Width="130">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding DiasParaVencerTexto}" FontSize="11"
-                                                   FontWeight="SemiBold">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="#6A6A9A"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="por_vencer">
-                                                            <Setter Property="Foreground" Value="#FFA726"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Estado}" Value="vencida">
-                                                            <Setter Property="Foreground" Value="#FF5555"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding Estado}" Value="cancelada">
-                                                            <Setter Property="Foreground" Value="#3A3A5C"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
+                                        <!-- Eliminamos el centrado para que todo arranque al principio -->
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" >
 
-                            <!-- Estado badge -->
-                            <DataGridTemplateColumn Header="ESTADO" Width="115">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border CornerRadius="20" Padding="10,4" HorizontalAlignment="Left">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#1A1A30"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="activa">
-                                                            <Setter Property="Background" Value="#0A2A14"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="por_vencer">
-                                                            <Setter Property="Background" Value="#2A1F00"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="vencida">
-                                                            <Setter Property="Background" Value="#2A0A0A"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="cancelada">
-                                                            <Setter Property="Background" Value="#1A1A2A"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <StackPanel Orientation="Horizontal">
-                                                <Ellipse Width="7" Height="7" VerticalAlignment="Center" Margin="0,0,6,0">
-                                                    <Ellipse.Style>
-                                                        <Style TargetType="Ellipse">
-                                                            <Setter Property="Fill" Value="#6A6A9A"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="activa">
-                                                                    <Setter Property="Fill" Value="#00E676"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="por_vencer">
-                                                                    <Setter Property="Fill" Value="#FFA726"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="vencida">
-                                                                    <Setter Property="Fill" Value="#FF4444"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Ellipse.Style>
-                                                </Ellipse>
-                                                <TextBlock FontSize="12" FontWeight="SemiBold">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Text" Value="{Binding EstadoTexto}"/>
-                                                            <Setter Property="Foreground" Value="#6A6A9A"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="activa">
-                                                                    <Setter Property="Foreground" Value="#00E676"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="por_vencer">
-                                                                    <Setter Property="Text" Value="Por vencer"/>
-                                                                    <Setter Property="Foreground" Value="#FFA726"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding EstadoVisual}" Value="vencida">
-                                                                    <Setter Property="Foreground" Value="#FF6666"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </Border>
+                                            <!-- El Badge ahora arranca desde el borde izquierdo de la celda -->
+                                            <Border Style="{StaticResource MembresiaBadgeStyle}" 
+                        HorizontalAlignment="Left">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Ellipse Style="{StaticResource MembresiaDotStyle}"/>
+                                                    <TextBlock Style="{StaticResource MembresiaTextStyle}"/>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- El texto de abajo ahora usa el MISMO margen que el texto del badge -->
+                                            <TextBlock Text="{Binding DiasParaVencerTexto}" 
+                           FontSize="10" 
+                           FontWeight="Medium"
+                           Margin="4,6,0,0" 
+                           HorizontalAlignment="Left">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="#8A92A6"/>
+                                                        <Style.Triggers>
+                                                            <!-- Tus triggers de colores se mantienen -->
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
                             <!-- Acciones: Renovar / Editar / Cancelar -->
-                            <DataGridTemplateColumn Header="ACCIONES" Width="155">
+                            <DataGridTemplateColumn Header="ACCIONES" Width="170">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                             <!-- RENOVAR -->
-                                            <Border Width="52" Height="34" CornerRadius="8"
-                                                    Background="#0A2A14" Margin="0,0,6,0"
-                                                    BorderBrush="#00E676" BorderThickness="1"
-                                                    ToolTip="Renovar membresía (+30 días)">
-                                                <Button Click="btnRenovar_Click" Background="Transparent"
-                                                        BorderThickness="0" Cursor="Hand">
-                                                    <TextBlock Text="+30d" FontSize="11" FontWeight="Bold"
-                                                               Foreground="#00E676"/>
-                                                </Button>
-                                            </Border>
+                                            <Button Style="{StaticResource ButtonStyleRenovar}" 
+            Click="btnRenovar_Click" 
+            ToolTip="Renovar membresía (+30 días)"
+            Margin="0,0,4,0">
+                                                <TextBlock Text="+30d" FontSize="11" FontWeight="Bold" Foreground="#00E676"/>
+                                            </Button>
                                             <!-- EDITAR -->
-                                            <Border Width="34" Height="34" CornerRadius="8"
-                                                    Background="#1A1A30" Margin="0,0,6,0">
-                                                <Button Click="btnEditar_Click" Background="Transparent"
-                                                        BorderThickness="0" Cursor="Hand" ToolTip="Editar">
+                                            <Button Click="btnEditar_Click" Style="{StaticResource ButtonStyleEditar}" 
+Margin="4,0" Cursor="Hand" ToolTip="Editar">
                                                     <TextBlock Text="✏" FontSize="15" Foreground="#00CFFF"/>
                                                 </Button>
-                                            </Border>
-                                            <!-- CANCELAR -->
-                                            <Border Width="34" Height="34" CornerRadius="8" Background="#1A1A30">
-                                                <Button Click="btnCancelar_Click" Background="Transparent"
-                                                        BorderThickness="0" Cursor="Hand" ToolTip="Cancelar membresía">
-                                                    <TextBlock Text="✕" FontSize="14" FontWeight="Bold"
-                                                               Foreground="#FF5555"/>
-                                                </Button>
-                                            </Border>
+                                                <!-- CANCELAR -->
+                                            <Button Style="{StaticResource ButtonStyleCancelar}" 
+Click="btnCancelar_Click" 
+ToolTip="Cancelar membresía">
+                                                <TextBlock Text="✕" FontSize="14" FontWeight="Bold"
+                                                                   Foreground="#FF5555"/>
+                                                    </Button>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -465,32 +429,29 @@
                         <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
                     </StackPanel>
 
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="22,14,22,0">
+                    <ScrollViewer 
+                        Grid.Row="2" 
+                        VerticalScrollBarVisibility="Auto" 
+                        Margin="22,14,22,0" 
+                        Style="{StaticResource PanelScrollViewerStyle}"
+                        ClipToBounds="False">
                         <StackPanel>
 
                             <!-- SOCIO -->
-                            <TextBlock Text="SOCIO *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10" Height="46"
-                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                <ComboBox x:Name="cmbSocio" BorderThickness="0" Background="Transparent"
-                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                          FontSize="13" Padding="10,0" IsEditable="True"
-                                          IsTextSearchEnabled="True"
+                            <TextBlock Text="SOCIO *" Style="{StaticResource LabelCampoEstilo}" Margin="2,5,0,6"/>
+                            <ComboBox x:Name="cmbSocio" Style="{StaticResource ComboBoxEstilo}"
                                           DisplayMemberPath="TextoCombo">
                                     <ComboBox.Resources>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
                                     </ComboBox.Resources>
                                 </ComboBox>
-                            </Border>
 
                             <!-- ACTIVIDAD -->
                             <TextBlock Text="ACTIVIDAD *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10" Height="46"
-                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                <ComboBox x:Name="cmbActividad" BorderThickness="0" Background="Transparent"
-                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                          FontSize="13" Padding="10,0"
+        
+                                <ComboBox x:Name="cmbActividad"
+                                          Style="{StaticResource ComboBoxEstilo}"
                                           DisplayMemberPath="TextoCombo"
                                           SelectionChanged="cmbActividad_SelectionChanged">
                                     <ComboBox.Resources>
@@ -498,22 +459,16 @@
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
                                     </ComboBox.Resources>
                                 </ComboBox>
-                            </Border>
 
                             <!-- INSTRUCTOR -->
                             <TextBlock Text="INSTRUCTOR" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10" Height="46"
-                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                <ComboBox x:Name="cmbInstructor" BorderThickness="0" Background="Transparent"
-                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                          FontSize="13" Padding="10,0"
+                                <ComboBox x:Name="cmbInstructor" Style="{StaticResource ComboBoxEstilo}"
                                           DisplayMemberPath="TextoCombo">
                                     <ComboBox.Resources>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
                                     </ComboBox.Resources>
                                 </ComboBox>
-                            </Border>
 
                             <!-- FECHAS lado a lado -->
                             <Grid Margin="0,0,0,0">
@@ -523,24 +478,14 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Margin="0,0,6,0">
                                     <TextBlock Text="INICIO *" Style="{StaticResource LabelCampoEstilo}"/>
-                                    <Border Background="#16162A" CornerRadius="10" Height="46"
-                                            BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                        <DatePicker x:Name="dpInicio"
-                                                    BorderThickness="0" Background="Transparent"
-                                                    FontSize="13" VerticalContentAlignment="Center"
-                                                    Padding="6,0" Foreground="#E8E8FF"
+                                    <DatePicker x:Name="dpInicio"
+                                                    Style="{StaticResource DatePickerEstilo}"
                                                     SelectedDateChanged="dpInicio_SelectedDateChanged"/>
-                                    </Border>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="6,0,0,0">
                                     <TextBlock Text="VENCIMIENTO *" Style="{StaticResource LabelCampoEstilo}"/>
-                                    <Border Background="#16162A" CornerRadius="10" Height="46"
-                                            BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                        <DatePicker x:Name="dpVencimiento"
-                                                    BorderThickness="0" Background="Transparent"
-                                                    FontSize="13" VerticalContentAlignment="Center"
-                                                    Padding="6,0" Foreground="#E8E8FF"/>
-                                    </Border>
+                                    <DatePicker x:Name="dpVencimiento"
+                                                    Style="{StaticResource DatePickerEstilo}"/>
                                 </StackPanel>
                             </Grid>
 
@@ -564,11 +509,8 @@
 
                             <!-- MÉTODO DE PAGO -->
                             <TextBlock Text="MÉTODO DE PAGO *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10" Height="46"
-                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                <ComboBox x:Name="cmbMetodoPago" BorderThickness="0" Background="Transparent"
-                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                          FontSize="13" Padding="10,0">
+
+                            <ComboBox x:Name="cmbMetodoPago" Style="{StaticResource ComboBoxEstilo}">
                                     <ComboBox.Resources>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
@@ -578,13 +520,12 @@
                                     <ComboBoxItem Content="Tarjeta"       Tag="tarjeta"       Foreground="#E8E8FF"/>
                                     <ComboBoxItem Content="Otro"          Tag="otro"          Foreground="#E8E8FF"/>
                                 </ComboBox>
-                            </Border>
 
                             <!-- OBSERVACIONES -->
                             <TextBlock Text="OBSERVACIONES" Style="{StaticResource LabelCampoEstilo}"/>
                             <Border Background="#16162A" CornerRadius="10"
                                     BorderBrush="#252540" BorderThickness="1.5"
-                                    Margin="0,0,0,14">
+                                    Margin="0,0,0,30">
                                 <TextBox x:Name="txtObservaciones"
                                          Background="Transparent" BorderThickness="0"
                                          Foreground="#E8E8FF" CaretBrush="#00CFFF"
