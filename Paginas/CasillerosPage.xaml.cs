@@ -280,18 +280,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             Button[] chips = { chipTodos, chipLibres, chipOcupados, chipManten };
             foreach (var c in chips)
             {
+                // Al asignar el estilo completo, recuperás el espaciado y los efectos automáticos
                 if (c == seleccionado)
                 {
-                    c.Background = new SolidColorBrush(Color.FromRgb(30, 30, 56));
-                    c.Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255));
-                    c.BorderThickness = new Thickness(0);
+                    c.Style = (Style)FindResource("BotonChipActivoEstilo");
                 }
                 else
                 {
-                    c.Background = Brushes.Transparent;
-                    c.Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154));
-                    c.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64));
-                    c.BorderThickness = new Thickness(1);
+                    c.Style = (Style)FindResource("BotonChipEstilo");
                 }
             }
         }

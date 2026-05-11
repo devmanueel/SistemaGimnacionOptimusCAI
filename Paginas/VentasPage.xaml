@@ -64,37 +64,13 @@
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Border Background="#16162A" CornerRadius="10" BorderBrush="#252540"
-                            BorderThickness="1.5" Width="240" Height="46" Margin="0,0,12,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="40"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="🔍" FontSize="15"
-                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <Grid Grid.Column="1">
-                                <TextBox x:Name="txtBuscar" Height="44" BorderThickness="0"
-                                         Background="Transparent" Foreground="#E8E8FF"
-                                         CaretBrush="#00CFFF" FontSize="14"
-                                         VerticalContentAlignment="Center" Padding="0,0,10,0"
-                                         TextChanged="txtBuscar_TextChanged"/>
-                                <TextBlock Text="Buscar venta..." IsHitTestVisible="False"
-                                           VerticalAlignment="Center" FontSize="12" Foreground="#3A3A5C">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Grid>
-                        </Grid>
-                    </Border>
+                    <!-- Buscador -->
+                    <TextBox x:Name="txtBuscar" Tag="Buscar venta..."
+Style="{StaticResource BuscadorStyle}"
+Width="290" 
+Margin="0,0,12,0"
+TextChanged="txtBuscar_TextChanged"/>
+                    
                     <Button Content="🛒  NUEVA VENTA" Style="{StaticResource BotonNaranjaEstilo}"
                             Width="180" Height="46" Click="btnNuevaVenta_Click"/>
                 </StackPanel>
@@ -143,11 +119,11 @@
             </Grid>
 
             <!-- FILTROS -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12" ClipToBounds="False">
                 <TextBlock Text="METODO:" Foreground="#4A4A7A" FontSize="11"
                            FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
                 <Button x:Name="chipTodos"    Content="Todos"         Tag="todos"
-                        Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
+                        Style="{StaticResource BotonChipActivoEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
                 <Button x:Name="chipEfectivo" Content="Efectivo"      Tag="efectivo"
                         Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
                 <Button x:Name="chipTransfer" Content="Transferencia" Tag="transferencia"
@@ -464,38 +440,32 @@
                         <!-- Socio + metodo -->
                         <StackPanel Grid.Row="2" Margin="22,0,22,12">
                             <TextBlock Text="CLIENTE" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10" Height="42"
-                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,4">
-                                <ComboBox x:Name="cmbSocio" BorderThickness="0" Background="Transparent"
-                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                          FontSize="12" Padding="10,0" IsEditable="True"
-                                          IsTextSearchEnabled="True" DisplayMemberPath="TextoCombo">
-                                    <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
-                                    </ComboBox.Resources>
-                                </ComboBox>
-                            </Border>
+                            <ComboBox x:Name="cmbSocio" Style="{StaticResource ComboBoxEstilo}"
+          Foreground="#E8E8FF" VerticalContentAlignment="Center"
+          FontSize="12" Padding="10,0" IsEditable="True"
+          IsTextSearchEnabled="True" DisplayMemberPath="TextoCombo">
+                                <ComboBox.Resources>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                </ComboBox.Resources>
+                            </ComboBox>
                             <TextBlock Text="Dejar vacio para venta a publico general"
                                        FontSize="10" Foreground="#4A4A7A"
                                        FontStyle="Italic" Margin="2,0,0,10"/>
 
                             <TextBlock Text="METODO DE PAGO" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10" Height="42"
-                                    BorderBrush="#252540" BorderThickness="1.5">
-                                <ComboBox x:Name="cmbMetodoPago" BorderThickness="0" Background="Transparent"
-                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                          FontSize="12" Padding="10,0">
-                                    <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
-                                    </ComboBox.Resources>
-                                    <ComboBoxItem Content="Efectivo"      Tag="efectivo"      Foreground="#E8E8FF" IsSelected="True"/>
-                                    <ComboBoxItem Content="Transferencia" Tag="transferencia" Foreground="#E8E8FF"/>
-                                    <ComboBoxItem Content="Tarjeta"       Tag="tarjeta"       Foreground="#E8E8FF"/>
-                                    <ComboBoxItem Content="Otro"          Tag="otro"          Foreground="#E8E8FF"/>
-                                </ComboBox>
-                            </Border>
+                            <ComboBox x:Name="cmbMetodoPago" Style="{StaticResource ComboBoxEstilo}"
+          Foreground="#E8E8FF" VerticalContentAlignment="Center"
+          FontSize="12" Padding="10,0">
+                                <ComboBox.Resources>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                </ComboBox.Resources>
+                                <ComboBoxItem Content="Efectivo"      Tag="efectivo"      Foreground="#E8E8FF" IsSelected="True"/>
+                                <ComboBoxItem Content="Transferencia" Tag="transferencia" Foreground="#E8E8FF"/>
+                                <ComboBoxItem Content="Tarjeta"       Tag="tarjeta"       Foreground="#E8E8FF"/>
+                                <ComboBoxItem Content="Otro"          Tag="otro"          Foreground="#E8E8FF"/>
+                            </ComboBox>
                         </StackPanel>
 
                         <!-- Items carrito -->

@@ -1,0 +1,593 @@
+﻿<Page x:Class="SistemaGimnacionOptimusCAI.Paginas.WhatsappPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      mc:Ignorable="d"
+      d:DesignHeight="768" d:DesignWidth="1280"
+      Title="WhatsApp">
+
+    <Page.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0A0A14" Offset="0"/>
+            <GradientStop Color="#0D0D22" Offset="1"/>
+        </LinearGradientBrush>
+    </Page.Background>
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
+            <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#4A4A7A"/>
+                <Setter Property="FontSize"   Value="10"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Margin"     Value="2,0,0,6"/>
+            </Style>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid x:Name="gridRaiz" Margin="24,20,24,20" Opacity="0">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetName="gridRaiz"
+                                         Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" Duration="0:0:0.5"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- HEADER -->
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#25D366" Offset="0"/>
+                            <GradientStop Color="#128C7E" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="WHATSAPP"
+                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                    <TextBlock Text="Mensajeria a socios — avisos y notificaciones"
+                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="🔔 GENERAR AVISOS"
+                        Background="#0A2A14" Foreground="#25D366"
+                        BorderBrush="#25D366" BorderThickness="1.5"
+                        Width="180" Height="46" FontSize="12" FontWeight="Bold"
+                        Cursor="Hand" Margin="0,0,12,0"
+                        Click="btnGenerarAvisos_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button Content="＋ NUEVO MENSAJE"
+                        Style="{StaticResource BotonNaranjaEstilo}"
+                        Width="180" Height="46" Click="btnNuevoMensaje_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- STATS -->
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statTotal" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#E8E8FF"/>
+                    <TextBlock Text="TOTAL MENSAJES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statPendientes" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#FFA726"/>
+                    <TextBlock Text="PENDIENTES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Margin="4,0,4,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statEnviados" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#25D366"/>
+                    <TextBlock Text="ENVIADOS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="3" Margin="8,0,0,0" CornerRadius="10"
+                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
+                <StackPanel>
+                    <TextBlock x:Name="statEnviadosHoy" Text="—" FontFamily="Bahnschrift SemiBold"
+                               FontSize="26" FontWeight="Bold" Foreground="#00CFFF"/>
+                    <TextBlock Text="ENVIADOS HOY" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- FILTROS -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Text="ESTADO:" Foreground="#4A4A7A" FontSize="11"
+                       FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
+            <Button x:Name="chipTodos"      Content="Todos"      Tag="todos"
+                    Style="{StaticResource BotonChipActivoEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
+            <Button x:Name="chipPendientes" Content="Pendientes" Tag="pendiente"
+                    Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
+            <Button x:Name="chipEnviados"   Content="Enviados"   Tag="enviado"
+                    Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
+            <Button x:Name="chipErrores"    Content="Errores"    Tag="error"
+                    Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click"/>
+        </StackPanel>
+
+        <!-- CONTENIDO: lista + detalle -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="420"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ══ LISTA DE MENSAJES ══ -->
+            <Border Grid.Column="0" Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1" Margin="0,0,14,0" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#25D366" Offset="0"/>
+                                <GradientStop Color="#128C7E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <Border Grid.Row="1" Background="#16162A" CornerRadius="10"
+                            BorderBrush="#252540" BorderThickness="1.5"
+                            Margin="14,14,14,8" Height="42">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="🔍" FontSize="14"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <Grid Grid.Column="1">
+                                <TextBox x:Name="txtBuscar" Height="40" BorderThickness="0"
+                                         Background="Transparent" Foreground="#E8E8FF"
+                                         CaretBrush="#25D366" FontSize="13"
+                                         VerticalContentAlignment="Center" Padding="0,0,10,0"
+                                         TextChanged="txtBuscar_TextChanged"/>
+                                <TextBlock Text="Buscar mensaje, socio, telefono..."
+                                           IsHitTestVisible="False"
+                                           VerticalAlignment="Center" FontSize="11" Foreground="#3A3A5C">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                                  Padding="12,4,12,12">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" x:Name="panelSinMensajes"
+                                        HorizontalAlignment="Center" Margin="0,40,0,0"
+                                        Visibility="Collapsed">
+                                <TextBlock Text="💬" FontSize="48" HorizontalAlignment="Center" Opacity="0.4"/>
+                                <TextBlock Text="No hay mensajes" FontSize="13"
+                                           Foreground="#6A6A9A"
+                                           HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" x:Name="panelMensajes"/>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- ══ DETALLE ══ -->
+            <Border Grid.Column="1" Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#25D366"/>
+
+                    <!-- Estado vacio -->
+                    <StackPanel Grid.Row="1" x:Name="panelSinSeleccion"
+                                VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="💬" FontSize="80" Opacity="0.3" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Seleccioná un mensaje"
+                                   FontFamily="Bahnschrift SemiBold"
+                                   FontSize="18" FontWeight="Bold" Foreground="#6A6A9A"
+                                   HorizontalAlignment="Center" Margin="0,12,0,4"/>
+                        <TextBlock Text="Hace click en uno de la lista para ver el detalle"
+                                   FontSize="12" Foreground="#4A4A7A"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Detalle -->
+                    <Grid Grid.Row="1" x:Name="panelDetalle" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Header -->
+                        <Border Grid.Row="0" BorderBrush="#252540"
+                                BorderThickness="0,0,0,1" Padding="24,18,24,16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Avatar -->
+                                <Grid Grid.Column="0" Margin="0,0,14,0">
+                                    <Ellipse Width="52" Height="52">
+                                        <Ellipse.Fill>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#25D366" Offset="0"/>
+                                                <GradientStop Color="#128C7E" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                    <Ellipse Width="48" Height="48">
+                                        <Ellipse.Fill>
+                                            <ImageBrush x:Name="imgDetalleFoto" Stretch="UniformToFill"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                </Grid>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock x:Name="lblDetalleNombre" Text="—"
+                                               FontFamily="Bahnschrift SemiBold"
+                                               FontSize="16" FontWeight="Bold"
+                                               Foreground="#E8E8FF"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock x:Name="lblDetalleTelefono" Text="—"
+                                                   FontFamily="Consolas" FontSize="11"
+                                                   Foreground="#25D366"/>
+                                        <TextBlock Text="  ·  " FontSize="11" Foreground="#3A3A5C"/>
+                                        <TextBlock x:Name="lblDetalleNumeroSocio" Text=""
+                                                   FontFamily="Consolas" FontSize="11"
+                                                   Foreground="#FF6B35"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="lblDetalleDisparador" Text="—"
+                                               FontSize="10" Foreground="#6A6A9A"
+                                               Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <!-- Estado badge -->
+                                <Border Grid.Column="2" x:Name="badgeEstado"
+                                        CornerRadius="20" Padding="14,6"
+                                        VerticalAlignment="Center"
+                                        Background="#2A1F00">
+                                    <TextBlock x:Name="lblBadgeEstado" Text="—"
+                                               FontSize="11" FontWeight="Bold"
+                                               Foreground="#FFA726"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Mensaje (estilo burbuja chat) -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                      Padding="24,20,24,16">
+                            <Border Background="#1A2D24" CornerRadius="12,12,12,2"
+                                    BorderBrush="#0E5C49" BorderThickness="1"
+                                    Padding="18,14,18,14"
+                                    HorizontalAlignment="Stretch">
+                                <StackPanel>
+                                    <TextBlock x:Name="lblDetalleMensaje" Text=""
+                                               FontSize="13" Foreground="#E8E8FF"
+                                               TextWrapping="Wrap" LineHeight="20"/>
+                                    <TextBlock x:Name="lblDetalleFechaCreado" Text="—"
+                                               FontSize="10" Foreground="#6A8A7A"
+                                               HorizontalAlignment="Right" Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </ScrollViewer>
+
+                        <!-- Botones de accion -->
+                        <Border Grid.Row="2" BorderBrush="#252540"
+                                BorderThickness="0,1,0,0" Padding="24,16,24,16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Grid.Column="0" x:Name="btnEliminarMensaje"
+                                        Content="🗑  ELIMINAR"
+                                        Background="#1A0A0A" Foreground="#FF5555"
+                                        BorderBrush="#5A1A1A" BorderThickness="1"
+                                        Width="120" Height="40" FontSize="11" FontWeight="Bold"
+                                        Cursor="Hand"
+                                        Click="btnEliminarMensaje_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="10">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <Button x:Name="btnAbrirWhatsapp"
+                                            Content="📱  ABRIR EN WHATSAPP"
+                                            Background="#0A2A14" Foreground="#25D366"
+                                            BorderBrush="#25D366" BorderThickness="1.5"
+                                            Width="190" Height="40" FontSize="11" FontWeight="Bold"
+                                            Cursor="Hand" Margin="0,0,8,0"
+                                            Click="btnAbrirWhatsapp_Click">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="10">
+                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+
+                                    <Button x:Name="btnMarcarEnviado"
+                                            Content="✓  MARCAR ENVIADO"
+                                            Background="#25D366" Foreground="#0A0A14"
+                                            BorderThickness="0"
+                                            Width="170" Height="40" FontSize="11" FontWeight="Bold"
+                                            Cursor="Hand"
+                                            Click="btnMarcarEnviado_Click">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        CornerRadius="10">
+                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ══════════════════ MODAL NUEVO MENSAJE ══════════════════ -->
+        <Border x:Name="modalNuevo" Background="#CC000000" Visibility="Collapsed">
+            <Border Width="460" Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MaxHeight="640" ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#25D366"/>
+                    <StackPanel Grid.Row="1" Margin="24,22,24,12">
+                        <TextBlock Text="NUEVO MENSAJE"
+                                   FontFamily="Bahnschrift SemiBold"
+                                   FontSize="16" FontWeight="Bold" Foreground="#E8E8FF"/>
+                        <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="2" Margin="24,8,24,0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Text="SOCIO (opcional, pone numero externo si esta vacio)"
+                                       Style="{StaticResource LabelCampoEstilo}"/>
+                            <ComboBox x:Name="cmbSocio" BorderThickness="0"
+          Background="Transparent" Foreground="#E8E8FF"
+          VerticalContentAlignment="Center"
+          FontSize="13" Padding="10,0" IsEditable="True"
+          IsTextSearchEnabled="True"
+          DisplayMemberPath="TextoCombo"
+          SelectionChanged="cmbSocio_SelectionChanged" Style="{StaticResource ComboBoxEstilo}">
+                                <ComboBox.Resources>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                </ComboBox.Resources>
+                            </ComboBox>
+                            <!-- <Border Background="#16162A" CornerRadius="10" Height="46"
+                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                                
+                            </Border>-->
+
+                            <TextBlock Text="TELEFONO * (con codigo de pais, ej: 5491155555555)"
+                                       Style="{StaticResource LabelCampoEstilo}"/>
+                            <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"/>
+
+                            <TextBlock Text="PLANTILLA RAPIDA" Style="{StaticResource LabelCampoEstilo}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                <Button Content="👋 Bienvenida" Click="btnPlantilla_Click" Tag="bienvenida"
+                                        Background="#1A1A30" Foreground="#A0A0C0"
+                                        BorderBrush="#252540" BorderThickness="1"
+                                        FontSize="11" Cursor="Hand" Margin="0,0,6,0" Padding="10,5">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button Content="🎂 Cumpleaños" Click="btnPlantilla_Click" Tag="cumple"
+                                        Background="#1A1A30" Foreground="#A0A0C0"
+                                        BorderBrush="#252540" BorderThickness="1"
+                                        FontSize="11" Cursor="Hand" Margin="0,0,6,0" Padding="10,5">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <Button Content="🧹 Limpiar" Click="btnPlantilla_Click" Tag="limpiar"
+                                        Background="#1A1A30" Foreground="#A0A0C0"
+                                        BorderBrush="#252540" BorderThickness="1"
+                                        FontSize="11" Cursor="Hand" Padding="10,5">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </StackPanel>
+
+                            <TextBlock Text="MENSAJE *" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="#16162A" CornerRadius="10"
+                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                                <TextBox x:Name="txtMensaje" Background="Transparent"
+                                         BorderThickness="0" Foreground="#E8E8FF"
+                                         CaretBrush="#25D366" FontSize="13" Padding="14,10"
+                                         AcceptsReturn="True" TextWrapping="Wrap"
+                                         Height="160" VerticalScrollBarVisibility="Auto"/>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Grid Grid.Row="3" Margin="24,12,24,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Cancelar"
+                                Style="{StaticResource BotonCerrarEstilo}"
+                                Margin="0,0,8,0" Click="btnNuevoCancelar_Click"/>
+                        <Button Grid.Column="1" Content="GUARDAR"
+                                Style="{StaticResource BotonPrincipalEstilo}"
+                                Margin="8,0,0,0" Click="btnNuevoGuardar_Click"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Border>
+
+        <!-- ══════════════════ MODAL GENERAR AVISOS ══════════════════ -->
+        <Border x:Name="modalAvisos" Background="#CC000000" Visibility="Collapsed">
+            <Border Width="380" Background="#12121E" CornerRadius="12"
+                    BorderBrush="#252540" BorderThickness="1"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="4"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#25D366"/>
+                    <StackPanel Grid.Row="1" Margin="24,22,24,12" HorizontalAlignment="Center">
+                        <TextBlock Text="🔔" FontSize="44"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="GENERAR AVISOS DE VENCIMIENTO"
+                                   FontFamily="Bahnschrift SemiBold"
+                                   FontSize="14" FontWeight="Bold" Foreground="#E8E8FF"
+                                   HorizontalAlignment="Center" Margin="0,4,0,2"/>
+                        <TextBlock Text="Crea mensajes pendientes para socios con vencimiento proximo."
+                                   FontSize="11" Foreground="#6A6A9A"
+                                   HorizontalAlignment="Center" TextWrapping="Wrap"
+                                   TextAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Margin="24,12,24,12">
+                        <TextBlock Text="DIAS DE ANTICIPACION" Style="{StaticResource LabelCampoEstilo}"/>
+                        <TextBox x:Name="txtDiasAntes" Style="{StaticResource InputEstilo}"
+                                 PreviewTextInput="txtSoloNumeros_PreviewTextInput"
+                                 Text="3"/>
+                        <TextBlock Text="Buscara membresias que vencen entre hoy y los proximos N dias."
+                                   FontSize="10" Foreground="#4A4A7A" FontStyle="Italic"
+                                   Margin="2,-8,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Grid Grid.Row="3" Margin="24,12,24,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Cancelar"
+                                Style="{StaticResource BotonCerrarEstilo}"
+                                Margin="0,0,8,0" Click="btnAvisosCancelar_Click"/>
+                        <Button Grid.Column="1" Content="GENERAR"
+                                Style="{StaticResource BotonPrincipalEstilo}"
+                                Margin="8,0,0,0" Click="btnAvisosConfirmar_Click"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Border>
+
+    </Grid>
+</Page>

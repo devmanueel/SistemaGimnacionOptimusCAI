@@ -144,7 +144,7 @@
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <!-- Buscador -->
-                <TextBox x:Name="txtBuscar" 
+                <TextBox x:Name="txtBuscar" Tag="Buscar por socio, DNI o N°"
 Style="{StaticResource BuscadorStyle}"
 Width="290" 
 Margin="0,0,12,0"
@@ -218,25 +218,16 @@ TextChanged="txtBuscar_TextChanged"/>
                        FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
 
             <!-- CHIP SELECCIONADO (TODOS) -->
-            <Button x:Name="chipTodos" Content="Todos"
-            Click="chipFiltro_Click" Tag="todos"
-            Style="{StaticResource ChipFiltroEstilo}"
-            Background="#1E1E38" Foreground="#E8E8FF"
-            BorderThickness="0" Margin="0,0,8,0"/>
+            <Button x:Name="chipTodos" Content="Todos" Click="chipFiltro_Click" Tag="todos"
+            Style="{StaticResource BotonChipActivoEstilo}" Margin="0,0,8,0"/>
 
             <!-- CHIP DESELECCIONADO (ACTIVOS) -->
-            <Button x:Name="chipActivos" Content="Activos"
-            Click="chipFiltro_Click" Tag="activos"
-            Style="{StaticResource ChipFiltroEstilo}"
-            Background="Transparent" Foreground="#6A6A9A"
-            BorderThickness="1" BorderBrush="#252540" Margin="0,0,8,0"/>
+            <Button x:Name="chipActivos" Content="Activos" Click="chipFiltro_Click" Tag="activos"
+            Style="{StaticResource ChipFiltroEstilo}" Margin="0,0,8,0"/>
 
             <!-- CHIP DESELECCIONADO (INACTIVOS) -->
-            <Button x:Name="chipInactivos" Content="Inactivos"
-            Click="chipFiltro_Click" Tag="inactivos"
-            Style="{StaticResource ChipFiltroEstilo}"
-            Background="Transparent" Foreground="#6A6A9A"
-            BorderThickness="1" BorderBrush="#252540"/>
+            <Button x:Name="chipInactivos" Content="Inactivos" Click="chipFiltro_Click" Tag="inactivos"
+            Style="{StaticResource ChipFiltroEstilo}"/>
         </StackPanel>
 
         <!-- ══════════════════════════════════════════════════
@@ -379,7 +370,7 @@ TextChanged="txtBuscar_TextChanged"/>
 
                             <!-- Cambios de JoakoG-->
                             <!-- Acciones -->
-                            <DataGridTemplateColumn Header="ACCIONES" Width="100">
+                            <DataGridTemplateColumn Header="ACCIONES" Width="110">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

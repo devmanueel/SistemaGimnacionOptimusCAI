@@ -68,7 +68,7 @@
     <SolidColorBrush x:Key="BadgeNaranjaBorde" Color="#85451A"/>
     <SolidColorBrush x:Key="BadgeNaranjaHover" Color="#402200"/>
 
-    <SolidColorBrush x:Key="BadgeCyanFondo"    Color="#0A1A2A"/>
+    <SolidColorBrush x:Key="BadgeCyanFondo"    Color="#060E14"/>
     <SolidColorBrush x:Key="BadgeCyanBorde"    Color="#007A99"/>
     <SolidColorBrush x:Key="BadgeCyanHover"    Color="#0F253A"/>
 
@@ -301,7 +301,7 @@
                         BorderBrush="{StaticResource ColorBorde}"
                         BorderThickness="1.5"
                         CornerRadius="10"
-                        Height="46">
+                        Height="40">
                         <Grid x:Name="PART_Root">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -317,17 +317,19 @@
 
                             <Button x:Name="PART_Button"
                                 Grid.Column="1"
-                                Margin="0,0,10,0"
+                                Margin="0,0,8,0"
                                 Focusable="False"
                                 Background="Transparent"
                                 BorderThickness="0"
+                                    Height="25"
+                                    
                                 Cursor="Hand">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="BtnBg"
                                             Background="Transparent"
                                             CornerRadius="8"
-                                            Padding="6">
+                                            Padding="2">
                                             <ContentPresenter HorizontalAlignment="Center"
                                                           VerticalAlignment="Center"/>
                                         </Border>
@@ -1036,7 +1038,7 @@
                                 <DropShadowEffect BlurRadius="12" 
                                               ShadowDepth="0" 
                                               Color="{StaticResource ColorCyanColor}" 
-                                              Opacity="0.5"/>
+                                              Opacity="0.2"/>
                             </Border.Effect>
                             <ContentPresenter HorizontalAlignment="Center" 
                                           VerticalAlignment="Center"
@@ -1559,7 +1561,7 @@ Usando la paleta oficial de Optimus CAI
                                 <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
 
                                 <TextBlock x:Name="PlaceholderText" 
-                                       Text="Buscar por nombre, apellido o DNI..."
+                                       Text="{TemplateBinding Tag}"
                                        Foreground="#3A3A5C"
                                        FontSize="12"
                                        VerticalAlignment="Center"

@@ -106,7 +106,7 @@
 
             <!-- Buscador -->
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <TextBox x:Name="txtBuscar" 
+                <TextBox x:Name="txtBuscar" Tag="Buscar por socio, DNI, N° o actividad..."
 Style="{StaticResource BuscadorStyle}"
 Width="290" 
 Margin="0,0,12,0"
@@ -219,7 +219,7 @@ TextChanged="txtBuscar_TextChanged"/>
 
         <!-- ══════════════════ FILTROS ══════════════════ -->
         <!-- Agregamos un poco de Padding al StackPanel para que el resplandor no se corte -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12" ClipToBounds="False">
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12" >
             <TextBlock Text="MOSTRAR:" Foreground="#4A4A7A" FontSize="11"
                        FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
 

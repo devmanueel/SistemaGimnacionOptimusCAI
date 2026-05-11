@@ -159,25 +159,19 @@ TextChanged="txtBuscar_TextChanged"/>
                FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
 
             <!-- CHIP SELECCIONADO (TODOS) -->
-            <Button x:Name="chipTodos" Content="todos"
-    Click="chipFiltro_Click" Tag="todos"
-    Style="{StaticResource ChipFiltroEstilo}"
-    Background="#1E1E38" Foreground="#E8E8FF"
-    BorderThickness="0" Margin="0,0,8,0"/>
+            <Button x:Name="chipTodos" Content="Todos"
+                    Click="chipFiltro_Click" Tag="todos" Style="{StaticResource BotonChipActivoEstilo}"
+                    Margin="0,0,8,0"/>
 
             <!-- CHIP DESELECCIONADO (ACTIVOS) -->
             <Button x:Name="chipActivos" Content="Activos"
-    Click="chipFiltro_Click" Tag="activas"
-    Style="{StaticResource ChipFiltroEstilo}"
-    Background="Transparent" Foreground="#6A6A9A"
-    BorderThickness="1" BorderBrush="#252540" Margin="0,0,8,0"/>
+                    Click="chipFiltro_Click" Tag="activas"
+                    Style="{StaticResource ChipFiltroEstilo}" Margin="0,0,8,0"/>
 
             <!-- CHIP DESELECCIONADO (INACTIVOS) -->
             <Button x:Name="chipInactivos" Content="Inactivos"
-    Click="chipFiltro_Click" Tag="inactivas"
-    Style="{StaticResource ChipFiltroEstilo}"
-    Background="Transparent" Foreground="#6A6A9A"
-    BorderThickness="1" BorderBrush="#252540" Cursor="Hand"/>
+                    Click="chipFiltro_Click" Tag="inactivas"
+                    Style="{StaticResource ChipFiltroEstilo}" Cursor="Hand"/>
         </StackPanel>
 
         <!-- ══════════════════ CONTENIDO ══════════════════ -->

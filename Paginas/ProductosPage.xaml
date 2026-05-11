@@ -237,7 +237,7 @@
                 <TextBlock Text="STOCK:" Foreground="#4A4A7A" FontSize="11"
                            FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
                 <Button x:Name="chipTodos"     Content="Todos"     Click="chipFiltro_Click" Tag="todos"
-                        Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
+                        Style="{StaticResource BotonChipActivoEstilo}" Margin="0,0,8,0"/>
                 <Button x:Name="chipConStock"  Content="Con stock" Click="chipFiltro_Click" Tag="con_stock"
                         Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
                 <Button x:Name="chipBajoStock" Content="Bajo stock" Click="chipFiltro_Click" Tag="bajo_stock"
@@ -247,19 +247,17 @@
             </StackPanel>
 
             <!-- Filtro de categoría -->
-            <Border Grid.Column="2" Background="#16162A" CornerRadius="10" Height="36"
-                    BorderBrush="#252540" BorderThickness="1.5" Width="200">
-                <ComboBox x:Name="cmbFiltroCategoria"
-                          BorderThickness="0" Background="Transparent"
-                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                          FontSize="12" Padding="10,0"
-                          SelectionChanged="cmbFiltroCategoria_SelectionChanged">
-                    <ComboBox.Resources>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
-                    </ComboBox.Resources>
-                </ComboBox>
-            </Border>
+            <ComboBox x:Name="cmbFiltroCategoria"
+                      Grid.Column="2"
+                      Width="250"
+          Style="{StaticResource ComboBoxEstilo}"
+          Height="40"
+          SelectionChanged="cmbFiltroCategoria_SelectionChanged">
+                <ComboBox.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                </ComboBox.Resources>
+            </ComboBox>
         </Grid>
 
         <!-- ══════════════════ CONTENIDO ══════════════════ -->
@@ -389,11 +387,8 @@
                             <TextBlock x:Name="errNombre" Style="{StaticResource LabelErrorEstilo}"/>
 
                             <TextBlock Text="CATEGORÍA" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10" Height="46"
-                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                <ComboBox x:Name="cmbCategoria" BorderThickness="0" Background="Transparent"
-                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                          FontSize="13" Padding="10,0" IsEditable="True">
+
+                            <ComboBox x:Name="cmbCategoria" Style="{StaticResource ComboBoxEstilo}" IsEditable="True">
                                     <ComboBox.Resources>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
@@ -405,7 +400,7 @@
                                     <ComboBoxItem Content="Accesorios"   Foreground="#E8E8FF"/>
                                     <ComboBoxItem Content="Higiene"      Foreground="#E8E8FF"/>
                                 </ComboBox>
-                            </Border>
+                            
 
                             <TextBlock Text="DESCRIPCIÓN" Style="{StaticResource LabelCampoEstilo}"/>
                             <Border Background="#16162A" CornerRadius="10"

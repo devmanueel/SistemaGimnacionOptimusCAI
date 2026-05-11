@@ -117,11 +117,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Paginas\AuditoriaPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Paginas\CajaPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Paginas\CasillerosPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Paginas\InstructorAsistenciasPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -137,7 +145,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Paginas\RutinasPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Paginas\SociosPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Paginas\TurnosPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -149,6 +165,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Paginas\WhatsappPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Paginas\ActividadesPage.xaml.cs">
@@ -157,11 +177,17 @@
     <Compile Include="Paginas\AsistenciasPage.xaml.cs">
       <DependentUpon>AsistenciasPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Paginas\AuditoriaPage.xaml.cs">
+      <DependentUpon>AuditoriaPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Paginas\CajaPage.xaml.cs">
       <DependentUpon>CajaPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\CasillerosPage.xaml.cs">
       <DependentUpon>CasillerosPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\InstructorAsistenciasPage.xaml.cs">
+      <DependentUpon>InstructorAsistenciasPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\MembresiasPage.xaml.cs">
       <DependentUpon>MembresiasPage.xaml</DependentUpon>
@@ -172,14 +198,23 @@
     <Compile Include="Paginas\ProductosPage.xaml.cs">
       <DependentUpon>ProductosPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Paginas\RutinasPage.xaml.cs">
+      <DependentUpon>RutinasPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Paginas\SociosPage.xaml.cs">
       <DependentUpon>SociosPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\TurnosPage.xaml.cs">
+      <DependentUpon>TurnosPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\UsuariosPage.xaml.cs">
       <DependentUpon>UsuariosPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\VentasPage.xaml.cs">
       <DependentUpon>VentasPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\WhatsappPage.xaml.cs">
+      <DependentUpon>WhatsappPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
