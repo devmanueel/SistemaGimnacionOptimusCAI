@@ -222,58 +222,33 @@
                                        FontSize="14" FontWeight="Bold" Foreground="#E8E8FF"
                                        VerticalAlignment="Center"/>
                         </StackPanel>
-                        <Border Grid.Column="1" Background="#16162A" CornerRadius="8"
-                                BorderBrush="#252540" BorderThickness="1.5"
-                                Width="220" Height="34">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="36"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="🔍" FontSize="13"
-                                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                <Grid Grid.Column="1">
-                                    <TextBox x:Name="txtBuscar" Height="32" BorderThickness="0"
-                                             Background="Transparent" Foreground="#E8E8FF"
-                                             CaretBrush="#00CFFF" FontSize="11"
-                                             VerticalContentAlignment="Center" Padding="0,0,8,0"
-                                             TextChanged="txtBuscar_TextChanged"/>
-                                    <TextBlock Text="Buscar instructor..."
-                                               IsHitTestVisible="False" VerticalAlignment="Center"
-                                               FontSize="11" Foreground="#3A3A5C">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Grid>
-                            </Grid>
-                        </Border>
                     </Grid>
 
                     <!-- Filtro fechas -->
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="22,0,22,12">
-                        <TextBlock Text="DESDE:" Foreground="#4A4A7A" FontSize="10"
-                                   FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <DatePicker x:Name="dpDesde" BorderThickness="0" 
-                                    Background="Transparent" FontSize="11" VerticalContentAlignment="Center"
-                                    Foreground="#E8E8FF" Style="{StaticResource DatePickerEstilo}" SelectedDateChanged="dpFecha_Changed" Margin="0, 0, 12, 0"
-                                    Width="140"/>
-                        
-                        <TextBlock Text="HASTA:" Foreground="#4A4A7A" FontSize="10"
-                                   FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <DatePicker x:Name="dpHasta" BorderThickness="0"
-                                    Background="Transparent" FontSize="11"
-                                    VerticalContentAlignment="Center" Foreground="#E8E8FF"
-                                    SelectedDateChanged="dpFecha_Changed" Style="{StaticResource DatePickerEstilo}" 
-                                    Margin="0, 0, 12, 0" Width="140"/>
-                    </StackPanel>
+                    <Grid Grid.Row="2" Margin="22,20,22,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="DESDE:" Foreground="#4A4A7A" FontSize="10"
+                   FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <DatePicker x:Name="dpDesde" Style="{StaticResource DatePickerEstilo}" 
+                    Width="140" Height="42" Margin="0,0,15,0"
+                    SelectedDateChanged="dpFecha_Changed"/>
+
+                            <TextBlock Text="HASTA:" Foreground="#4A4A7A" FontSize="10"
+                   FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <DatePicker x:Name="dpHasta" Style="{StaticResource DatePickerEstilo}" 
+                    Width="140" Height="42" Margin="0, 0,0 ,0"
+                    SelectedDateChanged="dpFecha_Changed"/>
+                        </StackPanel>
+
+                        <TextBox x:Name="txtBuscar" Tag="Buscar instructor..." Grid.Column="1"
+             Style="{StaticResource BuscadorStyle}" Width="290" Height="42"
+             VerticalAlignment="Center" TextChanged="txtBuscar_TextChanged"/>
+                    </Grid>
 
                     <DataGrid Grid.Row="3" x:Name="gridHistorial"
                               IsReadOnly="True" AutoGenerateColumns="False"

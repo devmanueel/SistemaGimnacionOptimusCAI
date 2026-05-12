@@ -497,7 +497,7 @@ TextChanged="txtBuscar_TextChanged"/>
                             <TextBlock Text="CONCEPTO *" Style="{StaticResource LabelCampoEstilo}"/>
                             <ComboBox x:Name="cmbConcepto" BorderThickness="0" Background="Transparent"
           Foreground="#E8E8FF" VerticalContentAlignment="Center"
-          FontSize="13" Padding="10,0" IsEditable="True" Style="{StaticResource ComboBoxEstilo}">
+          FontSize="13" Padding="10,0" Style="{StaticResource ComboBoxEstilo}">
                                 <ComboBox.Resources>
                                     <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
                                     <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>

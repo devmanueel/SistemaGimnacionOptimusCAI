@@ -597,13 +597,13 @@ TextChanged="txtBuscar_TextChanged"/>
                                 <TextBlock Text="¿CÓMO NOS CONOCIÓ?" Style="{StaticResource LabelCampoEstilo}"/>
 
                                 <ComboBox x:Name="cmbComoConocio"
-                                              FontSize="14" Padding="10,0" IsEditable="True" Style="{StaticResource ComboBoxEstilo}">
+                                              FontSize="14" Padding="10,0" Style="{StaticResource ComboBoxEstilo}" Margin="0,0,0,14">
                                     <ComboBoxItem Content="Recomendación de amigo"/>
                                     <ComboBoxItem Content="Redes sociales"/>
                                     <ComboBoxItem Content="Pasé por la calle"/>
                                     <ComboBoxItem Content="Publicidad"/>
                                     <ComboBoxItem Content="Familiar"/>
-                                    <ComboBoxItem Content="Otro"/>
+                                    <ComboBoxItem Content="Otro" IsSelected="True"/>
                                 </ComboBox>
 
                             </StackPanel>

@@ -107,10 +107,8 @@
             <!-- Buscador -->
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <TextBox x:Name="txtBuscar" Tag="Buscar por socio, DNI, N° o actividad..."
-Style="{StaticResource BuscadorStyle}"
-Width="290" 
-Margin="0,0,12,0"
-TextChanged="txtBuscar_TextChanged"/>
+                         Style="{StaticResource BuscadorStyle}" Width="290" 
+                         Margin="0,0,12,0" TextChanged="txtBuscar_TextChanged"/>
 
                 <Button Content="＋  COBRAR CUOTA"
                         Style="{StaticResource BotonNaranjaEstilo}"

@@ -132,7 +132,7 @@
                        FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
             <ComboBox x:Name="cmbFiltroActividad"
                       DisplayMemberPath="Nombre"
-                      Width="280"
+                      Width="250"
                       Height="36"
                       SelectionChanged="cmbFiltroActividad_SelectionChanged"
                       Style="{StaticResource ComboBoxEstilo}">
@@ -313,13 +313,13 @@
 
                             <TextBlock Text="INSTRUCTOR (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
                             <ComboBox x:Name="cmbInstructor" BorderThickness="0" Background="Transparent"
-          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-          FontSize="13" Padding="10,0"
-          DisplayMemberPath="NombreCompleto" Style="{StaticResource ComboBoxEstilo}">
-                                <ComboBox.Resources>
-                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
-                                </ComboBox.Resources>
+                                      Foreground="#E8E8FF" VerticalContentAlignment="Center"
+                                      FontSize="13" Padding="10,0" Style="{StaticResource ComboBoxEstilo}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding NombreCompleto}" Foreground="#E8E8FF"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
                             </ComboBox>
 
                             <TextBlock Text="CUPO MÁXIMO *" Style="{StaticResource LabelCampoEstilo}"/>

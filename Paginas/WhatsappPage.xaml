@@ -179,39 +179,10 @@
                         </Border.Background>
                     </Border>
 
-                    <Border Grid.Row="1" Background="#16162A" CornerRadius="10"
-                            BorderBrush="#252540" BorderThickness="1.5"
-                            Margin="14,14,14,8" Height="42">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="40"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="🔍" FontSize="14"
-                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <Grid Grid.Column="1">
-                                <TextBox x:Name="txtBuscar" Height="40" BorderThickness="0"
-                                         Background="Transparent" Foreground="#E8E8FF"
-                                         CaretBrush="#25D366" FontSize="13"
-                                         VerticalContentAlignment="Center" Padding="0,0,10,0"
-                                         TextChanged="txtBuscar_TextChanged"/>
-                                <TextBlock Text="Buscar mensaje, socio, telefono..."
-                                           IsHitTestVisible="False"
-                                           VerticalAlignment="Center" FontSize="11" Foreground="#3A3A5C">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Grid>
-                        </Grid>
-                    </Border>
+                    <TextBox x:Name="txtBuscar" Tag="Buscar mensaje, socio, telefono..." Grid.Row="1"
+                             Style="{StaticResource BuscadorStyle}" Width="Auto" 
+                             Margin="14,14,14,0" TextChanged="txtBuscar_TextChanged"/>
+                    
 
                     <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
                                   Padding="12,4,12,12">
@@ -444,7 +415,7 @@
                             <ComboBox x:Name="cmbSocio" BorderThickness="0"
           Background="Transparent" Foreground="#E8E8FF"
           VerticalContentAlignment="Center"
-          FontSize="13" Padding="10,0" IsEditable="True"
+          FontSize="13" Padding="10,0"
           IsTextSearchEnabled="True"
           DisplayMemberPath="TextoCombo"
           SelectionChanged="cmbSocio_SelectionChanged" Style="{StaticResource ComboBoxEstilo}">

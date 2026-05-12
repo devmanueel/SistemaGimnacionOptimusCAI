@@ -241,39 +241,10 @@
             </StackPanel>
 
             <!-- Buscador en el medio -->
-            <Border Grid.Column="2" Background="#16162A" CornerRadius="10"
-                    BorderBrush="#252540" BorderThickness="1.5"
-                    Width="220" Height="36">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="36"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="🔍" FontSize="13"
-                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    <Grid Grid.Column="1">
-                        <TextBox x:Name="txtBuscar" Height="34" BorderThickness="0"
-                                 Background="Transparent" Foreground="#E8E8FF"
-                                 CaretBrush="#00CFFF" FontSize="12"
-                                 VerticalContentAlignment="Center" Padding="0,0,8,0"
-                                 TextChanged="txtBuscar_TextChanged"/>
-                        <TextBlock Text="Buscar por número o socio..."
-                                   IsHitTestVisible="False" VerticalAlignment="Center"
-                                   FontSize="11" Foreground="#3A3A5C">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Grid>
-                </Grid>
-            </Border>
+            <TextBox x:Name="txtBuscar" Tag="Buscar por número o socio" Grid.Column="2"
+                     Style="{StaticResource BuscadorStyle}" Width="250" 
+                     TextChanged="txtBuscar_TextChanged"/>
+            
         </Grid>
 
         <!-- ══════════════════ CONTENIDO ══════════════════ -->
@@ -423,19 +394,15 @@
                             <!-- ── Asignar a un socio (solo si libre) ── -->
                             <StackPanel x:Name="panelAsignar" Visibility="Collapsed">
                                 <TextBlock Text="ASIGNAR A SOCIO" Style="{StaticResource LabelCampoEstilo}"/>
-                                <Border Background="#16162A" CornerRadius="10" Height="46"
-                                        BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                    <ComboBox x:Name="cmbSocio" BorderThickness="0" Background="Transparent"
-                                              Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                              FontSize="13" Padding="10,0" IsEditable="True"
-                                              IsTextSearchEnabled="True"
-                                              DisplayMemberPath="TextoCombo">
-                                        <ComboBox.Resources>
-                                            <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                            <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
-                                        </ComboBox.Resources>
-                                    </ComboBox>
-                                </Border>
+                                <ComboBox x:Name="cmbSocio"
+                                          Style="{StaticResource ComboBoxEstilo}"
+                                          VerticalContentAlignment="Center" Height="46">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding TextoCombo}" Foreground="#E8E8FF"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
                                 <Button Content="ASIGNAR CASILLERO"
                                         Style="{StaticResource BotonPrincipalEstilo}"
                                         Height="44" FontSize="13" Margin="0,0,0,16"

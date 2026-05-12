@@ -75,39 +75,9 @@
             </StackPanel>
 
             <!-- Buscador -->
-            <Border Grid.Column="1" Background="#16162A" CornerRadius="10"
-                    BorderBrush="#252540" BorderThickness="1.5"
-                    Width="300" Height="46">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="40"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="🔍" FontSize="15"
-                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    <Grid Grid.Column="1">
-                        <TextBox x:Name="txtBuscar" Height="44" BorderThickness="0"
-                                 Background="Transparent" Foreground="#E8E8FF"
-                                 CaretBrush="#A78BFA" FontSize="14"
-                                 VerticalContentAlignment="Center" Padding="0,0,10,0"
-                                 TextChanged="txtBuscar_TextChanged"/>
-                        <TextBlock Text="Buscar acción, entidad, usuario..."
-                                   IsHitTestVisible="False"
-                                   VerticalAlignment="Center" FontSize="12" Foreground="#3A3A5C">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </Grid>
-                </Grid>
-            </Border>
+            <TextBox x:Name="txtBuscar" Tag="Buscar acción, entidad, usuario..." Grid.Column="1"
+                     Style="{StaticResource BuscadorStyle}" Width="290" 
+                     TextChanged="txtBuscar_TextChanged"/>
         </Grid>
 
         <!-- STATS -->
