@@ -151,9 +151,10 @@ Margin="0,0,12,0"
 TextChanged="txtBuscar_TextChanged"/>
 
                 <!-- Botón Nuevo Socio -->
-                <Button Content="＋  NUEVO SOCIO"
+                <Button Content=" NUEVO SOCIO"
                         Style="{StaticResource BotonNaranjaEstilo}"
-                        Width="170" Height="46"
+                        Tag="UserPlus"
+                        Width="180" Height="46"
                         Click="btnNuevo_Click"/>
             </StackPanel>
         </Grid>
@@ -384,11 +385,11 @@ TextChanged="txtBuscar_TextChanged"/>
 
                                             <!-- BOTÓN ESTADO -->
                                             <Button Click="btnToggleEstado_Click" 
-            Style="{StaticResource ButtonStyleEstado}">
+                                                    Style="{StaticResource ButtonStyleEstado}">
                                                 <fa:ImageAwesome Height="14">
                                                     <fa:ImageAwesome.Style>
                                                         <Style TargetType="fa:ImageAwesome">
-                                                            <Setter Property="Icon" Value="Trash"/>
+                                                            <Setter Property="Icon" Value="Times"/>
                                                             <Setter Property="Foreground" Value="#FF5555"/>
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding Activo}" Value="False">

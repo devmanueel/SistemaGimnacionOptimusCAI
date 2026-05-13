@@ -131,8 +131,9 @@
          TextChanged="txtBuscar_TextChanged"/>
 
                 <!-- Botón Nuevo Usuario naranja -->
-                <Button Content="＋  NUEVO USUARIO"
+                <Button Content=" NUEVO USUARIO"
                         Style="{StaticResource BotonNaranjaEstilo}"
+                        Tag="Plus"
                         Width="178" Height="46"
                         Click="btnNuevo_Click"/>
             </StackPanel>
@@ -304,7 +305,7 @@
                             </DataGridTemplateColumn>
 
                             <!-- ACCIONES -->
-                            <DataGridTemplateColumn Header="ACCIONES" Width="100">
+                            <DataGridTemplateColumn Header="ACCIONES" Width="110">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">

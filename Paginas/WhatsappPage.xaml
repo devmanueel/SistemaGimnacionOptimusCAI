@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="WhatsApp">
@@ -92,7 +93,8 @@
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
-                <Button Content="＋ NUEVO MENSAJE"
+                <Button Content="NUEVO MENSAJE"
+                        Tag="Plus"
                         Style="{StaticResource BotonNaranjaEstilo}"
                         Width="180" Height="46" Click="btnNuevoMensaje_Click"/>
             </StackPanel>
@@ -218,7 +220,9 @@
                     <!-- Estado vacio -->
                     <StackPanel Grid.Row="1" x:Name="panelSinSeleccion"
                                 VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="💬" FontSize="80" Opacity="0.3" HorizontalAlignment="Center"/>
+                        <fa:ImageAwesome Icon="CommentOutline" Foreground="#25D366" 
+                                         Opacity="0.3" HorizontalAlignment="Center"
+                                         Height="80"/>
                         <TextBlock Text="Seleccioná un mensaje"
                                    FontFamily="Bahnschrift SemiBold"
                                    FontSize="18" FontWeight="Bold" Foreground="#6A6A9A"

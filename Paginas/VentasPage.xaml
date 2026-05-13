@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="Ventas">
@@ -25,7 +26,7 @@
                 <Setter Property="Foreground" Value="#4A4A7A"/>
                 <Setter Property="FontSize"   Value="10"/>
                 <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Margin"     Value="2,0,0,6"/>
+                <Setter Property="Margin"     Value="2,0,0,10"/>
             </Style>
         </ResourceDictionary>
     </Page.Resources>
@@ -65,14 +66,12 @@
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <!-- Buscador -->
-                    <TextBox x:Name="txtBuscar" Tag="Buscar venta..."
-Style="{StaticResource BuscadorStyle}"
-Width="290" 
-Margin="0,0,12,0"
-TextChanged="txtBuscar_TextChanged"/>
-                    
-                    <Button Content="🛒  NUEVA VENTA" Style="{StaticResource BotonNaranjaEstilo}"
-                            Width="180" Height="46" Click="btnNuevaVenta_Click"/>
+                    <TextBox x:Name="txtBuscar" Tag="Buscar venta..." Style="{StaticResource BuscadorStyle}"
+                             Width="290" Margin="0,0,12,0"
+                             TextChanged="txtBuscar_TextChanged"/>
+
+                    <Button Content="NUEVA VENTA" Style="{StaticResource BotonNaranjaEstilo}"
+                            Tag="ShoppingCart" Click="btnNuevaVenta_Click" Width="180"/>
                 </StackPanel>
             </Grid>
 
@@ -253,24 +252,21 @@ TextChanged="txtBuscar_TextChanged"/>
                             <DataGridTextColumn Header="FECHA"
                                                 Binding="{Binding FechaCorta}" Width="120"/>
 
+                            <!-- ACCIONES -->
                             <DataGridTemplateColumn Header="ACCIONES" Width="110">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <Border Width="34" Height="34" CornerRadius="8"
-                                                    Background="#1A1A30" Margin="0,0,6,0">
-                                                <Button Click="btnVerDetalle_Click" Background="Transparent"
-                                                        BorderThickness="0" Cursor="Hand" ToolTip="Ver detalle">
-                                                    <TextBlock Text="👁" FontSize="13" Foreground="#00CFFF"/>
-                                                </Button>
-                                            </Border>
-                                            <Border Width="34" Height="34" CornerRadius="8" Background="#1A1A30">
-                                                <Button Click="btnAnular_Click" Background="Transparent"
-                                                        BorderThickness="0" Cursor="Hand" ToolTip="Anular">
-                                                    <TextBlock Text="✕" FontSize="14" FontWeight="Bold"
-                                                               Foreground="#FF5555"/>
-                                                </Button>
-                                            </Border>
+                                            <Button Style="{StaticResource BotonAccionVerEstilo}"
+                                                    Click="btnVerDetalle_Click" 
+                                                    Margin="0,0,6,0"/>
+                                            <!-- BotonAccionVerEstilo -->
+                                            <Button Style="{StaticResource ButtonStyleCancelar}"
+                                                    Click="btnAnular_Click" 
+                                                    ToolTip="Cancelar membresía">
+                                                <TextBlock Text="✕" FontSize="14" FontWeight="Bold"
+                                                                   Foreground="#FF5555"/>
+                                            </Button>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -309,7 +305,8 @@ TextChanged="txtBuscar_TextChanged"/>
                             </Border>
                         </ControlTemplate>
                     </Button.Template>
-                    <TextBlock Text="←" FontSize="20" FontWeight="Bold"/>
+                    <fa:ImageAwesome Icon="ArrowLeft" Height="20" Width="30" HorizontalAlignment="Center"
+                                     VerticalAlignment="Center" Foreground="#6A6A9A"/>
                 </Button>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
@@ -353,38 +350,11 @@ TextChanged="txtBuscar_TextChanged"/>
                                 </LinearGradientBrush>
                             </Border.Background>
                         </Border>
-                        <Border Grid.Row="1" Background="#16162A" CornerRadius="10"
-                                BorderBrush="#252540" BorderThickness="1.5"
-                                Margin="14,14,14,0" Height="42">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="🔍" FontSize="14"
-                                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                                <Grid Grid.Column="1">
-                                    <TextBox x:Name="txtBuscarProducto" Height="40" BorderThickness="0"
-                                             Background="Transparent" Foreground="#E8E8FF"
-                                             CaretBrush="#00CFFF" FontSize="13"
-                                             VerticalContentAlignment="Center" Padding="0,0,10,0"
-                                             TextChanged="txtBuscarProducto_TextChanged"/>
-                                    <TextBlock Text="Buscar producto..." IsHitTestVisible="False"
-                                               VerticalAlignment="Center" FontSize="11" Foreground="#3A3A5C">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Text, ElementName=txtBuscarProducto}" Value="">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Grid>
-                            </Grid>
-                        </Border>
+
+                        <!-- Buscador -->
+                        <TextBox x:Name="txtBuscarProducto" Grid.Row="1" Tag="Buscar producto..." Style="{StaticResource BuscadorStyle}" Margin="12" Width="Auto"
+                                 TextChanged="txtBuscarProducto_TextChanged"/>
+                        
                         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled" Padding="14,12,14,14">
                             <Grid>
@@ -426,12 +396,14 @@ TextChanged="txtBuscar_TextChanged"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                <TextBlock Text="🛒" FontSize="18" Margin="0,0,8,0"/>
+                                <fa:ImageAwesome Icon="ShoppingCart" Foreground="#00E676"
+                                                 Height="30" Width="30" VerticalAlignment="Center"
+                                                 Margin="2, 0, 10 ,0"/>
                                 <TextBlock Text="CARRITO" FontFamily="Bahnschrift SemiBold, Segoe UI"
                                            FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"
                                            VerticalAlignment="Center"/>
                             </StackPanel>
-                            <Border Grid.Column="1" Background="#0A2A14" CornerRadius="14" Padding="10,3">
+                            <Border Grid.Column="1" Style="{StaticResource BadgeContadorEstilo}">
                                 <TextBlock x:Name="lblCantidadItems" Text="0 items"
                                            FontSize="11" FontWeight="Bold" Foreground="#00E676"/>
                             </Border>
@@ -476,7 +448,7 @@ TextChanged="txtBuscar_TextChanged"/>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" x:Name="panelCarritoVacio"
                                             HorizontalAlignment="Center" Margin="0,40,0,0">
-                                    <TextBlock Text="🛒" FontSize="42" HorizontalAlignment="Center" Opacity="0.3"/>
+                                    <fa:ImageAwesome Icon="ShoppingCart" Height="72" Width="72" HorizontalAlignment="Center" Opacity="0.3"/>
                                     <TextBlock Text="Tu carrito esta vacio"
                                                FontSize="13" Foreground="#6A6A9A"
                                                HorizontalAlignment="Center" Margin="0,8,0,4"/>
@@ -498,14 +470,14 @@ TextChanged="txtBuscar_TextChanged"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Grid.Column="0" Text="TOTAL"
-                                               Foreground="#6A8A6A" FontSize="11"
+                                               Foreground="#6A8A6A" FontSize="15"
                                                FontWeight="Bold" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Column="1" x:Name="lblTotal" Text="$0"
                                                FontFamily="Bahnschrift SemiBold, Consolas"
                                                FontSize="32" FontWeight="Bold" Foreground="#00E676"/>
                                 </Grid>
-                                <Button x:Name="btnCobrar" Content="💰  CERRAR Y COBRAR"
-                                        Style="{StaticResource BotonPrincipalEstilo}"
+                                <Button x:Name="btnCobrar" Content="CERRAR Y COBRAR"
+                                        Style="{StaticResource BotonCobrarEstilo}"
                                         Height="50" FontSize="14" Click="btnCobrar_Click"/>
                             </StackPanel>
                         </Border>

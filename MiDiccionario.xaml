@@ -439,7 +439,7 @@
     <!-- 2. ESTILO PARA EL COMBOBOX (EL CONTENEDOR) -->
     <Style x:Key="ComboBoxEstilo" TargetType="{x:Type ComboBox}">
         <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
-        <Setter Property="Margin" Value="0,0,0,14" />
+        <Setter Property="Margin" Value="0,0,0,15" />
         <Setter Property="Height" Value="46"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -648,18 +648,28 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="borde" CornerRadius="10">
-                        <!-- Degradado inline: no referencia recursos → no puede fallar -->
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                 <GradientStop Color="#FF6B35" Offset="0"/>
                                 <GradientStop Color="#FF3D1F" Offset="1"/>
                             </LinearGradientBrush>
                         </Border.Background>
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
-                                          Margin="20,0"/>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20,0">
+                            <fa:ImageAwesome Icon="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" 
+                                         Foreground="White" 
+                                         Height="14" 
+                                         Margin="0,0,10,0"
+                                         VerticalAlignment="Center"/>
+
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </StackPanel>
                     </Border>
+
                     <ControlTemplate.Triggers>
+                        <Trigger Property="Tag" Value="{x:Null}">
+                        </Trigger>
+
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="borde" Property="Opacity" Value="0.88"/>
                         </Trigger>
@@ -1109,7 +1119,6 @@
 
     <!-- Botón ELIMINAR/CANCELAR: Usa tu ColorError (Rojo) -->
     <Style x:Key="ButtonStyleCancelar" BasedOn="{StaticResource ButtonStyleAccionBase}" TargetType="Button">
-        <Setter Property="Background" Value="#2A0A0A"/>
         <Setter Property="BorderBrush" Value="#551515"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
@@ -1122,13 +1131,134 @@
     <!-- Estilo para BOTÓN ESTADO -->
     <Style x:Key="ButtonStyleEstado" BasedOn="{StaticResource ButtonStyleAccionBase}" TargetType="Button">
         <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Activo}" Value="True"/>
+                    <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                </MultiDataTrigger.Conditions>
                 <Setter Property="BorderBrush" Value="#FF5555"/>
-                <!-- Iluminación Roja -->
-            </Trigger>
+                <Setter Property="Background" Value="#2A1A1A"/>
+            </MultiDataTrigger>
+
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding Activo}" Value="False"/>
+                    <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True"/>
+                </MultiDataTrigger.Conditions>
+                <Setter Property="BorderBrush" Value="#00E676"/>
+                <Setter Property="Background" Value="#1A2A1A"/>
+            </MultiDataTrigger>
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="BotonAccionVerEstilo" TargetType="Button">
+        <Setter Property="Background" Value="#1A1A30"/>
+        <Setter Property="Width" Value="34"/>
+        <Setter Property="Height" Value="34"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="ToolTip" Value="Ver detalle"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" 
+                        CornerRadius="8" 
+                        x:Name="border">
+                        <fa:ImageAwesome Icon="Eye" 
+                                     Foreground="#00CFFF" 
+                                     Width="14" 
+                                     Height="14"
+                                     VerticalAlignment="Center" 
+                                     HorizontalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#252545"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#00CFFF"/>
+                            <Setter Property="Foreground" Value="#1A1A30"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ButtonCajaBaseStyle" TargetType="Button">
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Width" Value="130"/>
+        <Setter Property="Height" Value="46"/>
+        <Setter Property="BorderThickness" Value="1.5"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="10"
+                        x:Name="border">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <fa:ImageAwesome Icon="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" 
+                                         Foreground="{TemplateBinding Foreground}"
+                                         Height="14" Margin="0,0,8,0"/>
+                            <ContentPresenter/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ButtonIngresoStyle" TargetType="Button" BasedOn="{StaticResource ButtonCajaBaseStyle}">
+        <Setter Property="Background" Value="#0A2A14"/>
+        <Setter Property="Foreground" Value="#00E676"/>
+        <Setter Property="BorderBrush" Value="#00E676"/>
+        <Setter Property="Tag" Value="ArrowUp"/>
+    </Style>
+
+    <Style x:Key="ButtonGastoStyle" TargetType="Button" BasedOn="{StaticResource ButtonCajaBaseStyle}">
+        <Setter Property="Background" Value="#2A0A0A"/>
+        <Setter Property="Foreground" Value="#FF5555"/>
+        <Setter Property="BorderBrush" Value="#FF5555"/>
+        <Setter Property="Tag" Value="ArrowDown"/>
+    </Style>
+
+    <Style x:Key="BotonCobrarEstilo" TargetType="Button" BasedOn="{StaticResource BotonPrincipalEstilo}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="borde" 
+                        Background="{TemplateBinding Background}" 
+                        CornerRadius="10">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <fa:ImageAwesome Icon="CreditCard" 
+                                         Foreground="{TemplateBinding Foreground}" 
+                                         Height="18" 
+                                         Margin="0, 0,12,0"
+                                         VerticalAlignment="Center"/>
+
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="borde" Property="Opacity" Value="0.9"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="borde" Property="Opacity" Value="0.7"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <!-- ===========================================================
      ESTILOS DE LOS INDICADORES (KPIs)
      Usando la paleta oficial de Optimus CAI
@@ -1360,7 +1490,7 @@ Usando la paleta oficial de Optimus CAI
 =========================================================== -->
 
     <Style x:Key="BadgeBaseStyle" TargetType="Border">
-        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="CornerRadius" Value="5"/>
         <Setter Property="Padding" Value="10,4"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -1424,6 +1554,61 @@ Usando la paleta oficial de Optimus CAI
         <Setter Property="FontSize" Value="11"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="#00CFFF"/>
+    </Style>
+
+    <Style x:Key="ResultadoBadgeStyle" TargetType="Border" BasedOn="{StaticResource BadgeBaseStyle}">
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="#2A0A0A"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding EsPermitido}" Value="True">
+                <Setter Property="Background" Value="#0A2A14"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ResultadoIconStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Margin" Value="0,0,4,0"/>
+        <Setter Property="Text" Value="✕"/>
+        <Setter Property="Foreground" Value="#FF6666"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding EsPermitido}" Value="True">
+                <Setter Property="Text" Value="✓"/>
+                <Setter Property="Foreground" Value="#00E676"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ResultadoTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="#FF6666"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding EsPermitido}" Value="True">
+                <Setter Property="Foreground" Value="#00E676"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="BadgeContadorEstilo" TargetType="Border">
+        <Setter Property="Background" Value="#0A2A14"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="MinWidth" Value="60"/>
+        <Setter Property="Height" Value="32"/>
+        <Style.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="#00E676"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+            </Style>
+        </Style.Resources>
     </Style>
 
     <!-- ===========================================================

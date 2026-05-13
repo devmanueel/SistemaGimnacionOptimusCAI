@@ -204,7 +204,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             // Badge de stock arriba a la derecha
             var badgeEstado = new Border
             {
-                CornerRadius = new CornerRadius(20),
+                CornerRadius = new CornerRadius(4),
                 Padding = new Thickness(10, 4, 10, 4),
                 HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Top,

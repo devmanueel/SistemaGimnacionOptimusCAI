@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       mc:Ignorable="d"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="Control de Acceso">
 
@@ -177,7 +178,7 @@
                     <!-- Título + DNI input -->
                     <StackPanel Grid.Row="1" Margin="22,22,22,0">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                            <TextBlock Text="🚪" FontSize="20" Margin="0,0,8,0"/>
+                            <fa:ImageAwesome Icon="SignIn" Foreground="#00CFFF" Height="18" Margin="0, 0, 8, 0"/>
                             <TextBlock Text="REGISTRAR INGRESO"
                                        FontFamily="Bahnschrift SemiBold, Segoe UI"
                                        FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"
@@ -318,12 +319,12 @@
                                 VerticalAlignment="Center"
                                 HorizontalAlignment="Center"
                                 Margin="20">
-                        <TextBlock Text="🔒" FontSize="56" Foreground="#3A3A5C"
-                                   HorizontalAlignment="Center" Opacity="0.6"/>
+                        <fa:ImageAwesome Icon="Lock" Foreground="#00CFFF" Height="90" Opacity="0.7" HorizontalAlignment="Center" Margin="0, 0, 0, 15"/>
+                       
                         <TextBlock Text="ESPERANDO INGRESO..."
                                    FontFamily="Bahnschrift SemiBold"
                                    FontSize="13" FontWeight="Bold"
-                                   Foreground="#3A3A5C"
+                                   Foreground="White"
                                    HorizontalAlignment="Center" Margin="0,12,0,0"/>
                     </StackPanel>
 
@@ -357,7 +358,7 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="📋" FontSize="16" Margin="0,0,8,0"/>
+                            <fa:ImageAwesome Icon="ListUl" Foreground="#00CFFF" Height="16" Margin="0, 0, 8, 0"/>
                             <TextBlock Text="ACCESOS DEL DÍA"
                                        FontFamily="Bahnschrift SemiBold, Segoe UI"
                                        FontSize="14" FontWeight="Bold" Foreground="#E8E8FF"
@@ -442,8 +443,8 @@
                                             </Grid>
                                             <StackPanel VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding SocioNombre}" FontSize="13"
-                                                           FontWeight="SemiBold" Foreground="#E8E8FF"/>
-                                                <TextBlock Text="{Binding NumeroSocioFormateado}"
+                                                           FontWeight="SemiBold" Foreground="#E8E8FF" Margin="5, 0, 0, 5"/>
+                                                <TextBlock Text="{Binding NumeroSocioFormateado}" Margin="5, 0, 0, 0"
                                                            FontFamily="Consolas" FontSize="11"
                                                            Foreground="#FF6B35"/>
                                             </StackPanel>
@@ -459,45 +460,11 @@
                             <DataGridTemplateColumn Header="RESULTADO" Width="155">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border CornerRadius="20" Padding="10,4" HorizontalAlignment="Left">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#2A0A0A"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding EsPermitido}" Value="True">
-                                                            <Setter Property="Background" Value="#0A2A14"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
+                                        <Border Style="{StaticResource ResultadoBadgeStyle}">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock FontSize="13" FontWeight="Bold" Margin="0,0,4,0">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Text" Value="✕"/>
-                                                            <Setter Property="Foreground" Value="#FF6666"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding EsPermitido}" Value="True">
-                                                                    <Setter Property="Text" Value="✓"/>
-                                                                    <Setter Property="Foreground" Value="#00E676"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                                <TextBlock Text="{Binding ResultadoTexto}" FontSize="12"
-                                                           FontWeight="SemiBold" VerticalAlignment="Center">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="#FF6666"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding EsPermitido}" Value="True">
-                                                                    <Setter Property="Foreground" Value="#00E676"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
+                                                <TextBlock Style="{StaticResource ResultadoIconStyle}"/>
+                                                <TextBlock Style="{StaticResource ResultadoTextStyle}" 
+                                                           Text="{Binding ResultadoTexto}"/>
                                             </StackPanel>
                                         </Border>
                                     </DataTemplate>

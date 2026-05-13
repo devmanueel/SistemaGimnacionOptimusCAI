@@ -267,8 +267,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 lblTituloFormulario.Text = "REGISTRAR INGRESO";
                 btnGuardar.Content = "REGISTRAR INGRESO";
                 lineaSuperior.Background = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-                lblPreviewIcono.Text = "💰";
-                lblPreviewMonto.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+
+                // ← Resetear ícono a verde
+                iconoFormulario.Icon = FontAwesome.WPF.FontAwesomeIcon.PlusCircle;
+                iconoFormulario.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
 
                 cmbConcepto.ItemsSource = ConceptosIngreso;
             }
@@ -277,8 +279,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 lblTituloFormulario.Text = "REGISTRAR GASTO";
                 btnGuardar.Content = "REGISTRAR GASTO";
                 lineaSuperior.Background = new SolidColorBrush(Color.FromRgb(255, 85, 85));
-                lblPreviewIcono.Text = "💸";
-                lblPreviewMonto.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+
+                // ← Ícono rojo (ya lo tenías, sacá el duplicado)
+                iconoFormulario.Icon = FontAwesome.WPF.FontAwesomeIcon.MinusCircle;
+                iconoFormulario.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
 
                 cmbConcepto.ItemsSource = ConceptosGasto;
             }
@@ -416,8 +420,23 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             decimal monto = 0;
             if (decimal.TryParse(txtMonto.Text, out monto) && monto > 0)
             {
-                string signo = _modoForm == "ingreso" ? "+" : "-";
-                lblPreviewMonto.Text = signo + "$" + monto.ToString("N0");
+                if (_modoForm == "ingreso")
+                {
+                    lblPreviewMonto.Text = "+$" + monto.ToString("N0");
+                    lblPreviewMonto.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                    iconoPreviewMonto.Icon = FontAwesome.WPF.FontAwesomeIcon.PlusCircle;
+                    iconoPreviewMonto.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                    panelPreviewMonto.Background = new SolidColorBrush(Color.FromArgb(255, 10, 26, 10));
+                }
+                else
+                {
+                    lblPreviewMonto.Text = "-$" + monto.ToString("N0");
+                    lblPreviewMonto.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+                    iconoPreviewMonto.Icon = FontAwesome.WPF.FontAwesomeIcon.MinusCircle;
+                    iconoPreviewMonto.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+                    panelPreviewMonto.Background = new SolidColorBrush(Color.FromArgb(255, 42, 10, 10));
+                }
+
                 panelPreviewMonto.Visibility = Visibility.Visible;
             }
             else
@@ -512,6 +531,22 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var btn = sender as Button;
             if (btn == null) return null;
             return btn.DataContext as CajaMovimiento;
+        }
+
+        private void btnRangoHoy_Click(object sender, RoutedEventArgs e)
+        {
+            dpDesde.SelectedDate = DateTime.Today;
+            dpHasta.SelectedDate = DateTime.Today;
+        }
+        private void btnRangoSemana_Click(object sender, RoutedEventArgs e)
+        {
+            dpDesde.SelectedDate = DateTime.Today.AddDays(-6);
+            dpHasta.SelectedDate = DateTime.Today;
+        }
+        private void btnRangoMes_Click(object sender, RoutedEventArgs e)
+        {
+            dpDesde.SelectedDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            dpHasta.SelectedDate = DateTime.Today;
         }
     }
 }

@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       mc:Ignorable="d"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="Membresías">
 
@@ -110,8 +111,9 @@
                          Style="{StaticResource BuscadorStyle}" Width="290" 
                          Margin="0,0,12,0" TextChanged="txtBuscar_TextChanged"/>
 
-                <Button Content="＋  COBRAR CUOTA"
+                <Button Content="COBRAR CUOTA"
                         Style="{StaticResource BotonNaranjaEstilo}"
+                        Tag="UserPlus"
                         Width="180" Height="46" Click="btnNuevo_Click"/>
             </StackPanel>
         </Grid>
@@ -377,16 +379,16 @@
                                                 <TextBlock Text="+30d" FontSize="11" FontWeight="Bold" Foreground="#00E676"/>
                                             </Button>
                                             <!-- EDITAR -->
-                                            <Button Click="btnEditar_Click" Style="{StaticResource ButtonStyleEditar}" 
-Margin="4,0" Cursor="Hand" ToolTip="Editar">
-                                                    <TextBlock Text="✏" FontSize="15" Foreground="#00CFFF"/>
-                                                </Button>
+                                            <Button Click="btnEditar_Click" Style="{StaticResource ButtonStyleEditar}"
+                                                    Margin="4,0" Cursor="Hand" ToolTip="Editar">
+                                                <fa:ImageAwesome Icon="Edit" Foreground="#00CFFF" Height="14"/>
+                                            </Button>
                                                 <!-- CANCELAR -->
-                                            <Button Style="{StaticResource ButtonStyleCancelar}" 
-Click="btnCancelar_Click" 
-ToolTip="Cancelar membresía">
-                                                <TextBlock Text="✕" FontSize="14" FontWeight="Bold"
-                                                                   Foreground="#FF5555"/>
+                                            <Button Style="{StaticResource ButtonStyleCancelar}"                           
+                                                    Click="btnCancelar_Click" 
+                                                    ToolTip="Cancelar membresía">
+                                                <fa:ImageAwesome Icon="Times" Foreground="#FF5555" Height="14"/>
+                                                
                                                     </Button>
                                         </StackPanel>
                                     </DataTemplate>

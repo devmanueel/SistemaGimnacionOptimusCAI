@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="Asistencias de Instructores">
@@ -140,7 +141,7 @@
         <!-- CONTENIDO: Turnos de hoy + Historial -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="430"/>
+                <ColumnDefinition Width="415"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
@@ -163,15 +164,15 @@
                     </Border>
 
                     <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="22,18,22,12">
-                        <TextBlock Text="📋" FontSize="18" Margin="0,0,8,0"/>
+                        <fa:ImageAwesome Icon="Calendar" Foreground="#00E676" Height="25" Margin="0,0,8,0"/>
                         <TextBlock Text="TURNOS DE HOY"
                                    FontFamily="Bahnschrift SemiBold, Segoe UI"
                                    FontSize="14" FontWeight="Bold" Foreground="#E8E8FF"
-                                   VerticalAlignment="Center"/>
+                                   VerticalAlignment="Center" Margin="0,3, 0, 0"/>
                     </StackPanel>
 
                     <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
-                                  Padding="16,0,16,16">
+                                  Padding="16,0,16,16"  >
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -180,10 +181,13 @@
                             <StackPanel Grid.Row="0" x:Name="panelSinTurnos"
                                         HorizontalAlignment="Center" Margin="0,40,0,0"
                                         Visibility="Collapsed">
-                                <TextBlock Text="📅" FontSize="48" HorizontalAlignment="Center" Opacity="0.4"/>
+                                <TextBlock HorizontalAlignment="Center" >
+                                    <fa:ImageAwesome Icon="Calendar" Foreground="#FF000000" Opacity="0.4" Height="80" Margin="0, 50, 0, 10"/>
+                                </TextBlock>
                                 <TextBlock Text="No hay turnos hoy"
                                            FontSize="13" Foreground="#6A6A9A"
-                                           HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                           HorizontalAlignment="Center" Margin="0,8,0,0">
+                                </TextBlock>
                             </StackPanel>
                             <StackPanel Grid.Row="1" x:Name="panelTurnosHoy"/>
                         </Grid>
@@ -216,11 +220,11 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Orientation="Horizontal">
-                            <TextBlock Text="📊" FontSize="16" Margin="0,0,8,0"/>
+                            <fa:ImageAwesome Icon="History" Foreground="#A78BFA" Height="18" Margin="0,0,8,0"/>
                             <TextBlock Text="HISTORIAL"
                                        FontFamily="Bahnschrift SemiBold"
                                        FontSize="14" FontWeight="Bold" Foreground="#E8E8FF"
-                                       VerticalAlignment="Center"/>
+                                       VerticalAlignment="Center" />
                         </StackPanel>
                     </Grid>
 
@@ -318,7 +322,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding HoraEntradaTexto}"
-                                                   FontFamily="Consolas" FontWeight="Bold"
+                                                   FontFamily="Consolas" FontWeight="Bold" Margin="3, 0, 0, 0"
                                                    FontSize="13" Foreground="#00E676"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -328,7 +332,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding HoraSalidaTexto}"
-                                                   FontFamily="Consolas" FontWeight="Bold"
+                                                   FontFamily="Consolas" FontWeight="Bold" Margin="3, 0, 0, 0"
                                                    FontSize="13">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
@@ -352,7 +356,7 @@
                             <DataGridTemplateColumn Header="ESTADO" Width="120">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border CornerRadius="20" Padding="10,4" HorizontalAlignment="Left">
+                                        <Border CornerRadius="4" Padding="10,4" HorizontalAlignment="Left">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="#0A2A14"/>
@@ -381,17 +385,14 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="" Width="50">
+                            <DataGridTemplateColumn Header="" Width="70">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Width="32" Height="32" CornerRadius="8" Background="#1A1A30">
-                                            <Button Click="btnEliminar_Click"
-                                                    Background="Transparent" BorderThickness="0"
-                                                    Cursor="Hand" ToolTip="Eliminar">
-                                                <TextBlock Text="✕" FontSize="13" FontWeight="Bold"
-                                                           Foreground="#FF5555"/>
-                                            </Button>
-                                        </Border>
+                                        <Button Click="btnEliminar_Click"
+                                                Style="{StaticResource ButtonStyleCancelar}"
+                                                Cursor="Hand" ToolTip="Eliminar">
+                                            <fa:ImageAwesome Icon="Times" Foreground="#FF5555" Height="14"/>
+                                        </Button>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

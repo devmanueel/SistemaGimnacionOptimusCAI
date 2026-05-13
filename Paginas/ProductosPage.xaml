@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="Productos">
@@ -144,7 +145,8 @@
                          Style="{StaticResource BuscadorStyle}" Width="290" 
                          Margin="0,0,12,0" TextChanged="txtBuscar_TextChanged"/>
 
-                <Button Content="＋ NUEVO PRODUCTO"
+                <Button Content="NUEVO PRODUCTO"
+                        Tag="Plus"
                         Style="{StaticResource BotonNaranjaEstilo}"
                         Width="195" Height="46" Click="btnNuevo_Click"/>
             </StackPanel>
@@ -258,7 +260,7 @@
                     </Border>
 
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled" Padding="14">
+                                  HorizontalScrollBarVisibility="Disabled" Padding="14" Style="{StaticResource PanelScrollViewerStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -329,9 +331,10 @@
                                         ClipToBounds="True">
                                     <Grid>
                                         <Image x:Name="imgFotoFormulario" Stretch="UniformToFill"/>
-                                        <TextBlock x:Name="lblSinFoto" Text="📦" FontSize="48"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                   Opacity="0.3"/>
+                                        <TextBlock x:Name="lblSinFoto" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <fa:ImageAwesome Icon="Archive" Foreground="#FF000000" Opacity="0.5"
+                                                             Height="60" Width="60" VerticalAlignment="Center"/>
+                                        </TextBlock>
                                     </Grid>
                                 </Border>
                                 <Button Content="Cambiar foto" Click="btnSubirFoto_Click"

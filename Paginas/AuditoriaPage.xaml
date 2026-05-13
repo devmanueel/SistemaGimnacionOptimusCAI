@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="Auditoría">
@@ -200,7 +201,7 @@
                         </Border.Background>
                     </Border>
 
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Style="{StaticResource PanelScrollViewerStyle}"
                                   Padding="0,8,0,12">
                         <Grid>
                             <Grid.RowDefinitions>
@@ -210,7 +211,10 @@
                             <StackPanel Grid.Row="0" x:Name="panelVacio"
                                         HorizontalAlignment="Center" Margin="0,80,0,0"
                                         Visibility="Collapsed">
-                                <TextBlock Text="📜" FontSize="64" HorizontalAlignment="Center" Opacity="0.4"/>
+        
+                                <fa:ImageAwesome Icon="FileTextOutline" HorizontalAlignment="Center" Opacity="0.8" Height="64"
+                                                 Foreground="#FF000000"/>
+
                                 <TextBlock Text="No hay registros en este período"
                                            FontFamily="Bahnschrift SemiBold"
                                            FontSize="14" FontWeight="Bold"
@@ -246,8 +250,8 @@
                     <!-- Estado vacio -->
                     <StackPanel Grid.Row="1" x:Name="panelSinSeleccion"
                                 VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="📜" FontSize="80" Opacity="0.3"
-                                   HorizontalAlignment="Center"/>
+                        <fa:ImageAwesome Icon="FileTextOutline" HorizontalAlignment="Center" 
+                                         Opacity="0.8" Height="64" Foreground="#FF000000"/>
                         <TextBlock Text="Seleccioná un evento"
                                    FontFamily="Bahnschrift SemiBold"
                                    FontSize="18" FontWeight="Bold" Foreground="#6A6A9A"
@@ -258,7 +262,7 @@
                     </StackPanel>
 
                     <!-- Detalle -->
-                    <ScrollViewer Grid.Row="1" x:Name="scrollDetalle"
+                    <ScrollViewer Grid.Row="1" x:Name="scrollDetalle" Style="{StaticResource PanelScrollViewerStyle}"
                                   Visibility="Collapsed"
                                   VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="24,18,24,18">

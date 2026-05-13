@@ -23,7 +23,7 @@
                 <Setter Property="Foreground" Value="#4A4A7A"/>
                 <Setter Property="FontSize"   Value="10"/>
                 <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Margin"     Value="2,0,0,6"/>
+                <Setter Property="Margin"     Value="2,0,0,15"/>
             </Style>
         </ResourceDictionary>
     </Page.Resources>
@@ -79,7 +79,8 @@
                                FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
                 </StackPanel>
             </StackPanel>
-            <Button Grid.Column="1" Content="＋ NUEVO TURNO"
+            <Button Grid.Column="1" Content="NUEVO TURNO"
+                    Tag="Plus"
                     Style="{StaticResource BotonNaranjaEstilo}"
                     Width="180" Height="46" Click="btnNuevo_Click"/>
         </Grid>
@@ -197,7 +198,7 @@
 
                     <!-- Columnas con turnos -->
                     <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled">
+                                  HorizontalScrollBarVisibility="Disabled" Style="{StaticResource PanelScrollViewerStyle}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -264,7 +265,7 @@
                         <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
                     </StackPanel>
 
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="22,14,22,0">
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="22,14,22,0" Style="{StaticResource PanelScrollViewerStyle}">
                         <StackPanel>
 
                             <TextBlock Text="ACTIVIDAD *" Style="{StaticResource LabelCampoEstilo}"/>

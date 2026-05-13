@@ -111,8 +111,9 @@ Width="290"
 Margin="0,0,12,0"
 TextChanged="txtBuscar_TextChanged"/>
 
-                <Button Content="＋  NUEVA ACTIVIDAD"
+                <Button Content="NUEVA ACTIVIDAD"
                         Style="{StaticResource BotonNaranjaEstilo}"
+                        Tag="Plus"
                         Width="185" Height="46" Click="btnNuevo_Click"/>
             </StackPanel>
         </Grid>
@@ -262,21 +263,21 @@ TextChanged="txtBuscar_TextChanged"/>
                             </DataGridTemplateColumn>
 
                             <!-- Acciones -->
-                            <DataGridTemplateColumn Header="ACCIONES" Width="140">
+                            <DataGridTemplateColumn Header="ACCIONES" Width="120">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
 
                                             <!-- BOTÓN EDITAR -->
                                             <Button Click="btnEditar_Click" 
-Style="{StaticResource ButtonStyleEditar}" 
-Margin="0,0,8,0">
+                                                    Style="{StaticResource ButtonStyleEditar}" 
+                                                    Margin="0,0,8,0">
                                                 <fa:ImageAwesome Icon="Edit" Foreground="#00CFFF" Height="14"/>
                                             </Button>
 
                                             <!-- BOTÓN ESTADO -->
                                             <Button Click="btnToggleEstado_Click" 
-Style="{StaticResource ButtonStyleEstado}">
+                                                    Style="{StaticResource ButtonStyleEstado}">
                                                 <fa:ImageAwesome Height="14">
                                                     <fa:ImageAwesome.Style>
                                                         <Style TargetType="fa:ImageAwesome">
