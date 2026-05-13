@@ -129,6 +129,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Paginas\DashboardPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Paginas\InstructorAsistenciasPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -185,6 +189,9 @@
     </Compile>
     <Compile Include="Paginas\CasillerosPage.xaml.cs">
       <DependentUpon>CasillerosPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\DashboardPage.xaml.cs">
+      <DependentUpon>DashboardPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\InstructorAsistenciasPage.xaml.cs">
       <DependentUpon>InstructorAsistenciasPage.xaml</DependentUpon>

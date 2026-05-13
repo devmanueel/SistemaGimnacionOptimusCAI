@@ -1,0 +1,579 @@
+﻿<Page x:Class="SistemaGimnacionOptimusCAI.Paginas.DashboardPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
+      mc:Ignorable="d"
+      d:DesignHeight="768" d:DesignWidth="1280"
+      Title="Dashboard">
+
+    <Page.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#0A0A14" Offset="0"/>
+            <GradientStop Color="#0D0D22" Offset="1"/>
+        </LinearGradientBrush>
+    </Page.Background>
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Grid x:Name="gridRaiz" Margin="24,20,24,20" Opacity="0">
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Grid.Loaded">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetName="gridRaiz"
+                                         Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1" Duration="0:0:0.5"
+                                         DecelerationRatio="0.6"/>
+                        <DoubleAnimation Storyboard.TargetName="translateEntrada"
+                                         Storyboard.TargetProperty="Y"
+                                         From="20" To="0" Duration="0:0:0.5"
+                                         DecelerationRatio="0.8"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+        <Grid.RenderTransform>
+            <TranslateTransform x:Name="translateEntrada" Y="20"/>
+        </Grid.RenderTransform>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ══════════════════ HEADER ══════════════════ -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#00CFFF" Offset="0"/>
+                            <GradientStop Color="#A78BFA" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+                <StackPanel>
+                    <TextBlock Text="TABLERO PRINCIPAL"
+                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                    <TextBlock x:Name="lblFechaHoy"
+                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Saludo al usuario -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock x:Name="lblSaludo"
+                           FontSize="13" Foreground="#6A6A9A"
+                           VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <Border Width="32" Height="32" CornerRadius="16"
+                        Background="#1A1A2E"
+                        BorderBrush="#252540" BorderThickness="1">
+                    <TextBlock x:Name="lblIniciales"
+                               FontSize="12" FontWeight="Bold"
+                               Foreground="#00CFFF"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- ══════════════════ CARDS KPI ══════════════════ -->
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Card 1: Socios Activos -->
+            <Border Grid.Column="0" Margin="0,0,8,0"
+                    Background="#12121E" CornerRadius="14"
+                    BorderThickness="1" BorderBrush="#252540">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.3" Color="#00CFFF"/>
+                </Border.Effect>
+                <Grid Margin="18,16">
+                    <!-- Borde superior decorativo -->
+                    <Border VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                            Height="3" CornerRadius="2,2,0,0" Margin="-18,-16,-18,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#00CFFF" Offset="0"/>
+                                <GradientStop Color="#12121E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock x:Name="statSociosActivos" Text="0"
+                                       FontFamily="Bahnschrift SemiBold" FontSize="36"
+                                       FontWeight="ExtraBold" Foreground="#00CFFF">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="0" Color="#00CFFF" Opacity="0.4"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock Text="SOCIOS ACTIVOS" FontSize="10"
+                                       FontWeight="Bold" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Width="44" Height="44"
+                                CornerRadius="22" Background="#0A1A2A"
+                                VerticalAlignment="Center">
+                            <fa:ImageAwesome Icon="Users" Foreground="#00CFFF"
+                                             Height="20" Width="20"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Card 2: Membresias Activas -->
+            <Border Grid.Column="1" Margin="4,0,4,0"
+                    Background="#12121E" CornerRadius="14"
+                    BorderThickness="1" BorderBrush="#252540">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.3" Color="#A78BFA"/>
+                </Border.Effect>
+                <Grid Margin="18,16">
+                    <Border VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                            Height="3" CornerRadius="2,2,0,0" Margin="-18,-16,-18,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#A78BFA" Offset="0"/>
+                                <GradientStop Color="#12121E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock x:Name="statMembresiasActivas" Text="0"
+                                       FontFamily="Bahnschrift SemiBold" FontSize="36"
+                                       FontWeight="ExtraBold" Foreground="#A78BFA">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="0" Color="#A78BFA" Opacity="0.4"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock Text="MEMBRESIAS ACTIVAS" FontSize="10"
+                                       FontWeight="Bold" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Width="44" Height="44"
+                                CornerRadius="22" Background="#1E1840"
+                                VerticalAlignment="Center">
+                            <fa:ImageAwesome Icon="IdCardOutline" Foreground="#A78BFA"
+                                             Height="20" Width="20"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Card 3: Ingresos del Mes -->
+            <Border Grid.Column="2" Margin="4,0,4,0"
+                    Background="#12121E" CornerRadius="14"
+                    BorderThickness="1" BorderBrush="#252540">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.3" Color="#00E676"/>
+                </Border.Effect>
+                <Grid Margin="18,16">
+                    <Border VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                            Height="3" CornerRadius="2,2,0,0" Margin="-18,-16,-18,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#00E676" Offset="0"/>
+                                <GradientStop Color="#12121E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock x:Name="statIngresosMes" Text="$0"
+                                       FontFamily="Bahnschrift SemiBold, Consolas" FontSize="28"
+                                       FontWeight="ExtraBold" Foreground="#00E676">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="0" Color="#00E676" Opacity="0.4"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock Text="INGRESOS DEL MES" FontSize="10"
+                                       FontWeight="Bold" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Width="44" Height="44"
+                                CornerRadius="22" Background="#0A2A14"
+                                VerticalAlignment="Center">
+                            <fa:ImageAwesome Icon="Money" Foreground="#00E676"
+                                             Height="20" Width="20"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Card 4: Asistencias Hoy -->
+            <Border Grid.Column="3" Margin="8,0,0,0"
+                    Background="#12121E" CornerRadius="14"
+                    BorderThickness="1" BorderBrush="#252540">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.3" Color="#FFA726"/>
+                </Border.Effect>
+                <Grid Margin="18,16">
+                    <Border VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                            Height="3" CornerRadius="2,2,0,0" Margin="-18,-16,-18,0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#FFA726" Offset="0"/>
+                                <GradientStop Color="#12121E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock x:Name="statAsistenciasHoy" Text="0"
+                                       FontFamily="Bahnschrift SemiBold" FontSize="36"
+                                       FontWeight="ExtraBold" Foreground="#FFA726">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="0" Color="#FFA726" Opacity="0.4"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock Text="ASISTENCIAS HOY" FontSize="10"
+                                       FontWeight="Bold" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Border Grid.Column="1" Width="44" Height="44"
+                                CornerRadius="22" Background="#2A1F00"
+                                VerticalAlignment="Center">
+                            <fa:ImageAwesome Icon="CheckSquareOutline" Foreground="#FFA726"
+                                             Height="20" Width="20"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ══════════════════ CONTENIDO PRINCIPAL ══════════════════ -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="300"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ── CALENDARIO ── -->
+            <Border Grid.Column="0" Margin="0,0,14,0"
+                    Background="#12121E" CornerRadius="14"
+                    BorderBrush="#252540" BorderThickness="1"
+                    ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Barra degradado superior -->
+                    <Border Grid.Row="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#00CFFF" Offset="0"/>
+                                <GradientStop Color="#A78BFA" Offset="0.5"/>
+                                <GradientStop Color="#12121E" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+
+                    <!-- Header del calendario -->
+                    <Grid Grid.Row="1" Margin="20,16,20,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Flecha anterior -->
+                        <Border Grid.Column="0" Width="32" Height="32"
+                                CornerRadius="8" Background="#1A1A2E"
+                                BorderBrush="#252540" BorderThickness="1"
+                                Cursor="Hand">
+                            <TextBlock Text="❮" FontSize="12" Foreground="#6A6A9A"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Mes y año -->
+                        <TextBlock x:Name="lblMesAnio" Grid.Column="1"
+                                   FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                   FontSize="16" FontWeight="Bold" Foreground="#E8E8FF"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                        <!-- Flecha siguiente -->
+                        <Border Grid.Column="2" Width="32" Height="32"
+                                CornerRadius="8" Background="#1A1A2E"
+                                BorderBrush="#252540" BorderThickness="1"
+                                Cursor="Hand">
+                            <TextBlock Text="❯" FontSize="12" Foreground="#6A6A9A"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </Grid>
+
+                    <!-- Grilla del calendario -->
+                    <Grid Grid.Row="2" Margin="16,0,16,16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Encabezados días de la semana -->
+                        <UniformGrid Grid.Row="0" Rows="1" Columns="7" Margin="0,0,0,8">
+                            <TextBlock Text="LUN" FontSize="11" FontWeight="Bold"
+                                       Foreground="#6A6A9A" HorizontalAlignment="Center" Padding="0,4"/>
+                            <TextBlock Text="MAR" FontSize="11" FontWeight="Bold"
+                                       Foreground="#6A6A9A" HorizontalAlignment="Center" Padding="0,4"/>
+                            <TextBlock Text="MIE" FontSize="11" FontWeight="Bold"
+                                       Foreground="#6A6A9A" HorizontalAlignment="Center" Padding="0,4"/>
+                            <TextBlock Text="JUE" FontSize="11" FontWeight="Bold"
+                                       Foreground="#6A6A9A" HorizontalAlignment="Center" Padding="0,4"/>
+                            <TextBlock Text="VIE" FontSize="11" FontWeight="Bold"
+                                       Foreground="#6A6A9A" HorizontalAlignment="Center" Padding="0,4"/>
+                            <TextBlock Text="SAB" FontSize="11" FontWeight="Bold"
+                                       Foreground="#6A6A9A" HorizontalAlignment="Center" Padding="0,4"/>
+                            <TextBlock Text="DOM" FontSize="11" FontWeight="Bold"
+                                       Foreground="#FF5555" HorizontalAlignment="Center" Padding="0,4"/>
+                        </UniformGrid>
+
+                        <!-- Celdas del calendario (generadas en code-behind) -->
+                        <UniformGrid x:Name="gridCalendario" Grid.Row="1"
+                                     Rows="6" Columns="7"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- ── PANEL DERECHO ── -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- ── PRÓXIMOS VENCIMIENTOS ── -->
+                <Border Grid.Row="0"
+                        Background="#12121E" CornerRadius="14"
+                        BorderBrush="#252540" BorderThickness="1"
+                        ClipToBounds="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#FFA726" Offset="0"/>
+                                    <GradientStop Color="#12121E" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <StackPanel Grid.Row="1" Margin="16,14,16,10"
+                                    Orientation="Horizontal">
+                            <Border Width="28" Height="28" CornerRadius="8"
+                                    Background="#2A1F00" Margin="0,0,10,0">
+                                <fa:ImageAwesome Icon="ClockOutline" Foreground="#FFA726"
+                                                 Height="14" Width="14"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="PROXIMOS VENCIMIENTOS"
+                                       FontSize="11" FontWeight="Bold"
+                                       Foreground="#E8E8FF" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <ScrollViewer Grid.Row="2" MaxHeight="180"
+                                      VerticalScrollBarVisibility="Auto"
+                                      Margin="12,0,12,12"
+                                      Style="{StaticResource PanelScrollViewerStyle}">
+                            <StackPanel x:Name="panelVencimientos">
+                                <!-- Se llena desde code-behind -->
+                                <TextBlock Text="Cargando..."
+                                           FontSize="12" Foreground="#6A6A9A"
+                                           Margin="4,8" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+
+                <!-- ── ACCESOS RAPIDOS ── -->
+                <Border Grid.Row="2"
+                        Background="#12121E" CornerRadius="14"
+                        BorderBrush="#252540" BorderThickness="1"
+                        ClipToBounds="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#A78BFA" Offset="0"/>
+                                    <GradientStop Color="#12121E" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+
+                        <StackPanel Grid.Row="1" Margin="16,14,16,12"
+                                    Orientation="Horizontal">
+                            <Border Width="28" Height="28" CornerRadius="8"
+                                    Background="#1E1840" Margin="0,0,10,0">
+                                <fa:ImageAwesome Icon="Flash" Foreground="#A78BFA"
+                                                 Height="14" Width="14"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="ACCESOS RAPIDOS"
+                                       FontSize="11" FontWeight="Bold"
+                                       Foreground="#E8E8FF" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <UniformGrid Grid.Row="2" Rows="3" Columns="2"
+                                     Margin="12,0,12,14">
+
+                            <!-- Nuevo Socio -->
+                            <Border Margin="4" Height="56" CornerRadius="10"
+                                    Background="#16162A" BorderBrush="#252540"
+                                    BorderThickness="1" Cursor="Hand"
+                                    x:Name="btnRapidoSocio">
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <fa:ImageAwesome Icon="UserPlus" Foreground="#00CFFF"
+                                                     Height="16" Width="16"
+                                                     HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Nuevo Socio" FontSize="10"
+                                               FontWeight="Bold" Foreground="#A0A8BA"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Cobrar Cuota -->
+                            <Border Margin="4" Height="56" CornerRadius="10"
+                                    Background="#16162A" BorderBrush="#252540"
+                                    BorderThickness="1" Cursor="Hand"
+                                    x:Name="btnRapidoCuota">
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Money" Foreground="#00E676"
+                                                     Height="16" Width="16"
+                                                     HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Cobrar Cuota" FontSize="10"
+                                               FontWeight="Bold" Foreground="#A0A8BA"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Registrar Asistencia -->
+                            <Border Margin="4" Height="56" CornerRadius="10"
+                                    Background="#16162A" BorderBrush="#252540"
+                                    BorderThickness="1" Cursor="Hand"
+                                    x:Name="btnRapidoAsistencia">
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <fa:ImageAwesome Icon="CheckSquareOutline" Foreground="#FFA726"
+                                                     Height="16" Width="16"
+                                                     HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Asistencia" FontSize="10"
+                                               FontWeight="Bold" Foreground="#A0A8BA"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Nueva Venta -->
+                            <Border Margin="4" Height="56" CornerRadius="10"
+                                    Background="#16162A" BorderBrush="#252540"
+                                    BorderThickness="1" Cursor="Hand"
+                                    x:Name="btnRapidoVenta">
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <fa:ImageAwesome Icon="ShoppingBasket" Foreground="#A78BFA"
+                                                     Height="16" Width="16"
+                                                     HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Nueva Venta" FontSize="10"
+                                               FontWeight="Bold" Foreground="#A0A8BA"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Turno -->
+                            <Border Margin="4" Height="56" CornerRadius="10"
+                                    Background="#16162A" BorderBrush="#252540"
+                                    BorderThickness="1" Cursor="Hand"
+                                    x:Name="btnRapidoTurno">
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <fa:ImageAwesome Icon="Calendar" Foreground="#FF6B35"
+                                                     Height="16" Width="16"
+                                                     HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Nuevo Turno" FontSize="10"
+                                               FontWeight="Bold" Foreground="#A0A8BA"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Reporte -->
+                            <Border Margin="4" Height="56" CornerRadius="10"
+                                    Background="#16162A" BorderBrush="#252540"
+                                    BorderThickness="1" Cursor="Hand"
+                                    x:Name="btnRapidoReporte">
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <fa:ImageAwesome Icon="BarChart" Foreground="#00CFFF"
+                                                     Height="16" Width="16"
+                                                     HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Ver Reportes" FontSize="10"
+                                               FontWeight="Bold" Foreground="#A0A8BA"
+                                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Border>
+
+                        </UniformGrid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>

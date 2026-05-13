@@ -88,21 +88,22 @@ namespace SistemaGimnacionOptimusCAI
             var items = new List<MenuItem>
             {
                 // Todos ven estos
-    new MenuItem { Icono = FontAwesomeIcon.Users,           Texto = "Socios",               TipoPagina = typeof(SociosPage),                SoloAdmin = false },
-    new MenuItem { Icono = FontAwesomeIcon.IdCardOutline,   Texto = "Membresías",           TipoPagina = typeof(MembresiasPage),            SoloAdmin = false },
-    new MenuItem { Icono = FontAwesomeIcon.CheckSquareOutline, Texto = "Asistencias",          TipoPagina = typeof(AsistenciasPage),           SoloAdmin = false },
-    new MenuItem { Icono = FontAwesomeIcon.Money,           Texto = "Caja",                 TipoPagina = typeof(CajaPage),                  SoloAdmin = false },
-    new MenuItem { Icono = FontAwesomeIcon.ShoppingBasket,  Texto = "Ventas",               TipoPagina = typeof(VentasPage),                SoloAdmin = false },
-    new MenuItem { Icono = FontAwesomeIcon.Book,             Texto = "Productos",            TipoPagina = typeof(ProductosPage),             SoloAdmin = false },
-    new MenuItem { Icono = FontAwesomeIcon.Calendar,        Texto = "Turnos",               TipoPagina = typeof(TurnosPage),                SoloAdmin = false },
-    new MenuItem { Icono = FontAwesomeIcon.ClockOutline,    Texto = "Fichaje Instructores", TipoPagina = typeof(InstructorAsistenciasPage), SoloAdmin = false },
-    new MenuItem { Icono = FontAwesomeIcon.Clipboard,       Texto = "Rutinas",              TipoPagina = typeof(RutinasPage),               SoloAdmin = false },
-    new MenuItem { Icono = FontAwesomeIcon.Whatsapp,        Texto = "WhatsApp",             TipoPagina = typeof(WhatsappPage),              SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Home,                Texto = "Inicio",              TipoPagina = typeof(DashboardPage),             SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Users,               Texto = "Socios",               TipoPagina = typeof(SociosPage),                SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.IdCardOutline,       Texto = "Membresías",           TipoPagina = typeof(MembresiasPage),            SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.CheckSquareOutline,  Texto = "Asistencias",          TipoPagina = typeof(AsistenciasPage),           SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Money,               Texto = "Caja",                 TipoPagina = typeof(CajaPage),                  SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.ShoppingBasket,      Texto = "Ventas",               TipoPagina = typeof(VentasPage),                SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Book,                Texto = "Productos",            TipoPagina = typeof(ProductosPage),             SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Calendar,            Texto = "Turnos",               TipoPagina = typeof(TurnosPage),                SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.ClockOutline,        Texto = "Fichaje Instructores", TipoPagina = typeof(InstructorAsistenciasPage), SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Clipboard,           Texto = "Rutinas",              TipoPagina = typeof(RutinasPage),               SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Whatsapp,            Texto = "WhatsApp",             TipoPagina = typeof(WhatsappPage),              SoloAdmin = false },
 
     // Solo admin
-    new MenuItem { Icono = FontAwesomeIcon.SoccerBallOutline,Texto = "Actividades",          TipoPagina = typeof(ActividadesPage),           SoloAdmin = true },
+    new MenuItem { Icono = FontAwesomeIcon.SoccerBallOutline,Texto = "Actividades",          TipoPagina = typeof(ActividadesPage),          SoloAdmin = true },
     new MenuItem { Icono = FontAwesomeIcon.Lock,            Texto = "Casilleros",           TipoPagina = typeof(CasillerosPage),            SoloAdmin = true },
-    new MenuItem { Icono = FontAwesomeIcon.FileTextOutline,  Texto = "Auditoría",            TipoPagina = typeof(AuditoriaPage),             SoloAdmin = true },
+    new MenuItem { Icono = FontAwesomeIcon.FileTextOutline,  Texto = "Auditoría",            TipoPagina = typeof(AuditoriaPage),            SoloAdmin = true },
     new MenuItem { Icono = FontAwesomeIcon.User,            Texto = "Usuarios",             TipoPagina = typeof(UsuariosPage),              SoloAdmin = true }
             };
 
