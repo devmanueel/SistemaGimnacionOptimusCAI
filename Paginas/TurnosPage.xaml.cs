@@ -30,6 +30,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarComboActividades();
             CargarComboInstructores();
             CargarTurnos();
+            if (SesionManager.AbrirPanelAlNavegar)
+            {
+                SesionManager.AbrirPanelAlNavegar = false;
+                btnNuevo_Click(null, null);
+            }
         }
 
         // ── CARGA ─────────────────────────────────────────────
@@ -61,7 +66,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 // Agregar opción "sin asignar" al inicio
                 var lista = new List<Usuario>
                 {
-                    new Usuario { Id = 0, Nombre = "Sin", Apellido = "asignar" }
+                    new Usuario { Id = 0, Nombre = "asignar", Apellido = "Sin" }
                 };
                 lista.AddRange(usuarios);
                 cmbInstructor.ItemsSource = lista;

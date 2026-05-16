@@ -94,18 +94,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             Button[] chips = { chipTodos, chipActivos, chipInactivos };
             foreach (var c in chips)
             {
+                // Al asignar el estilo completo, recuperás el espaciado y los efectos automáticos
                 if (c == seleccionado)
                 {
-                    c.Background = new SolidColorBrush(Color.FromRgb(30, 30, 56));
-                    c.Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255));
-                    c.BorderThickness = new Thickness(0);
+                    c.Style = (Style)FindResource("BotonChipActivoEstilo");
                 }
                 else
                 {
-                    c.Background = Brushes.Transparent;
-                    c.Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154));
-                    c.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64));
-                    c.BorderThickness = new Thickness(1);
+                    c.Style = (Style)FindResource("BotonChipEstilo");
                 }
             }
         }
@@ -158,6 +154,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtNombre.Text = act.Nombre;
             txtDias.Text = act.DiasSesiones.ToString();
             txtPrecio.Text = act.Precio.ToString("F0");
+
+            // Llamamos al método para que el panel aparezca animado
             ActualizarPreviewPrecio();
 
             // Seleccionar tipo
@@ -342,14 +340,15 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private void ActualizarPreviewPrecio()
         {
             decimal precio = 0;
+            // Eliminamos cualquier referencia a panelPreviewPrecio.Visibility aquí
             if (decimal.TryParse(txtPrecio.Text, out precio) && precio > 0)
             {
                 lblPreviewPrecio.Text = "$" + precio.ToString("N0");
-                panelPreviewPrecio.Visibility = Visibility.Visible;
             }
             else
             {
-                panelPreviewPrecio.Visibility = Visibility.Collapsed;
+                // Esto es la LLAVE: al poner "$0", el XAML activa la animación de salida
+                lblPreviewPrecio.Text = "$0";
             }
         }
 
@@ -489,7 +488,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtPrecio.Text = string.Empty;
             cmbTipo.SelectedIndex = 0;
             DesmarcarDias();
-            panelPreviewPrecio.Visibility = Visibility.Collapsed;
+
+            // CORRECCIÓN: No uses Visibility = Collapsed. 
+            // Usamos esto para que el trigger de XAML oculte el panel suavemente.
+            lblPreviewPrecio.Text = "$0";
+
             _idEditar = 0;
         }
 

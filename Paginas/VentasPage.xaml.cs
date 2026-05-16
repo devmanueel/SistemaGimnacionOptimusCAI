@@ -29,6 +29,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             ResaltarChip(chipTodos);
             CargarVentas();
             CargarComboSocios();
+            if (SesionManager.AbrirPanelAlNavegar)
+            {
+                SesionManager.AbrirPanelAlNavegar = false;
+                btnNuevaVenta_Click(null, null);
+            }
         }
 
         // ── CARGA ─────────────────────────────────────────────
@@ -338,13 +343,15 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             Button[] chips = { chipTodos, chipEfectivo, chipTransfer, chipTarjeta };
             foreach (var c in chips)
             {
-                bool activo = c == sel;
-                c.Background = activo ? new SolidColorBrush(Color.FromRgb(30, 30, 56)) : Brushes.Transparent;
-                c.Foreground = activo
-                    ? new SolidColorBrush(Color.FromRgb(232, 232, 255))
-                    : new SolidColorBrush(Color.FromRgb(106, 106, 154));
-                c.BorderThickness = new Thickness(activo ? 0 : 1);
-                c.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64));
+                // Al asignar el estilo completo, recuperás el espaciado y los efectos automáticos
+                if (c == sel)
+                {
+                    c.Style = (Style)FindResource("BotonChipActivoEstilo");
+                }
+                else
+                {
+                    c.Style = (Style)FindResource("BotonChipEstilo");
+                }
             }
         }
 

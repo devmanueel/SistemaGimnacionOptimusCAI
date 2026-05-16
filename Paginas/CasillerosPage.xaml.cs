@@ -144,24 +144,26 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             btn.Click += BtnCasillero_Click;
 
             // Colores según estado
-            Color colorFondo, colorBorde, colorTexto;
+            Color colorFondo, colorBorde, colorTexto, colorIcono = Colors.White;
             if (c.EsLibre)
             {
                 colorFondo = Color.FromRgb(10, 42, 20);    // #0A2A14
                 colorBorde = Color.FromRgb(0, 230, 118);   // #00E676
                 colorTexto = Color.FromRgb(0, 230, 118);
+                colorIcono = colorTexto;                   // Cambios de JoakoG
             }
             else if (c.EsOcupado)
             {
                 colorFondo = Color.FromRgb(42, 22, 0);     // #2A1600
                 colorBorde = Color.FromRgb(255, 107, 53);  // #FF6B35
                 colorTexto = Color.FromRgb(255, 107, 53);
+                colorIcono = colorTexto;                    // Cambios de JoakoG
             }
             else
             {
                 colorFondo = Color.FromRgb(42, 31, 0);     // #2A1F00
                 colorBorde = Color.FromRgb(255, 167, 38);  // #FFA726
-                colorTexto = Color.FromRgb(255, 167, 38);
+                colorTexto = Color.FromRgb(255, 167, 38);  // Cambios de JoakoG
             }
 
             btn.Background = new SolidColorBrush(colorFondo);
@@ -174,17 +176,29 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 VerticalAlignment = VerticalAlignment.Center
             };
 
+
+
+
             // Ícono según estado
-            var lblIcono = new TextBlock
+            // --- CAMBIO AQUÍ: Usamos ImageAwesome en lugar de TextBlock ---
+            var icoCasillero = new FontAwesome.WPF.ImageAwesome
             {
-                FontSize = 22,
+                Height = 22, // Mantenemos el tamaño similar al anterior FontSize
+                Foreground = new SolidColorBrush(colorIcono),
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 4)
+                Margin = new Thickness(0, 0, 0, 6)
             };
-            if (c.EsLibre) lblIcono.Text = "🔓";
-            else if (c.EsOcupado) lblIcono.Text = "🔒";
-            else lblIcono.Text = "🔧";
-            stack.Children.Add(lblIcono);
+
+            // Asignación de icono según estado usando el Enum de FontAwesome
+            if (c.EsLibre) icoCasillero.Icon = FontAwesome.WPF.FontAwesomeIcon.UnlockAlt;
+            else if (c.EsOcupado) icoCasillero.Icon = FontAwesome.WPF.FontAwesomeIcon.Lock;
+            else icoCasillero.Icon = FontAwesome.WPF.FontAwesomeIcon.Wrench;
+
+            stack.Children.Add(icoCasillero);
+            // -------------------------------------------------------------
+
+
+
 
             // Número del casillero
             var lblNum = new TextBlock
@@ -280,18 +294,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             Button[] chips = { chipTodos, chipLibres, chipOcupados, chipManten };
             foreach (var c in chips)
             {
+                // Al asignar el estilo completo, recuperás el espaciado y los efectos automáticos
                 if (c == seleccionado)
                 {
-                    c.Background = new SolidColorBrush(Color.FromRgb(30, 30, 56));
-                    c.Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255));
-                    c.BorderThickness = new Thickness(0);
+                    c.Style = (Style)FindResource("BotonChipActivoEstilo");
                 }
                 else
                 {
-                    c.Background = Brushes.Transparent;
-                    c.Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154));
-                    c.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64));
-                    c.BorderThickness = new Thickness(1);
+                    c.Style = (Style)FindResource("BotonChipEstilo");
                 }
             }
         }

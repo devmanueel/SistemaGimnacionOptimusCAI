@@ -4,16 +4,12 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="Productos">
 
-    <Page.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0A0A14" Offset="0"/>
-            <GradientStop Color="#0D0D22" Offset="1"/>
-        </LinearGradientBrush>
-    </Page.Background>
+    <Page.Background><SolidColorBrush Color="#080A08"/></Page.Background>
 
     <Page.Resources>
         <ResourceDictionary>
@@ -24,7 +20,7 @@
 
             <Style x:Key="InputErrorEstilo" TargetType="TextBox" BasedOn="{StaticResource InputEstilo}">
                 <Setter Property="Background"      Value="#1E0A0A"/>
-                <Setter Property="BorderBrush"     Value="#FF4444"/>
+                <Setter Property="BorderBrush"     Value="{StaticResource ColorError}"/>
                 <Setter Property="BorderThickness" Value="1.5"/>
             </Style>
 
@@ -38,10 +34,53 @@
             </Style>
 
             <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
-                <Setter Property="Foreground" Value="#4A4A7A"/>
+                <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
                 <Setter Property="FontSize"   Value="10"/>
                 <Setter Property="FontWeight" Value="Bold"/>
                 <Setter Property="Margin"     Value="2,0,0,6"/>
+            </Style>
+
+            <!-- Botón toggle activo/inactivo en cards -->
+            <Style x:Key="ProductoBtnToggleStyle" TargetType="Button">
+                <Setter Property="FontSize" Value="9"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="8,5"/>
+                <Setter Property="Height" Value="26"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="borde"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="borde" Property="Background" Value="#162016"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Activo}" Value="True">
+                        <Setter Property="Background" Value="#1A1010"/>
+                        <Setter Property="BorderBrush" Value="#3A1515"/>
+                        <Setter Property="Foreground" Value="#C44040"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Activo}" Value="False">
+                        <Setter Property="Background" Value="#111811"/>
+                        <Setter Property="BorderBrush" Value="#1E281E"/>
+                        <Setter Property="Foreground" Value="#00E676"/>
+                    </DataTrigger>
+                </Style.Triggers>
             </Style>
 
             <!-- CARD del producto -->
@@ -49,8 +88,8 @@
                 <Setter Property="Width"           Value="220"/>
                 <Setter Property="Height"          Value="320"/>
                 <Setter Property="Margin"          Value="8"/>
-                <Setter Property="Background"      Value="#16162A"/>
-                <Setter Property="BorderBrush"     Value="#252540"/>
+                <Setter Property="Background"      Value="#111811"/>
+                <Setter Property="BorderBrush"     Value="{StaticResource Border1}"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="CornerRadius"    Value="12"/>
                 <Setter Property="Cursor"          Value="Hand"/>
@@ -58,8 +97,8 @@
                 <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="BorderBrush" Value="#00CFFF"/>
-                        <Setter Property="Background"  Value="#1A1A38"/>
+                        <Setter Property="BorderBrush" Value="{StaticResource GreenMain}"/>
+                        <Setter Property="Background"  Value="{StaticResource ColorInputHover}"/>
                         <Trigger.EnterActions>
                             <BeginStoryboard>
                                 <Storyboard>
@@ -123,57 +162,24 @@
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                 <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#FF6B35" Offset="0"/>
-                            <GradientStop Color="#A78BFA" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
+                    <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                 </Border>
                 <StackPanel>
                     <TextBlock Text="PRODUCTOS"
                                FontFamily="Bahnschrift SemiBold, Segoe UI"
-                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                               FontSize="19" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Kiosco, suplementos y mercadería"
-                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                               FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                 </StackPanel>
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Border Background="#16162A" CornerRadius="10"
-                        BorderBrush="#252540" BorderThickness="1.5"
-                        Width="280" Height="46" Margin="0,0,12,0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="40"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="🔍" FontSize="15"
-                                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        <Grid Grid.Column="1">
-                            <TextBox x:Name="txtBuscar" Height="44" BorderThickness="0"
-                                     Background="Transparent" Foreground="#E8E8FF"
-                                     CaretBrush="#00CFFF" FontSize="14"
-                                     VerticalContentAlignment="Center" Padding="0,0,10,0"
-                                     TextChanged="txtBuscar_TextChanged"/>
-                            <TextBlock Text="Buscar producto..." IsHitTestVisible="False"
-                                       VerticalAlignment="Center" FontSize="12" Foreground="#3A3A5C">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
-                        </Grid>
-                    </Grid>
-                </Border>
+                <TextBox x:Name="txtBuscar" Tag="Buscar producto..."
+                         Style="{StaticResource BuscadorStyle}" Width="290" 
+                         Margin="0,0,12,0" TextChanged="txtBuscar_TextChanged"/>
 
-                <Button Content="＋ NUEVO PRODUCTO"
+                <Button Content="NUEVO PRODUCTO"
+                        Tag="Plus"
                         Style="{StaticResource BotonNaranjaEstilo}"
                         Width="195" Height="46" Click="btnNuevo_Click"/>
             </StackPanel>
@@ -183,45 +189,92 @@
         <Grid Grid.Row="1" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statTotal" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#E8E8FF"/>
-                    <TextBlock Text="TOTAL PRODUCTOS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="0" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statTotal" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="TOTAL PRODUCTOS" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="Cube"
+                                     Foreground="{StaticResource TextPrimary}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statSinStock" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#FF5555"/>
-                    <TextBlock Text="SIN STOCK" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="2" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statSinStock" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource ColorError}"/>
+                        <TextBlock Text="SIN STOCK" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="TimesCircle"
+                                     Foreground="{StaticResource ColorError}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="2" Margin="4,0,4,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statBajoStock" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#FFA726"/>
-                    <TextBlock Text="BAJO STOCK" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="4" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statBajoStock" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="#D4830A"/>
+                        <TextBlock Text="BAJO STOCK" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="Flag"
+                                     Foreground="#D4830A"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="3" Margin="8,0,0,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statValorInventario" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="22" FontWeight="Bold" Foreground="#00E676"/>
-                    <TextBlock Text="VALOR INVENTARIO" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="6" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statValorInventario" Text="—"
+                                   FontSize="22" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
+                        <TextBlock Text="VALOR INVENTARIO" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="Dollar"
+                                     Foreground="{StaticResource GreenMain}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
         </Grid>
 
@@ -234,10 +287,10 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <TextBlock Text="STOCK:" Foreground="#4A4A7A" FontSize="11"
+                <TextBlock Text="STOCK:" Foreground="{StaticResource TextMuted}" FontSize="11"
                            FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
                 <Button x:Name="chipTodos"     Content="Todos"     Click="chipFiltro_Click" Tag="todos"
-                        Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
+                        Style="{StaticResource BotonChipActivoEstilo}" Margin="0,0,8,0"/>
                 <Button x:Name="chipConStock"  Content="Con stock" Click="chipFiltro_Click" Tag="con_stock"
                         Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
                 <Button x:Name="chipBajoStock" Content="Bajo stock" Click="chipFiltro_Click" Tag="bajo_stock"
@@ -247,19 +300,17 @@
             </StackPanel>
 
             <!-- Filtro de categoría -->
-            <Border Grid.Column="2" Background="#16162A" CornerRadius="10" Height="36"
-                    BorderBrush="#252540" BorderThickness="1.5" Width="200">
-                <ComboBox x:Name="cmbFiltroCategoria"
-                          BorderThickness="0" Background="Transparent"
-                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                          FontSize="12" Padding="10,0"
-                          SelectionChanged="cmbFiltroCategoria_SelectionChanged">
-                    <ComboBox.Resources>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
-                    </ComboBox.Resources>
-                </ComboBox>
-            </Border>
+            <ComboBox x:Name="cmbFiltroCategoria"
+                      Grid.Column="2"
+                      Width="250"
+          Style="{StaticResource ComboBoxEstilo}"
+          Height="40"
+          SelectionChanged="cmbFiltroCategoria_SelectionChanged">
+                <ComboBox.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
+                </ComboBox.Resources>
+            </ComboBox>
         </Grid>
 
         <!-- ══════════════════ CONTENIDO ══════════════════ -->
@@ -270,8 +321,8 @@
             </Grid.ColumnDefinitions>
 
             <!-- ══════ GRILLA DE CARDS ══════ -->
-            <Border Grid.Column="0" Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1" Margin="0,0,14,0" ClipToBounds="True">
+            <Border Grid.Column="0" Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Margin="0,0,14,0" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3"/>
@@ -279,17 +330,11 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#FF6B35" Offset="0"/>
-                                <GradientStop Color="#A78BFA" Offset="0.5"/>
-                                <GradientStop Color="#12121E" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                     </Border>
 
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled" Padding="14">
+                                  HorizontalScrollBarVisibility="Disabled" Padding="14" Style="{StaticResource PanelScrollViewerStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -305,10 +350,10 @@
                                 <TextBlock Text="No hay productos cargados"
                                            FontFamily="Bahnschrift SemiBold"
                                            FontSize="16" FontWeight="Bold"
-                                           Foreground="#6A6A9A"
+                                           Foreground="{StaticResource TextMuted}"
                                            HorizontalAlignment="Center" Margin="0,12,0,4"/>
                                 <TextBlock Text="Empezá agregando tu primer producto al kiosco"
-                                           FontSize="12" Foreground="#4A4A7A"
+                                           FontSize="12" Foreground="{StaticResource TextMuted}"
                                            HorizontalAlignment="Center"/>
                             </StackPanel>
 
@@ -323,8 +368,8 @@
 
             <!-- ══════ PANEL DETALLE/FORMULARIO ══════ -->
             <Border x:Name="panelFormulario" Grid.Column="1" Width="400"
-                    Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1"
+                    Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                     Visibility="Collapsed" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -335,39 +380,36 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#FF6B35" Offset="0"/>
-                                <GradientStop Color="#A78BFA" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                     </Border>
 
                     <StackPanel Grid.Row="1" Margin="22,18,22,0">
                         <TextBlock x:Name="lblTituloFormulario" Text="NUEVO PRODUCTO"
                                    FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                   FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"/>
-                        <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
+                                   FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
                     </StackPanel>
 
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="22,14,22,0">
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" 
+                                  Margin="22,14,22,0" Style="{StaticResource PanelScrollViewerStyle}">
                         <StackPanel>
 
                             <!-- Foto -->
                             <StackPanel HorizontalAlignment="Center" Margin="0,0,0,16">
                                 <Border Width="120" Height="120" CornerRadius="14"
-                                        Background="#16162A" BorderBrush="#252540" BorderThickness="2"
+                                        Background="#111811" BorderBrush="{StaticResource Border1}" BorderThickness="2"
                                         ClipToBounds="True">
                                     <Grid>
                                         <Image x:Name="imgFotoFormulario" Stretch="UniformToFill"/>
-                                        <TextBlock x:Name="lblSinFoto" Text="📦" FontSize="48"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                   Opacity="0.3"/>
+                                        <TextBlock x:Name="lblSinFoto" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <fa:ImageAwesome Icon="Archive" Foreground="#FF000000" Opacity="0.5"
+                                                             Height="60" Width="60" VerticalAlignment="Center"/>
+                                        </TextBlock>
                                     </Grid>
                                 </Border>
                                 <Button Content="Cambiar foto" Click="btnSubirFoto_Click"
-                                        Background="Transparent" Foreground="#00CFFF"
-                                        BorderThickness="1" BorderBrush="#00CFFF"
+                                        Background="Transparent" Foreground="{StaticResource GreenMain}"
+                                        BorderThickness="0.5" BorderBrush="{StaticResource GreenMain}"
                                         Cursor="Hand" Padding="10,4" Margin="0,8,0,0"
                                         FontSize="11" FontWeight="SemiBold">
                                     <Button.Template>
@@ -389,30 +431,27 @@
                             <TextBlock x:Name="errNombre" Style="{StaticResource LabelErrorEstilo}"/>
 
                             <TextBlock Text="CATEGORÍA" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10" Height="46"
-                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                <ComboBox x:Name="cmbCategoria" BorderThickness="0" Background="Transparent"
-                                          Foreground="#E8E8FF" VerticalContentAlignment="Center"
-                                          FontSize="13" Padding="10,0" IsEditable="True">
+
+                            <ComboBox x:Name="cmbCategoria" Style="{StaticResource ComboBoxEstilo}">
                                     <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                     </ComboBox.Resources>
-                                    <ComboBoxItem Content="Bebidas"      Foreground="#E8E8FF"/>
-                                    <ComboBoxItem Content="Suplementos"  Foreground="#E8E8FF"/>
-                                    <ComboBoxItem Content="Snacks"       Foreground="#E8E8FF"/>
-                                    <ComboBoxItem Content="Ropa"         Foreground="#E8E8FF"/>
-                                    <ComboBoxItem Content="Accesorios"   Foreground="#E8E8FF"/>
-                                    <ComboBoxItem Content="Higiene"      Foreground="#E8E8FF"/>
+                                    <ComboBoxItem Content="Bebidas"      Foreground="{StaticResource TextPrimary}"/>
+                                    <ComboBoxItem Content="Suplementos"  Foreground="{StaticResource TextPrimary}"/>
+                                    <ComboBoxItem Content="Snacks"       Foreground="{StaticResource TextPrimary}"/>
+                                    <ComboBoxItem Content="Ropa"         Foreground="{StaticResource TextPrimary}"/>
+                                    <ComboBoxItem Content="Accesorios"   Foreground="{StaticResource TextPrimary}"/>
+                                    <ComboBoxItem Content="Higiene"      Foreground="{StaticResource TextPrimary}"/>
                                 </ComboBox>
-                            </Border>
+                            
 
                             <TextBlock Text="DESCRIPCIÓN" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10"
-                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                            <Border Background="#111811" CornerRadius="10"
+                                    BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,0,14">
                                 <TextBox x:Name="txtDescripcion" Background="Transparent"
-                                         BorderThickness="0" Foreground="#E8E8FF"
-                                         CaretBrush="#00CFFF" FontSize="13" Padding="14,10"
+                                         BorderThickness="0" Foreground="{StaticResource TextPrimary}"
+                                         CaretBrush="{StaticResource GreenMain}" FontSize="13" Padding="14,10"
                                          AcceptsReturn="True" TextWrapping="Wrap"
                                          Height="60" VerticalScrollBarVisibility="Auto"/>
                             </Border>
@@ -453,14 +492,14 @@
                             </Grid>
 
                             <!-- Sección AJUSTAR STOCK (solo en edición) -->
-                            <Border x:Name="panelAjusteStock" Background="#0A1A2A"
-                                    BorderBrush="#1A3A5A" BorderThickness="1"
+                            <Border x:Name="panelAjusteStock" Background="{StaticResource ColorInput}"
+                                    BorderBrush="{StaticResource ColorBorde}" BorderThickness="0.5"
                                     CornerRadius="10" Padding="14" Margin="0,8,0,14"
                                     Visibility="Collapsed">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                        <TextBlock Text="📦" FontSize="14" Margin="0,0,6,0"/>
-                                        <TextBlock Text="AJUSTAR STOCK" Foreground="#00CFFF"
+                                        <TextBlock Text="📦" FontSize="18" Foreground="{StaticResource TextPrimary}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="AJUSTAR STOCK" Foreground="{StaticResource GreenMain}"
                                                    FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
 
@@ -469,11 +508,11 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Background="#16162A" CornerRadius="8" Height="38"
-                                                BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,8,0">
+                                        <Border Grid.Column="0" Background="#111811" CornerRadius="8" Height="38"
+                                                BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,8,0">
                                             <TextBox x:Name="txtCantidadAjuste" Background="Transparent"
-                                                     BorderThickness="0" Foreground="#E8E8FF"
-                                                     CaretBrush="#00CFFF" FontSize="14" Padding="10,0"
+                                                     BorderThickness="0" Foreground="{StaticResource TextPrimary}"
+                                                     CaretBrush="{StaticResource GreenMain}" FontSize="14" Padding="10,0"
                                                      VerticalContentAlignment="Center"
                                                      PreviewTextInput="txtSoloNumeros_PreviewTextInput"/>
                                         </Border>
@@ -481,7 +520,7 @@
                                             <Button Content="＋" Click="btnSumarStock_Click"
                                                     Width="34" Height="34" FontSize="14" FontWeight="Bold"
                                                     Background="#0A2A14" Foreground="#00E676"
-                                                    BorderThickness="1" BorderBrush="#00E676"
+                                                    BorderThickness="0.5" BorderBrush="#00E676"
                                                     Cursor="Hand" Margin="0,0,4,0">
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
@@ -496,8 +535,8 @@
                                             </Button>
                                             <Button Content="－" Click="btnRestarStock_Click"
                                                     Width="34" Height="34" FontSize="14" FontWeight="Bold"
-                                                    Background="#2A1F00" Foreground="#FFA726"
-                                                    BorderThickness="1" BorderBrush="#FFA726"
+                                                    Background="#1E1600" Foreground="#D4830A"
+                                                    BorderThickness="0.5" BorderBrush="#D4830A"
                                                     Cursor="Hand">
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
@@ -512,11 +551,11 @@
                                             </Button>
                                         </StackPanel>
                                     </Grid>
-                                    <TextBlock Text="Stock actual:" Foreground="#6A8AAA"
-                                               FontSize="10" Margin="0,8,0,0"/>
+                                    <TextBlock Text="Stock actual:" Foreground="{StaticResource TextMuted}"
+                                               FontSize="14" Margin="0,8"/>
                                     <TextBlock x:Name="lblStockActual" Text="0 unidades"
                                                FontFamily="Bahnschrift SemiBold"
-                                               FontSize="20" FontWeight="Bold" Foreground="#E8E8FF"/>
+                                               FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
                                 </StackPanel>
                             </Border>
 
@@ -540,3 +579,4 @@
         </Grid>
     </Grid>
 </Page>
+

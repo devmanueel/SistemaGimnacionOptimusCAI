@@ -4,16 +4,12 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+      xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="WhatsApp">
 
-    <Page.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0A0A14" Offset="0"/>
-            <GradientStop Color="#0D0D22" Offset="1"/>
-        </LinearGradientBrush>
-    </Page.Background>
+    <Page.Background><SolidColorBrush Color="#080A08"/></Page.Background>
 
     <Page.Resources>
         <ResourceDictionary>
@@ -22,7 +18,7 @@
             </ResourceDictionary.MergedDictionaries>
             <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
             <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
-                <Setter Property="Foreground" Value="#4A4A7A"/>
+                <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
                 <Setter Property="FontSize"   Value="10"/>
                 <Setter Property="FontWeight" Value="Bold"/>
                 <Setter Property="Margin"     Value="2,0,0,6"/>
@@ -58,19 +54,14 @@
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                 <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#25D366" Offset="0"/>
-                            <GradientStop Color="#128C7E" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
+                    <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                 </Border>
                 <StackPanel>
                     <TextBlock Text="WHATSAPP"
                                FontFamily="Bahnschrift SemiBold, Segoe UI"
-                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                               FontSize="19" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Mensajeria a socios — avisos y notificaciones"
-                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                               FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                 </StackPanel>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
@@ -92,7 +83,8 @@
                         </ControlTemplate>
                     </Button.Template>
                 </Button>
-                <Button Content="＋ NUEVO MENSAJE"
+                <Button Content="NUEVO MENSAJE"
+                        Tag="Plus"
                         Style="{StaticResource BotonNaranjaEstilo}"
                         Width="180" Height="46" Click="btnNuevoMensaje_Click"/>
             </StackPanel>
@@ -102,50 +94,99 @@
         <Grid Grid.Row="1" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statTotal" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#E8E8FF"/>
-                    <TextBlock Text="TOTAL MENSAJES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="0" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statTotal" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="TOTAL MENSAJES" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="CommentOutline"
+                                     Foreground="{StaticResource TextPrimary}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
-            <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statPendientes" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#FFA726"/>
-                    <TextBlock Text="PENDIENTES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="2" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statPendientes" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="#D4830A"/>
+                        <TextBlock Text="PENDIENTES" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="ClockOutline"
+                                     Foreground="#D4830A"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
-            <Border Grid.Column="2" Margin="4,0,4,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statEnviados" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#25D366"/>
-                    <TextBlock Text="ENVIADOS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="4" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statEnviados" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="#25D366"/>
+                        <TextBlock Text="ENVIADOS" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="PaperPlane"
+                                     Foreground="#25D366"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
-            <Border Grid.Column="3" Margin="8,0,0,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statEnviadosHoy" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#00CFFF"/>
-                    <TextBlock Text="ENVIADOS HOY" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+
+            <!-- ENVIADOS HOY -->
+            <Border Grid.Column="6" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statEnviadosHoy" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
+                        <TextBlock Text="ENVIADOS HOY" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="PaperPlane"
+                                     Foreground="{StaticResource GreenMain}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
         </Grid>
 
         <!-- FILTROS -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
-            <TextBlock Text="ESTADO:" Foreground="#4A4A7A" FontSize="11"
+            <TextBlock Text="ESTADO:" Foreground="{StaticResource TextMuted}" FontSize="11"
                        FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
             <Button x:Name="chipTodos"      Content="Todos"      Tag="todos"
-                    Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
+                    Style="{StaticResource BotonChipActivoEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
             <Button x:Name="chipPendientes" Content="Pendientes" Tag="pendiente"
                     Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click" Margin="0,0,8,0"/>
             <Button x:Name="chipEnviados"   Content="Enviados"   Tag="enviado"
@@ -162,8 +203,8 @@
             </Grid.ColumnDefinitions>
 
             <!-- ══ LISTA DE MENSAJES ══ -->
-            <Border Grid.Column="0" Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1" Margin="0,0,14,0" ClipToBounds="True">
+            <Border Grid.Column="0" Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Margin="0,0,14,0" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3"/>
@@ -171,50 +212,16 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#25D366" Offset="0"/>
-                                <GradientStop Color="#128C7E" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                     </Border>
 
-                    <Border Grid.Row="1" Background="#16162A" CornerRadius="10"
-                            BorderBrush="#252540" BorderThickness="1.5"
-                            Margin="14,14,14,8" Height="42">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="40"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="🔍" FontSize="14"
-                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <Grid Grid.Column="1">
-                                <TextBox x:Name="txtBuscar" Height="40" BorderThickness="0"
-                                         Background="Transparent" Foreground="#E8E8FF"
-                                         CaretBrush="#25D366" FontSize="13"
-                                         VerticalContentAlignment="Center" Padding="0,0,10,0"
-                                         TextChanged="txtBuscar_TextChanged"/>
-                                <TextBlock Text="Buscar mensaje, socio, telefono..."
-                                           IsHitTestVisible="False"
-                                           VerticalAlignment="Center" FontSize="11" Foreground="#3A3A5C">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Text, ElementName=txtBuscar}" Value="">
-                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Grid>
-                        </Grid>
-                    </Border>
+                    <TextBox x:Name="txtBuscar" Tag="Buscar mensaje, socio, telefono..." Grid.Row="1"
+                             Style="{StaticResource BuscadorStyle}" Width="Auto" 
+                             Margin="14,14,14,0" TextChanged="txtBuscar_TextChanged"/>
+                    
 
                     <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
-                                  Padding="12,4,12,12">
+                                  Padding="12,4,12,12" Style="{StaticResource PanelScrollViewerStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -225,18 +232,18 @@
                                         Visibility="Collapsed">
                                 <TextBlock Text="💬" FontSize="48" HorizontalAlignment="Center" Opacity="0.4"/>
                                 <TextBlock Text="No hay mensajes" FontSize="13"
-                                           Foreground="#6A6A9A"
+                                           Foreground="{StaticResource TextMuted}"
                                            HorizontalAlignment="Center" Margin="0,8,0,0"/>
                             </StackPanel>
-                            <StackPanel Grid.Row="1" x:Name="panelMensajes"/>
+                            <StackPanel Grid.Row="1" Margin="10, 15" x:Name="panelMensajes"/>
                         </Grid>
                     </ScrollViewer>
                 </Grid>
             </Border>
 
             <!-- ══ DETALLE ══ -->
-            <Border Grid.Column="1" Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1" ClipToBounds="True">
+            <Border Grid.Column="1" Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="4"/>
@@ -247,13 +254,15 @@
                     <!-- Estado vacio -->
                     <StackPanel Grid.Row="1" x:Name="panelSinSeleccion"
                                 VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="💬" FontSize="80" Opacity="0.3" HorizontalAlignment="Center"/>
+                        <fa:ImageAwesome Icon="CommentOutline" Foreground="#25D366" 
+                                         Opacity="0.3" HorizontalAlignment="Center"
+                                         Height="80"/>
                         <TextBlock Text="Seleccioná un mensaje"
                                    FontFamily="Bahnschrift SemiBold"
-                                   FontSize="18" FontWeight="Bold" Foreground="#6A6A9A"
+                                   FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextMuted}"
                                    HorizontalAlignment="Center" Margin="0,12,0,4"/>
                         <TextBlock Text="Hace click en uno de la lista para ver el detalle"
-                                   FontSize="12" Foreground="#4A4A7A"
+                                   FontSize="12" Foreground="{StaticResource TextMuted}"
                                    HorizontalAlignment="Center"/>
                     </StackPanel>
 
@@ -266,7 +275,7 @@
                         </Grid.RowDefinitions>
 
                         <!-- Header -->
-                        <Border Grid.Row="0" BorderBrush="#252540"
+                        <Border Grid.Row="0" BorderBrush="{StaticResource Border1}"
                                 BorderThickness="0,0,0,1" Padding="24,18,24,16">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -278,12 +287,7 @@
                                 <!-- Avatar -->
                                 <Grid Grid.Column="0" Margin="0,0,14,0">
                                     <Ellipse Width="52" Height="52">
-                                        <Ellipse.Fill>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                <GradientStop Color="#25D366" Offset="0"/>
-                                                <GradientStop Color="#128C7E" Offset="1"/>
-                                            </LinearGradientBrush>
-                                        </Ellipse.Fill>
+                                        <Ellipse.Fill><SolidColorBrush Color="#4ADE80"/></Ellipse.Fill>
                                     </Ellipse>
                                     <Ellipse Width="48" Height="48">
                                         <Ellipse.Fill>
@@ -296,18 +300,18 @@
                                     <TextBlock x:Name="lblDetalleNombre" Text="—"
                                                FontFamily="Bahnschrift SemiBold"
                                                FontSize="16" FontWeight="Bold"
-                                               Foreground="#E8E8FF"/>
+                                               Foreground="{StaticResource TextPrimary}"/>
                                     <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                         <TextBlock x:Name="lblDetalleTelefono" Text="—"
                                                    FontFamily="Consolas" FontSize="11"
                                                    Foreground="#25D366"/>
-                                        <TextBlock Text="  ·  " FontSize="11" Foreground="#3A3A5C"/>
+                                        <TextBlock Text="  ·  " FontSize="11" Foreground="{StaticResource TextMuted}"/>
                                         <TextBlock x:Name="lblDetalleNumeroSocio" Text=""
                                                    FontFamily="Consolas" FontSize="11"
-                                                   Foreground="#FF6B35"/>
+                                                   Foreground="{StaticResource GreenMain}"/>
                                     </StackPanel>
                                     <TextBlock x:Name="lblDetalleDisparador" Text="—"
-                                               FontSize="10" Foreground="#6A6A9A"
+                                               FontSize="10" Foreground="{StaticResource TextMuted}"
                                                Margin="0,2,0,0"/>
                                 </StackPanel>
 
@@ -315,10 +319,10 @@
                                 <Border Grid.Column="2" x:Name="badgeEstado"
                                         CornerRadius="20" Padding="14,6"
                                         VerticalAlignment="Center"
-                                        Background="#2A1F00">
+                                        Background="#1E1600">
                                     <TextBlock x:Name="lblBadgeEstado" Text="—"
                                                FontSize="11" FontWeight="Bold"
-                                               Foreground="#FFA726"/>
+                                               Foreground="#D4830A"/>
                                 </Border>
                             </Grid>
                         </Border>
@@ -327,12 +331,12 @@
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                                       Padding="24,20,24,16">
                             <Border Background="#1A2D24" CornerRadius="12,12,12,2"
-                                    BorderBrush="#0E5C49" BorderThickness="1"
+                                    BorderBrush="#0E5C49" BorderThickness="0.5"
                                     Padding="18,14,18,14"
                                     HorizontalAlignment="Stretch">
                                 <StackPanel>
                                     <TextBlock x:Name="lblDetalleMensaje" Text=""
-                                               FontSize="13" Foreground="#E8E8FF"
+                                               FontSize="13" Foreground="{StaticResource TextPrimary}"
                                                TextWrapping="Wrap" LineHeight="20"/>
                                     <TextBlock x:Name="lblDetalleFechaCreado" Text="—"
                                                FontSize="10" Foreground="#6A8A7A"
@@ -342,7 +346,7 @@
                         </ScrollViewer>
 
                         <!-- Botones de accion -->
-                        <Border Grid.Row="2" BorderBrush="#252540"
+                        <Border Grid.Row="2" BorderBrush="{StaticResource Border1}"
                                 BorderThickness="0,1,0,0" Padding="24,16,24,16">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -354,7 +358,7 @@
                                 <Button Grid.Column="0" x:Name="btnEliminarMensaje"
                                         Content="🗑  ELIMINAR"
                                         Background="#1A0A0A" Foreground="#FF5555"
-                                        BorderBrush="#5A1A1A" BorderThickness="1"
+                                        BorderBrush="#5A1A1A" BorderThickness="0.5"
                                         Width="120" Height="40" FontSize="11" FontWeight="Bold"
                                         Cursor="Hand"
                                         Click="btnEliminarMensaje_Click">
@@ -394,7 +398,7 @@
 
                                     <Button x:Name="btnMarcarEnviado"
                                             Content="✓  MARCAR ENVIADO"
-                                            Background="#25D366" Foreground="#0A0A14"
+                                            Background="#25D366" Foreground="#080A08"
                                             BorderThickness="0"
                                             Width="170" Height="40" FontSize="11" FontWeight="Bold"
                                             Cursor="Hand"
@@ -419,8 +423,8 @@
 
         <!-- ══════════════════ MODAL NUEVO MENSAJE ══════════════════ -->
         <Border x:Name="modalNuevo" Background="#CC000000" Visibility="Collapsed">
-            <Border Width="460" Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1"
+            <Border Width="460" Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     MaxHeight="640" ClipToBounds="True">
                 <Grid>
@@ -434,28 +438,29 @@
                     <StackPanel Grid.Row="1" Margin="24,22,24,12">
                         <TextBlock Text="NUEVO MENSAJE"
                                    FontFamily="Bahnschrift SemiBold"
-                                   FontSize="16" FontWeight="Bold" Foreground="#E8E8FF"/>
-                        <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
+                                   FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
                     </StackPanel>
                     <ScrollViewer Grid.Row="2" Margin="24,8,24,0" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <TextBlock Text="SOCIO (opcional, pone numero externo si esta vacio)"
                                        Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10" Height="46"
-                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
-                                <ComboBox x:Name="cmbSocio" BorderThickness="0"
-                                          Background="Transparent" Foreground="#E8E8FF"
-                                          VerticalContentAlignment="Center"
-                                          FontSize="13" Padding="10,0" IsEditable="True"
-                                          IsTextSearchEnabled="True"
-                                          DisplayMemberPath="TextoCombo"
-                                          SelectionChanged="cmbSocio_SelectionChanged">
-                                    <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
-                                    </ComboBox.Resources>
-                                </ComboBox>
-                            </Border>
+                            <ComboBox x:Name="cmbSocio" BorderThickness="0"
+          Background="Transparent" Foreground="{StaticResource TextPrimary}"
+          VerticalContentAlignment="Center"
+          FontSize="13" Padding="10,0"
+          IsTextSearchEnabled="True"
+          DisplayMemberPath="TextoCombo"
+          SelectionChanged="cmbSocio_SelectionChanged" Style="{StaticResource ComboBoxEstilo}">
+                                <ComboBox.Resources>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
+                                </ComboBox.Resources>
+                            </ComboBox>
+                            <!-- <Border Background="{StaticResource Bg2}" CornerRadius="10" Height="46"
+                                    BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,0,14">
+                                
+                            </Border>-->
 
                             <TextBlock Text="TELEFONO * (con codigo de pais, ej: 5491155555555)"
                                        Style="{StaticResource LabelCampoEstilo}"/>
@@ -464,8 +469,8 @@
                             <TextBlock Text="PLANTILLA RAPIDA" Style="{StaticResource LabelCampoEstilo}"/>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                                 <Button Content="👋 Bienvenida" Click="btnPlantilla_Click" Tag="bienvenida"
-                                        Background="#1A1A30" Foreground="#A0A0C0"
-                                        BorderBrush="#252540" BorderThickness="1"
+                                        Background="{StaticResource Bg4}" Foreground="{StaticResource TextMuted}"
+                                        BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                                         FontSize="11" Cursor="Hand" Margin="0,0,6,0" Padding="10,5">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
@@ -479,8 +484,8 @@
                                     </Button.Template>
                                 </Button>
                                 <Button Content="🎂 Cumpleaños" Click="btnPlantilla_Click" Tag="cumple"
-                                        Background="#1A1A30" Foreground="#A0A0C0"
-                                        BorderBrush="#252540" BorderThickness="1"
+                                        Background="{StaticResource Bg4}" Foreground="{StaticResource TextMuted}"
+                                        BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                                         FontSize="11" Cursor="Hand" Margin="0,0,6,0" Padding="10,5">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
@@ -494,8 +499,8 @@
                                     </Button.Template>
                                 </Button>
                                 <Button Content="🧹 Limpiar" Click="btnPlantilla_Click" Tag="limpiar"
-                                        Background="#1A1A30" Foreground="#A0A0C0"
-                                        BorderBrush="#252540" BorderThickness="1"
+                                        Background="{StaticResource Bg4}" Foreground="{StaticResource TextMuted}"
+                                        BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                                         FontSize="11" Cursor="Hand" Padding="10,5">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
@@ -511,10 +516,10 @@
                             </StackPanel>
 
                             <TextBlock Text="MENSAJE *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10"
-                                    BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,14">
+                            <Border Background="{StaticResource Bg2}" CornerRadius="10"
+                                    BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,0,14">
                                 <TextBox x:Name="txtMensaje" Background="Transparent"
-                                         BorderThickness="0" Foreground="#E8E8FF"
+                                         BorderThickness="0" Foreground="{StaticResource TextPrimary}"
                                          CaretBrush="#25D366" FontSize="13" Padding="14,10"
                                          AcceptsReturn="True" TextWrapping="Wrap"
                                          Height="160" VerticalScrollBarVisibility="Auto"/>
@@ -539,8 +544,8 @@
 
         <!-- ══════════════════ MODAL GENERAR AVISOS ══════════════════ -->
         <Border x:Name="modalAvisos" Background="#CC000000" Visibility="Collapsed">
-            <Border Width="380" Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1"
+            <Border Width="380" Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                     HorizontalAlignment="Center" VerticalAlignment="Center"
                     ClipToBounds="True">
                 <Grid>
@@ -556,10 +561,10 @@
                                    HorizontalAlignment="Center"/>
                         <TextBlock Text="GENERAR AVISOS DE VENCIMIENTO"
                                    FontFamily="Bahnschrift SemiBold"
-                                   FontSize="14" FontWeight="Bold" Foreground="#E8E8FF"
+                                   FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
                                    HorizontalAlignment="Center" Margin="0,4,0,2"/>
                         <TextBlock Text="Crea mensajes pendientes para socios con vencimiento proximo."
-                                   FontSize="11" Foreground="#6A6A9A"
+                                   FontSize="11" Foreground="{StaticResource TextMuted}"
                                    HorizontalAlignment="Center" TextWrapping="Wrap"
                                    TextAlignment="Center"/>
                     </StackPanel>
@@ -569,7 +574,7 @@
                                  PreviewTextInput="txtSoloNumeros_PreviewTextInput"
                                  Text="3"/>
                         <TextBlock Text="Buscara membresias que vencen entre hoy y los proximos N dias."
-                                   FontSize="10" Foreground="#4A4A7A" FontStyle="Italic"
+                                   FontSize="10" Foreground="{StaticResource TextMuted}" FontStyle="Italic"
                                    Margin="2,-8,0,0" TextWrapping="Wrap"/>
                     </StackPanel>
                     <Grid Grid.Row="3" Margin="24,12,24,18">
@@ -590,3 +595,4 @@
 
     </Grid>
 </Page>
+

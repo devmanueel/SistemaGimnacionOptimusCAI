@@ -1,5 +1,6 @@
 ﻿// SistemaGimnacionOptimusCAI/MainWindow.xaml.cs — C# 7.3
 using Controllers;
+using FontAwesome.WPF;
 using SistemaGimnacionOptimusCAI.Paginas;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace SistemaGimnacionOptimusCAI
         // Definicion de un item del menu
         private class MenuItem
         {
-            public string Icono { get; set; }
+            public FontAwesome.WPF.FontAwesomeIcon Icono { get; set; }
             public string Texto { get; set; }
             public Type TipoPagina { get; set; }
             public bool SoloAdmin { get; set; }
@@ -87,22 +88,23 @@ namespace SistemaGimnacionOptimusCAI
             var items = new List<MenuItem>
             {
                 // Todos ven estos
-                new MenuItem { Icono = "🏋",  Texto = "Socios",            TipoPagina = typeof(SociosPage),                SoloAdmin = false },
-                new MenuItem { Icono = "🎫",  Texto = "Membresías",        TipoPagina = typeof(MembresiasPage),            SoloAdmin = false },
-                new MenuItem { Icono = "✓",   Texto = "Asistencias",       TipoPagina = typeof(AsistenciasPage),           SoloAdmin = false },
-                new MenuItem { Icono = "💵",  Texto = "Caja",              TipoPagina = typeof(CajaPage),                  SoloAdmin = false },
-                new MenuItem { Icono = "💰",  Texto = "Ventas",            TipoPagina = typeof(VentasPage),                SoloAdmin = false },
-                new MenuItem { Icono = "📦",  Texto = "Productos",         TipoPagina = typeof(ProductosPage),             SoloAdmin = false },
-                new MenuItem { Icono = "📅",  Texto = "Turnos",            TipoPagina = typeof(TurnosPage),                SoloAdmin = false },
-                new MenuItem { Icono = "⏱",   Texto = "Fichaje Instructores", TipoPagina = typeof(InstructorAsistenciasPage), SoloAdmin = false },
-                new MenuItem { Icono = "📋",  Texto = "Rutinas",           TipoPagina = typeof(RutinasPage),               SoloAdmin = false },
-                new MenuItem { Icono = "💬",  Texto = "WhatsApp",          TipoPagina = typeof(WhatsappPage),              SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Home,                Texto = "Inicio",              TipoPagina = typeof(DashboardPage),             SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Users,               Texto = "Socios",               TipoPagina = typeof(SociosPage),                SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.IdCardOutline,       Texto = "Membresías",           TipoPagina = typeof(MembresiasPage),            SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.CheckSquareOutline,  Texto = "Asistencias",          TipoPagina = typeof(AsistenciasPage),           SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Money,               Texto = "Caja",                 TipoPagina = typeof(CajaPage),                  SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.ShoppingBasket,      Texto = "Ventas",               TipoPagina = typeof(VentasPage),                SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Book,                Texto = "Productos",            TipoPagina = typeof(ProductosPage),             SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Calendar,            Texto = "Turnos",               TipoPagina = typeof(TurnosPage),                SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.ClockOutline,        Texto = "Fichaje Instructores", TipoPagina = typeof(InstructorAsistenciasPage), SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Clipboard,           Texto = "Rutinas",              TipoPagina = typeof(RutinasPage),               SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.Whatsapp,            Texto = "WhatsApp",             TipoPagina = typeof(WhatsappPage),              SoloAdmin = false },
 
-                // Solo admin
-                new MenuItem { Icono = "🥊",  Texto = "Actividades",       TipoPagina = typeof(ActividadesPage),           SoloAdmin = true },
-                new MenuItem { Icono = "🔒",  Texto = "Casilleros",        TipoPagina = typeof(CasillerosPage),            SoloAdmin = true },
-                new MenuItem { Icono = "📜",  Texto = "Auditoría",         TipoPagina = typeof(AuditoriaPage),             SoloAdmin = true },
-                new MenuItem { Icono = "👤",  Texto = "Usuarios",          TipoPagina = typeof(UsuariosPage),              SoloAdmin = true }
+    // Solo admin
+    new MenuItem { Icono = FontAwesomeIcon.SoccerBallOutline,Texto = "Actividades",          TipoPagina = typeof(ActividadesPage),          SoloAdmin = true },
+    new MenuItem { Icono = FontAwesomeIcon.Lock,            Texto = "Casilleros",           TipoPagina = typeof(CasillerosPage),            SoloAdmin = true },
+    new MenuItem { Icono = FontAwesomeIcon.FileTextOutline,  Texto = "Auditoría",            TipoPagina = typeof(AuditoriaPage),            SoloAdmin = true },
+    new MenuItem { Icono = FontAwesomeIcon.User,            Texto = "Usuarios",             TipoPagina = typeof(UsuariosPage),              SoloAdmin = true }
             };
 
             // Filtrar segun rol y crear los botones
@@ -134,32 +136,36 @@ namespace SistemaGimnacionOptimusCAI
 
             var stack = new StackPanel { Orientation = Orientation.Horizontal };
 
-            stack.Children.Add(new TextBlock
+            // ICONO DE FONT AWESOME
+            var imgIcono = new FontAwesome.WPF.ImageAwesome
             {
-                Text = item.Icono,
-                FontSize = 16,
+                Icon = item.Icono,
+                Foreground = new SolidColorBrush(Color.FromRgb(90, 107, 90)),
+                Height = 16,
+                Width = 16,
                 Margin = new Thickness(0, 0, 12, 0),
-                VerticalAlignment = VerticalAlignment.Center,
-                Width = 24,
-                TextAlignment = TextAlignment.Center
-            });
+                VerticalAlignment = VerticalAlignment.Center
+            };
 
-            stack.Children.Add(new TextBlock
+            // TEXTO
+            var txtTexto = new TextBlock
             {
                 Text = item.Texto,
                 FontSize = 12,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(160, 160, 192)),
+                Foreground = new SolidColorBrush(Color.FromRgb(90, 107, 90)),
                 VerticalAlignment = VerticalAlignment.Center
-            });
+            };
 
+            stack.Children.Add(imgIcono);
+            stack.Children.Add(txtTexto);
             border.Child = stack;
 
             // Hover
             border.MouseEnter += (s, e) =>
             {
                 if (border != _botonActivo)
-                    border.Background = new SolidColorBrush(Color.FromRgb(22, 22, 42));
+                    border.Background = new SolidColorBrush(Color.FromRgb(22, 32, 22));
             };
             border.MouseLeave += (s, e) =>
             {
@@ -171,6 +177,37 @@ namespace SistemaGimnacionOptimusCAI
             border.MouseLeftButtonUp += (s, e) => NavegarPagina(indice);
 
             return border;
+        }
+
+        // ── ACTUALIZAR SIDEBAR (desde otras pages) ─────────────
+        public void ActualizarSidebar(Type tipoPagina)
+        {
+            for (int i = 0; i < _botonesMenu.Count; i++)
+            {
+                var tag = _botonesMenu[i].Tag as object[];
+                if (tag == null || tag.Length < 3) continue;
+                if ((Type)tag[1] == tipoPagina)
+                {
+                    ResaltarBotonActivo(_botonesMenu[i]);
+                    lblPaginaActual.Text = tag[2] as string;
+                    return;
+                }
+            }
+        }
+
+        // ── NAVEGACION PUBLICA (desde otras pages) ─────────────
+        public void NavegarA(Type tipoPagina)
+        {
+            for (int i = 0; i < _botonesMenu.Count; i++)
+            {
+                var tag = _botonesMenu[i].Tag as object[];
+                if (tag == null || tag.Length < 3) continue;
+                if ((Type)tag[1] == tipoPagina)
+                {
+                    NavegarPagina(i);
+                    return;
+                }
+            }
         }
 
         // ── NAVEGACION ────────────────────────────────────────
@@ -209,32 +246,37 @@ namespace SistemaGimnacionOptimusCAI
 
         private void ResaltarBotonActivo(Border btn)
         {
-            // Reset todos
+            // Colores de la paleta verde
+            var colorBordeActivo = new SolidColorBrush(Color.FromRgb(122, 201, 67));
+            var colorFondoActivo = new SolidColorBrush(Color.FromRgb(22, 32, 22));
+            var colorIconoInactivo = new SolidColorBrush(Color.FromRgb(90, 107, 90));
+            var colorTextoInactivo = new SolidColorBrush(Color.FromRgb(90, 107, 90));
+
             foreach (var b in _botonesMenu)
             {
+                // RESETEAR INACTIVOS
                 b.Background = Brushes.Transparent;
                 b.BorderThickness = new Thickness(0);
 
                 var stack = b.Child as StackPanel;
-                if (stack != null && stack.Children.Count >= 2)
+                if (stack != null)
                 {
-                    var tb = stack.Children[1] as TextBlock;
-                    if (tb != null)
-                        tb.Foreground = new SolidColorBrush(Color.FromRgb(160, 160, 192));
+                    ((FontAwesome.WPF.ImageAwesome)stack.Children[0]).Foreground = colorIconoInactivo;
+                    ((TextBlock)stack.Children[1]).Foreground = colorTextoInactivo;
                 }
             }
 
-            // Marcar el actual
-            btn.Background = new SolidColorBrush(Color.FromRgb(26, 24, 64));
-            btn.BorderBrush = new SolidColorBrush(Color.FromRgb(167, 139, 250));
+            // RESALTAR BOTÓN ACTIVO
+            btn.Background = colorFondoActivo;
+            btn.BorderBrush = colorBordeActivo;
             btn.BorderThickness = new Thickness(1);
+            btn.CornerRadius = new CornerRadius(8);
 
             var stackActivo = btn.Child as StackPanel;
-            if (stackActivo != null && stackActivo.Children.Count >= 2)
+            if (stackActivo != null)
             {
-                var tbActivo = stackActivo.Children[1] as TextBlock;
-                if (tbActivo != null)
-                    tbActivo.Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255));
+                ((FontAwesome.WPF.ImageAwesome)stackActivo.Children[0]).Foreground = new SolidColorBrush(Color.FromRgb(159, 217, 110));
+                ((TextBlock)stackActivo.Children[1]).Foreground = new SolidColorBrush(Color.FromRgb(232, 240, 232));
             }
 
             _botonActivo = btn;
