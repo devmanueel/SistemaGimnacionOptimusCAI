@@ -30,6 +30,9 @@ namespace Controllers
         public static int RolId { get; private set; }
         public static string RolNombre { get; private set; }
 
+        // ── Flags de navegacion ────────────────────────────────
+        public static bool AbrirPanelAlNavegar { get; set; }
+
         // ── Estado ───────────────────────────────────────────
         public static bool HaySesion => UsuarioId > 0;
         public static bool EsAdmin => RolNombre == "admin";

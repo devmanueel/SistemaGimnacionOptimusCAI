@@ -97,7 +97,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Helpers\ByteToImageConverter.cs" />
+    <Compile Include="Helpers\InicialesConverter.cs" />
     <Compile Include="Helpers\Validador.cs" />
+    <Compile Include="Helpers\WidthHeightToRectConverter.cs" />
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -260,6 +262,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Assets\Logo-gimnasio.png" />
     <Content Include="DB_CAI_Optimus.mdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -267,6 +270,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <DependentUpon>DB_CAI_Optimus.mdf</DependentUpon>
     </Content>
+    <Resource Include="Assets\Logo-gimnasio.jpeg" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

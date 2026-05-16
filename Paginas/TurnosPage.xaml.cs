@@ -30,6 +30,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarComboActividades();
             CargarComboInstructores();
             CargarTurnos();
+            if (SesionManager.AbrirPanelAlNavegar)
+            {
+                SesionManager.AbrirPanelAlNavegar = false;
+                btnNuevo_Click(null, null);
+            }
         }
 
         // ── CARGA ─────────────────────────────────────────────

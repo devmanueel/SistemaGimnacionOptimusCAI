@@ -29,6 +29,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             ResaltarChip(chipTodos);
             CargarVentas();
             CargarComboSocios();
+            if (SesionManager.AbrirPanelAlNavegar)
+            {
+                SesionManager.AbrirPanelAlNavegar = false;
+                btnNuevaVenta_Click(null, null);
+            }
         }
 
         // ── CARGA ─────────────────────────────────────────────

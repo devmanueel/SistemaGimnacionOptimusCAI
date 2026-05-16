@@ -7,14 +7,8 @@
       mc:Ignorable="d"
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       d:DesignHeight="768" d:DesignWidth="1280"
-      Title="Membresías">
-
-    <Page.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0A0A14" Offset="0"/>
-            <GradientStop Color="#0D0D22" Offset="1"/>
-        </LinearGradientBrush>
-    </Page.Background>
+       Title="Membresías"
+       Background="#080A08">
 
     <Page.Resources>
         <ResourceDictionary>
@@ -25,7 +19,7 @@
 
             <Style x:Key="InputErrorEstilo" TargetType="TextBox" BasedOn="{StaticResource InputEstilo}">
                 <Setter Property="Background"      Value="#1E0A0A"/>
-                <Setter Property="BorderBrush"     Value="#FF4444"/>
+                <Setter Property="BorderBrush"     Value="{StaticResource ColorError}"/>
                 <Setter Property="BorderThickness" Value="1.5"/>
             </Style>
 
@@ -39,14 +33,11 @@
             </Style>
 
             <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
-                <Setter Property="Foreground"  Value="#A0A8BA"/>
+                <Setter Property="Foreground"  Value="{StaticResource TextSecondary}"/>
                 <Setter Property="FontSize"    Value="10"/>
                 <Setter Property="FontWeight"  Value="Bold"/>
-                <Setter Property="FontFamily"  Value="Segoe UI Semibold, Segoe UI"/>
                 <!-- Margin: 2 (izq), 18 (arriba para separar del campo anterior), 0 (der), 6 (abajo para pegar al input) -->
                 <Setter Property="Margin"      Value="2,15"/>
-
-                <!-- Opcional: Un toque de opacidad si querés un look más moderno -->
                 <Setter Property="Opacity"     Value="0.9"/>
             </Style>
         </ResourceDictionary>
@@ -88,20 +79,14 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#00CFFF" Offset="0"/>
-                            <GradientStop Color="#00E676" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-                </Border>
+                <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0"
+                        Background="{StaticResource GreenMain}"/>
                 <StackPanel>
                     <TextBlock Text="MEMBRESÍAS Y CUOTAS"
-                               FontFamily="Bahnschrift SemiBold, Segoe UI"
-                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                               Style="{StaticResource TopbarTituloStyle}"
+                               FontSize="19"/>
                     <TextBlock Text="Cobros, vencimientos y renovaciones"
-                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                               Style="{StaticResource TopbarSubtituloStyle}"/>
                 </StackPanel>
             </StackPanel>
 
@@ -122,97 +107,85 @@
         <Grid Grid.Row="1" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Style="{StaticResource BorderStyleStatCard}" Grid.Column="0">
+            <Border Grid.Column="0" Style="{StaticResource BorderStyleStatCard}">
                 <Grid>
                     <StackPanel>
-                        <TextBlock x:Name="statActivas" Text="1" Foreground="#00E676" Style="{StaticResource TextBlockStatValor}">
-                            <TextBlock.Effect>
-                                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="#00E676" Opacity="0.3"/>
-                            </TextBlock.Effect>
-                        </TextBlock>
+                        <TextBlock x:Name="statActivas" Text="1"
+                                   Foreground="{StaticResource GreenMain}"
+                                   Style="{StaticResource TextBlockStatValor}"/>
                         <TextBlock Text="MEMBRESÍAS ACTIVAS" Style="{StaticResource TextBlockStatEtiqueta}"/>
                     </StackPanel>
-
-                    <Path Data="{StaticResource IconRayo}" Fill="#00E676" Opacity="0.12" Width="32" Height="32" Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <Path Data="{StaticResource IconRayo}" Fill="{StaticResource GreenMain}"
+                          Opacity="0.12" Width="32" Height="32"
+                          Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
             </Border>
 
-            <Border Grid.Column="1" Style="{StaticResource BorderStyleStatCard}" Margin="4,0,4,0">
+            <Border Grid.Column="2" Style="{StaticResource BorderStyleStatCard}">
                 <Grid>
                     <StackPanel>
-                        <TextBlock x:Name="statPorVencer" Text="0" Foreground="#FFA726" Style="{StaticResource TextBlockStatValor}">
-                            <TextBlock.Effect>
-                                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="#FFA726" Opacity="0.25"/>
-                            </TextBlock.Effect>
-                        </TextBlock>
+                        <TextBlock x:Name="statPorVencer" Text="0"
+                                   Foreground="#D4830A"
+                                   Style="{StaticResource TextBlockStatValor}"/>
                         <TextBlock Text="PRÓXIMOS VENCIMIENTOS" Style="{StaticResource TextBlockStatEtiqueta}"/>
                     </StackPanel>
-                    <Path Data="{StaticResource IconReloj}" Fill="#FFA726" Opacity="0.12" Width="35" Height="35" Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <Path Data="{StaticResource IconReloj}" Fill="#D4830A"
+                          Opacity="0.12" Width="35" Height="35"
+                          Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
             </Border>
 
-            <Border Grid.Column="2" Style="{StaticResource BorderStyleStatCard}" Margin="4,0,4,0">
+            <Border Grid.Column="4" Style="{StaticResource BorderStyleStatCard}">
                 <Grid>
                     <StackPanel>
-                        <TextBlock x:Name="statVencidas" Text="0" Foreground="#FF5555" Style="{StaticResource TextBlockStatValor}">
-                            <TextBlock.Effect>
-                                <DropShadowEffect BlurRadius="12" ShadowDepth="0" Color="#FF5555" Opacity="0.25"/>
-                            </TextBlock.Effect>
-                        </TextBlock>
+                        <TextBlock x:Name="statVencidas" Text="0"
+                                   Foreground="{StaticResource ColorError}"
+                                   Style="{StaticResource TextBlockStatValor}"/>
                         <TextBlock Text="MEMBRESÍAS EXPIRADAS" Style="{StaticResource TextBlockStatEtiqueta}"/>
                     </StackPanel>
-                    <Path Data="{StaticResource IconAlerta}" Fill="#FF5555" Opacity="0.12" Width="35" Height="35" Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <Path Data="{StaticResource IconAlerta}" Fill="{StaticResource ColorError}"
+                          Opacity="0.12" Width="35" Height="35"
+                          Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
             </Border>
 
-            <Border Grid.Column="3" 
-        Margin="8,0,0,0" 
-        Style="{StaticResource BorderStyleStatCard}"
-        BorderBrush="{StaticResource BrushGlowFinanciero}" 
-        BorderThickness="0,0,0,4">
+            <Border Grid.Column="6" Style="{StaticResource BorderStyleStatCard}"
+                    BorderBrush="{StaticResource GreenDim}" BorderThickness="1">
                 <Grid>
-                    <Border Background="#1A00CFFF" Opacity="0.05" CornerRadius="12" Margin="-18,-14"/>
-
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="INGRESOS MENSUALES" 
-                       Style="{StaticResource TextBlockStatEtiqueta}" 
-                       Foreground="#00CFFF" 
-                       Opacity="0.9"
-                       Margin="0,0,0,4"/>
-
+                        <TextBlock Text="INGRESOS MENSUALES"
+                                   Style="{StaticResource TextBlockStatEtiqueta}"
+                                   Foreground="{StaticResource GreenMain}"
+                                   Margin="0,0,0,4"/>
                         <Grid>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock x:Name="statRecaudadoMes" 
-                               Text="$25.000" 
-                               Foreground="White" 
-                               Style="{StaticResource TextBlockStatValor}" 
-                               FontSize="30">
-                                    <TextBlock.Effect>
-                                        <DropShadowEffect BlurRadius="20" ShadowDepth="0" Color="#00CFFF" Opacity="0.5"/>
-                                    </TextBlock.Effect>
-                                </TextBlock>
-
-                                <Path Data="M7,14l5-5 5 5H7z" 
-                          Fill="#00E676" 
-                          Width="12" Height="12" 
-                          Margin="8,0,0,10" 
-                          VerticalAlignment="Bottom"/>
+                                <TextBlock x:Name="statRecaudadoMes" Text="$25.000"
+                                           Foreground="{StaticResource TextPrimary}"
+                                           Style="{StaticResource TextBlockStatValor}"
+                                           FontSize="30"/>
+                                <Path Data="M7,14l5-5 5 5H7z"
+                                      Fill="{StaticResource GreenMain}"
+                                      Width="12" Height="12"
+                                      Margin="8,0,0,10"
+                                      VerticalAlignment="Bottom"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
-
-                    <Path Data="{StaticResource IconGraficoCrecimiento}" 
-              Fill="{StaticResource BrushGlowFinanciero}" 
-              Opacity="0.2" 
-              Width="45" Height="45" 
-              Stretch="Uniform" 
-              HorizontalAlignment="Right" 
-              VerticalAlignment="Center"/>
+                    <Path Data="{StaticResource IconGraficoCrecimiento}"
+                          Fill="{StaticResource GreenMain}"
+                          Opacity="0.15"
+                          Width="45" Height="45"
+                          Stretch="Uniform"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Center"/>
                 </Grid>
             </Border>
         </Grid>
@@ -220,19 +193,44 @@
         <!-- ══════════════════ FILTROS ══════════════════ -->
         <!-- Agregamos un poco de Padding al StackPanel para que el resplandor no se corte -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12" >
-            <TextBlock Text="MOSTRAR:" Foreground="#4A4A7A" FontSize="11"
+            <TextBlock Text="MOSTRAR:" Foreground="{StaticResource TextMuted}" FontSize="11"
                        FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
 
-            <Button x:Name="chipTodos"     Content="Todas"     Click="chipFiltro_Click" Tag="todos"
-                    Style="{StaticResource BotonChipActivoEstilo}" Margin="0,0,8,0"/>
-            <Button x:Name="chipActivas"   Content="Activas"   Click="chipFiltro_Click" Tag="activa"
-                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
-            <Button x:Name="chipPorVencer" Content="Por vencer" Click="chipFiltro_Click" Tag="por_vencer"
-                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
-            <Button x:Name="chipVencidas"  Content="Vencidas"  Click="chipFiltro_Click" Tag="vencida"
-                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0"/>
-            <Button x:Name="chipCanceladas" Content="Canceladas" Click="chipFiltro_Click" Tag="cancelada"
-                    Style="{StaticResource BotonChipEstilo}"/>
+            <Button x:Name="chipTodos"     Click="chipFiltro_Click" Tag="todos"
+                    Style="{StaticResource BotonChipActivoEstilo}" Margin="0,0,8,0" Height="30">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Todas"/>
+                    <TextBlock x:Name="chipTodosNum" Text="(0)" FontSize="11" Margin="4,0,0,0"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="chipActivas"   Click="chipFiltro_Click" Tag="activa"
+                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0" Height="30">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Activas"/>
+                    <TextBlock x:Name="chipActivasNum" Text="(0)" FontSize="11" Margin="4,0,0,0"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="chipPorVencer" Click="chipFiltro_Click" Tag="por_vencer"
+                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0" Height="30">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Por vencer"/>
+                    <TextBlock x:Name="chipPorVencerNum" Text="(0)" FontSize="11" Margin="4,0,0,0"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="chipVencidas"  Click="chipFiltro_Click" Tag="vencida"
+                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,8,0" Height="30">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Vencidas"/>
+                    <TextBlock x:Name="chipVencidasNum" Text="(0)" FontSize="11" Margin="4,0,0,0"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="chipCanceladas" Click="chipFiltro_Click" Tag="cancelada"
+                    Style="{StaticResource BotonChipEstilo}" Height="30">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Canceladas"/>
+                    <TextBlock x:Name="chipCanceladasNum" Text="(0)" FontSize="11" Margin="4,0,0,0"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
 
         <!-- ══════════════════ CONTENIDO ══════════════════ -->
@@ -243,22 +241,15 @@
             </Grid.ColumnDefinitions>
 
             <!-- DATAGRID -->
-            <Border Grid.Column="0" Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1" Margin="0,0,14,0" ClipToBounds="True">
+            <Border Grid.Column="0" Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="1" Margin="0,0,14,0" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#00CFFF" Offset="0"/>
-                                <GradientStop Color="#00E676" Offset="0.5"/>
-                                <GradientStop Color="#12121E" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                    </Border>
+                    <Border Grid.Row="0" Background="{StaticResource GreenMid}"
+        CornerRadius="10,10,0,0"/>
 
                     <DataGrid Grid.Row="1" x:Name="gridMembresias"
                               IsReadOnly="True" AutoGenerateColumns="False"
@@ -266,7 +257,7 @@
                               Background="Transparent" BorderThickness="0"
                               RowHeaderWidth="0" RowHeight="64"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#1A1A2E">
+                              HorizontalGridLinesBrush="{StaticResource Border1}">
                         <DataGrid.Columns>
 
                             <!-- Foto + N° de socio -->
@@ -275,14 +266,7 @@
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Grid Margin="0,0,10,0">
-                                                <Ellipse Width="42" Height="42">
-                                                    <Ellipse.Fill>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                            <GradientStop Color="#00CFFF" Offset="0"/>
-                                                            <GradientStop Color="#A78BFA" Offset="1"/>
-                                                        </LinearGradientBrush>
-                                                    </Ellipse.Fill>
-                                                </Ellipse>
+                                                <Ellipse Width="42" Height="42" Fill="{StaticResource GreenMain}"/>
                                                 <Ellipse Width="38" Height="38">
                                                     <Ellipse.Fill>
                                                         <ImageBrush ImageSource="{Binding SocioFoto, Converter={StaticResource BytesAImagen}}"
@@ -292,13 +276,13 @@
                                             </Grid>
                                             <StackPanel VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding SocioNombre}" FontSize="13"
-                                                           FontWeight="Bold" Foreground="#E8E8FF"
-                                                           Padding="4, 4"/>
+                                                                           FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
+                                                                           Padding="4, 4"/>
                                                 <TextBlock Text="{Binding NumeroSocioFormateado}"
-                                                           Padding="4, 0"
-                                                           FontWeight="Bold"
-                                                           FontFamily="Consolas" FontSize="13"
-                                                           Foreground="#6C757D"/>
+                                                                           Padding="4, 0"
+                                                                           FontWeight="Bold"
+                                                                           FontFamily="Consolas" FontSize="13"
+                                                                           Foreground="{StaticResource TextSecondary}"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </DataTemplate>
@@ -311,8 +295,8 @@
                                     <DataTemplate>
                                         <Border HorizontalAlignment="Left" Style="{StaticResource TipoBadgeStyle}">
                                             <TextBlock Text="{Binding ActividadNombre}" FontSize="12"
-                                                       FontWeight="SemiBold" Foreground="#A78BFA"
-                                                       TextWrapping="Wrap"/>
+                                                                       FontWeight="SemiBold" Foreground="{StaticResource GreenMain}"
+                                                                       TextWrapping="Wrap"/>
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -323,7 +307,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding MontoTexto}" FontWeight="Bold"
-                                                   FontFamily="Consolas" Foreground="#00E676" FontSize="14"/>
+                                                                   FontFamily="Consolas" Foreground="{StaticResource GreenMain}" FontSize="14"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -351,16 +335,8 @@
                            FontSize="10" 
                            FontWeight="Medium"
                            Margin="4,6,0,0" 
-                           HorizontalAlignment="Left">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="#8A92A6"/>
-                                                        <Style.Triggers>
-                                                            <!-- Tus triggers de colores se mantienen -->
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
+                           HorizontalAlignment="Left"
+                           Foreground="{StaticResource TextMuted}"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -376,12 +352,12 @@
             Click="btnRenovar_Click" 
             ToolTip="Renovar membresía (+30 días)"
             Margin="0,0,4,0">
-                                                <TextBlock Text="+30d" FontSize="11" FontWeight="Bold" Foreground="#00E676"/>
+                                                <TextBlock Text="+30d" FontSize="11" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
                                             </Button>
                                             <!-- EDITAR -->
                                             <Button Click="btnEditar_Click" Style="{StaticResource ButtonStyleEditar}"
                                                     Margin="4,0" Cursor="Hand" ToolTip="Editar">
-                                                <fa:ImageAwesome Icon="Edit" Foreground="#00CFFF" Height="14"/>
+                                                <fa:ImageAwesome Icon="Edit" Foreground="{StaticResource ColorEditarCyan}" Height="14"/>
                                             </Button>
                                                 <!-- CANCELAR -->
                                             <Button Style="{StaticResource ButtonStyleCancelar}"                           
@@ -401,8 +377,8 @@
 
             <!-- ══════════════════ PANEL FORMULARIO ══════════════════ -->
             <Border x:Name="panelFormulario" Grid.Column="1" Width="400"
-                    Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1"
+                    Background="{StaticResource Bg2}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="1"
                     Visibility="Collapsed" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -412,21 +388,13 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#00CFFF" Offset="0"/>
-                                <GradientStop Color="#00E676" Offset="0.5"/>
-                                <GradientStop Color="#FFA726" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                    </Border>
+                    <Border Grid.Row="0" Background="{StaticResource GreenMid}"/>
 
                     <StackPanel Grid.Row="1" Margin="22,18,22,0">
                         <TextBlock x:Name="lblTituloFormulario" Text="COBRAR CUOTA"
-                                   FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                   FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"/>
-                        <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
+                                   FontSize="15" FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
                     </StackPanel>
 
                     <ScrollViewer 
@@ -442,8 +410,8 @@
                             <ComboBox x:Name="cmbSocio" Style="{StaticResource ComboBoxEstilo}"
                                           DisplayMemberPath="TextoCombo">
                                     <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                     </ComboBox.Resources>
                                 </ComboBox>
 
@@ -455,8 +423,8 @@
                                           DisplayMemberPath="TextoCombo"
                                           SelectionChanged="cmbActividad_SelectionChanged">
                                     <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                     </ComboBox.Resources>
                                 </ComboBox>
 
@@ -465,8 +433,8 @@
                                 <ComboBox x:Name="cmbInstructor" Style="{StaticResource ComboBoxEstilo}"
                                           DisplayMemberPath="TextoCombo">
                                     <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                     </ComboBox.Resources>
                                 </ComboBox>
 
@@ -497,7 +465,7 @@
                             <TextBlock x:Name="errMonto" Style="{StaticResource LabelErrorEstilo}"/>
 
                             <!-- Preview del monto -->
-                            <Border x:Name="panelPreviewMonto" Background="#0A1A0A" CornerRadius="8"
+                            <Border x:Name="panelPreviewMonto" Background="{StaticResource Bg3}" CornerRadius="8"
                                     Padding="12,8" Margin="0,0,0,14" Visibility="Collapsed">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="💰" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
@@ -512,23 +480,23 @@
 
                             <ComboBox x:Name="cmbMetodoPago" Style="{StaticResource ComboBoxEstilo}">
                                     <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                     </ComboBox.Resources>
-                                    <ComboBoxItem Content="Efectivo"      Tag="efectivo"      Foreground="#E8E8FF" IsSelected="True"/>
-                                    <ComboBoxItem Content="Transferencia" Tag="transferencia" Foreground="#E8E8FF"/>
-                                    <ComboBoxItem Content="Tarjeta"       Tag="tarjeta"       Foreground="#E8E8FF"/>
-                                    <ComboBoxItem Content="Otro"          Tag="otro"          Foreground="#E8E8FF"/>
+                                    <ComboBoxItem Content="Efectivo"      Tag="efectivo"      Foreground="{StaticResource TextPrimary}" IsSelected="True"/>
+                                    <ComboBoxItem Content="Transferencia" Tag="transferencia" Foreground="{StaticResource TextPrimary}"/>
+                                    <ComboBoxItem Content="Tarjeta"       Tag="tarjeta"       Foreground="{StaticResource TextPrimary}"/>
+                                    <ComboBoxItem Content="Otro"          Tag="otro"          Foreground="{StaticResource TextPrimary}"/>
                                 </ComboBox>
 
                             <!-- OBSERVACIONES -->
                             <TextBlock Text="OBSERVACIONES" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10"
-                                    BorderBrush="#252540" BorderThickness="1.5"
+                            <Border Background="{StaticResource Bg2}" CornerRadius="10"
+                                    BorderBrush="{StaticResource Border2}" BorderThickness="1"
                                     Margin="0,0,0,30">
                                 <TextBox x:Name="txtObservaciones"
                                          Background="Transparent" BorderThickness="0"
-                                         Foreground="#E8E8FF" CaretBrush="#00CFFF"
+                                         Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource GreenMain}"
                                          FontSize="13" Padding="14,10"
                                          AcceptsReturn="True" TextWrapping="Wrap"
                                          Height="80" VerticalScrollBarVisibility="Auto"/>

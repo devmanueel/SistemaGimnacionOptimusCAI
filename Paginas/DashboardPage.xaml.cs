@@ -280,5 +280,31 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             fila.Child = grid;
             panelVencimientos.Children.Add(fila);
         }
+
+        // ── NAVEGACION ACCESOS RAPIDOS ─────────────────────────
+        private void NavegarConSidebar(Type tipo, bool abrirPanel = false)
+        {
+            if (abrirPanel) SesionManager.AbrirPanelAlNavegar = true;
+            var main = Window.GetWindow(this) as MainWindow;
+            main?.NavegarA(tipo);
+        }
+
+        private void btnRapidoSocio_Click(object sender, RoutedEventArgs e)
+            => NavegarConSidebar(typeof(SociosPage), true);
+
+        private void btnRapidoCuota_Click(object sender, RoutedEventArgs e)
+            => NavegarConSidebar(typeof(MembresiasPage), true);
+
+        private void btnRapidoAsistencia_Click(object sender, RoutedEventArgs e)
+            => NavegarConSidebar(typeof(AsistenciasPage));
+
+        private void btnRapidoVenta_Click(object sender, RoutedEventArgs e)
+        {
+            SesionManager.AbrirPanelAlNavegar = true;
+            NavegarConSidebar(typeof(VentasPage));
+        }
+
+        private void btnRapidoTurno_Click(object sender, RoutedEventArgs e)
+            => NavegarConSidebar(typeof(TurnosPage), true);
     }
 }

@@ -43,6 +43,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarSocios();
             ResaltarChip(chipTodos);
             CambiarTab("datos");
+            if (SesionManager.AbrirPanelAlNavegar)
+            {
+                SesionManager.AbrirPanelAlNavegar = false;
+                btnNuevo_Click(null, null);
+            }
         }
 
         // ─────────────────────────────────────────────────────
@@ -83,6 +88,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 statActivos.Text = activos.ToString();
                 statInactivos.Text = inactivos.ToString();
                 statNuevosMes.Text = nuevosMes.ToString();
+                chipTodosNum.Text = $"({total})";
+                chipActivosNum.Text = $"({activos})";
+                chipInactivosNum.Text = $"({inactivos})";
             }
             catch
             {
@@ -162,8 +170,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             if (activo)
             {
-                btn.Foreground = new SolidColorBrush(Color.FromRgb(0, 207, 255));
-                btn.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 207, 255));
+                btn.Foreground = new SolidColorBrush(Color.FromRgb(74, 222, 128));
+                btn.BorderBrush = new SolidColorBrush(Color.FromRgb(74, 222, 128));
 
                 // Animar la barra
                 var trans = barraTab.RenderTransform as TranslateTransform;
@@ -187,7 +195,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             else
             {
-                btn.Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154));
+                btn.Foreground = new SolidColorBrush(Color.FromRgb(61, 92, 61));
                 btn.BorderBrush = Brushes.Transparent;
             }
         }

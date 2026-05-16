@@ -43,6 +43,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarCombos();
             CargarMembresias();
             ResaltarChip(chipTodos);
+            if (SesionManager.AbrirPanelAlNavegar)
+            {
+                SesionManager.AbrirPanelAlNavegar = false;
+                btnNuevo_Click(null, null);
+            }
         }
 
         // ─────────────────────────────────────────────────────
@@ -95,12 +100,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 int activas = 0;
                 int porVencer = 0;
                 int vencidas = 0;
+                int canceladas = 0;
                 decimal recaudado = 0;
                 var primerDiaMes = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
 
                 foreach (var m in todas)
                 {
-                    if (m.Estado == "vencida") vencidas++;
+                    if (m.Estado == "cancelada") canceladas++;
+                    else if (m.Estado == "vencida") vencidas++;
                     else if (m.Estado == "activa")
                     {
                         activas++;
@@ -115,6 +122,12 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 statPorVencer.Text = porVencer.ToString();
                 statVencidas.Text = vencidas.ToString();
                 statRecaudadoMes.Text = "$" + recaudado.ToString("N0");
+
+                chipTodosNum.Text = $"({todas.Count})";
+                chipActivasNum.Text = $"({activas})";
+                chipPorVencerNum.Text = $"({porVencer})";
+                chipVencidasNum.Text = $"({vencidas})";
+                chipCanceladasNum.Text = $"({canceladas})";
             }
             catch
             {

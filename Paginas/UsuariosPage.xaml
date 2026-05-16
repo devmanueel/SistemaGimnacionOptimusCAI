@@ -9,12 +9,7 @@
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="Usuarios">
 
-    <Page.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0A0A14" Offset="0"/>
-            <GradientStop Color="#0D0D22" Offset="1"/>
-        </LinearGradientBrush>
-    </Page.Background>
+    <Page.Background><SolidColorBrush Color="#080A08"/></Page.Background>
 
     <Page.Resources>
         <ResourceDictionary>
@@ -30,7 +25,7 @@
             <Style x:Key="InputErrorEstilo" TargetType="TextBox"
                    BasedOn="{StaticResource InputEstilo}">
                 <Setter Property="Background"      Value="#1E0A0A"/>
-                <Setter Property="BorderBrush"     Value="#FF4444"/>
+                <Setter Property="BorderBrush"     Value="{StaticResource ColorError}"/>
                 <Setter Property="BorderThickness" Value="1.5"/>
             </Style>
 
@@ -46,7 +41,7 @@
 
             <!-- Estilos para los labels-->
             <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
-                <Setter Property="Foreground"  Value="#4A4A7A"/>
+                <Setter Property="Foreground"  Value="{StaticResource TextMuted}"/>
                 <Setter Property="FontSize"    Value="10"/>
                 <Setter Property="FontWeight"  Value="Bold"/>
                 <Setter Property="FontFamily"  Value="Segoe UI Semibold, Segoe UI"/>
@@ -103,20 +98,15 @@
             <!-- Título con barra naranja lateral -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                 <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#FF6B35" Offset="0"/>
-                            <GradientStop Color="#FF3D1F" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
+                    <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                 </Border>
                 <StackPanel>
                     <TextBlock Text="GESTIÓN DE USUARIOS"
                                FontFamily="Bahnschrift SemiBold, Segoe UI"
                                FontSize="19" FontWeight="Bold"
-                               Foreground="#E8E8FF"/>
+                               Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Administradores e instructores del sistema"
-                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                               FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                 </StackPanel>
             </StackPanel>
 
@@ -145,35 +135,38 @@
         <Grid Grid.Row="1" Margin="0,0,0,18">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <!-- TOTAL USUARIOS -->
-            <Border Grid.Column="0" Margin="0,0,4,0" Style="{StaticResource KpiCardBorderStyle}">
+            <Border Grid.Column="0" Style="{StaticResource KpiCardBorderStyle}">
                 <Grid>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock x:Name="statTotal" Text="3" Style="{StaticResource KpiNumberStyle}" Foreground="{StaticResource ColorPrimario}"/>
+                        <TextBlock x:Name="statTotal" Text="3" Style="{StaticResource KpiNumberStyle}" Foreground="{StaticResource GreenMain}"/>
                         <TextBlock Text="TOTAL USUARIOS" Style="{StaticResource KpiLabelStyle}"/>
                     </StackPanel>
-                    <fa:ImageAwesome Icon="Users" Style="{StaticResource KpiIconStyle}" Foreground="{StaticResource ColorPrimario}"/>
+                    <fa:ImageAwesome Icon="Users" Style="{StaticResource KpiIconStyle}" Foreground="{StaticResource GreenMain}"/>
                 </Grid>
             </Border>
 
             <!-- ACTIVOS -->
-            <Border Grid.Column="1" Margin="4,0,4,0" Style="{StaticResource KpiCardBorderStyle}">
+            <Border Grid.Column="2" Style="{StaticResource KpiCardBorderStyle}">
                 <Grid>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock x:Name="statActivos" Text="3" Style="{StaticResource KpiNumberStyle}" Foreground="{StaticResource ColorExito}"/>
+                        <TextBlock x:Name="statActivos" Text="3" Style="{StaticResource KpiNumberStyle}" Foreground="{StaticResource GreenMain}"/>
                         <TextBlock Text="ACTIVOS" Style="{StaticResource KpiLabelStyle}"/>
                     </StackPanel>
-                    <fa:ImageAwesome Icon="CheckCircle" Style="{StaticResource KpiIconStyle}" Foreground="{StaticResource ColorExito}"/>
+                    <fa:ImageAwesome Icon="CheckCircle" Style="{StaticResource KpiIconStyle}" Foreground="{StaticResource GreenMain}"/>
                 </Grid>
             </Border>
 
             <!-- ADMINISTRADORES -->
-            <Border Grid.Column="2" Margin="4,0,4,0" Style="{StaticResource KpiCardBorderStyle}">
+            <Border Grid.Column="4" Style="{StaticResource KpiCardBorderStyle}">
                 <Grid>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="statAdmins" Text="3" Style="{StaticResource KpiNumberStyle}" Foreground="{StaticResource ColorNaranja}"/>
@@ -183,7 +176,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Column="3" Margin="4,0,4,0" Style="{StaticResource KpiCardBorderStyle}">
+            <Border Grid.Column="6" Style="{StaticResource KpiCardBorderStyle}">
                 <Grid>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="statInstructores" Text="3" Style="{StaticResource KpiNumberStyle}" Foreground="{StaticResource ColorVioleta}"/>
@@ -204,8 +197,8 @@
             </Grid.ColumnDefinitions>
 
             <!-- DATAGRID -->
-            <Border Grid.Column="0" Background="#12121E"
-                    CornerRadius="12" BorderBrush="#252540" BorderThickness="1"
+            <Border Grid.Column="0" Background="{StaticResource Bg1}"
+                    CornerRadius="12" BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                     Margin="0,0,14,0" ClipToBounds="True">
 
                 <Grid>
@@ -217,13 +210,7 @@
 
                     <!-- Línea cyan/violeta decorativa -->
                     <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#00CFFF" Offset="0"/>
-                                <GradientStop Color="#A78BFA" Offset="0.5"/>
-                                <GradientStop Color="#12121E" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                     </Border>
 
                     <DataGrid Grid.Row="1"
@@ -237,7 +224,7 @@
                               RowHeaderWidth="0"
                               RowHeight="64"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#1A1A2E"
+                              HorizontalGridLinesBrush="#111811"
                               SelectionChanged="gridUsuarios_SelectionChanged">
 
                         <DataGrid.Columns>
@@ -248,12 +235,7 @@
                                     <DataTemplate>
                                         <Grid HorizontalAlignment="Center">
                                             <Ellipse Width="48" Height="48">
-                                                <Ellipse.Fill>
-                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                        <GradientStop Color="#00CFFF" Offset="0"/>
-                                                        <GradientStop Color="#A78BFA" Offset="1"/>
-                                                    </LinearGradientBrush>
-                                                </Ellipse.Fill>
+                                                <Ellipse.Fill><SolidColorBrush Color="#4ADE80"/></Ellipse.Fill>
                                             </Ellipse>
                                             <Ellipse Width="40" Height="40">
                                                 <Ellipse.Fill>
@@ -314,7 +296,7 @@
                                             <Button Click="btnEditar_Click" 
 Style="{StaticResource ButtonStyleEditar}" 
 Margin="0,0,8,0">
-                                                <fa:ImageAwesome Icon="Edit" Foreground="#00CFFF" Height="14"/>
+                                                <fa:ImageAwesome Icon="Edit" Foreground="{StaticResource ColorEditarCyan}" Height="14"/>
                                             </Button>
 
                                             <!-- BOTÓN ESTADO -->
@@ -351,10 +333,10 @@ Style="{StaticResource ButtonStyleEstado}">
             ══════════════════════════════════ -->
             <Border x:Name="panelFormulario"
                     Grid.Column="1" Width="370"
-                    Background="#12121E"
+                    Background="{StaticResource Bg1}"
                     CornerRadius="12"
-                    BorderBrush="#252540"
-                    BorderThickness="1"
+                    BorderBrush="{StaticResource Border1}"
+                    BorderThickness="0.5"
                     Visibility="Collapsed"
                     ClipToBounds="True">
 
@@ -376,21 +358,15 @@ Style="{StaticResource ButtonStyleEstado}">
 
                     <!-- Línea superior tricolor -->
                     <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#FF6B35" Offset="0"/>
-                                <GradientStop Color="#A78BFA" Offset="0.5"/>
-                                <GradientStop Color="#00CFFF" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                     </Border>
 
                     <!-- Título del formulario -->
                     <StackPanel Grid.Row="1" Margin="22,18,22,0">
                         <TextBlock x:Name="lblTituloFormulario" Text="NUEVO USUARIO"
                                    FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                   FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"/>
-                        <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
+                                   FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
                     </StackPanel>
 
                     <!-- Campos -->
@@ -404,13 +380,7 @@ Style="{StaticResource ButtonStyleEstado}">
                             <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
                                 <Grid>
                                     <Ellipse Width="106" Height="106" Margin="0, 4, 0, 0" >
-                                        <Ellipse.Fill>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                <GradientStop Color="#FF6B35" Offset="0"/>
-                                                <GradientStop Color="#A78BFA" Offset="0.5"/>
-                                                <GradientStop Color="#00CFFF" Offset="1"/>
-                                            </LinearGradientBrush>
-                                        </Ellipse.Fill>
+                                        <Ellipse.Fill><SolidColorBrush Color="#4ADE80"/></Ellipse.Fill>
                                     </Ellipse>
                                     <Ellipse Width="100" Height="100" HorizontalAlignment="Center">
                                         <Ellipse.Fill>
@@ -425,12 +395,7 @@ Style="{StaticResource ButtonStyleEstado}">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
                                                 <Border CornerRadius="14">
-                                                    <Border.Background>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                            <GradientStop Color="#FF6B35" Offset="0"/>
-                                                            <GradientStop Color="#FF3D1F" Offset="1"/>
-                                                        </LinearGradientBrush>
-                                                    </Border.Background>
+                                                    <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                                                     <ContentPresenter HorizontalAlignment="Center"
                                                                       VerticalAlignment="Center"/>
                                                 </Border>
@@ -483,7 +448,7 @@ Style="{StaticResource ButtonStyleEstado}">
                             
                             <TextBlock x:Name="lblClaveAclaracion"
                                        Text="Dejá vacío para no cambiar la contraseña."
-                                       FontSize="11" Foreground="#4A4A7A" FontStyle="Italic"
+                                       FontSize="11" Foreground="{StaticResource TextMuted}" FontStyle="Italic"
                                        Margin="0,-8,0,12" Visibility="Collapsed"/>
 
                             <TextBlock Text="ROL *" Style="{StaticResource LabelCampoEstilo}"/>
@@ -492,28 +457,28 @@ Style="{StaticResource ButtonStyleEstado}">
                                           Style="{StaticResource ComboBoxEstilo}">
                                     <ComboBox.Resources>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}"
-                                                         Color="#1A1A2E"/>
+                                                         Color="#111811"/>
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}"
-                                                         Color="#E8E8FF"/>
+                                                         Color="#E8F5E8"/>
                                     </ComboBox.Resources>
                                 <ComboBoxItem Tag="1">
                                     <StackPanel Orientation="Horizontal">
                                         <!-- Icono de Seguridad -->
                                         <fa:ImageAwesome Icon="Shield" Foreground="#FF9F43" Height="14" Width="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Administrador" Foreground="#E8E8FF" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Administrador" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </ComboBoxItem>
                                 <ComboBoxItem Tag="2">
                                     <StackPanel Orientation="Horizontal">
                                         <!-- Icono de Usuario -->
                                         <fa:ImageAwesome Icon="User" Foreground="#6C5DD3" Height="12" Width="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Empleado / Instructor" Foreground="#E8E8FF" VerticalAlignment="Center"/>
+                                        <TextBlock Text="Empleado / Instructor" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </ComboBoxItem>
                             </ComboBox>
                             <TextBlock x:Name="errRol" Style="{StaticResource LabelErrorEstilo}"/>
 
-                            <Border Height="1" Background="#1A1A30" Margin="0,10,0,0"/>
+                            <Border Height="1" Background="{StaticResource Bg4}" Margin="0,10,0,0"/>
                         </StackPanel>
                     </ScrollViewer>
 
@@ -536,3 +501,4 @@ Style="{StaticResource ButtonStyleEstado}">
         </Grid>
     </Grid>
 </Page>
+

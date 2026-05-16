@@ -140,7 +140,7 @@ namespace SistemaGimnacionOptimusCAI
             var imgIcono = new FontAwesome.WPF.ImageAwesome
             {
                 Icon = item.Icono,
-                Foreground = new SolidColorBrush(Color.FromRgb(148, 163, 184)), // Gris azulado que sugerimos
+                Foreground = new SolidColorBrush(Color.FromRgb(90, 107, 90)),
                 Height = 16,
                 Width = 16,
                 Margin = new Thickness(0, 0, 12, 0),
@@ -153,7 +153,7 @@ namespace SistemaGimnacionOptimusCAI
                 Text = item.Texto,
                 FontSize = 12,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(160, 160, 192)),
+                Foreground = new SolidColorBrush(Color.FromRgb(90, 107, 90)),
                 VerticalAlignment = VerticalAlignment.Center
             };
 
@@ -165,7 +165,7 @@ namespace SistemaGimnacionOptimusCAI
             border.MouseEnter += (s, e) =>
             {
                 if (border != _botonActivo)
-                    border.Background = new SolidColorBrush(Color.FromRgb(22, 22, 42));
+                    border.Background = new SolidColorBrush(Color.FromRgb(22, 32, 22));
             };
             border.MouseLeave += (s, e) =>
             {
@@ -177,6 +177,37 @@ namespace SistemaGimnacionOptimusCAI
             border.MouseLeftButtonUp += (s, e) => NavegarPagina(indice);
 
             return border;
+        }
+
+        // ── ACTUALIZAR SIDEBAR (desde otras pages) ─────────────
+        public void ActualizarSidebar(Type tipoPagina)
+        {
+            for (int i = 0; i < _botonesMenu.Count; i++)
+            {
+                var tag = _botonesMenu[i].Tag as object[];
+                if (tag == null || tag.Length < 3) continue;
+                if ((Type)tag[1] == tipoPagina)
+                {
+                    ResaltarBotonActivo(_botonesMenu[i]);
+                    lblPaginaActual.Text = tag[2] as string;
+                    return;
+                }
+            }
+        }
+
+        // ── NAVEGACION PUBLICA (desde otras pages) ─────────────
+        public void NavegarA(Type tipoPagina)
+        {
+            for (int i = 0; i < _botonesMenu.Count; i++)
+            {
+                var tag = _botonesMenu[i].Tag as object[];
+                if (tag == null || tag.Length < 3) continue;
+                if ((Type)tag[1] == tipoPagina)
+                {
+                    NavegarPagina(i);
+                    return;
+                }
+            }
         }
 
         // ── NAVEGACION ────────────────────────────────────────
@@ -215,39 +246,37 @@ namespace SistemaGimnacionOptimusCAI
 
         private void ResaltarBotonActivo(Border btn)
         {
-            // Colores de tu paleta
-            var colorBordeActivo = new SolidColorBrush(Color.FromRgb(167, 139, 250)); // El lila de tu captura
-            var colorFondoActivo = new SolidColorBrush(Color.FromRgb(26, 24, 64));   // Fondo oscuro resaltado
-            var colorIconoInactivo = new SolidColorBrush(Color.FromRgb(148, 163, 184)); // Gris azulado
-            var colorTextoInactivo = new SolidColorBrush(Color.FromRgb(160, 160, 192)); // Gris tenue
+            // Colores de la paleta verde
+            var colorBordeActivo = new SolidColorBrush(Color.FromRgb(122, 201, 67));
+            var colorFondoActivo = new SolidColorBrush(Color.FromRgb(22, 32, 22));
+            var colorIconoInactivo = new SolidColorBrush(Color.FromRgb(90, 107, 90));
+            var colorTextoInactivo = new SolidColorBrush(Color.FromRgb(90, 107, 90));
 
             foreach (var b in _botonesMenu)
             {
                 // RESETEAR INACTIVOS
                 b.Background = Brushes.Transparent;
-                b.BorderThickness = new Thickness(0); // Quitar borde
+                b.BorderThickness = new Thickness(0);
 
                 var stack = b.Child as StackPanel;
                 if (stack != null)
                 {
-                    // Reset color del Icono (FontAwesome) y del Texto
                     ((FontAwesome.WPF.ImageAwesome)stack.Children[0]).Foreground = colorIconoInactivo;
                     ((TextBlock)stack.Children[1]).Foreground = colorTextoInactivo;
                 }
             }
 
-            // RESALTAR BOTÓN CLICKEADO (IGUAL A TU FOTO)
+            // RESALTAR BOTÓN ACTIVO
             btn.Background = colorFondoActivo;
             btn.BorderBrush = colorBordeActivo;
-            btn.BorderThickness = new Thickness(1); // Aplicar el borde lila
+            btn.BorderThickness = new Thickness(1);
             btn.CornerRadius = new CornerRadius(8);
 
             var stackActivo = btn.Child as StackPanel;
             if (stackActivo != null)
             {
-                // Icono y Texto en blanco/lavanda para que resalten
-                ((FontAwesome.WPF.ImageAwesome)stackActivo.Children[0]).Foreground = Brushes.White;
-                ((TextBlock)stackActivo.Children[1]).Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255));
+                ((FontAwesome.WPF.ImageAwesome)stackActivo.Children[0]).Foreground = new SolidColorBrush(Color.FromRgb(159, 217, 110));
+                ((TextBlock)stackActivo.Children[1]).Foreground = new SolidColorBrush(Color.FromRgb(232, 240, 232));
             }
 
             _botonActivo = btn;

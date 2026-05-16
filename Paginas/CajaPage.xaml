@@ -3,16 +3,14 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1280"
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       Title="Caja">
 
     <Page.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0A0A14" Offset="0"/>
-            <GradientStop Color="#0D0D22" Offset="1"/>
-        </LinearGradientBrush>
+        <SolidColorBrush Color="#080A08"/>
     </Page.Background>
 
     <Page.Resources>
@@ -23,7 +21,7 @@
 
             <Style x:Key="InputErrorEstilo" TargetType="TextBox" BasedOn="{StaticResource InputEstilo}">
                 <Setter Property="Background"      Value="#1E0A0A"/>
-                <Setter Property="BorderBrush"     Value="#FF4444"/>
+                <Setter Property="BorderBrush"     Value="{StaticResource ColorError}"/>
                 <Setter Property="BorderThickness" Value="1.5"/>
             </Style>
 
@@ -37,7 +35,7 @@
             </Style>
 
             <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
-                <Setter Property="Foreground"  Value="#4A4A7A"/>
+                                <Setter Property="Foreground"  Value="{StaticResource TextSecondary}"/>
                 <Setter Property="FontSize"    Value="10"/>
                 <Setter Property="FontWeight"  Value="Bold"/>
                 <Setter Property="FontFamily"  Value="Segoe UI Semibold, Segoe UI"/>
@@ -46,10 +44,10 @@
 
             <!-- Estilo para botones de rango rápido -->
             <Style x:Key="BtnRangoEstilo" TargetType="Button">
-                <Setter Property="Background"      Value="#16162A"/>
-                <Setter Property="Foreground"      Value="#6A6A9A"/>
+                <Setter Property="Background"      Value="{StaticResource Bg2}"/>
+                <Setter Property="Foreground"      Value="{StaticResource TextMuted}"/>
                 <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="BorderBrush"     Value="#252540"/>
+                <Setter Property="BorderBrush"     Value="{StaticResource Border1}"/>
                 <Setter Property="Cursor"          Value="Hand"/>
                 <Setter Property="Padding"         Value="10,4"/>
                 <Setter Property="FontSize"        Value="10"/>
@@ -68,9 +66,9 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="borde" Property="Background" Value="#1E1E38"/>
-                                    <Setter TargetName="borde" Property="BorderBrush" Value="#00CFFF"/>
-                                    <Setter Property="Foreground" Value="#00CFFF"/>
+                                    <Setter TargetName="borde" Property="Background" Value="{StaticResource Bg3}"/>
+                                    <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource GreenMid}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource GreenMid}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -81,14 +79,14 @@
             <!-- Estilo hover para filas del DataGrid -->
             <Style x:Key="FilaMovimientoEstilo" TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="#C0C0E0"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
                 <Setter Property="BorderThickness" Value="0"/>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#1A1A30"/>
+                        <Setter Property="Background" Value="{StaticResource Bg3}"/>
                     </Trigger>
                     <Trigger Property="IsSelected" Value="True">
-                        <Setter Property="Background" Value="#1E1E38"/>
+                        <Setter Property="Background" Value="{StaticResource Bg3}"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>
@@ -132,20 +130,13 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#00E676" Offset="0"/>
-                            <GradientStop Color="#00CFFF" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-                </Border>
+                <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0" Background="#00E676"/>
                 <StackPanel>
                     <TextBlock Text="CAJA Y MOVIMIENTOS"
                                FontFamily="Bahnschrift SemiBold, Segoe UI"
-                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                               FontSize="19" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Ingresos, gastos y balance del gimnasio"
-                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                               FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                 </StackPanel>
             </StackPanel>
 
@@ -169,7 +160,7 @@
 
             <!-- Card balance del día — mejorada -->
             <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="12"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                     Padding="20">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -181,11 +172,11 @@
 
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
                         <fa:ImageAwesome Icon="Dollar"
-                                         Foreground="{StaticResource ColorExito}"
+                                         Foreground="{StaticResource GreenMain}"
                                          Height="16" Width="16"
                                          VerticalAlignment="Center"
                                          Margin="0,0,8,0"/>
-                        <TextBlock Text="BALANCE DEL DÍA" Foreground="#6A6A9A"
+                        <TextBlock Text="BALANCE DEL DÍA" Foreground="{StaticResource TextMuted}"
                                    FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
                     </StackPanel>
 
@@ -196,15 +187,8 @@
 
                     <!-- Barra de progreso ingresos vs gastos -->
                     <Grid Grid.Row="2" Margin="0,0,0,12" Height="4">
-                        <Border CornerRadius="2" Background="#1A1A30"/>
-                        <Border x:Name="barraBalance" CornerRadius="2" HorizontalAlignment="Left" Width="0">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                    <GradientStop Color="#00E676" Offset="0"/>
-                                    <GradientStop Color="#00CFFF" Offset="1"/>
-                                </LinearGradientBrush>
-                            </Border.Background>
-                        </Border>
+                        <Border CornerRadius="2" Background="{StaticResource Bg4}"/>
+                        <Border x:Name="barraBalance" CornerRadius="2" HorizontalAlignment="Left" Width="0" Background="#00E676"/>
                     </Grid>
 
                     <!-- Detalle ingresos / gastos — mejorado -->
@@ -215,7 +199,7 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Ingresos -->
-                        <Border Grid.Column="0" Background="#0A2A14" CornerRadius="8"
+                        <Border Grid.Column="0" Background="{StaticResource Bg3}" CornerRadius="8"
                                 Padding="10,8" Margin="0,0,6,0">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
@@ -234,7 +218,7 @@
                         </Border>
 
                         <!-- Gastos -->
-                        <Border Grid.Column="1" Background="#2A0A0A" CornerRadius="8"
+                        <Border Grid.Column="1" Background="{StaticResource Bg4}" CornerRadius="8"
                                 Padding="10,8" Margin="6,0,0,0">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
@@ -257,7 +241,7 @@
 
             <!-- Mini gráfico 7 días + balance del mes -->
             <Border Grid.Column="1" Margin="8,0,0,0" CornerRadius="12"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                     Padding="20">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -267,10 +251,10 @@
 
                     <StackPanel Grid.Column="0">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                            <fa:ImageAwesome Icon="LineChart" Foreground="#00CFFF"
+                             <fa:ImageAwesome Icon="LineChart" Foreground="{StaticResource GreenMid}"
                                              Height="16" Width="16" VerticalAlignment="Center"
                                              Margin="0,0,8,0"/>
-                            <TextBlock Text="ÚLTIMOS 7 DÍAS" Foreground="#6A6A9A"
+                            <TextBlock Text="ÚLTIMOS 7 DÍAS" Foreground="{StaticResource TextMuted}"
                                        FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
                         </StackPanel>
                         <Grid x:Name="gridChart" Height="80" VerticalAlignment="Bottom">
@@ -299,25 +283,25 @@
 
                     <!-- Card balance del mes -->
                     <Border Grid.Column="1" Margin="20,0,0,0"
-                            Background="#0A1A2A" CornerRadius="10"
-                            BorderBrush="#1A3A5A" BorderThickness="1"
+                            Background="{StaticResource Bg3}" CornerRadius="10"
+                            BorderBrush="{StaticResource Border2}" BorderThickness="0.5"
                             Padding="16,12" VerticalAlignment="Center">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                                 <fa:ImageAwesome Icon="Calendar"
-                                                 Foreground="#00CFFF"
+                                                 Foreground="{StaticResource GreenMid}"
                                                  Height="11" Width="11"
                                                  VerticalAlignment="Center"
                                                  Margin="0,0,6,0"/>
                                 <TextBlock Text="BALANCE DEL MES"
-                                           Foreground="#6A8AAA" FontSize="10"
+                                            Foreground="{StaticResource TextSecondary}" FontSize="10"
                                            FontWeight="Bold"/>
                             </StackPanel>
                             <TextBlock x:Name="lblBalanceMes" Text="$0"
                                        FontFamily="Bahnschrift SemiBold"
-                                       FontSize="22" FontWeight="Bold" Foreground="#00CFFF"/>
+                                        FontSize="22" FontWeight="Bold" Foreground="{StaticResource GreenMid}"/>
                             <TextBlock x:Name="lblMovimientosMes" Text="0 movim."
-                                       Foreground="#6A6A9A" FontSize="11" Margin="0,4,0,0"/>
+                                       Foreground="{StaticResource TextMuted}" FontSize="11" Margin="0,4,0,0"/>
                         </StackPanel>
                     </Border>
                 </Grid>
@@ -333,7 +317,7 @@
 
             <!-- Chips de filtro -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="MOSTRAR:" Foreground="#4A4A7A" FontSize="11"
+                <TextBlock Text="MOSTRAR:" Foreground="{StaticResource TextMuted}" FontSize="11"
                            FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
                 <Button x:Name="chipTodos"    Content="Todos"    Click="chipFiltro_Click" Tag="todos"
                         Style="{StaticResource BotonChipActivoEstilo}"/>
@@ -354,14 +338,14 @@
                 <Button Content="Mes"   Style="{StaticResource BtnRangoEstilo}"
                         Click="btnRangoMes_Click"    Margin="0,0,16,0"/>
 
-                <TextBlock Text="DESDE:" Foreground="#4A4A7A" FontSize="10"
+                <TextBlock Text="DESDE:" Foreground="{StaticResource TextMuted}" FontSize="10"
                            FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                 <DatePicker x:Name="dpDesde"
                             Style="{StaticResource DatePickerEstilo}"
                             SelectedDateChanged="dpFecha_Changed"
                             Width="150"/>
 
-                <TextBlock Text="HASTA:" Foreground="#4A4A7A" FontSize="10"
+                <TextBlock Text="HASTA:" Foreground="{StaticResource TextMuted}" FontSize="10"
                            FontWeight="Bold" VerticalAlignment="Center" Margin="18,0,8,0"/>
                 <DatePicker x:Name="dpHasta"
                             Style="{StaticResource DatePickerEstilo}"
@@ -378,34 +362,35 @@
             </Grid.ColumnDefinitions>
 
             <!-- DATAGRID con footer de totales -->
-            <Border Grid.Column="0" Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1" Margin="0,0,14,0" ClipToBounds="True">
+            <Border Grid.Column="0" Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Margin="0,0,14,0" ClipToBounds="True">
+               
                 <Grid>
+
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
+                    
 
-                    <!-- Línea superior cyan (reemplaza la multicolor) -->
-                    <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#00E676" Offset="0"/>
-                                <GradientStop Color="#00CFFF" Offset="0.5"/>
-                                <GradientStop Color="#12121E" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                    </Border>
+                    <!-- Línea superior verde -->
+                    <Border Grid.Row="0" Background="{StaticResource GreenMid}"/>
 
-                    <DataGrid Grid.Row="1" x:Name="gridMovimientos"
+                      <DataGrid Grid.Row="1" x:Name="gridMovimientos"
                               IsReadOnly="True" AutoGenerateColumns="False"
                               CanUserAddRows="False" CanUserResizeRows="False"
                               Background="Transparent" BorderThickness="0"
                               RowHeaderWidth="0" RowHeight="52"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#16162A"
+                              HorizontalGridLinesBrush="{StaticResource Border1}"
                               RowStyle="{StaticResource FilaMovimientoEstilo}">
+
+                            <DataGrid.Resources>
+                                <Style TargetType="ScrollViewer">
+                                    <Setter Property="Background" Value="{StaticResource Bg0}"/>
+                                </Style>
+                            </DataGrid.Resources>
 
                         <DataGrid.Columns>
 
@@ -439,13 +424,13 @@
                                                     <Setter Property="Background" Value="#2A0A0A"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding TipoTexto}" Value="Cuota">
-                                                            <Setter Property="Background" Value="#0A1A2A"/>
+                                                            <Setter Property="Background" Value="{StaticResource Bg3}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding TipoTexto}" Value="Venta">
-                                                            <Setter Property="Background" Value="#1A0A2A"/>
+                                                            <Setter Property="Background" Value="{StaticResource Bg4}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding TipoTexto}" Value="Clase">
-                                                            <Setter Property="Background" Value="#0A2A1A"/>
+                                                            <Setter Property="Background" Value="{StaticResource Bg3}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding TipoTexto}" Value="Gasto">
                                                             <Setter Property="Background" Value="#2A0A0A"/>
@@ -463,14 +448,14 @@
                                                             <Setter Property="Icon"       Value="Times"/>
                                                             <Setter Property="Foreground" Value="#FF6666"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding TipoTexto}" Value="Cuota">
-                                                                    <Setter Property="Icon"       Value="CreditCard"/>
-                                                                    <Setter Property="Foreground" Value="#00CFFF"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding TipoTexto}" Value="Venta">
-                                                                    <Setter Property="Icon"       Value="ShoppingCart"/>
-                                                                    <Setter Property="Foreground" Value="#A78BFA"/>
-                                                                </DataTrigger>
+                                                                 <DataTrigger Binding="{Binding TipoTexto}" Value="Cuota">
+                                                                     <Setter Property="Icon"       Value="CreditCard"/>
+                                                                     <Setter Property="Foreground" Value="{StaticResource GreenMain}"/>
+                                                                 </DataTrigger>
+                                                                 <DataTrigger Binding="{Binding TipoTexto}" Value="Venta">
+                                                                     <Setter Property="Icon"       Value="ShoppingCart"/>
+                                                                     <Setter Property="Foreground" Value="{StaticResource GreenMain}"/>
+                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding TipoTexto}" Value="Clase">
                                                                     <Setter Property="Icon"       Value="Heartbeat"/>
                                                                     <Setter Property="Foreground" Value="#00E676"/>
@@ -489,12 +474,12 @@
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Foreground" Value="#FF6666"/>
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding TipoTexto}" Value="Cuota">
-                                                                    <Setter Property="Foreground" Value="#00CFFF"/>
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding TipoTexto}" Value="Venta">
-                                                                    <Setter Property="Foreground" Value="#A78BFA"/>
-                                                                </DataTrigger>
+                                <DataTrigger Binding="{Binding TipoTexto}" Value="Cuota">
+                                                                     <Setter Property="Foreground" Value="{StaticResource GreenMain}"/>
+                                                                 </DataTrigger>
+                                                                 <DataTrigger Binding="{Binding TipoTexto}" Value="Venta">
+                                                                     <Setter Property="Foreground" Value="{StaticResource GreenMain}"/>
+                                                                 </DataTrigger>
                                                                 <DataTrigger Binding="{Binding TipoTexto}" Value="Clase">
                                                                     <Setter Property="Foreground" Value="#00E676"/>
                                                                 </DataTrigger>
@@ -541,11 +526,11 @@
                             <DataGridTemplateColumn Header="MÉTODO" Width="0.9*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Background="#1A1A30" CornerRadius="6"
+                                        <Border Background="{StaticResource Bg4}" CornerRadius="6"
                                                 Padding="8, 4" HorizontalAlignment="Left">
                                             <StackPanel Orientation="Horizontal">
                                                 <fa:ImageAwesome Height="9" Width="25"
-                                                                 Foreground="#6A6A9A"
+                                                                 Foreground="{StaticResource TextMuted}"
                                                                  VerticalAlignment="Center"
                                                                  Margin="0,2,2,0">
                                                     <fa:ImageAwesome.Style>
@@ -563,7 +548,7 @@
                                                     </fa:ImageAwesome.Style>
                                                 </fa:ImageAwesome>
                                                 <TextBlock Text="{Binding MetodoPagoTexto}"
-                                                           FontSize="11" Foreground="#A0A0C0"/>
+                                                           FontSize="11" Foreground="{StaticResource TextMuted}"/>
                                             </StackPanel>
                                         </Border>
                                     </DataTemplate>
@@ -577,11 +562,11 @@
                                                 Binding="{Binding UsuarioNombre}" Width="1*"/>
 
                             <!-- Eliminar -->
-                            <DataGridTemplateColumn Header="" Width="70">
+                            <!-- Eliminar -->
+                            <DataGridTemplateColumn Header="Accion" Width="70">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Button Click="btnEliminar_Click"
-                                                Background="Transparent" BorderThickness="0"
                                                 Cursor="Hand" ToolTip="Eliminar movimiento"
                                                 Style="{StaticResource ButtonStyleCancelar}">
                                             <fa:ImageAwesome Icon="TrashOutline"
@@ -596,8 +581,8 @@
                     </DataGrid>
 
                     <!-- ── Footer de totales del período ── -->
-                    <Border Grid.Row="2" Background="#0D0D1A"
-                            BorderBrush="#252540" BorderThickness="0,1,0,0"
+                    <Border Grid.Row="2" Background="{StaticResource Bg2}"
+                            BorderBrush="{StaticResource Border1}" BorderThickness="0,1,0,0"
                             Padding="16,10">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -608,11 +593,11 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                <fa:ImageAwesome Icon="Filter" Foreground="#4A4A7A"
+                                <fa:ImageAwesome Icon="Filter" Foreground="{StaticResource TextMuted}"
                                                  Height="11" Width="11" Margin="0,0,6,0"
                                                  VerticalAlignment="Center"/>
                                 <TextBlock x:Name="lblTotalRegistros" Text="0 movimientos"
-                                           Foreground="#4A4A7A" FontSize="11"/>
+                                           Foreground="{StaticResource TextMuted}" FontSize="11"/>
                             </StackPanel>
 
                             <!-- Total ingresos período -->
@@ -621,7 +606,7 @@
                                 <fa:ImageAwesome Icon="ArrowUp" Foreground="#00A855"
                                                  Height="10" Width="10" Margin="0,0,6,0"
                                                  VerticalAlignment="Center"/>
-                                <TextBlock Text="Ingresos:" Foreground="#4A4A7A"
+                                <TextBlock Text="Ingresos:" Foreground="{StaticResource TextMuted}"
                                            FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="lblTotalIngresos" Text="$0"
                                            Foreground="#00E676" FontFamily="Consolas"
@@ -634,7 +619,7 @@
                                 <fa:ImageAwesome Icon="ArrowDown" Foreground="#CC3333"
                                                  Height="10" Width="10" Margin="0,0,6,0"
                                                  VerticalAlignment="Center"/>
-                                <TextBlock Text="Gastos:" Foreground="#4A4A7A"
+                                <TextBlock Text="Gastos:" Foreground="{StaticResource TextMuted}"
                                            FontSize="11" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="lblTotalGastos" Text="$0"
                                            Foreground="#FF5555" FontFamily="Consolas"
@@ -643,7 +628,7 @@
 
                             <!-- Neto período -->
                             <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="Neto:" Foreground="#6A6A9A"
+                                <TextBlock Text="Neto:" Foreground="{StaticResource TextMuted}"
                                            FontSize="11" FontWeight="Bold"
                                            Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="lblTotalNeto" Text="$0"
@@ -669,8 +654,8 @@
 
             <!-- ══════════════════ PANEL FORMULARIO ══════════════════ -->
             <Border x:Name="panelFormulario" Grid.Column="1" Width="380"
-                    Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1"
+                    Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                     Visibility="Collapsed" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -692,21 +677,22 @@
                                              Margin="0,0,8,0"/>
                             <TextBlock x:Name="lblTituloFormulario" Text="REGISTRAR INGRESO"
                                        FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                       FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"/>
+                                       FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
                         </StackPanel>
-                        <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
+                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
                     </StackPanel>
 
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="22,14,22,0">
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" 
+                                  Margin="22,14,22,0" Style="{StaticResource PanelScrollViewerStyle}">
                         <StackPanel>
 
                             <TextBlock Text="CONCEPTO *" Style="{StaticResource LabelCampoEstilo}"/>
                             <ComboBox x:Name="cmbConcepto" BorderThickness="0" Background="Transparent"
-                                      Foreground="#E8E8FF" VerticalContentAlignment="Center"
+                                      Foreground="{StaticResource TextPrimary}" VerticalContentAlignment="Center"
                                       FontSize="13" Padding="10,0" Style="{StaticResource ComboBoxEstilo}">
                                 <ComboBox.Resources>
-                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                 </ComboBox.Resources>
                             </ComboBox>
                             <TextBlock x:Name="errConcepto" Style="{StaticResource LabelErrorEstilo}"/>
@@ -717,7 +703,7 @@
                                      LostFocus="txtMonto_LostFocus"/>
                             <TextBlock x:Name="errMonto" Style="{StaticResource LabelErrorEstilo}"/>
 
-                            <Border x:Name="panelPreviewMonto" Background="#0A1A0A" CornerRadius="8"
+                            <Border x:Name="panelPreviewMonto" Background="{StaticResource Bg3}" CornerRadius="8"
         Padding="12,8" Margin="0,0,0,14" Visibility="Collapsed">
                                 <StackPanel Orientation="Horizontal">
                                     <fa:ImageAwesome x:Name="iconoPreviewMonto"
@@ -734,25 +720,25 @@
                             <TextBlock Text="MÉTODO DE PAGO *" Style="{StaticResource LabelCampoEstilo}"/>
                             <ComboBox x:Name="cmbMetodoPago" BorderThickness="0" Background="Transparent"
                                       Style="{StaticResource ComboBoxEstilo}"
-                                      Foreground="#E8E8FF" VerticalContentAlignment="Center"
+                                      Foreground="{StaticResource TextPrimary}" VerticalContentAlignment="Center"
                                       FontSize="13" Padding="10,0">
                                 <ComboBox.Resources>
-                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                 </ComboBox.Resources>
-                                <ComboBoxItem Content="Efectivo"      Tag="efectivo"      Foreground="#E8E8FF" IsSelected="True"/>
-                                <ComboBoxItem Content="Transferencia" Tag="transferencia" Foreground="#E8E8FF"/>
-                                <ComboBoxItem Content="Tarjeta"       Tag="tarjeta"       Foreground="#E8E8FF"/>
-                                <ComboBoxItem Content="Otro"          Tag="otro"          Foreground="#E8E8FF"/>
+                                <ComboBoxItem Content="Efectivo"      Tag="efectivo"      Foreground="{StaticResource TextPrimary}" IsSelected="True"/>
+                                <ComboBoxItem Content="Transferencia" Tag="transferencia" Foreground="{StaticResource TextPrimary}"/>
+                                <ComboBoxItem Content="Tarjeta"       Tag="tarjeta"       Foreground="{StaticResource TextPrimary}"/>
+                                <ComboBoxItem Content="Otro"          Tag="otro"          Foreground="{StaticResource TextPrimary}"/>
                             </ComboBox>
 
                             <TextBlock Text="DETALLE (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#16162A" CornerRadius="10"
-                                    BorderBrush="#252540" BorderThickness="1.5"
+                            <Border Background="{StaticResource Bg2}" CornerRadius="10"
+                                    BorderBrush="{StaticResource Border1}" BorderThickness="1.5"
                                     Margin="0,0,0,14">
                                 <TextBox x:Name="txtDetalle"
                                          Background="Transparent" BorderThickness="0"
-                                         Foreground="#E8E8FF" CaretBrush="#00CFFF"
+                                         Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource GreenMid}"
                                          FontSize="13" Padding="14,10"
                                          AcceptsReturn="True" TextWrapping="Wrap"
                                          Height="80" VerticalScrollBarVisibility="Auto"/>

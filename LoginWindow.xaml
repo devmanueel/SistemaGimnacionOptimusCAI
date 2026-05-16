@@ -16,14 +16,14 @@
             </ResourceDictionary.MergedDictionaries>
             
             <Style x:Key="InputErrorEstilo" TargetType="TextBox" BasedOn="{StaticResource InputEstilo}">
-                <Setter Property="Background"      Value="#1E0A0A"/>
-                <Setter Property="BorderBrush"     Value="#FF4444"/>
+                <Setter Property="Background"      Value="{StaticResource BrushVencidaFondo}"/>
+                <Setter Property="BorderBrush"     Value="{StaticResource ColorError}"/>
                 <Setter Property="BorderThickness" Value="1.5"/>
             </Style>
 
             <Style x:Key="LabelErrorEstilo" TargetType="TextBlock">
                 <Setter Property="FontSize"     Value="11"/>
-                <Setter Property="Foreground"   Value="#FF5555"/>
+                <Setter Property="Foreground"   Value="{StaticResource ColorError}"/>
                 <Setter Property="Margin"       Value="4,-10,0,8"/>
                 <Setter Property="FontStyle"    Value="Italic"/>
                 <Setter Property="Visibility"   Value="Collapsed"/>
@@ -31,7 +31,7 @@
             </Style>
 
             <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
-                <Setter Property="Foreground"  Value="#4A4A7A"/>
+                <Setter Property="Foreground"  Value="{StaticResource TextMuted}"/>
                 <Setter Property="FontSize"    Value="10"/>
                 <Setter Property="FontWeight"  Value="Bold"/>
                 <Setter Property="FontFamily"  Value="Segoe UI Semibold, Segoe UI"/>
@@ -42,15 +42,9 @@
 
     <!-- Permite mover la ventana arrastrando -->
     <Border x:Name="borderRaiz" CornerRadius="16"
-            BorderBrush="#252540" BorderThickness="1"
+            BorderBrush="{StaticResource Border1}" BorderThickness="1"
+            Background="{StaticResource Bg1}"
             MouseLeftButtonDown="Window_MouseLeftButtonDown">
-
-        <Border.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Color="#0A0A14" Offset="0"/>
-                <GradientStop Color="#0D0D22" Offset="1"/>
-            </LinearGradientBrush>
-        </Border.Background>
 
         <Grid>
             <Grid.RowDefinitions>
@@ -64,40 +58,18 @@
                 <!-- Footer -->
             </Grid.RowDefinitions>
 
-            <!-- Franja naranja-violeta -->
-            <Border Grid.Row="0" CornerRadius="16,16,0,0">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                        <GradientStop Color="#FF6B35" Offset="0"/>
-                        <GradientStop Color="#A78BFA" Offset="0.5"/>
-                        <GradientStop Color="#00CFFF" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
-            </Border>
+            <!-- Franja verde superior -->
+            <Border Grid.Row="0" CornerRadius="16,16,0,0" Background="{StaticResource GreenMain}"/>
 
-            <!-- Logo + título -->
+            <!-- Logo -->
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,36,0,28">
-                <!-- Ícono circular con gradiente -->
-                <Border Width="80" Height="80" CornerRadius="40"
-                        HorizontalAlignment="Center" Margin="0,0,0,18">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#FF6B35" Offset="0"/>
-                            <GradientStop Color="#A78BFA" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <TextBlock Text="🥊" FontSize="36"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"/>
-                </Border>
+                <Image Source="/Assets/Logo-gimnasio.png" 
+                       Width="250" 
+                       Stretch="Uniform"
+                       HorizontalAlignment="Center" Margin="0,0,0,20"/>
 
-                <TextBlock Text="OPTIMUS CAI"
-                           FontFamily="Bahnschrift SemiBold, Segoe UI"
-                           FontSize="22" FontWeight="Bold"
-                           Foreground="#E8E8FF"
-                           HorizontalAlignment="Center"/>
                 <TextBlock Text="Sistema de Gestión"
-                           FontSize="12" Foreground="#6A6A9A"
+                           FontSize="12" Foreground="{StaticResource TextMuted}"
                            HorizontalAlignment="Center" Margin="0,4,0,0"/>
             </StackPanel>
 
@@ -106,8 +78,8 @@
 
                 <!-- DNI -->
                 <TextBlock Text="DNI" Style="{StaticResource LabelCampoEstilo}"/>
-                <Border Background="#16162A" CornerRadius="10" Height="48"
-                        BorderBrush="#252540" BorderThickness="1.5" Margin="0, 0, 0, 20">
+                <Border Background="{StaticResource Bg4}" CornerRadius="10" Height="48"
+                        BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0, 0, 0, 20">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="44"/>
@@ -118,7 +90,7 @@
                                    VerticalAlignment="Center"/>
                         <TextBox x:Name="txtDni" Grid.Column="1"
                                  Background="Transparent" BorderThickness="0"
-                                 Foreground="#E8E8FF" CaretBrush="#FF6B35"
+                                 Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource GreenMain}"
                                  FontSize="16" FontFamily="Consolas"
                                  VerticalContentAlignment="Center"
                                  MaxLength="8"
@@ -130,8 +102,8 @@
 
                 <!-- Contraseña -->
                 <TextBlock Text="CONTRASEÑA" Style="{StaticResource LabelCampoEstilo}"/>
-                <Border Background="#16162A" CornerRadius="10" Height="48"
-                        BorderBrush="#252540" BorderThickness="1.5" Margin="0,0,0,20">
+                <Border Background="{StaticResource Bg4}" CornerRadius="10" Height="48"
+                        BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,0,20">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="44"/>
@@ -143,7 +115,7 @@
                                    VerticalAlignment="Center"/>
                         <PasswordBox x:Name="txtPassword" Grid.Column="1"
                                      Background="Transparent" BorderThickness="0"
-                                     Foreground="#E8E8FF" CaretBrush="#FF6B35"
+                                     Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource GreenMain}"
                                      FontSize="16" VerticalContentAlignment="Center"
                                      PasswordChar="●"
                                      KeyDown="txtPassword_KeyDown"/>
@@ -153,7 +125,7 @@
                                 Background="Transparent" BorderThickness="0"
                                 Cursor="Hand" ToolTip="Mostrar/ocultar">
                             <TextBlock x:Name="lblTogglePass" Text="👁" FontSize="15"
-                                       Foreground="#4A4A7A"/>
+                                       Foreground="{StaticResource TextMuted}"/>
                         </Button>
                     </Grid>
                 </Border>
@@ -180,13 +152,7 @@
         Click="btnIngresar_Click">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="borde" CornerRadius="10">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                        <GradientStop Color="#FF6B35" Offset="0"/>
-                                        <GradientStop Color="#A78BFA" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
+                                    <Border Background="{StaticResource GreenMain}" CornerRadius="10">
                                 <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
                             </Border>
@@ -202,12 +168,12 @@
             <!-- Footer -->
             <StackPanel Grid.Row="3" Margin="0,18,0,22">
                 <TextBlock Text="OptimusCAI — Gestión de Gimnasio"
-                           FontSize="10" Foreground="#3A3A5C"
+                           FontSize="10" Foreground="{StaticResource TextMuted}"
                            HorizontalAlignment="Center"/>
                 <!-- Botón cerrar -->
                 <Button Content="✕ Salir" Click="btnSalir_Click"
                         Background="Transparent" BorderThickness="0"
-                        Foreground="#3A3A5C" FontSize="10"
+                        Foreground="{StaticResource TextMuted}" FontSize="10"
                         Cursor="Hand" HorizontalAlignment="Center"
                         Margin="0,6,0,0"/>
             </StackPanel>

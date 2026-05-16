@@ -96,7 +96,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 {
                     Content = "Todas las categorías",
                     Tag = null,
-                    Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255)),
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                     IsSelected = true
                 });
 
@@ -173,7 +173,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var contenedorFoto = new Border
             {
                 Height = 150,
-                Background = new SolidColorBrush(Color.FromRgb(10, 10, 25)),
+                Background = new SolidColorBrush(Color.FromRgb(17, 24, 17)),
                 CornerRadius = new CornerRadius(11, 11, 0, 0),
                 ClipToBounds = true
             };
@@ -266,7 +266,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     Text = p.Categoria.ToUpper(),
                     FontSize = 9,
                     FontWeight = FontWeights.Bold,
-                    Foreground = new SolidColorBrush(Color.FromRgb(167, 139, 250)),
+                    Foreground = new SolidColorBrush(Color.FromRgb(122, 173, 122)),
                     Margin = new Thickness(0, 0, 0, 4)
                 };
                 infoStack.Children.Add(lblCat);
@@ -313,7 +313,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     ? new SolidColorBrush(Color.FromRgb(255, 85, 85))
                     : p.BajoStock
                         ? new SolidColorBrush(Color.FromRgb(255, 167, 38))
-                        : new SolidColorBrush(Color.FromRgb(106, 106, 154)),
+                        : new SolidColorBrush(Color.FromRgb(122, 173, 122)),
                 VerticalAlignment = VerticalAlignment.Center
             };
             Grid.SetColumn(lblStock, 1);
@@ -325,25 +325,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var btnToggle = new Button
             {
                 Content = p.Activo ? "DESACTIVAR" : "REACTIVAR",
-                FontSize = 9,
-                FontWeight = FontWeights.Bold,
-                Background = Brushes.Transparent,
-                Foreground = p.Activo
-                    ? new SolidColorBrush(Color.FromRgb(106, 106, 154))
-                    : new SolidColorBrush(Color.FromRgb(0, 230, 118)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64)),
-                BorderThickness = new Thickness(1),
-                Cursor = Cursors.Hand,
-                Padding = new Thickness(6, 4, 6, 4),
-                Margin = new Thickness(0, 8, 0, 0),
+                Style = (Style)Resources["ProductoBtnToggleStyle"],
+                Margin = new Thickness(0, 10, 0, 0),
                 Tag = p.Id
             };
             btnToggle.Click += BtnToggle_Click;
-
-            var btnTpl = new ControlTemplate(typeof(Button));
-            // Para evitar definir un template inline en C#, usamos un Border simple:
-            // En cambio dejamos el botón con su template default y le ponemos margin/padding.
-            // Eso es suficiente y queda prolijo.
 
             infoStack.Children.Add(btnToggle);
             stack.Children.Add(infoStack);
@@ -591,7 +577,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             else
             {
                 lblStockActual.Text = stock + " unidades";
-                lblStockActual.Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255));
+                lblStockActual.Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232));
             }
         }
 

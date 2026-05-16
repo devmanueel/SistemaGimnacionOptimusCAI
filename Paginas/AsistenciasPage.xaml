@@ -9,12 +9,7 @@
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="Control de Acceso">
 
-    <Page.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0A0A14" Offset="0"/>
-            <GradientStop Color="#0D0D22" Offset="1"/>
-        </LinearGradientBrush>
-    </Page.Background>
+    <Page.Background><SolidColorBrush Color="#080A08"/></Page.Background>
 
     <Page.Resources>
         <ResourceDictionary>
@@ -24,10 +19,10 @@
             <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
 
             <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
-                <Setter Property="Foreground" Value="#4A4A7A"/>
+                <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
                 <Setter Property="FontSize"   Value="10"/>
                 <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Margin"     Value="2,0,0,6"/>
+                <Setter Property="Margin"     Value="2,0,0,10"/>
             </Style>
         </ResourceDictionary>
     </Page.Resources>
@@ -68,32 +63,27 @@
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                 <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#00CFFF" Offset="0"/>
-                            <GradientStop Color="#00E676" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
+                    <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                 </Border>
                 <StackPanel>
                     <TextBlock Text="CONTROL DE ACCESO"
                                FontFamily="Bahnschrift SemiBold, Segoe UI"
-                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                               FontSize="19" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Registro de ingresos al gimnasio"
-                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                               FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                 </StackPanel>
             </StackPanel>
 
             <!-- Reloj en vivo -->
-            <Border Grid.Column="1" Background="#12121E" CornerRadius="10"
-                    BorderBrush="#252540" BorderThickness="1" Padding="16,8">
+            <Border Grid.Column="1" Background="{StaticResource Bg1}" CornerRadius="10"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,8">
                 <StackPanel>
                     <TextBlock x:Name="lblReloj" Text="00:00:00"
                                FontFamily="Bahnschrift SemiBold, Consolas"
                                FontSize="22" FontWeight="Bold"
-                               Foreground="#00CFFF" HorizontalAlignment="Center"/>
+                               Foreground="{StaticResource GreenMain}" HorizontalAlignment="Center"/>
                     <TextBlock x:Name="lblFecha" Text="—"
-                               FontSize="10" Foreground="#6A6A9A"
+                               FontSize="10" Foreground="{StaticResource TextMuted}"
                                HorizontalAlignment="Center"/>
                 </StackPanel>
             </Border>
@@ -103,45 +93,92 @@
         <Grid Grid.Row="1" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statPermitidos" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#00E676"/>
-                    <TextBlock Text="ACCESOS HOY" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="0" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statPermitidos" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
+                        <TextBlock Text="ACCESOS HOY" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="CheckCircle"
+                                     Foreground="{StaticResource GreenMain}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statDenegados" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#FF5555"/>
-                    <TextBlock Text="DENEGADOS HOY" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="2" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statDenegados" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource ColorError}"/>
+                        <TextBlock Text="DENEGADOS HOY" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="TimesCircle"
+                                     Foreground="{StaticResource ColorError}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="2" Margin="4,0,4,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statSociosUnicos" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#00CFFF"/>
-                    <TextBlock Text="SOCIOS DISTINTOS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="4" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statSociosUnicos" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
+                        <TextBlock Text="SOCIOS DISTINTOS" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="Users"
+                                     Foreground="{StaticResource GreenMain}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="3" Margin="8,0,0,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statSemana" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#A78BFA"/>
-                    <TextBlock Text="ACCESOS ÚLTIMA SEMANA" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="6" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statSemana" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
+                        <TextBlock Text="ACCESOS ÚLTIMA SEMANA" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="ClockOutline"
+                                     Foreground="{StaticResource GreenMain}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
         </Grid>
 
@@ -155,8 +192,8 @@
             </Grid.ColumnDefinitions>
 
             <!-- ══════════════════ PANEL VALIDACIÓN ══════════════════ -->
-            <Border Grid.Column="0" Background="#12121E"
-                    CornerRadius="12" BorderBrush="#252540" BorderThickness="1"
+            <Border Grid.Column="0" Background="{StaticResource Bg1}"
+                    CornerRadius="12" BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                     Margin="0,0,14,0" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -167,32 +204,27 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#00CFFF" Offset="0"/>
-                                <GradientStop Color="#00E676" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                     </Border>
 
                     <!-- Título + DNI input -->
                     <StackPanel Grid.Row="1" Margin="22,22,22,0">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                            <fa:ImageAwesome Icon="SignIn" Foreground="#00CFFF" Height="18" Margin="0, 0, 8, 0"/>
+                            <fa:ImageAwesome Icon="SignIn" Foreground="{StaticResource GreenMain}" Height="18" Margin="0, 0, 8, 0"/>
                             <TextBlock Text="REGISTRAR INGRESO"
                                        FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                       FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"
+                                       FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
                                        VerticalAlignment="Center"/>
                         </StackPanel>
 
-                        <TextBlock Text="DNI DEL SOCIO" Style="{StaticResource LabelCampoEstilo}"/>
+                        <TextBlock Foreground="{StaticResource TextMuted}" Text="DNI DEL SOCIO" Style="{StaticResource LabelCampoEstilo}"/>
 
                         <!-- Input de DNI muy grande, con foco automático -->
-                        <Border Background="#16162A" CornerRadius="12" Height="64"
-                                BorderBrush="#00CFFF" BorderThickness="2" Margin="0,0,0,12">
+                        <Border Background="{StaticResource Bg2}" CornerRadius="12" Height="64"
+                                BorderBrush="{StaticResource GreenMain}" BorderThickness="2" Margin="0,0,0,12">
                             <TextBox x:Name="txtDni"
                                      Background="Transparent" BorderThickness="0"
-                                     Foreground="#E8E8FF" CaretBrush="#00CFFF"
+                                     Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource GreenMain}"
                                      FontSize="28" FontFamily="Consolas, Segoe UI"
                                      FontWeight="Bold"
                                      VerticalContentAlignment="Center"
@@ -204,7 +236,7 @@
                         </Border>
 
                         <TextBlock Text="Ingresá el DNI y presioná ENTER"
-                                   FontSize="11" Foreground="#6A6A9A"
+                                   FontSize="11" Foreground="{StaticResource TextMuted}"
                                    FontStyle="Italic" HorizontalAlignment="Center"
                                    Margin="0,0,0,12"/>
 
@@ -213,7 +245,7 @@
                                 Height="48" FontSize="14"
                                 Click="btnValidar_Click"/>
 
-                        <Border Height="1" Background="#252540" Margin="0,18,0,12"/>
+                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,18,0,12"/>
                     </StackPanel>
 
                     <!-- Tarjeta de resultado (cambia según permitido/denegado) -->
@@ -241,12 +273,7 @@
                             <!-- Foto del socio -->
                             <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="0,8,0,12">
                                 <Ellipse Width="92" Height="92">
-                                    <Ellipse.Fill>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                            <GradientStop Color="#00CFFF" Offset="0"/>
-                                            <GradientStop Color="#A78BFA" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Ellipse.Fill>
+                                    <Ellipse.Fill><SolidColorBrush Color="#4ADE80"/></Ellipse.Fill>
                                 </Ellipse>
                                 <Ellipse Width="86" Height="86">
                                     <Ellipse.Fill>
@@ -259,14 +286,14 @@
                             <TextBlock Grid.Row="2" x:Name="lblSocioNombre"
                                        Text="—"
                                        FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                       FontSize="16" FontWeight="Bold" Foreground="#E8E8FF"
+                                       FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
                                        HorizontalAlignment="Center" Margin="0,0,0,2"/>
 
                             <!-- Número de socio -->
                             <TextBlock Grid.Row="3" x:Name="lblNumeroSocio"
                                        Text="#0000"
                                        FontFamily="Consolas" FontSize="12"
-                                       Foreground="#FF6B35" HorizontalAlignment="Center"
+                                       Foreground="{StaticResource GreenMain}" HorizontalAlignment="Center"
                                        Margin="0,0,0,12"/>
 
                             <!-- Mensaje + detalles -->
@@ -293,7 +320,7 @@
                                             <TextBlock Grid.Column="1" x:Name="lblActividad"
                                                        Text="—" FontSize="11"
                                                        FontWeight="SemiBold"
-                                                       Foreground="#E8E8FF"
+                                                       Foreground="{StaticResource TextPrimary}"
                                                        TextTrimming="CharacterEllipsis"/>
                                         </Grid>
                                         <Grid>
@@ -306,7 +333,7 @@
                                             <TextBlock Grid.Column="1" x:Name="lblVencimiento"
                                                        Text="—" FontSize="11"
                                                        FontWeight="SemiBold"
-                                                       Foreground="#E8E8FF"/>
+                                                       Foreground="{StaticResource TextPrimary}"/>
                                         </Grid>
                                     </StackPanel>
                                 </StackPanel>
@@ -319,7 +346,7 @@
                                 VerticalAlignment="Center"
                                 HorizontalAlignment="Center"
                                 Margin="20">
-                        <fa:ImageAwesome Icon="Lock" Foreground="#00CFFF" Height="90" Opacity="0.7" HorizontalAlignment="Center" Margin="0, 0, 0, 15"/>
+                        <fa:ImageAwesome Icon="Lock" Foreground="{StaticResource GreenMain}" Height="90" Opacity="0.7" HorizontalAlignment="Center" Margin="0, 0, 0, 15"/>
                        
                         <TextBlock Text="ESPERANDO INGRESO..."
                                    FontFamily="Bahnschrift SemiBold"
@@ -332,8 +359,8 @@
             </Border>
 
             <!-- ══════════════════ LISTA ACCESOS ══════════════════ -->
-            <Border Grid.Column="1" Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1" ClipToBounds="True">
+            <Border Grid.Column="1" Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3"/>
@@ -343,12 +370,7 @@
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#A78BFA" Offset="0"/>
-                                <GradientStop Color="#12121E" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                     </Border>
 
                     <!-- Header de la lista -->
@@ -358,10 +380,10 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <fa:ImageAwesome Icon="ListUl" Foreground="#00CFFF" Height="16" Margin="0, 0, 8, 0"/>
+                            <fa:ImageAwesome Icon="ListUl" Foreground="{StaticResource GreenMain}" Height="16" Margin="0, 0, 8, 0"/>
                             <TextBlock Text="ACCESOS DEL DÍA"
                                        FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                       FontSize="14" FontWeight="Bold" Foreground="#E8E8FF"
+                                       FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
                                        VerticalAlignment="Center"/>
                         </StackPanel>
 
@@ -376,7 +398,7 @@
                         </StackPanel>
                     </Grid>
 
-                    <Border Grid.Row="2" Height="1" Background="#252540" Margin="0,14,0,0"/>
+                    <Border Grid.Row="2" Height="1" Background="{StaticResource Border1}" Margin="0,14,0,0"/>
 
                     <!-- DataGrid de accesos -->
                     <DataGrid Grid.Row="3" x:Name="gridAccesos"
@@ -385,7 +407,7 @@
                               Background="Transparent" BorderThickness="0"
                               RowHeaderWidth="0" RowHeight="58"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#1A1A2E">
+                              HorizontalGridLinesBrush="#111811">
                         <DataGrid.Columns>
 
                             <!-- Indicador lateral de color -->
@@ -414,7 +436,7 @@
                                     <DataTemplate>
                                         <TextBlock Text="{Binding HoraAcceso}"
                                                    FontFamily="Consolas" FontWeight="Bold"
-                                                   FontSize="14" Foreground="#E8E8FF"
+                                                   FontSize="14" Foreground="{StaticResource TextPrimary}"
                                                    VerticalAlignment="Center"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -427,12 +449,7 @@
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Grid Margin="0,0,10,0">
                                                 <Ellipse Width="38" Height="38">
-                                                    <Ellipse.Fill>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                            <GradientStop Color="#00CFFF" Offset="0"/>
-                                                            <GradientStop Color="#A78BFA" Offset="1"/>
-                                                        </LinearGradientBrush>
-                                                    </Ellipse.Fill>
+                                                    <Ellipse.Fill><SolidColorBrush Color="#4ADE80"/></Ellipse.Fill>
                                                 </Ellipse>
                                                 <Ellipse Width="34" Height="34">
                                                     <Ellipse.Fill>
@@ -443,10 +460,10 @@
                                             </Grid>
                                             <StackPanel VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding SocioNombre}" FontSize="13"
-                                                           FontWeight="SemiBold" Foreground="#E8E8FF" Margin="5, 0, 0, 5"/>
+                                                           FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" Margin="5, 0, 0, 5"/>
                                                 <TextBlock Text="{Binding NumeroSocioFormateado}" Margin="5, 0, 0, 0"
                                                            FontFamily="Consolas" FontSize="11"
-                                                           Foreground="#FF6B35"/>
+                                                           Foreground="{StaticResource GreenMain}"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </DataTemplate>
@@ -475,10 +492,10 @@
                             <DataGridTemplateColumn Header="MÉTODO" Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Background="#1A1A30" CornerRadius="6"
+                                        <Border Background="{StaticResource Bg4}" CornerRadius="6"
                                                 Padding="8,3" HorizontalAlignment="Left">
                                             <TextBlock Text="{Binding MetodoTexto}"
-                                                       FontSize="10" Foreground="#A0A0C0"/>
+                                                       FontSize="10" Foreground="{StaticResource TextMuted}"/>
                                         </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -491,3 +508,4 @@
         </Grid>
     </Grid>
 </Page>
+

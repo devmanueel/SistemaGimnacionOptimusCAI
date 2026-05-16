@@ -8,12 +8,7 @@
       d:DesignHeight="768" d:DesignWidth="1280"
       Title="Actividades">
 
-    <Page.Background>
-        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#0A0A14" Offset="0"/>
-            <GradientStop Color="#0D0D22" Offset="1"/>
-        </LinearGradientBrush>
-    </Page.Background>
+    <Page.Background><SolidColorBrush Color="#080A08"/></Page.Background>
 
     <Page.Resources>
         <ResourceDictionary>
@@ -23,7 +18,7 @@
 
             <Style x:Key="InputErrorEstilo" TargetType="TextBox" BasedOn="{StaticResource InputEstilo}">
                 <Setter Property="Background"      Value="#1E0A0A"/>
-                <Setter Property="BorderBrush"     Value="#FF4444"/>
+                <Setter Property="BorderBrush"     Value="{StaticResource ColorError}"/>
                 <Setter Property="BorderThickness" Value="1.5"/>
             </Style>
 
@@ -37,7 +32,7 @@
             </Style>
 
             <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
-                <Setter Property="Foreground"  Value="#4A4A7A"/>
+                <Setter Property="Foreground"  Value="{StaticResource TextMuted}"/>
                 <Setter Property="FontSize"    Value="10"/>
                 <Setter Property="FontWeight"  Value="Bold"/>
                 <Setter Property="FontFamily"  Value="Segoe UI Semibold, Segoe UI"/>
@@ -87,19 +82,14 @@
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                 <Border Width="4" Height="36" CornerRadius="2" Margin="0,0,14,0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#A78BFA" Offset="0"/>
-                            <GradientStop Color="#FF6B35" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
+                    <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                 </Border>
                 <StackPanel>
                     <TextBlock Text="ACTIVIDADES Y PLANES"
                                FontFamily="Bahnschrift SemiBold, Segoe UI"
-                               FontSize="19" FontWeight="Bold" Foreground="#E8E8FF"/>
+                               FontSize="19" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
                     <TextBlock Text="Planes mensuales, clases sueltas y precios"
-                               FontSize="12" Foreground="#6A6A9A" Margin="0,2,0,0"/>
+                               FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                 </StackPanel>
             </StackPanel>
             
@@ -122,41 +112,76 @@ TextChanged="txtBuscar_TextChanged"/>
         <Grid Grid.Row="1" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Margin="0,0,8,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statTotal" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#A78BFA"/>
-                    <TextBlock Text="TOTAL PLANES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="0" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statTotal" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
+                        <TextBlock Text="TOTAL PLANES" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="ListUl"
+                                     Foreground="{StaticResource GreenMain}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="1" Margin="4,0,4,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statActivos" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#00E676"/>
-                    <TextBlock Text="ACTIVOS" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="2" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statActivos" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
+                        <TextBlock Text="ACTIVOS" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="CheckCircle"
+                                     Foreground="{StaticResource GreenMain}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
 
-            <Border Grid.Column="2" Margin="8,0,0,0" CornerRadius="10"
-                    Background="#12121E" BorderBrush="#252540" BorderThickness="1" Padding="16,12">
-                <StackPanel>
-                    <TextBlock x:Name="statSociosTotal" Text="—" FontFamily="Bahnschrift SemiBold"
-                               FontSize="26" FontWeight="Bold" Foreground="#00CFFF"/>
-                    <TextBlock Text="SOCIOS ACTIVOS EN PLANES" FontSize="10" Foreground="#6A6A9A" Margin="0,2,0,0"/>
-                </StackPanel>
+            <Border Grid.Column="4" CornerRadius="10"
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock x:Name="statSociosTotal" Text="—"
+                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
+                        <TextBlock Text="SOCIOS ACTIVOS EN PLANES" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <fa:ImageAwesome Grid.Column="1" Icon="Users"
+                                     Foreground="{StaticResource GreenMain}"
+                                     Height="28" Width="28"
+                                     Opacity="0.3"
+                                     VerticalAlignment="Center"/>
+                </Grid>
             </Border>
         </Grid>
 
         <!-- ══════════════════ FILTROS ══════════════════ -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
-            <TextBlock Text="MOSTRAR:" Foreground="#4A4A7A" FontSize="11"
+            <TextBlock Text="MOSTRAR:" Foreground="{StaticResource TextMuted}" FontSize="11"
                FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
 
             <!-- CHIP SELECCIONADO (TODOS) -->
@@ -183,21 +208,15 @@ TextChanged="txtBuscar_TextChanged"/>
             </Grid.ColumnDefinitions>
 
             <!-- DATAGRID -->
-            <Border Grid.Column="0" Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1" Margin="0,0,14,0" ClipToBounds="True">
+            <Border Grid.Column="0" Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Margin="0,0,14,0" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#A78BFA" Offset="0"/>
-                                <GradientStop Color="#FF6B35" Offset="0.5"/>
-                                <GradientStop Color="#12121E" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                     </Border>
 
                     <DataGrid Grid.Row="1" x:Name="gridActividades"
@@ -206,7 +225,7 @@ TextChanged="txtBuscar_TextChanged"/>
                               Background="Transparent" BorderThickness="0"
                               RowHeaderWidth="0" RowHeight="58"
                               GridLinesVisibility="Horizontal"
-                              HorizontalGridLinesBrush="#1A1A2E">
+                              HorizontalGridLinesBrush="#111811">
                         <DataGrid.Columns>
 
                             <DataGridTextColumn Header="ACTIVIDAD" Binding="{Binding Nombre}" Width="1.5*"/>
@@ -272,7 +291,7 @@ TextChanged="txtBuscar_TextChanged"/>
                                             <Button Click="btnEditar_Click" 
                                                     Style="{StaticResource ButtonStyleEditar}" 
                                                     Margin="0,0,8,0">
-                                                <fa:ImageAwesome Icon="Edit" Foreground="#00CFFF" Height="14"/>
+                                                <fa:ImageAwesome Icon="Edit" Foreground="{StaticResource ColorEditarCyan}" Height="14"/>
                                             </Button>
 
                                             <!-- BOTÓN ESTADO -->
@@ -306,8 +325,8 @@ TextChanged="txtBuscar_TextChanged"/>
 
             <!-- ══════════ PANEL FORMULARIO ══════════ -->
             <Border x:Name="panelFormulario" Grid.Column="1" Width="380"
-                    Background="#12121E" CornerRadius="12"
-                    BorderBrush="#252540" BorderThickness="1"
+                    Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
                     Visibility="Collapsed" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -319,20 +338,14 @@ TextChanged="txtBuscar_TextChanged"/>
 
                     <!-- Línea superior -->
                     <Border Grid.Row="0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#A78BFA" Offset="0"/>
-                                <GradientStop Color="#FF6B35" Offset="0.5"/>
-                                <GradientStop Color="#00CFFF" Offset="1"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
+                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
                     </Border>
 
                     <StackPanel Grid.Row="1" Margin="22,18,22,0">
                         <TextBlock x:Name="lblTituloFormulario" Text="NUEVA ACTIVIDAD"
                                    FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                   FontSize="15" FontWeight="Bold" Foreground="#E8E8FF"/>
-                        <Border Height="1" Background="#252540" Margin="0,12,0,0"/>
+                                   FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
                     </StackPanel>
 
                     <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="22,14,22,0" Style="{StaticResource PanelScrollViewerStyle}">
@@ -349,11 +362,11 @@ TextChanged="txtBuscar_TextChanged"/>
                             <ComboBox x:Name="cmbTipo" Style="{StaticResource ComboBoxEstilo}" 
                                       Margin="0,0,0,14" SelectionChanged="cmbTipo_SelectionChanged">
                                     <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#1A1A2E"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8E8FF"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                     </ComboBox.Resources>
-                                    <ComboBoxItem Content="Mensual"            Tag="mensual"            Foreground="#E8E8FF"/>
-                                    <ComboBoxItem Content="Mensual con clases" Tag="mensual_con_clases" Foreground="#E8E8FF"/>
+                                    <ComboBoxItem Content="Mensual"            Tag="mensual"            Foreground="{StaticResource TextPrimary}"/>
+                                    <ComboBoxItem Content="Mensual con clases" Tag="mensual_con_clases" Foreground="{StaticResource TextPrimary}"/>
                                 </ComboBox>
 
                             <!-- DÍAS/SESIONES POR SEMANA -->
@@ -457,3 +470,4 @@ TextChanged="txtBuscar_TextChanged"/>
         </Grid>
     </Grid>
 </Page>
+

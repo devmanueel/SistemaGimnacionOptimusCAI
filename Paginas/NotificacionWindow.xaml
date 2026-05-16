@@ -49,10 +49,7 @@
             CornerRadius="14"
             Background="#1E1E2E"
             Padding="0,0,0,28">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="40" Color="#000000"
-                              Opacity="0.55" ShadowDepth="6"/>
-        </Border.Effect>
+        
 
         <Grid>
             <Grid.RowDefinitions>
@@ -131,3 +128,4 @@
         </Grid>
     </Border>
 </Window>
+
