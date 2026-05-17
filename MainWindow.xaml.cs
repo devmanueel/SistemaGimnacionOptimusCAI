@@ -27,6 +27,7 @@ namespace SistemaGimnacionOptimusCAI
 
         public MainWindow()
         {
+            System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             InitializeComponent();
             Loaded += MainWindow_Loaded;
         }
