@@ -218,9 +218,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (m == null) return;
 
             _esNuevo = false;
-            _idEditar = m.Id;
 
             LimpiarFormulario();
+            _idEditar = m.Id;
 
             // Pre-seleccionar socio (deshabilitado al editar)
             foreach (var item in cmbSocio.Items)
