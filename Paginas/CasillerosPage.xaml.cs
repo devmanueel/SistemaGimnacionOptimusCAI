@@ -240,7 +240,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 {
                     Text = nombreCorto,
                     FontSize = 9,
-                    Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255)),
+                    Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     TextTrimming = TextTrimming.CharacterEllipsis
                 };
@@ -520,9 +520,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─────────────────────────────────────────────────────
         private void btnAgregar_Click(object sender, RoutedEventArgs e)
         {
-            // Diálogo simple: pedir número de casillero por NotificacionWindow no alcanza,
-            // así que abrimos un input rápido usando InputBox style.
-            // Para simplificar: usar el panel de detalle reutilizable abriendo un input nativo.
             var dlg = new CasilleroInputDialog("Nuevo casillero", "Número del casillero (1-9999):", "");
             dlg.Owner = Window.GetWindow(this);
 
@@ -553,7 +550,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 string entrada = dlg.ValorIngresado.Trim();
 
-                // Parsear "1-50:3000" o "1-50"
                 short desde = 0, hasta = 0;
                 decimal? precio = null;
 
@@ -561,7 +557,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 {
                     string[] partes = entrada.Split(':');
                     string rango = partes[0];
-
                     string[] numeros = rango.Split('-');
                     desde = short.Parse(numeros[0].Trim());
                     hasta = short.Parse(numeros[1].Trim());
@@ -654,9 +649,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
     }
 
     // ──────────────────────────────────────────────────────────
-    //  DIÁLOGO INPUT SIMPLE
-    //  Window minimalista para pedir un valor de texto al usuario.
-    //  Usado por "Agregar" y "Crear en masa".
+    //  DIÁLOGO INPUT SIMPLE (paleta verde actual)
     // ──────────────────────────────────────────────────────────
     public class CasilleroInputDialog : Window
     {
@@ -676,8 +669,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             var border = new Border
             {
-                Background = new SolidColorBrush(Color.FromRgb(18, 18, 30)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64)),
+                Background = new SolidColorBrush(Color.FromRgb(14, 20, 16)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(30, 52, 36)),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(12),
                 Margin = new Thickness(0)
@@ -695,7 +688,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 FontFamily = new FontFamily("Bahnschrift SemiBold, Segoe UI"),
                 FontSize = 16,
                 FontWeight = FontWeights.Bold,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255)),
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                 Margin = new Thickness(0, 0, 0, 8)
             };
             Grid.SetRow(lblTitulo, 0);
@@ -704,7 +697,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 Text = mensaje,
                 FontSize = 12,
-                Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154)),
+                Foreground = new SolidColorBrush(Color.FromRgb(90, 122, 90)),
                 Margin = new Thickness(0, 0, 0, 14),
                 TextWrapping = TextWrapping.Wrap
             };
@@ -713,9 +706,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _txt = new TextBox
             {
                 Text = valorInicial,
-                Background = new SolidColorBrush(Color.FromRgb(22, 22, 42)),
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0, 207, 255)),
+                Background = new SolidColorBrush(Color.FromRgb(18, 26, 20)),
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(37, 211, 102)),
                 BorderThickness = new Thickness(1.5),
                 FontSize = 14,
                 Padding = new Thickness(12, 8, 12, 8),
@@ -737,8 +730,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Height = 36,
                 Margin = new Thickness(0, 0, 8, 0),
                 Background = Brushes.Transparent,
-                Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64)),
+                Foreground = new SolidColorBrush(Color.FromRgb(90, 122, 90)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(30, 52, 36)),
                 BorderThickness = new Thickness(1),
                 Cursor = Cursors.Hand
             };
@@ -749,8 +742,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Content = "Aceptar",
                 Width = 110,
                 Height = 36,
-                Background = new SolidColorBrush(Color.FromRgb(0, 207, 255)),
-                Foreground = new SolidColorBrush(Color.FromRgb(10, 10, 20)),
+                Background = new SolidColorBrush(Color.FromRgb(37, 211, 102)),
+                Foreground = new SolidColorBrush(Color.FromRgb(8, 10, 8)),
                 BorderThickness = new Thickness(0),
                 FontWeight = FontWeights.Bold,
                 Cursor = Cursors.Hand

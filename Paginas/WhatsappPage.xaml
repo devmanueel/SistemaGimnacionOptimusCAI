@@ -195,11 +195,12 @@
                     Style="{StaticResource BotonChipEstilo}" Click="chipFiltro_Click"/>
         </StackPanel>
 
-        <!-- CONTENIDO: lista + detalle -->
+        <!-- CONTENIDO: lista + detalle + panel -->
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="420"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!-- ══ LISTA DE MENSAJES ══ -->
@@ -357,23 +358,10 @@
 
                                 <Button Grid.Column="0" x:Name="btnEliminarMensaje"
                                         Content="🗑  ELIMINAR"
-                                        Background="#1A0A0A" Foreground="#FF5555"
-                                        BorderBrush="#5A1A1A" BorderThickness="0.5"
+                                        Style="{StaticResource ButtonStyleCancelar}"
                                         Width="120" Height="40" FontSize="11" FontWeight="Bold"
-                                        Cursor="Hand"
-                                        Click="btnEliminarMensaje_Click">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                    BorderBrush="{TemplateBinding BorderBrush}"
-                                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                                    CornerRadius="10">
-                                                <ContentPresenter HorizontalAlignment="Center"
-                                                                  VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
+                                        ToolTip="Eliminar mensaje"
+                                        Click="btnEliminarMensaje_Click"/>
 
                                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                                     <Button x:Name="btnAbrirWhatsapp"
@@ -419,29 +407,31 @@
                     </Grid>
                 </Grid>
             </Border>
-        </Grid>
 
-        <!-- ══════════════════ MODAL NUEVO MENSAJE ══════════════════ -->
-        <Border x:Name="modalNuevo" Background="#CC000000" Visibility="Collapsed">
-            <Border Width="460" Background="{StaticResource Bg1}" CornerRadius="12"
-                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                    MaxHeight="640" ClipToBounds="True">
+            <!-- ═══ PANEL NUEVO MENSAJE ═══ -->
+            <Border x:Name="panelFormulario" Grid.Column="2" Width="400"
+                    Background="{StaticResource Bg1}"
+                    CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}"
+                    BorderThickness="0.5"
+                    Margin="14,0,0,0"
+                    Visibility="Collapsed"
+                    ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="4"/>
+                        <RowDefinition Height="3"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Border Grid.Row="0" Background="#25D366"/>
-                    <StackPanel Grid.Row="1" Margin="24,22,24,12">
+                    <Border Grid.Row="0" Background="#25D366" CornerRadius="12,12,0,0"/>
+                    <StackPanel Grid.Row="1" Margin="22,18,22,12">
                         <TextBlock Text="NUEVO MENSAJE"
                                    FontFamily="Bahnschrift SemiBold"
                                    FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
                         <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
                     </StackPanel>
-                    <ScrollViewer Grid.Row="2" Margin="24,8,24,0" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Row="2" Margin="22,8,22,0" VerticalScrollBarVisibility="Auto" Style="{StaticResource PanelScrollViewerStyle}">
                         <StackPanel>
                             <TextBlock Text="SOCIO (opcional, pone numero externo si esta vacio)"
                                        Style="{StaticResource LabelCampoEstilo}"/>
@@ -457,21 +447,15 @@
                                     <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                 </ComboBox.Resources>
                             </ComboBox>
-                            <!-- <Border Background="{StaticResource Bg2}" CornerRadius="10" Height="46"
-                                    BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,0,14">
-                                
-                            </Border>-->
-
                             <TextBlock Text="TELEFONO * (con codigo de pais, ej: 5491155555555)"
                                        Style="{StaticResource LabelCampoEstilo}"/>
                             <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"/>
-
                             <TextBlock Text="PLANTILLA RAPIDA" Style="{StaticResource LabelCampoEstilo}"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                            <WrapPanel Orientation="Horizontal" Margin="0,0,0,14">
                                 <Button Content="👋 Bienvenida" Click="btnPlantilla_Click" Tag="bienvenida"
                                         Background="{StaticResource Bg4}" Foreground="{StaticResource TextMuted}"
                                         BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                                        FontSize="11" Cursor="Hand" Margin="0,0,6,0" Padding="10,5">
+                                        FontSize="11" Cursor="Hand" Margin="0,0,6,6" Padding="10,5">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border Background="{TemplateBinding Background}"
@@ -486,7 +470,7 @@
                                 <Button Content="🎂 Cumpleaños" Click="btnPlantilla_Click" Tag="cumple"
                                         Background="{StaticResource Bg4}" Foreground="{StaticResource TextMuted}"
                                         BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                                        FontSize="11" Cursor="Hand" Margin="0,0,6,0" Padding="10,5">
+                                        FontSize="11" Cursor="Hand" Margin="0,0,6,6" Padding="10,5">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
                                             <Border Background="{TemplateBinding Background}"
@@ -513,8 +497,7 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                            </StackPanel>
-
+                            </WrapPanel>
                             <TextBlock Text="MENSAJE *" Style="{StaticResource LabelCampoEstilo}"/>
                             <Border Background="{StaticResource Bg2}" CornerRadius="10"
                                     BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,0,14">
@@ -526,7 +509,7 @@
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
-                    <Grid Grid.Row="3" Margin="24,12,24,18">
+                    <Grid Grid.Row="3" Margin="22,12,22,18">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -540,35 +523,38 @@
                     </Grid>
                 </Grid>
             </Border>
-        </Border>
 
-        <!-- ══════════════════ MODAL GENERAR AVISOS ══════════════════ -->
-        <Border x:Name="modalAvisos" Background="#CC000000" Visibility="Collapsed">
-            <Border Width="380" Background="{StaticResource Bg1}" CornerRadius="12"
-                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                    ClipToBounds="True">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="4"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Border Grid.Row="0" Background="#25D366"/>
-                    <StackPanel Grid.Row="1" Margin="24,22,24,12" HorizontalAlignment="Center">
-                        <TextBlock Text="🔔" FontSize="44"
-                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="GENERAR AVISOS DE VENCIMIENTO"
+            <!-- ══════════════════ PANEL GENERAR AVISOS ══════════════════ -->
+            <Border x:Name="panelAvisos" Grid.Column="2" Width="400"
+                Background="{StaticResource Bg1}"
+                CornerRadius="12"
+                BorderBrush="{StaticResource Border1}"
+                BorderThickness="0.5"
+                Margin="14,0,0,0"
+                Visibility="Collapsed"
+                ClipToBounds="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="#25D366" CornerRadius="12,12,0,0"/>
+                <StackPanel Grid.Row="1" Margin="22,18,22,12">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="🔔" FontSize="28" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="GENERAR AVISOS"
                                    FontFamily="Bahnschrift SemiBold"
-                                   FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
-                                   HorizontalAlignment="Center" Margin="0,4,0,2"/>
-                        <TextBlock Text="Crea mensajes pendientes para socios con vencimiento proximo."
-                                   FontSize="11" Foreground="{StaticResource TextMuted}"
-                                   HorizontalAlignment="Center" TextWrapping="Wrap"
-                                   TextAlignment="Center"/>
+                                   FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
+                                   VerticalAlignment="Center"/>
                     </StackPanel>
-                    <StackPanel Grid.Row="2" Margin="24,12,24,12">
+                    <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
+                </StackPanel>
+                <ScrollViewer Grid.Row="2" Margin="22,8,22,0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Crea mensajes pendientes para socios con vencimiento proximo."
+                                   FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap" Margin="0,0,0,12"/>
                         <TextBlock Text="DIAS DE ANTICIPACION" Style="{StaticResource LabelCampoEstilo}"/>
                         <TextBox x:Name="txtDiasAntes" Style="{StaticResource InputEstilo}"
                                  PreviewTextInput="txtSoloNumeros_PreviewTextInput"
@@ -577,22 +563,23 @@
                                    FontSize="10" Foreground="{StaticResource TextMuted}" FontStyle="Italic"
                                    Margin="2,-8,0,0" TextWrapping="Wrap"/>
                     </StackPanel>
-                    <Grid Grid.Row="3" Margin="24,12,24,18">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Cancelar"
-                                Style="{StaticResource BotonCerrarEstilo}"
-                                Margin="0,0,8,0" Click="btnAvisosCancelar_Click"/>
-                        <Button Grid.Column="1" Content="GENERAR"
-                                Style="{StaticResource BotonPrincipalEstilo}"
-                                Margin="8,0,0,0" Click="btnAvisosConfirmar_Click"/>
-                    </Grid>
+                </ScrollViewer>
+                <Grid Grid.Row="3" Margin="22,12,22,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Cancelar"
+                            Style="{StaticResource BotonCerrarEstilo}"
+                            Margin="0,0,8,0" Click="btnAvisosCancelar_Click"/>
+                    <Button Grid.Column="1" Content="GENERAR"
+                            Style="{StaticResource BotonPrincipalEstilo}"
+                            Margin="8,0,0,0" Click="btnAvisosConfirmar_Click"/>
                 </Grid>
-            </Border>
+            </Grid>
         </Border>
 
+        </Grid>
     </Grid>
 </Page>
 

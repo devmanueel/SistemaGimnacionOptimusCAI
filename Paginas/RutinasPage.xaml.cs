@@ -323,7 +323,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             headerGrid.Children.Add(headerInfo);
 
             var btnsHeader = new StackPanel { Orientation = Orientation.Horizontal };
-            btnsHeader.Children.Add(CrearBotonMini("✏", Color.FromRgb(167, 139, 250), () => AbrirModalBloque(b)));
+            btnsHeader.Children.Add(CrearBotonMini("✏", Color.FromRgb(167, 139, 250), () => AbrirPanelBloque(b)));
             btnsHeader.Children.Add(CrearBotonMini("🗑", Color.FromRgb(255, 85, 85), () => EliminarBloque(b)));
             Grid.SetColumn(btnsHeader, 1);
             headerGrid.Children.Add(btnsHeader);
@@ -349,7 +349,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Padding = new Thickness(14, 10, 14, 12),
                 HorizontalContentAlignment = HorizontalAlignment.Left
             };
-            btnAgregar.Click += (s, ev) => AbrirModalEjercicio(b.Id, null);
+            btnAgregar.Click += (s, ev) => AbrirPanelEjercicio(b.Id, null);
             ejercStack.Children.Add(btnAgregar);
 
             stack.Children.Add(ejercStack);
@@ -366,7 +366,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Padding = new Thickness(14, 10, 10, 10),
                 Cursor = Cursors.Hand
             };
-            fila.MouseLeftButtonUp += (s, ev) => AbrirModalEjercicio(e.BloqueId, e);
+            fila.MouseLeftButtonUp += (s, ev) => AbrirPanelEjercicio(e.BloqueId, e);
 
             var grid = new Grid();
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -465,22 +465,22 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private void btnNuevaRutina_Click(object sender, RoutedEventArgs e)
         {
             _editandoRutina = false;
-            lblTituloModalRutina.Text = "NUEVA RUTINA";
+            lblTituloPanelRutina.Text = "NUEVA RUTINA";
             txtRutNombre.Text = string.Empty;
             txtRutDetalles.Text = string.Empty;
             txtRutSemanas.Text = "4";
-            AbrirModal(modalRutina);
+            AbrirPanel(panelRutina);
         }
 
         private void btnEditarRutina_Click(object sender, RoutedEventArgs e)
         {
             if (_rutinaActual == null) return;
             _editandoRutina = true;
-            lblTituloModalRutina.Text = "EDITAR RUTINA";
+            lblTituloPanelRutina.Text = "EDITAR RUTINA";
             txtRutNombre.Text = _rutinaActual.Nombre;
             txtRutDetalles.Text = _rutinaActual.Detalles ?? string.Empty;
             txtRutSemanas.Text = _rutinaActual.DuracionSemanas.ToString();
-            AbrirModal(modalRutina);
+            AbrirPanel(panelRutina);
         }
 
         private void btnEliminarRutina_Click(object sender, RoutedEventArgs e)
@@ -520,7 +520,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     txtRutNombre.Text, txtRutDetalles.Text, sem);
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
                 NotificacionWindow.MostrarExito(r.mensaje);
-                CerrarModal(modalRutina);
+                CerrarPanel(panelRutina);
                 CargarRutinas();
             }
             else
@@ -529,7 +529,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     txtRutNombre.Text, txtRutDetalles.Text, sem, UsuarioId);
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
                 NotificacionWindow.MostrarExito(r.mensaje);
-                CerrarModal(modalRutina);
+                CerrarPanel(panelRutina);
 
                 _todasLasRutinas = _controller.ObtenerRutinas();
                 ActualizarStats();
@@ -537,25 +537,25 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        private void btnRutCancelar_Click(object sender, RoutedEventArgs e) => CerrarModal(modalRutina);
+        private void btnRutCancelar_Click(object sender, RoutedEventArgs e) => CerrarPanel(panelRutina);
 
         // ── BLOQUES ───────────────────────────────────────────
         private void btnAgregarBloque_Click(object sender, RoutedEventArgs e)
         {
             if (_rutinaActual == null) return;
-            AbrirModalBloque(null);
+            AbrirPanelBloque(null);
         }
 
-        private void AbrirModalBloque(RutinaBloque bloque)
+        private void AbrirPanelBloque(RutinaBloque bloque)
         {
             _editandoBloque = bloque != null;
             _bloqueIdEditar = bloque != null ? bloque.Id : 0;
 
-            lblTituloModalBloque.Text = _editandoBloque ? "EDITAR BLOQUE" : "NUEVO BLOQUE";
+            lblTituloPanelBloque.Text = _editandoBloque ? "EDITAR BLOQUE" : "NUEVO BLOQUE";
             txtBlqNombre.Text = bloque != null ? bloque.Nombre : string.Empty;
             txtBlqOrden.Text = bloque != null ? bloque.Orden.ToString()
                                                : (_rutinaActual.Bloques.Count + 1).ToString();
-            AbrirModal(modalBloque);
+            AbrirPanel(panelBloque);
         }
 
         private void btnBlqGuardar_Click(object sender, RoutedEventArgs e)
@@ -574,11 +574,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
             }
 
-            CerrarModal(modalBloque);
+            CerrarPanel(panelBloque);
             SeleccionarRutina(_rutinaActual.Id);
         }
 
-        private void btnBlqCancelar_Click(object sender, RoutedEventArgs e) => CerrarModal(modalBloque);
+        private void btnBlqCancelar_Click(object sender, RoutedEventArgs e) => CerrarPanel(panelBloque);
 
         private void EliminarBloque(RutinaBloque b)
         {
@@ -593,13 +593,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ── EJERCICIOS ────────────────────────────────────────
-        private void AbrirModalEjercicio(long bloqueId, RutinaEjercicio ej)
+        private void AbrirPanelEjercicio(long bloqueId, RutinaEjercicio ej)
         {
             _editandoEjercicio = ej != null;
             _ejercicioIdEditar = ej != null ? ej.Id : 0;
             _bloqueIdParaEjercicio = bloqueId;
 
-            lblTituloModalEj.Text = _editandoEjercicio ? "EDITAR EJERCICIO" : "NUEVO EJERCICIO";
+            lblTituloPanelEj.Text = _editandoEjercicio ? "EDITAR EJERCICIO" : "NUEVO EJERCICIO";
 
             txtEjNombre.Text = ej != null ? ej.Nombre : string.Empty;
             txtEjSeries.Text = ej != null && ej.Series.HasValue ? ej.Series.Value.ToString() : string.Empty;
@@ -610,7 +610,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtEjNotas.Text = ej != null ? (ej.Notas ?? string.Empty) : string.Empty;
             txtEjOrden.Text = ej != null ? ej.Orden.ToString() : "1";
 
-            AbrirModal(modalEjercicio);
+            AbrirPanel(panelEjercicio);
         }
 
         private void btnEjGuardar_Click(object sender, RoutedEventArgs e)
@@ -651,11 +651,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
             }
 
-            CerrarModal(modalEjercicio);
+            CerrarPanel(panelEjercicio);
             SeleccionarRutina(_rutinaActual.Id);
         }
 
-        private void btnEjCancelar_Click(object sender, RoutedEventArgs e) => CerrarModal(modalEjercicio);
+        private void btnEjCancelar_Click(object sender, RoutedEventArgs e) => CerrarPanel(panelEjercicio);
 
         private void EliminarEjercicio(RutinaEjercicio e)
         {
@@ -806,6 +806,49 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ── HELPERS ───────────────────────────────────────────
         private void txtSoloNumeros_PreviewTextInput(object sender, TextCompositionEventArgs e)
             => e.Handled = !Regex.IsMatch(e.Text, @"^\d$");
+
+        private void AbrirPanel(Border panel)
+        {
+            panel.Visibility = Visibility.Visible;
+            panel.Opacity = 0;
+
+            var translate = new TranslateTransform { X = 60 };
+            panel.RenderTransform = translate;
+
+            var slide = new DoubleAnimation
+            {
+                From = 60,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromMilliseconds(350)),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+            translate.BeginAnimation(TranslateTransform.XProperty, slide);
+
+            var fade = new DoubleAnimation
+            {
+                From = 0,
+                To = 1,
+                Duration = new Duration(TimeSpan.FromMilliseconds(300))
+            };
+            panel.BeginAnimation(OpacityProperty, fade);
+        }
+
+        private void CerrarPanel(Border panel)
+        {
+            var fade = new DoubleAnimation
+            {
+                From = 1,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromMilliseconds(180)),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+            fade.Completed += (s, e) =>
+            {
+                panel.Visibility = Visibility.Collapsed;
+                panel.RenderTransform = null;
+            };
+            panel.BeginAnimation(OpacityProperty, fade);
+        }
 
         private void AbrirModal(Border modal)
         {
