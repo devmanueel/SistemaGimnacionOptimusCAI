@@ -288,10 +288,10 @@
                                                     Margin="0,0,6,0"/>
                                             <!-- BotonAccionVerEstilo -->
                                             <Button Style="{StaticResource ButtonStyleCancelar}"
-                                                    Click="btnAnular_Click" 
-                                                    ToolTip="Cancelar membresía">
+                                                    Click="btnAnular_Click"
+                                                    ToolTip="Anular venta">
                                                 <TextBlock Text="✕" FontSize="14" FontWeight="Bold"
-                                                                   Foreground="#FF5555"/>
+                                                                    Foreground="#FF5555"/>
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>

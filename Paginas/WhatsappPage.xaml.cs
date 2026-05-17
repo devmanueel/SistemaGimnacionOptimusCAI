@@ -105,10 +105,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 Background = new SolidColorBrush(seleccionado
                                     ? Color.FromRgb(26, 32, 28)
-                                    : Color.FromRgb(22, 22, 42)),
+                                    : Color.FromRgb(18, 26, 20)),
                 BorderBrush = new SolidColorBrush(seleccionado
                                     ? Color.FromRgb(37, 211, 102)
-                                    : Color.FromRgb(37, 37, 64)),
+                                    : Color.FromRgb(30, 52, 36)),
                 BorderThickness = new Thickness(seleccionado ? 1.5 : 1),
                 CornerRadius = new CornerRadius(10),
                 Margin = new Thickness(0, 0, 0, 8),
@@ -147,7 +147,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Text = m.SocioNombre,
                 FontSize = 13,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255)),
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                 TextTrimming = TextTrimming.CharacterEllipsis,
                 MaxWidth = 230
             });
@@ -159,7 +159,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Text = m.FechaCreado,
                 FontSize = 10,
                 FontFamily = new FontFamily("Consolas"),
-                Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154)),
+                Foreground = new SolidColorBrush(Color.FromRgb(90, 122, 90)),
                 VerticalAlignment = VerticalAlignment.Center
             };
             Grid.SetColumn(lblHora, 1);
@@ -181,7 +181,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 Text = m.MensajePreview,
                 FontSize = 11,
-                Foreground = new SolidColorBrush(Color.FromRgb(160, 160, 192)),
+                Foreground = new SolidColorBrush(Color.FromRgb(138, 170, 138)),
                 TextWrapping = TextWrapping.Wrap,
                 MaxHeight = 32,
                 Margin = new Thickness(0, 5, 0, 0)
@@ -367,13 +367,72 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch (Exception ex) { NotificacionWindow.MostrarError(ex.Message); }
         }
 
-        // ── NUEVO MENSAJE ─────────────────────────────────────
+        // ── PANEL NUEVO MENSAJE ───────────────────────────────
         private void btnNuevoMensaje_Click(object sender, RoutedEventArgs e)
         {
             cmbSocio.SelectedIndex = -1;
             txtTelefono.Text = string.Empty;
             txtMensaje.Text = string.Empty;
-            AbrirModal(modalNuevo);
+            AbrirPanel(panelFormulario);
+        }
+
+        private Border _panelAbierto;
+
+        private void AbrirPanel(Border panel)
+        {
+            if (_panelAbierto != null && _panelAbierto != panel)
+                CerrarPanel(_panelAbierto, cerrarInstantaneo: true);
+            _panelAbierto = panel;
+
+            panel.Visibility = Visibility.Visible;
+            panel.Opacity = 0;
+
+            var translate = new TranslateTransform { X = 60 };
+            panel.RenderTransform = translate;
+
+            var slide = new DoubleAnimation
+            {
+                From = 60,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromMilliseconds(350)),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+            translate.BeginAnimation(TranslateTransform.XProperty, slide);
+
+            var fade = new DoubleAnimation
+            {
+                From = 0,
+                To = 1,
+                Duration = new Duration(TimeSpan.FromMilliseconds(300))
+            };
+            panel.BeginAnimation(OpacityProperty, fade);
+        }
+
+        private void CerrarPanel(Border panel, bool cerrarInstantaneo = false)
+        {
+            if (cerrarInstantaneo)
+            {
+                panel.Visibility = Visibility.Collapsed;
+                panel.Opacity = 1;
+                panel.RenderTransform = null;
+                _panelAbierto = null;
+                return;
+            }
+
+            var fade = new DoubleAnimation
+            {
+                From = 1,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromMilliseconds(180)),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+            fade.Completed += (s, e) =>
+            {
+                panel.Visibility = Visibility.Collapsed;
+                panel.RenderTransform = null;
+                _panelAbierto = null;
+            };
+            panel.BeginAnimation(OpacityProperty, fade);
         }
 
         private void cmbSocio_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -420,18 +479,18 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
 
             NotificacionWindow.MostrarExito(r.mensaje);
-            CerrarModal(modalNuevo);
+            CerrarPanel(panelFormulario);
             CargarMensajes();
         }
 
         private void btnNuevoCancelar_Click(object sender, RoutedEventArgs e)
-            => CerrarModal(modalNuevo);
+            => CerrarPanel(panelFormulario);
 
         // ── GENERAR AVISOS ────────────────────────────────────
         private void btnGenerarAvisos_Click(object sender, RoutedEventArgs e)
         {
             txtDiasAntes.Text = "3";
-            AbrirModal(modalAvisos);
+            AbrirPanel(panelAvisos);
         }
 
         private void btnAvisosConfirmar_Click(object sender, RoutedEventArgs e)
@@ -442,7 +501,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var r = _controller.GenerarAvisosVencimiento(dias, UsuarioId);
             if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
 
-            CerrarModal(modalAvisos);
+            CerrarPanel(panelAvisos);
 
             if (r.generados > 0) NotificacionWindow.MostrarExito(r.mensaje);
             else NotificacionWindow.MostrarAdvertencia(r.mensaje);
@@ -457,7 +516,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         private void btnAvisosCancelar_Click(object sender, RoutedEventArgs e)
-            => CerrarModal(modalAvisos);
+            => CerrarPanel(panelAvisos);
 
         // ── HELPERS ───────────────────────────────────────────
         private void txtSoloNumeros_PreviewTextInput(object sender, TextCompositionEventArgs e)
