@@ -158,11 +158,12 @@
             </Border>
         </Grid>
 
-        <!-- CONTENIDO: lista izq + detalle der -->
+        <!-- CONTENIDO: lista izq + detalle der + panel -->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="380"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!-- ══ LISTA DE RUTINAS ══ -->
@@ -296,23 +297,10 @@
                                         <fa:ImageAwesome Icon="Edit" Foreground="{StaticResource ColorEditarCyan}" Height="14"/>
                                     </Button>
                                     <Button x:Name="btnEliminarRutina" Content="🗑"
-                                                Background="#1A0A0A" Foreground="#FF5555"
-                                                BorderBrush="#5A1A1A" BorderThickness="0.5"
-                                                Width="34" Height="34" FontSize="13" FontWeight="Bold"
-                                                Cursor="Hand"
-                                                Click="btnEliminarRutina_Click">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="8">
-                                                    <ContentPresenter HorizontalAlignment="Center"
-                                                                        VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
+                                                Style="{StaticResource ButtonStyleCancelar}"
+                                                FontSize="13" FontWeight="Bold"
+                                                ToolTip="Eliminar rutina"
+                                                Click="btnEliminarRutina_Click"/>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -346,37 +334,31 @@
                     </Grid>
                 </Grid>
             </Border>
-        </Grid>
 
-        <!-- ══════════════════ MODAL CRUD RUTINA ══════════════════ -->
-        <Border x:Name="modalRutina" Background="#CC000000" Visibility="Collapsed">
-            <Border Width="440" Background="{StaticResource Bg1}" CornerRadius="12"
-                        BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                        ClipToBounds="True">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="4"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <Border Grid.Row="0">
-                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
-                    </Border>
-
-                    <StackPanel Grid.Row="1" Margin="24,22,24,12">
-                        <TextBlock x:Name="lblTituloModalRutina" Text="NUEVA RUTINA"
-                                    FontFamily="Bahnschrift SemiBold"
-                                    FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="2" Margin="24,8,24,0">
+        <!-- ══════════════════ PANEL RUTINA ══════════════════ -->
+        <Border x:Name="panelRutina" Grid.Column="2" Width="400"
+                Background="{StaticResource Bg1}" CornerRadius="12"
+                BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
+                Margin="14,0,0,0" Visibility="Collapsed" ClipToBounds="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="#4ADE80" CornerRadius="12,12,0,0"/>
+                <StackPanel Grid.Row="1" Margin="22,18,22,12">
+                    <TextBlock x:Name="lblTituloPanelRutina" Text="NUEVA RUTINA"
+                                FontFamily="Bahnschrift SemiBold"
+                                FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                    <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
+                </StackPanel>
+                <ScrollViewer Grid.Row="2" Margin="22,8,22,0" VerticalScrollBarVisibility="Auto"
+                              Style="{StaticResource PanelScrollViewerStyle}">
+                    <StackPanel>
                         <TextBlock Text="NOMBRE *" Style="{StaticResource LabelCampoEstilo}"/>
                         <TextBox x:Name="txtRutNombre" Style="{StaticResource InputEstilo}"/>
-
                         <TextBlock Text="DETALLES (descripcion, objetivos, etc.)" Style="{StaticResource LabelCampoEstilo}"/>
                         <Border Background="{StaticResource Bg2}" CornerRadius="10"
                                     BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,0,14">
@@ -386,50 +368,49 @@
                                         AcceptsReturn="True" TextWrapping="Wrap"
                                         Height="80" VerticalScrollBarVisibility="Auto"/>
                         </Border>
-
                         <TextBlock Text="DURACIÓN (semanas)" Style="{StaticResource LabelCampoEstilo}"/>
                         <TextBox x:Name="txtRutSemanas" Style="{StaticResource InputEstilo}"
                                     PreviewTextInput="txtSoloNumeros_PreviewTextInput"
                                     Text="4"/>
                     </StackPanel>
-
-                    <Grid Grid.Row="3" Margin="24,16,24,18">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Cancelar"
-                                    Style="{StaticResource BotonCerrarEstilo}"
-                                    Margin="0,0,8,0" Click="btnRutCancelar_Click"/>
-                        <Button Grid.Column="1" Content="GUARDAR"
-                                    Style="{StaticResource BotonPrincipalEstilo}"
-                                    Margin="8,0,0,0" Click="btnRutGuardar_Click"/>
-                    </Grid>
+                </ScrollViewer>
+                <Grid Grid.Row="3" Margin="22,12,22,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Cancelar"
+                                Style="{StaticResource BotonCerrarEstilo}"
+                                Margin="0,0,8,0" Click="btnRutCancelar_Click"/>
+                    <Button Grid.Column="1" Content="GUARDAR"
+                                Style="{StaticResource BotonPrincipalEstilo}"
+                                Margin="8,0,0,0" Click="btnRutGuardar_Click"/>
                 </Grid>
-            </Border>
+            </Grid>
         </Border>
 
-        <!-- ══════════════════ MODAL CRUD BLOQUE ══════════════════ -->
-        <Border x:Name="modalBloque" Background="#CC000000" Visibility="Collapsed">
-            <Border Width="380" Background="{StaticResource Bg1}" CornerRadius="12"
-                        BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                        ClipToBounds="True">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="4"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Border Grid.Row="0" Background="{StaticResource GreenMain}"/>
-                    <StackPanel Grid.Row="1" Margin="22,22,22,12">
-                        <TextBlock x:Name="lblTituloModalBloque" Text="NUEVO BLOQUE"
-                                    FontFamily="Bahnschrift SemiBold"
-                                    FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="2" Margin="22,8,22,0">
+        <!-- ══════════════════ PANEL BLOQUE ══════════════════ -->
+        <Border x:Name="panelBloque" Grid.Column="2" Width="400"
+                Background="{StaticResource Bg1}" CornerRadius="12"
+                BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
+                Margin="14,0,0,0" Visibility="Collapsed" ClipToBounds="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="{StaticResource GreenMain}" CornerRadius="12,12,0,0"/>
+                <StackPanel Grid.Row="1" Margin="22,18,22,12">
+                    <TextBlock x:Name="lblTituloPanelBloque" Text="NUEVO BLOQUE"
+                                FontFamily="Bahnschrift SemiBold"
+                                FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                    <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
+                </StackPanel>
+                <ScrollViewer Grid.Row="2" Margin="22,8,22,0" VerticalScrollBarVisibility="Auto"
+                              Style="{StaticResource PanelScrollViewerStyle}">
+                    <StackPanel>
                         <TextBlock Text="NOMBRE DEL BLOQUE *" Style="{StaticResource LabelCampoEstilo}"/>
                         <TextBox x:Name="txtBlqNombre" Style="{StaticResource InputEstilo}"/>
                         <TextBlock Text="ORDEN" Style="{StaticResource LabelCampoEstilo}"/>
@@ -437,106 +418,100 @@
                                     PreviewTextInput="txtSoloNumeros_PreviewTextInput"
                                     Text="1"/>
                     </StackPanel>
-                    <Grid Grid.Row="3" Margin="22,12,22,18">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Cancelar"
-                                    Style="{StaticResource BotonCerrarEstilo}"
-                                    Margin="0,0,8,0" Click="btnBlqCancelar_Click"/>
-                        <Button Grid.Column="1" Content="GUARDAR"
-                                    Style="{StaticResource BotonPrincipalEstilo}"
-                                    Margin="8,0,0,0" Click="btnBlqGuardar_Click"/>
-                    </Grid>
+                </ScrollViewer>
+                <Grid Grid.Row="3" Margin="22,12,22,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Cancelar"
+                                Style="{StaticResource BotonCerrarEstilo}"
+                                Margin="0,0,8,0" Click="btnBlqCancelar_Click"/>
+                    <Button Grid.Column="1" Content="GUARDAR"
+                                Style="{StaticResource BotonPrincipalEstilo}"
+                                Margin="8,0,0,0" Click="btnBlqGuardar_Click"/>
                 </Grid>
-            </Border>
+            </Grid>
         </Border>
 
-        <!-- ══════════════════ MODAL CRUD EJERCICIO ══════════════════ -->
-        <Border x:Name="modalEjercicio" Background="#CC000000" Visibility="Collapsed">
-            <Border Width="460" Background="{StaticResource Bg1}" CornerRadius="12"
-                        BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                        MaxHeight="640" ClipToBounds="True">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="4"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Border Grid.Row="0" Background="{StaticResource GreenMain}"/>
-                    <StackPanel Grid.Row="1" Margin="22,22,22,12">
-                        <TextBlock x:Name="lblTituloModalEj" Text="NUEVO EJERCICIO"
-                                    FontFamily="Bahnschrift SemiBold"
-                                    FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
+        <!-- ══════════════════ PANEL EJERCICIO ══════════════════ -->
+        <Border x:Name="panelEjercicio" Grid.Column="2" Width="400"
+                Background="{StaticResource Bg1}" CornerRadius="12"
+                BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
+                Margin="14,0,0,0" Visibility="Collapsed" ClipToBounds="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="{StaticResource GreenMain}" CornerRadius="12,12,0,0"/>
+                <StackPanel Grid.Row="1" Margin="22,18,22,12">
+                    <TextBlock x:Name="lblTituloPanelEj" Text="NUEVO EJERCICIO"
+                                FontFamily="Bahnschrift SemiBold"
+                                FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                    <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
+                </StackPanel>
+                <ScrollViewer Grid.Row="2" Margin="22,8,22,0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="NOMBRE DEL EJERCICIO *" Style="{StaticResource LabelCampoEstilo}"/>
+                        <TextBox x:Name="txtEjNombre" Style="{StaticResource InputEstilo}"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,4,0">
+                                <TextBlock Text="SERIES" Style="{StaticResource LabelCampoEstilo}"/>
+                                <TextBox x:Name="txtEjSeries" Style="{StaticResource InputEstilo}"
+                                            PreviewTextInput="txtSoloNumeros_PreviewTextInput"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="4,0,4,0">
+                                <TextBlock Text="REPS" Style="{StaticResource LabelCampoEstilo}"/>
+                                <TextBox x:Name="txtEjReps" Style="{StaticResource InputEstilo}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="4,0,0,0">
+                                <TextBlock Text="PESO" Style="{StaticResource LabelCampoEstilo}"/>
+                                <TextBox x:Name="txtEjPeso" Style="{StaticResource InputEstilo}"/>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="DESCANSO (segundos)" Style="{StaticResource LabelCampoEstilo}"/>
+                        <TextBox x:Name="txtEjDescanso" Style="{StaticResource InputEstilo}"
+                                    PreviewTextInput="txtSoloNumeros_PreviewTextInput"/>
+                        <TextBlock Text="LINK DE VIDEO (YouTube, etc.)" Style="{StaticResource LabelCampoEstilo}"/>
+                        <TextBox x:Name="txtEjVideo" Style="{StaticResource InputEstilo}"/>
+                        <TextBlock Text="NOTAS" Style="{StaticResource LabelCampoEstilo}"/>
+                        <Border Background="{StaticResource Bg2}" CornerRadius="10"
+                                    BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,0,14">
+                            <TextBox x:Name="txtEjNotas" Background="Transparent"
+                                        BorderThickness="0" Foreground="{StaticResource TextPrimary}"
+                                        CaretBrush="{StaticResource GreenMain}" FontSize="13" Padding="14,10"
+                                        AcceptsReturn="True" TextWrapping="Wrap"
+                                        Height="60" VerticalScrollBarVisibility="Auto"/>
+                        </Border>
+                        <TextBlock Text="ORDEN" Style="{StaticResource LabelCampoEstilo}"/>
+                        <TextBox x:Name="txtEjOrden" Style="{StaticResource InputEstilo}"
+                                    PreviewTextInput="txtSoloNumeros_PreviewTextInput"
+                                    Text="1"/>
                     </StackPanel>
-                    <ScrollViewer Grid.Row="2" Margin="22,8,22,0" VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <TextBlock Text="NOMBRE DEL EJERCICIO *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtEjNombre" Style="{StaticResource InputEstilo}"/>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" Margin="0,0,4,0">
-                                    <TextBlock Text="SERIES" Style="{StaticResource LabelCampoEstilo}"/>
-                                    <TextBox x:Name="txtEjSeries" Style="{StaticResource InputEstilo}"
-                                                PreviewTextInput="txtSoloNumeros_PreviewTextInput"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Margin="4,0,4,0">
-                                    <TextBlock Text="REPS" Style="{StaticResource LabelCampoEstilo}"/>
-                                    <TextBox x:Name="txtEjReps" Style="{StaticResource InputEstilo}"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="2" Margin="4,0,0,0">
-                                    <TextBlock Text="PESO" Style="{StaticResource LabelCampoEstilo}"/>
-                                    <TextBox x:Name="txtEjPeso" Style="{StaticResource InputEstilo}"/>
-                                </StackPanel>
-                            </Grid>
-
-                            <TextBlock Text="DESCANSO (segundos)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtEjDescanso" Style="{StaticResource InputEstilo}"
-                                        PreviewTextInput="txtSoloNumeros_PreviewTextInput"/>
-
-                            <TextBlock Text="LINK DE VIDEO (YouTube, etc.)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtEjVideo" Style="{StaticResource InputEstilo}"/>
-
-                            <TextBlock Text="NOTAS" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="{StaticResource Bg2}" CornerRadius="10"
-                                        BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,0,14">
-                                <TextBox x:Name="txtEjNotas" Background="Transparent"
-                                            BorderThickness="0" Foreground="{StaticResource TextPrimary}"
-                                            CaretBrush="{StaticResource GreenMain}" FontSize="13" Padding="14,10"
-                                            AcceptsReturn="True" TextWrapping="Wrap"
-                                            Height="60" VerticalScrollBarVisibility="Auto"/>
-                            </Border>
-
-                            <TextBlock Text="ORDEN" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtEjOrden" Style="{StaticResource InputEstilo}"
-                                        PreviewTextInput="txtSoloNumeros_PreviewTextInput"
-                                        Text="1"/>
-                        </StackPanel>
-                    </ScrollViewer>
-                    <Grid Grid.Row="3" Margin="22,12,22,18">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Cancelar"
-                                    Style="{StaticResource BotonCerrarEstilo}"
-                                    Margin="0,0,8,0" Click="btnEjCancelar_Click"/>
-                        <Button Grid.Column="1" Content="GUARDAR"
-                                    Style="{StaticResource BotonPrincipalEstilo}"
-                                    Margin="8,0,0,0" Click="btnEjGuardar_Click"/>
-                    </Grid>
+                </ScrollViewer>
+                <Grid Grid.Row="3" Margin="22,12,22,18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Cancelar"
+                                Style="{StaticResource BotonCerrarEstilo}"
+                                Margin="0,0,8,0" Click="btnEjCancelar_Click"/>
+                    <Button Grid.Column="1" Content="GUARDAR"
+                                Style="{StaticResource BotonPrincipalEstilo}"
+                                Margin="8,0,0,0" Click="btnEjGuardar_Click"/>
                 </Grid>
-            </Border>
+            </Grid>
         </Border>
+        </Grid>
 
         <!-- ══════════════════ MODAL ASIGNAR ══════════════════ -->
         <Border x:Name="modalAsignar" Background="#CC000000" Visibility="Collapsed">

@@ -356,7 +356,7 @@
                                             </Button>
                                             <!-- EDITAR -->
                                             <Button Click="btnEditar_Click" Style="{StaticResource ButtonStyleEditar}"
-                                                    Margin="4,0" Cursor="Hand" ToolTip="Editar">
+                                                    Margin="4,0" Cursor="Hand" ToolTip="Editar membresía">
                                                 <fa:ImageAwesome Icon="Edit" Foreground="{StaticResource ColorEditarCyan}" Height="14"/>
                                             </Button>
                                                 <!-- CANCELAR -->

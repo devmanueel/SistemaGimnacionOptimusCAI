@@ -293,15 +293,30 @@
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
 
                                             <!-- BOTÓN EDITAR -->
-                                            <Button Click="btnEditar_Click" 
-Style="{StaticResource ButtonStyleEditar}" 
-Margin="0,0,8,0">
+                                            <Button Click="btnEditar_Click"
+Style="{StaticResource ButtonStyleEditar}"
+Margin="0,0,8,0"
+ToolTip="Editar usuario">
                                                 <fa:ImageAwesome Icon="Edit" Foreground="{StaticResource ColorEditarCyan}" Height="14"/>
                                             </Button>
 
                                             <!-- BOTÓN ESTADO -->
-                                            <Button Click="btnToggleEstado_Click" 
+                                            <Button Click="btnToggleEstado_Click"
 Style="{StaticResource ButtonStyleEstado}">
+                                                <Button.ToolTip>
+                                                    <TextBlock>
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Text" Value="Dar de baja"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Activo}" Value="False">
+                                                                        <Setter Property="Text" Value="Dar de alta"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Button.ToolTip>
                                                 <fa:ImageAwesome Height="14">
                                                     <fa:ImageAwesome.Style>
                                                         <Style TargetType="fa:ImageAwesome">

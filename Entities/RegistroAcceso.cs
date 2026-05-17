@@ -49,6 +49,7 @@ namespace Entities
                 if (Resultado == "denegado_vencimiento") return "Membresía vencida";
                 if (Resultado == "denegado_dia") return "Día no permitido";
                 if (Resultado == "denegado_socio_inactivo") return "Socio inactivo";
+                if (Resultado != null && Resultado.StartsWith("denegado_")) return "Acceso denegado";
                 return Resultado ?? "—";
             }
         }

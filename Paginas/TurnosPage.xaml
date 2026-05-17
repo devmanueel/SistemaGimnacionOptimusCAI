@@ -363,23 +363,11 @@
                                     <TextBlock Text="ZONA PELIGROSA" Foreground="#FF5555"
                                                FontSize="10" FontWeight="Bold" Margin="0,0,0,8"/>
                                     <Button x:Name="btnEliminar" Content="🗑️  ELIMINAR TURNO"
-                                            Background="Transparent" Foreground="#FF5555"
-                                            BorderThickness="0.5" BorderBrush="#5A1A1A"
+                                            Style="{StaticResource ButtonStyleCancelar}"
                                             FontWeight="SemiBold" FontSize="12"
-                                            Cursor="Hand" Height="36"
-                                            Click="btnEliminar_Click">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}"
-                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                        CornerRadius="8">
-                                                    <ContentPresenter HorizontalAlignment="Center"
-                                                                      VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
+                                            Height="36"
+                                            ToolTip="Eliminar turno"
+                                            Click="btnEliminar_Click"/>
                                 </StackPanel>
                             </Border>
 

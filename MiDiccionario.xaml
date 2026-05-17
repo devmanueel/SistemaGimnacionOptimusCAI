@@ -1036,7 +1036,6 @@
     </Style>
 
     <!-- ********************************* -->
-    <!-- Cambios de JoakoG -->
     <!-- Estilo Base para los Botones de Acción -->
     <!-- Estilo Base con tu ColorBorde y ColorInput -->
     <Style x:Key="ButtonStyleAccionBase" TargetType="Button">
