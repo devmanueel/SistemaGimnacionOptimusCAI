@@ -23,6 +23,40 @@
                 <Setter Property="FontWeight" Value="Bold"/>
                 <Setter Property="Margin"     Value="2,0,0,6"/>
             </Style>
+            <Style x:Key="BotonAgregarEstilo" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{StaticResource ColorPrimario}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource ColorBorde}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Padding" Value="14,6,14,6"/>
+                <Setter Property="Height" Value="35" />
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="borde"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="0,0,6,6"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Left"
+                                                  VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource ColorPrimarioHover}"/>
+                                    <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                                    <Setter TargetName="borde" Property="Background" Value="#0D110D"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Page.Resources>
 
@@ -66,7 +100,9 @@
             </StackPanel>
             <Button Grid.Column="1" Content="NUEVA RUTINA" Tag="Plus"
                         Style="{StaticResource BotonNaranjaEstilo}"
-                        Width="180" Height="46" Click="btnNuevaRutina_Click"/>
+                        Width="180" Height="46" 
+                        ToolTip="Nueva rutina"
+                        Click="btnNuevaRutina_Click"/>
         </Grid>
 
         <!-- STATS -->
@@ -182,10 +218,10 @@
                     <!-- Buscador -->
                     <TextBox x:Name="txtBuscar" Tag="Buscar rutina..." Grid.Row="1"
                              Style="{StaticResource BuscadorStyle}" Width="Auto" Height="42"
-                             Margin="12,12,12,0" TextChanged="txtBuscar_TextChanged"/>
+                             Margin="12,16,12,12" TextChanged="txtBuscar_TextChanged"/>
 
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
-                                    Padding="12,4,12,12" Style="{StaticResource PanelScrollViewerStyle}">
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="12, 8"
+                                    Padding="12,0,12,12" Style="{StaticResource PanelScrollViewerStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -272,35 +308,27 @@
                                                 TextWrapping="Wrap" Margin="0,8,0,0"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
-                                    <Button x:Name="btnAsignar" Content="👥  ASIGNAR"
-                                                Background="#0A1A2A" Foreground="{StaticResource GreenMain}"
-                                                BorderBrush="{StaticResource GreenMain}" BorderThickness="0.5"
-                                                Width="110" Height="34" FontSize="11" FontWeight="Bold"
-                                                Cursor="Hand" Margin="0,0,8,0"
-                                                Click="btnAsignar_Click">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border Background="{TemplateBinding Background}"
-                                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                                            CornerRadius="8">
-                                                    <ContentPresenter HorizontalAlignment="Center"
-                                                                        VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                    </Button>
+                                    <Button x:Name="btnAsignar" Content="  ASIGNAR"
+                                                Style="{StaticResource BotonGhostEstilo}"
+                                                Width="100" Height="34" FontSize="11"
+                                                Margin="0,0,8,0"
+                                                Tag="Users"
+                                                ToolTip="Asignar socio"
+                                                Click="btnAsignar_Click"/>
                                     <Button x:Name="btnEditarRutina"
                                                 Style="{StaticResource ButtonStyleEditar}"
                                                 Cursor="Hand" Margin="0,0,8,0"
+                                                ToolTip="Editar rutina"
                                                 Click="btnEditarRutina_Click">
                                         <fa:ImageAwesome Icon="Edit" Foreground="{StaticResource ColorEditarCyan}" Height="14"/>
                                     </Button>
-                                    <Button x:Name="btnEliminarRutina" Content="🗑"
+                                    <Button x:Name="btnEliminarRutina"
                                                 Style="{StaticResource ButtonStyleCancelar}"
-                                                FontSize="13" FontWeight="Bold"
+                                                Margin="0,0,8,0"
                                                 ToolTip="Eliminar rutina"
-                                                Click="btnEliminarRutina_Click"/>
+                                                Click="btnEliminarRutina_Click">
+                                        <fa:ImageAwesome Icon="Times" Foreground="#FF5555" Height="14"/>
+                                    </Button>
                                 </StackPanel>
                             </Grid>
                         </Border>
@@ -312,23 +340,11 @@
 
                                 <!-- Boton agregar bloque -->
                                 <Button x:Name="btnAgregarBloque" Content="＋ AGREGAR BLOQUE"
-                                            Background="Transparent" Foreground="{StaticResource GreenMain}"
-                                            BorderBrush="{StaticResource GreenMain}" BorderThickness="1.5"
-                                            Height="44" FontSize="12" FontWeight="Bold"
-                                            Cursor="Hand" Margin="0,8,0,16"
-                                            Click="btnAgregarBloque_Click">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}"
-                                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                                        CornerRadius="10">
-                                                <ContentPresenter HorizontalAlignment="Center"
-                                                                    VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
+                                            Style="{StaticResource BotonGhostEstilo}"
+                                            Height="44" FontSize="12"
+                                            Margin="0,8,0,16"
+                                            ToolTip="Nuevo bloque"
+                                            Click="btnAgregarBloque_Click"/>
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>
@@ -380,11 +396,15 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="Cancelar"
-                                Style="{StaticResource BotonCerrarEstilo}"
-                                Margin="0,0,8,0" Click="btnRutCancelar_Click"/>
+                                Style="{StaticResource BotonDangerLargoEstilo}"
+                                Margin="0,0,8,0"
+                                ToolTip=""
+                                Click="btnRutCancelar_Click"/>
                     <Button Grid.Column="1" Content="GUARDAR"
                                 Style="{StaticResource BotonPrincipalEstilo}"
-                                Margin="8,0,0,0" Click="btnRutGuardar_Click"/>
+                                Margin="8,0,0,0"
+                                ToolTip=""
+                                Click="btnRutGuardar_Click"/>
                 </Grid>
             </Grid>
         </Border>
@@ -425,11 +445,15 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="Cancelar"
-                                Style="{StaticResource BotonCerrarEstilo}"
-                                Margin="0,0,8,0" Click="btnBlqCancelar_Click"/>
+                                Style="{StaticResource BotonDangerLargoEstilo}"
+                                Margin="0,0,8,0"
+                                ToolTip=""
+                                Click="btnBlqCancelar_Click"/>
                     <Button Grid.Column="1" Content="GUARDAR"
                                 Style="{StaticResource BotonPrincipalEstilo}"
-                                Margin="8,0,0,0" Click="btnBlqGuardar_Click"/>
+                                Margin="8,0,0,0"
+                                ToolTip=""
+                                Click="btnBlqGuardar_Click"/>
                 </Grid>
             </Grid>
         </Border>
@@ -503,72 +527,67 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="Cancelar"
-                                Style="{StaticResource BotonCerrarEstilo}"
-                                Margin="0,0,8,0" Click="btnEjCancelar_Click"/>
+                                Style="{StaticResource BotonDangerLargoEstilo}"
+                                Margin="0,0,8,0"
+                                ToolTip=""
+                                Click="btnEjCancelar_Click"/>
                     <Button Grid.Column="1" Content="GUARDAR"
                                 Style="{StaticResource BotonPrincipalEstilo}"
-                                Margin="8,0,0,0" Click="btnEjGuardar_Click"/>
+                                Margin="8,0,0,0"
+                                ToolTip=""
+                                Click="btnEjGuardar_Click"/>
                 </Grid>
             </Grid>
         </Border>
-        </Grid>
 
-        <!-- ══════════════════ MODAL ASIGNAR ══════════════════ -->
-        <Border x:Name="modalAsignar" Background="#CC000000" Visibility="Collapsed">
-            <Border Width="440" Background="{StaticResource Bg1}" CornerRadius="12"
-                        BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                        MaxHeight="600" ClipToBounds="True">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="4"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Border Grid.Row="0" Background="{StaticResource GreenMain}"/>
-                    <StackPanel Grid.Row="1" Margin="24,22,24,12">
-                        <TextBlock Text="ASIGNAR A SOCIO"
-                                    FontFamily="Bahnschrift SemiBold"
-                                    FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock x:Name="lblAsignarRutina" Text=""
-                                    FontSize="11" Foreground="{StaticResource GreenMain}" Margin="0,4,0,0"/>
-                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="2" Margin="24,8,24,12">
+        <!-- ══════════════════ PANEL ASIGNAR ══════════════════ -->
+        <Border x:Name="panelAsignar" Grid.Column="2" Width="400"
+                Background="{StaticResource Bg1}" CornerRadius="12"
+                BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
+                Margin="14,0,0,0" Visibility="Collapsed" ClipToBounds="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="{StaticResource GreenMain}" CornerRadius="12,12,0,0"/>
+                <StackPanel Grid.Row="1" Margin="22,18,22,12">
+                    <TextBlock Text="ASIGNAR A SOCIO"
+                                FontFamily="Bahnschrift SemiBold"
+                                FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                    <TextBlock x:Name="lblAsignarRutina" Text=""
+                                FontSize="11" Foreground="{StaticResource GreenMain}" Margin="0,4,0,0"/>
+                    <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
+                </StackPanel>
+                <ScrollViewer Grid.Row="2" Margin="22,8,22,0" VerticalScrollBarVisibility="Auto"
+                              Style="{StaticResource PanelScrollViewerStyle}">
+                    <StackPanel>
                         <TextBlock Text="SOCIO" Style="{StaticResource LabelCampoEstilo}"/>
-                        <Border Background="{StaticResource Bg2}" CornerRadius="10" Height="46"
-                                    BorderBrush="{StaticResource Border1}" BorderThickness="1.5">
-                            <ComboBox x:Name="cmbAsignarSocio" BorderThickness="0"
-                                        Background="Transparent" Foreground="{StaticResource TextPrimary}"
-                                        VerticalContentAlignment="Center"
-                                        FontSize="13" Padding="10,0" IsEditable="True"
-                                        IsTextSearchEnabled="True"
-                                        DisplayMemberPath="TextoCombo">
-                                <ComboBox.Resources>
-                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
-                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
-                                </ComboBox.Resources>
-                            </ComboBox>
-                        </Border>
+                        <ComboBox x:Name="cmbAsignarSocio" Style="{StaticResource ComboBoxEstilo}"
+                                   IsTextSearchEnabled="True"
+                                  DisplayMemberPath="TextoCombo"/>
                         <Button Content="＋ ASIGNAR"
                                     Style="{StaticResource BotonPrincipalEstilo}"
-                                    Height="40" Margin="0,12,0,0"
+                                    Height="40" Margin="0,6,0,16"
+                                    ToolTip="Asignar"
                                     Click="btnConfirmarAsignar_Click"/>
+                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,0,0,12"/>
+                        <TextBlock Text="ASIGNACIONES ACTUALES"
+                                    FontSize="11" FontWeight="Bold" Foreground="{StaticResource TextMuted}"
+                                    Margin="0,0,0,8"/>
+                        <StackPanel x:Name="panelAsignaciones"/>
                     </StackPanel>
-                    <Border Grid.Row="3" BorderBrush="{StaticResource Border1}" BorderThickness="0,1,0,0">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="14,12,14,12">
-                            <StackPanel x:Name="panelAsignaciones"/>
-                        </ScrollViewer>
-                    </Border>
-                    <Button Grid.Row="4" Content="CERRAR"
-                                Style="{StaticResource BotonCerrarEstilo}"
-                                Height="40" Margin="24,12,24,18"
-                                Click="btnCerrarAsignar_Click"/>
-                </Grid>
-            </Border>
+                </ScrollViewer>
+                <Button Grid.Row="3" Content="CERRAR"
+                            Style="{StaticResource BotonDangerLargoEstilo}"
+                            Height="40" Margin="22,12,22,18"
+                            ToolTip="Cerrar"
+                            Click="btnCerrarAsignar_Click"/>
+            </Grid>
         </Border>
+        </Grid>
 
     </Grid>
 </Page>

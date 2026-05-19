@@ -243,7 +243,7 @@
                             <Setter TargetName="Bg" Property="BorderThickness" Value="1.5"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource ColorInputHover}"/>
+                            <Setter TargetName="Bg" Property="Background" Value="#1E3A2F"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{StaticResource ColorTextoSecundario}"/>
@@ -275,7 +275,7 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{StaticResource ColorInputHover}"/>
+                            <Setter TargetName="Bg" Property="Background" Value="#1E3A2F"/>
                         </Trigger>
                         <Trigger Property="HasSelectedDays" Value="True">
                             <Setter TargetName="Bg" Property="Background" Value="{StaticResource ColorPrimario}"/>
@@ -706,6 +706,41 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="8">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="borde" Property="Background" Value="#2A1010"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="borde" Property="Opacity" Value="0.85"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Botón Danger Largo (para paneles con texto largo como eliminar casillero) -->
+    <Style x:Key="BotonDangerLargoEstilo" TargetType="Button">
+        <Setter Property="Height"          Value="40"/>
+        <Setter Property="Background"      Value="#1A1010"/>
+        <Setter Property="Foreground"      Value="#FF5555"/>
+        <Setter Property="FontSize"        Value="12"/>
+        <Setter Property="FontWeight"      Value="SemiBold"/>
+        <Setter Property="Cursor"          Value="Hand"/>
+        <Setter Property="BorderThickness" Value="1.5"/>
+        <Setter Property="BorderBrush"     Value="#FF5555"/>
+        <Setter Property="Padding"         Value="16,0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="borde"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="10">
                         <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"/>
                     </Border>

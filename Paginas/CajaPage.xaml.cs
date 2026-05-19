@@ -157,7 +157,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                         Width = 10,
                         Height = altIng,
                         Background = new SolidColorBrush(Color.FromRgb(0, 230, 118)),
-                        CornerRadius = new CornerRadius(2, 2, 0, 0),
+                        CornerRadius = new CornerRadius(3, 3, 0, 0),
+                        VerticalAlignment = VerticalAlignment.Bottom,
                         Margin = new Thickness(0, 0, 2, 0),
                         ToolTip = "Ingresos: $" + d.Ingresos.ToString("N0")
                     };
@@ -171,7 +172,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                         Width = 10,
                         Height = altGas,
                         Background = new SolidColorBrush(Color.FromRgb(255, 85, 85)),
-                        CornerRadius = new CornerRadius(2, 2, 0, 0),
+                        CornerRadius = new CornerRadius(3, 3, 0, 0),
+                        VerticalAlignment = VerticalAlignment.Bottom,
                         ToolTip = "Gastos: $" + d.Gastos.ToString("N0")
                     };
 

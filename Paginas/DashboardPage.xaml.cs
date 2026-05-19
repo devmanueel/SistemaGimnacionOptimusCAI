@@ -115,8 +115,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             if (esHoy)
             {
-                borde.Background = new SolidColorBrush(Color.FromArgb(30, 0, 207, 255));
-                borde.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 207, 255));
+                borde.Background = new SolidColorBrush(Color.FromArgb(30, 45, 212, 191));
+                borde.BorderBrush = new SolidColorBrush(Color.FromRgb(45, 212, 191));
                 borde.BorderThickness = new Thickness(1.5);
             }
             else
@@ -127,8 +127,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
                 borde.MouseEnter += (s, e) =>
                 {
-                    borde.Background = new SolidColorBrush(Color.FromRgb(26, 26, 46));
-                    borde.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64));
+                    borde.Background = new SolidColorBrush(Color.FromRgb(30, 58, 47));
+                    borde.BorderBrush = new SolidColorBrush(Color.FromRgb(74, 222, 128));
                 };
                 borde.MouseLeave += (s, e) =>
                 {

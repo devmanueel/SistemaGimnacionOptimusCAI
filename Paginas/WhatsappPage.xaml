@@ -515,7 +515,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Button Grid.Column="0" Content="Cancelar"
-                                Style="{StaticResource BotonCerrarEstilo}"
+                                Style="{StaticResource BotonDangerLargoEstilo}"
                                 Margin="0,0,8,0" Click="btnNuevoCancelar_Click"/>
                         <Button Grid.Column="1" Content="GUARDAR"
                                 Style="{StaticResource BotonPrincipalEstilo}"
@@ -570,7 +570,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="Cancelar"
-                            Style="{StaticResource BotonCerrarEstilo}"
+                            Style="{StaticResource BotonDangerLargoEstilo}"
                             Margin="0,0,8,0" Click="btnAvisosCancelar_Click"/>
                     <Button Grid.Column="1" Content="GENERAR"
                             Style="{StaticResource BotonPrincipalEstilo}"

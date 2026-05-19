@@ -117,11 +117,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var card = new Border
             {
                 Background = new SolidColorBrush(seleccionada
-                                    ? Color.FromRgb(26, 24, 64)
-                                    : Color.FromRgb(22, 22, 42)),
+                                    ? Color.FromRgb(22, 32, 22)
+                                    : Color.FromRgb(17, 24, 17)),
                 BorderBrush = new SolidColorBrush(seleccionada
-                                    ? Color.FromRgb(167, 139, 250)
-                                    : Color.FromRgb(37, 37, 64)),
+                                    ? Color.FromRgb(74, 222, 128)
+                                    : Color.FromRgb(30, 40, 30)),
                 BorderThickness = new Thickness(seleccionada ? 1.5 : 1),
                 CornerRadius = new CornerRadius(10),
                 Padding = new Thickness(14, 12, 14, 12),
@@ -130,6 +130,20 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Tag = r.Id
             };
             card.MouseLeftButtonUp += (s, e) => SeleccionarRutina(r.Id);
+
+            if (!seleccionada)
+            {
+                card.MouseEnter += (s, e) =>
+                {
+                    if (!(s is Border b) || b.Tag == null) return;
+                    b.Background = new SolidColorBrush(Color.FromRgb(26, 36, 26));
+                };
+                card.MouseLeave += (s, e) =>
+                {
+                    if (!(s is Border b) || b.Tag == null) return;
+                    b.Background = new SolidColorBrush(Color.FromRgb(17, 24, 17));
+                };
+            }
 
             var stack = new StackPanel();
 
@@ -144,7 +158,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 FontFamily = new FontFamily("Bahnschrift SemiBold, Segoe UI"),
                 FontSize = 13,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255)),
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                 TextWrapping = TextWrapping.Wrap,
                 MaxHeight = 36
             };
@@ -178,7 +192,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 Text = r.ResumenTexto,
                 FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(167, 139, 250)),
+                Foreground = new SolidColorBrush(Color.FromRgb(122, 173, 122)),
                 Margin = new Thickness(0, 6, 0, 0)
             });
 
@@ -187,7 +201,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 Text = r.DuracionTexto + "  ·  " + r.AsignacionesTexto,
                 FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154)),
+                Foreground = new SolidColorBrush(Color.FromRgb(61, 92, 61)),
                 Margin = new Thickness(0, 2, 0, 0)
             });
 
@@ -265,7 +279,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     Text = "Esta rutina no tiene bloques. Agrega el primero abajo.",
                     FontSize = 12,
                     FontStyle = FontStyles.Italic,
-                    Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154)),
+                    Foreground = new SolidColorBrush(Color.FromRgb(61, 92, 61)),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     Margin = new Thickness(0, 20, 0, 20)
                 });
@@ -281,8 +295,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             var card = new Border
             {
-                Background = new SolidColorBrush(Color.FromRgb(18, 18, 30)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64)),
+                Background = new SolidColorBrush(Color.FromRgb(17, 24, 17)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(30, 40, 30)),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(10),
                 Padding = new Thickness(0),
@@ -294,7 +308,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             // Header bloque
             var headerBorder = new Border
             {
-                Background = new SolidColorBrush(Color.FromRgb(26, 24, 64)),
+                Background = new SolidColorBrush(Color.FromRgb(17, 24, 17)),
                 CornerRadius = new CornerRadius(10, 10, 0, 0),
                 Padding = new Thickness(14, 10, 10, 10)
             };
@@ -310,21 +324,25 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 FontFamily = new FontFamily("Bahnschrift SemiBold, Segoe UI"),
                 FontSize = 14,
                 FontWeight = FontWeights.Bold,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255))
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232))
             });
             headerInfo.Children.Add(new TextBlock
             {
                 Text = b.CantidadEjerciciosTexto,
                 FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(167, 139, 250)),
+                Foreground = new SolidColorBrush(Color.FromRgb(122, 173, 122)),
                 Margin = new Thickness(0, 2, 0, 0)
             });
             Grid.SetColumn(headerInfo, 0);
             headerGrid.Children.Add(headerInfo);
 
             var btnsHeader = new StackPanel { Orientation = Orientation.Horizontal };
-            btnsHeader.Children.Add(CrearBotonMini("✏", Color.FromRgb(167, 139, 250), () => AbrirPanelBloque(b)));
-            btnsHeader.Children.Add(CrearBotonMini("🗑", Color.FromRgb(255, 85, 85), () => EliminarBloque(b)));
+            var btnEditBloque = CrearBotonAccion("✏", "ButtonStyleEditar", () => AbrirPanelBloque(b));
+            btnEditBloque.ToolTip = "Editar bloque";
+            btnsHeader.Children.Add(btnEditBloque);
+            var btnDelBloque = CrearBotonAccion("🗑", "ButtonStyleCancelar", Color.FromRgb(255, 85, 85), () => EliminarBloque(b));
+            btnDelBloque.ToolTip = "Eliminar bloque";
+            btnsHeader.Children.Add(btnDelBloque);
             Grid.SetColumn(btnsHeader, 1);
             headerGrid.Children.Add(btnsHeader);
 
@@ -332,7 +350,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             stack.Children.Add(headerBorder);
 
             // Lista de ejercicios
-            var ejercStack = new StackPanel { Margin = new Thickness(0) };
+            var ejercStack = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
             foreach (var e in b.Ejercicios)
                 ejercStack.Children.Add(CrearFilaEjercicio(e));
 
@@ -340,14 +358,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var btnAgregar = new Button
             {
                 Content = "＋ Agregar ejercicio",
-                Background = Brushes.Transparent,
-                Foreground = new SolidColorBrush(Color.FromRgb(255, 107, 53)),
-                BorderThickness = new Thickness(0),
-                Cursor = Cursors.Hand,
-                FontSize = 11,
-                FontWeight = FontWeights.SemiBold,
-                Padding = new Thickness(14, 10, 14, 12),
-                HorizontalContentAlignment = HorizontalAlignment.Left
+                Style = (Style)FindResource("BotonAgregarEstilo"),
+                ToolTip = "Agregar ejercicio"
             };
             btnAgregar.Click += (s, ev) => AbrirPanelEjercicio(b.Id, null);
             ejercStack.Children.Add(btnAgregar);
@@ -361,9 +373,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             var fila = new Border
             {
-                BorderBrush = new SolidColorBrush(Color.FromRgb(26, 26, 46)),
-                BorderThickness = new Thickness(0, 0, 0, 1),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(30, 40, 30)),
+                BorderThickness = new Thickness(0, 1, 0, 0),
                 Padding = new Thickness(14, 10, 10, 10),
+                Margin = new Thickness(0, 0, 0, 0),
                 Cursor = Cursors.Hand
             };
             fila.MouseLeftButtonUp += (s, ev) => AbrirPanelEjercicio(e.BloqueId, e);
@@ -381,7 +394,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Text = e.Nombre,
                 FontSize = 13,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255))
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232))
             });
             if (e.TieneVideo)
             {
@@ -410,7 +423,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     Text = e.Notas,
                     FontSize = 10,
                     FontStyle = FontStyles.Italic,
-                    Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154)),
+                    Foreground = new SolidColorBrush(Color.FromRgb(61, 92, 61)),
                     TextWrapping = TextWrapping.Wrap,
                     Margin = new Thickness(0, 3, 0, 0)
                 });
@@ -422,17 +435,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             // Boton ver video (si tiene)
             if (e.TieneVideo)
             {
-                var btnVideo = CrearBotonMini("▶", Color.FromRgb(255, 107, 53), () =>
+                var btnVideo = CrearBotonAccion("▶", "ButtonStyleAccionBase", Color.FromRgb(255, 107, 53), () =>
                 {
                     try { Process.Start(e.LinkVideo); }
                     catch { NotificacionWindow.MostrarError("No se pudo abrir el link."); }
                 });
+                btnVideo.ToolTip = "Ver video";
                 Grid.SetColumn(btnVideo, 1);
                 grid.Children.Add(btnVideo);
             }
 
             // Boton eliminar
-            var btnDel = CrearBotonMini("✕", Color.FromRgb(255, 85, 85), () => EliminarEjercicio(e));
+            var btnDel = CrearBotonAccion("✕", "ButtonStyleCancelar", Color.FromRgb(255, 85, 85), () => EliminarEjercicio(e));
+            btnDel.ToolTip = "Eliminar ejercicio";
             Grid.SetColumn(btnDel, 2);
             grid.Children.Add(btnDel);
 
@@ -440,21 +455,26 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             return fila;
         }
 
-        private Button CrearBotonMini(string texto, Color color, Action onClick)
+        private Button CrearBotonAccion(string texto, string estilo, Action onClick)
         {
             var btn = new Button
             {
                 Content = texto,
-                Width = 30,
-                Height = 30,
-                Background = Brushes.Transparent,
-                Foreground = new SolidColorBrush(color),
-                BorderThickness = new Thickness(0),
-                Cursor = Cursors.Hand,
+                Width = 34,
+                Height = 34,
                 FontSize = 13,
+                Cursor = Cursors.Hand,
                 Margin = new Thickness(2, 0, 2, 0)
             };
+            btn.SetResourceReference(FrameworkElement.StyleProperty, estilo);
             btn.Click += (s, e) => { e.Handled = true; onClick(); };
+            return btn;
+        }
+
+        private Button CrearBotonAccion(string texto, string estilo, Color foreground, Action onClick)
+        {
+            var btn = CrearBotonAccion(texto, estilo, onClick);
+            btn.Foreground = new SolidColorBrush(foreground);
             return btn;
         }
 
@@ -676,7 +696,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             lblAsignarRutina.Text = _rutinaActual.Nombre;
             cmbAsignarSocio.SelectedIndex = -1;
             CargarAsignacionesActuales();
-            AbrirModal(modalAsignar);
+            AbrirPanel(panelAsignar);
         }
 
         private void CargarAsignacionesActuales()
@@ -692,7 +712,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                         Text = "Esta rutina no tiene socios asignados.",
                         FontSize = 11,
                         FontStyle = FontStyles.Italic,
-                        Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154)),
+                        Foreground = new SolidColorBrush(Color.FromRgb(61, 92, 61)),
                         HorizontalAlignment = HorizontalAlignment.Center,
                         Margin = new Thickness(0, 12, 0, 12)
                     });
@@ -709,8 +729,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             var fila = new Border
             {
-                Background = new SolidColorBrush(Color.FromRgb(18, 18, 30)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64)),
+                Background = new SolidColorBrush(Color.FromRgb(17, 24, 17)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(30, 40, 30)),
                 BorderThickness = new Thickness(0, 0, 0, 1),
                 Padding = new Thickness(0, 8, 0, 8)
             };
@@ -728,7 +748,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Height = 36,
                 Fill = new LinearGradientBrush(
                     Color.FromRgb(0, 207, 255),
-                    Color.FromRgb(167, 139, 250),
+                    Color.FromRgb(74, 222, 128),
                     new Point(0, 0), new Point(1, 1))
             };
             fotoCont.Children.Add(ringEll);
@@ -737,7 +757,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (a.SocioFoto != null && a.SocioFoto.Length > 0)
                 innerEll.Fill = new ImageBrush(BytesABitmapImage(a.SocioFoto)) { Stretch = Stretch.UniformToFill };
             else
-                innerEll.Fill = new SolidColorBrush(Color.FromRgb(40, 40, 60));
+                innerEll.Fill = new SolidColorBrush(Color.FromRgb(40, 50, 40));
             fotoCont.Children.Add(innerEll);
             Grid.SetColumn(fotoCont, 0);
             grid.Children.Add(fotoCont);
@@ -749,18 +769,18 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Text = a.SocioNombre,
                 FontSize = 12,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255))
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232))
             });
             info.Children.Add(new TextBlock
             {
                 Text = a.NumeroSocioTexto + "  ·  asignada el " + a.FechaTexto,
                 FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154))
+                Foreground = new SolidColorBrush(Color.FromRgb(61, 92, 61))
             });
             Grid.SetColumn(info, 1);
             grid.Children.Add(info);
 
-            var btnDel = CrearBotonMini("✕", Color.FromRgb(255, 85, 85), () =>
+            var btnDel = CrearBotonAccion("✕", "ButtonStyleCancelar", Color.FromRgb(255, 85, 85), () =>
             {
                 bool ok = NotificacionWindow.MostrarConfirmacion(
                     "¿Quitar la rutina al socio " + a.SocioNombre + "?",
@@ -801,7 +821,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         private void btnCerrarAsignar_Click(object sender, RoutedEventArgs e)
-            => CerrarModal(modalAsignar);
+            => CerrarPanel(panelAsignar);
 
         // ── HELPERS ───────────────────────────────────────────
         private void txtSoloNumeros_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -848,21 +868,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 panel.RenderTransform = null;
             };
             panel.BeginAnimation(OpacityProperty, fade);
-        }
-
-        private void AbrirModal(Border modal)
-        {
-            modal.Visibility = Visibility.Visible;
-            modal.Opacity = 0;
-            var fade = new DoubleAnimation { From = 0, To = 1, Duration = new Duration(TimeSpan.FromMilliseconds(180)) };
-            modal.BeginAnimation(OpacityProperty, fade);
-        }
-
-        private void CerrarModal(Border modal)
-        {
-            var fade = new DoubleAnimation { From = 1, To = 0, Duration = new Duration(TimeSpan.FromMilliseconds(150)) };
-            fade.Completed += (s, e) => modal.Visibility = Visibility.Collapsed;
-            modal.BeginAnimation(OpacityProperty, fade);
         }
 
         private static BitmapImage BytesABitmapImage(byte[] bytes)
