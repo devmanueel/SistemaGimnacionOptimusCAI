@@ -19,6 +19,7 @@ namespace Models.Dao
                 Fecha = Convert.ToDateTime(r["fecha"]),
                 HoraEntrada = r["hora_entrada"] != DBNull.Value ? (TimeSpan?)r["hora_entrada"] : null,
                 HoraSalida = r["hora_salida"] != DBNull.Value ? (TimeSpan?)r["hora_salida"] : null,
+                HorasTrabajadas = r["horas_trabajadas"] != DBNull.Value ? Convert.ToDecimal(r["horas_trabajadas"]) : 0m,
                 Observaciones = r["observaciones"] as string,
                 RegistradoPor = r["registrado_por"] != DBNull.Value ? (long?)Convert.ToInt64(r["registrado_por"]) : null,
                 CreadoEn = Convert.ToDateTime(r["creado_en"]),
@@ -194,6 +195,114 @@ namespace Models.Dao
                 }
             }
             return new EstadisticasInstructorAsistencias();
+        }
+
+        public FichajeResultado FicharEntrada(string dni, string passwordHash)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_FicharEntradaInstructor", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Dni", dni);
+                    cmd.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                    using (var r = cmd.ExecuteReader())
+                        if (r.Read())
+                            return new FichajeResultado
+                            {
+                                Id             = Convert.ToInt64(r["id"]),
+                                InstructorId   = Convert.ToInt64(r["instructor_id"]),
+                                NombreCompleto = r["nombre_completo"] as string,
+                                HoraEntrada    = r["hora_entrada"] != DBNull.Value ? (TimeSpan)r["hora_entrada"] : default(TimeSpan)
+                            };
+                }
+            }
+            return null;
+        }
+
+        public FichajeResultado FicharSalida(string dni, string passwordHash)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_FicharSalidaInstructor", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Dni", dni);
+                    cmd.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                    using (var r = cmd.ExecuteReader())
+                        if (r.Read())
+                            return new FichajeResultado
+                            {
+                                Id              = Convert.ToInt64(r["id"]),
+                                InstructorId    = Convert.ToInt64(r["instructor_id"]),
+                                NombreCompleto  = r["nombre_completo"] as string,
+                                HoraEntrada     = r["hora_entrada"]    != DBNull.Value ? (TimeSpan)r["hora_entrada"]             : default(TimeSpan),
+                                HoraSalida      = r["hora_salida"]     != DBNull.Value ? (TimeSpan)r["hora_salida"]              : default(TimeSpan),
+                                HorasTrabajadas = r["horas_trabajadas"] != DBNull.Value ? Convert.ToDecimal(r["horas_trabajadas"]) : 0m
+                            };
+                }
+            }
+            return null;
+        }
+
+        public List<ReporteInstructor> ObtenerReporteMensual(int anio, int mes)
+        {
+            var lista = new List<ReporteInstructor>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ReporteMensualInstructores", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Anio", anio);
+                    cmd.Parameters.AddWithValue("@Mes", mes);
+                    using (var r = cmd.ExecuteReader())
+                        while (r.Read())
+                            lista.Add(new ReporteInstructor
+                            {
+                                InstructorId    = Convert.ToInt64(r["instructor_id"]),
+                                NombreCompleto  = r["nombre_completo"] as string,
+                                TarifaHora      = r["tarifa_hora"]      != DBNull.Value ? Convert.ToDecimal(r["tarifa_hora"])      : 0m,
+                                ActividadNombre = r["actividad_nombre"] as string ?? "—",
+                                DiasAsistidos   = Convert.ToInt32(r["dias_asistidos"]),
+                                TotalHoras      = r["total_horas"]      != DBNull.Value ? Convert.ToDecimal(r["total_horas"])      : 0m,
+                                SueldoEstimado  = r["sueldo_estimado"]  != DBNull.Value ? Convert.ToDecimal(r["sueldo_estimado"])  : 0m
+                            });
+                }
+            }
+            return lista;
+        }
+
+        public List<InstructorAsistencia> ObtenerReporteSemanal(DateTime desde, DateTime hasta)
+        {
+            var lista = new List<InstructorAsistencia>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ReporteSemanalInstructores", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@FechaDesde", desde.Date);
+                    cmd.Parameters.AddWithValue("@FechaHasta", hasta.Date);
+                    using (var r = cmd.ExecuteReader())
+                        while (r.Read())
+                        {
+                            if (r["fecha"] == DBNull.Value) continue;
+                            lista.Add(new InstructorAsistencia
+                            {
+                                InstructorId    = Convert.ToInt64(r["instructor_id"]),
+                                InstructorNombre = r["nombre_completo"] as string,
+                                Fecha           = Convert.ToDateTime(r["fecha"]),
+                                HoraEntrada     = r["hora_entrada"]     != DBNull.Value ? (TimeSpan?)r["hora_entrada"]              : null,
+                                HoraSalida      = r["hora_salida"]      != DBNull.Value ? (TimeSpan?)r["hora_salida"]               : null,
+                                HorasTrabajadas = r["horas_trabajadas"] != DBNull.Value ? Convert.ToDecimal(r["horas_trabajadas"])   : 0m
+                            });
+                        }
+                }
+            }
+            return lista;
         }
     }
 }

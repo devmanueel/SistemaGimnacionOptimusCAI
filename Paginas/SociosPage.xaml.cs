@@ -203,6 +203,67 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─────────────────────────────────────────────────────
         // BOTONES PRINCIPALES
         // ─────────────────────────────────────────────────────
+        private void btnBajaInactivos_Click(object sender, RoutedEventArgs e)
+        {
+            List<SocioInactivo> inactivos;
+            try
+            {
+                inactivos = _controller.ObtenerInactivosParaDarDeBaja(2);
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError("No se pudo obtener la lista.\n" + ex.Message);
+                return;
+            }
+
+            if (inactivos == null || inactivos.Count == 0)
+            {
+                NotificacionWindow.MostrarExito(
+                    "No hay socios con más de 2 meses sin asistir que estén activos.",
+                    "Sin inactivos");
+                return;
+            }
+
+            // Armar resumen para mostrar
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Se encontraron " + inactivos.Count + " socio(s) sin asistir en 2+ meses:\n");
+            int mostrar = inactivos.Count > 10 ? 10 : inactivos.Count;
+            for (int i = 0; i < mostrar; i++)
+            {
+                var s = inactivos[i];
+                sb.AppendLine("• " + s.NombreCompleto + "  " + s.NumeroSocioFormateado +
+                              "  —  " + s.UltimaAsistenciaTexto);
+            }
+            if (inactivos.Count > 10)
+                sb.AppendLine("... y " + (inactivos.Count - 10) + " más.");
+
+            sb.AppendLine("\n¿Dar de baja a todos estos socios?");
+
+            bool confirmo = NotificacionWindow.MostrarConfirmacion(sb.ToString(), "Dar de baja inactivos");
+            if (!confirmo) return;
+
+            var ids = new List<long>();
+            foreach (var s in inactivos) ids.Add(s.Id);
+
+            try
+            {
+                var r = _controller.DarDeBajaLote(ids);
+                if (r.ok)
+                {
+                    NotificacionWindow.MostrarExito(r.mensaje, "Baja completada");
+                    CargarSocios();
+                }
+                else
+                {
+                    NotificacionWindow.MostrarError(r.mensaje);
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError("Error al dar de baja.\n" + ex.Message);
+            }
+        }
+
         private void btnNuevo_Click(object sender, RoutedEventArgs e)
         {
             _esNuevo = true;

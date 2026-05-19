@@ -11,6 +11,7 @@ namespace Entities
         public DateTime Fecha { get; set; }
         public TimeSpan? HoraEntrada { get; set; }
         public TimeSpan? HoraSalida { get; set; }
+        public decimal HorasTrabajadas { get; set; }
         public string Observaciones { get; set; }
         public long? RegistradoPor { get; set; }
         public DateTime CreadoEn { get; set; }
@@ -29,6 +30,17 @@ namespace Entities
         public string FechaCorta => Fecha.ToString("dd/MM");
         public string HoraEntradaTexto => HoraEntrada.HasValue ? HoraEntrada.Value.ToString(@"hh\:mm") : "—";
         public string HoraSalidaTexto => HoraSalida.HasValue ? HoraSalida.Value.ToString(@"hh\:mm") : "—";
+
+        public string HorasTrabajadasTexto
+        {
+            get
+            {
+                if (HorasTrabajadas <= 0) return AsistenciaAbierta ? "en curso" : "—";
+                int h = (int)HorasTrabajadas;
+                int m = (int)((HorasTrabajadas - h) * 60);
+                return h > 0 ? $"{h}h {m:D2}m" : $"{m} min";
+            }
+        }
 
         public bool AsistenciaAbierta => HoraEntrada.HasValue && !HoraSalida.HasValue;
         public bool AsistenciaCerrada => HoraEntrada.HasValue && HoraSalida.HasValue;
@@ -116,5 +128,53 @@ namespace Entities
         public int AbiertasHoy { get; set; }
         public int InstructoresHoy { get; set; }
         public int AsistenciasMes { get; set; }
+    }
+
+    public class ReporteInstructor
+    {
+        public long    InstructorId    { get; set; }
+        public string  NombreCompleto  { get; set; }
+        public decimal TarifaHora      { get; set; }
+        public string  ActividadNombre { get; set; }
+        public int     DiasAsistidos   { get; set; }
+        public decimal TotalHoras      { get; set; }
+        public decimal SueldoEstimado  { get; set; }
+
+        public string TotalHorasTexto
+        {
+            get
+            {
+                int h = (int)TotalHoras;
+                int m = (int)((TotalHoras - h) * 60);
+                return h > 0 ? $"{h}h {m:D2}m" : $"{m} min";
+            }
+        }
+
+        public string SueldoTexto  => "$" + SueldoEstimado.ToString("N2");
+        public string TarifaTexto  => TarifaHora > 0 ? "$" + TarifaHora.ToString("N2") + "/h" : "—";
+    }
+
+    public class FichajeResultado
+    {
+        public long     Id             { get; set; }
+        public long     InstructorId   { get; set; }
+        public string   NombreCompleto { get; set; }
+        public TimeSpan HoraEntrada    { get; set; }
+        public TimeSpan HoraSalida     { get; set; }
+        public decimal  HorasTrabajadas { get; set; }
+
+        public string HoraEntradaTexto  => HoraEntrada  != default(TimeSpan) ? HoraEntrada.ToString(@"hh\:mm")  : "—";
+        public string HoraSalidaTexto   => HoraSalida   != default(TimeSpan) ? HoraSalida.ToString(@"hh\:mm")   : "—";
+
+        public string HorasTrabajadasTexto
+        {
+            get
+            {
+                if (HorasTrabajadas <= 0) return "—";
+                int h = (int)HorasTrabajadas;
+                int m = (int)((HorasTrabajadas - h) * 60);
+                return h > 0 ? $"{h}h {m:D2}m" : $"{m} min";
+            }
+        }
     }
 }

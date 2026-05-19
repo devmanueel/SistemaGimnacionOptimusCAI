@@ -24,6 +24,7 @@ namespace Entities
         public decimal MontoPagado { get; set; }
         public string MetodoPago { get; set; } = "efectivo";
         public string Estado { get; set; } = "activa";
+        public string TipoPlan { get; set; } = "mensual";
         public long RegistradoPor { get; set; }
         public string Observaciones { get; set; }
         public DateTime CreadoEn { get; set; }
@@ -108,6 +109,16 @@ namespace Entities
             {
                 if (string.IsNullOrEmpty(MetodoPago)) return "—";
                 return char.ToUpper(MetodoPago[0]) + MetodoPago.Substring(1);
+            }
+        }
+
+        public string TipoPlanTexto
+        {
+            get
+            {
+                if (TipoPlan == "clase") return "Clase suelta";
+                if (TipoPlan == "semanal") return "Semanal";
+                return "Mensual";
             }
         }
     }

@@ -96,7 +96,7 @@
                          Style="{StaticResource BuscadorStyle}" Width="290" 
                          Margin="0,0,12,0" TextChanged="txtBuscar_TextChanged"/>
 
-                <Button Content="COBRAR CUOTA"
+                <Button x:Name="btnNuevo" Content="COBRAR CUOTA"
                         Style="{StaticResource BotonNaranjaEstilo}"
                         Tag="UserPlus"
                         Width="180" Height="46" Click="btnNuevo_Click"/>
@@ -157,7 +157,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Column="6" Style="{StaticResource BorderStyleStatCard}"
+            <Border x:Name="panelStatRecaudado" Grid.Column="6" Style="{StaticResource BorderStyleStatCard}"
                     BorderBrush="{StaticResource GreenDim}" BorderThickness="1">
                 <Grid>
                     <StackPanel VerticalAlignment="Center">
@@ -437,6 +437,19 @@
                                         <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                     </ComboBox.Resources>
                                 </ComboBox>
+
+                            <!-- TIPO DE PLAN -->
+                            <TextBlock Text="TIPO DE PLAN *" Style="{StaticResource LabelCampoEstilo}"/>
+                            <ComboBox x:Name="cmbTipoPlan" Style="{StaticResource ComboBoxEstilo}"
+                                      SelectionChanged="cmbTipoPlan_SelectionChanged">
+                                <ComboBox.Resources>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
+                                </ComboBox.Resources>
+                                <ComboBoxItem Content="Mensual (31 días)"    Tag="mensual" Foreground="{StaticResource TextPrimary}" IsSelected="True"/>
+                                <ComboBoxItem Content="Semanal (7 días)"     Tag="semanal" Foreground="{StaticResource TextPrimary}"/>
+                                <ComboBoxItem Content="Clase suelta (1 día)" Tag="clase"   Foreground="{StaticResource TextPrimary}"/>
+                            </ComboBox>
 
                             <!-- FECHAS lado a lado -->
                             <Grid Margin="0,0,0,0">

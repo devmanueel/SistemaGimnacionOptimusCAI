@@ -14,6 +14,14 @@ namespace Models.Dao
 {
     public class MembresiaDao : ConnectionToDB
     {
+        private static string LeerColumnaSegura(SqlDataReader r, string columna)
+        {
+            for (int i = 0; i < r.FieldCount; i++)
+                if (r.GetName(i).Equals(columna, StringComparison.OrdinalIgnoreCase))
+                    return r[columna] as string;
+            return null;
+        }
+
         private static Membresia MapearMembresia(SqlDataReader r)
         {
             return new Membresia
@@ -27,6 +35,7 @@ namespace Models.Dao
                 MontoPagado = Convert.ToDecimal(r["monto_pagado"]),
                 MetodoPago = r["metodo_pago"].ToString(),
                 Estado = r["estado"].ToString(),
+                TipoPlan = LeerColumnaSegura(r, "tipo_plan") ?? "mensual",
                 RegistradoPor = Convert.ToInt64(r["registrado_por"]),
                 Observaciones = r["observaciones"] as string,
                 CreadoEn = Convert.ToDateTime(r["creado_en"]),
@@ -121,6 +130,7 @@ namespace Models.Dao
                     cmd.Parameters.AddWithValue("@InstructorId", (object)m.InstructorId ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@FechaInicio", m.FechaInicio);
                     cmd.Parameters.AddWithValue("@FechaVencimiento", m.FechaVencimiento);
+                    cmd.Parameters.AddWithValue("@TipoPlan", m.TipoPlan ?? "mensual");
                     cmd.Parameters.AddWithValue("@MontoPagado", m.MontoPagado);
                     cmd.Parameters.AddWithValue("@MetodoPago", m.MetodoPago ?? "efectivo");
                     cmd.Parameters.AddWithValue("@RegistradoPor", m.RegistradoPor);
@@ -135,8 +145,12 @@ namespace Models.Dao
         // ──────────────────────────────────────────────────────
         // MODIFICAR (solo datos secundarios)
         // ──────────────────────────────────────────────────────
-        public bool ModificarMembresia(long id, long? instructorId,
-                                       DateTime fechaVencimiento, string observaciones)
+        public bool ModificarMembresia(long id, long? instructorId, long? actividadId,
+                                       DateTime fechaVencimiento, string observaciones,
+                                       long registradoPor = 0,
+                                       decimal? montoPagado = null,
+                                       string tipoPlan = null,
+                                       string metodoPago = null)
         {
             using (var conn = GetConnection())
             {
@@ -146,8 +160,13 @@ namespace Models.Dao
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id", id);
                     cmd.Parameters.AddWithValue("@InstructorId", (object)instructorId ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@ActividadId", (object)actividadId ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@FechaVencimiento", fechaVencimiento);
+                    cmd.Parameters.AddWithValue("@MontoPagado", (object)montoPagado ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@TipoPlan", (object)tipoPlan ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@MetodoPago", (object)metodoPago ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@Observaciones", (object)observaciones ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@RegistradoPor", registradoPor > 0 ? (object)registradoPor : DBNull.Value);
 
                     var filas = cmd.ExecuteScalar();
                     return filas != null && Convert.ToInt32(filas) > 0;
@@ -204,7 +223,7 @@ namespace Models.Dao
         // ──────────────────────────────────────────────────────
         // ELIMINAR (cancela, no borra)
         // ──────────────────────────────────────────────────────
-        public bool EliminarMembresia(long id)
+        public bool EliminarMembresia(long id, long registradoPor = 0)
         {
             using (var conn = GetConnection())
             {
@@ -213,6 +232,7 @@ namespace Models.Dao
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id", id);
+                    cmd.Parameters.AddWithValue("@RegistradoPor", registradoPor > 0 ? (object)registradoPor : DBNull.Value);
                     var filas = cmd.ExecuteScalar();
                     return filas != null && Convert.ToInt32(filas) > 0;
                 }
