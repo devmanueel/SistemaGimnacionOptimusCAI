@@ -1,7 +1,14 @@
-﻿-- ============================================================
+-- ============================================================
 --  SP_InstructorAsistencias.sql
 --  Registro de presencia de instructores en sus turnos
 -- ============================================================
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('instructor_asistencias') AND name = 'horas_trabajadas'
+)
+    ALTER TABLE instructor_asistencias ADD horas_trabajadas DECIMAL(5,2) NULL;
+GO
 
 IF OBJECT_ID('sp_ObtenerInstructorAsistencias',     'P') IS NOT NULL DROP PROCEDURE sp_ObtenerInstructorAsistencias;
 IF OBJECT_ID('sp_BuscarInstructorAsistencias',      'P') IS NOT NULL DROP PROCEDURE sp_BuscarInstructorAsistencias;
@@ -9,8 +16,12 @@ IF OBJECT_ID('sp_RegistrarEntradaInstructor',       'P') IS NOT NULL DROP PROCED
 IF OBJECT_ID('sp_RegistrarSalidaInstructor',        'P') IS NOT NULL DROP PROCEDURE sp_RegistrarSalidaInstructor;
 IF OBJECT_ID('sp_EliminarInstructorAsistencia',     'P') IS NOT NULL DROP PROCEDURE sp_EliminarInstructorAsistencia;
 IF OBJECT_ID('sp_ActualizarInstructorAsistencia',   'P') IS NOT NULL DROP PROCEDURE sp_ActualizarInstructorAsistencia;
-IF OBJECT_ID('sp_TurnosDeHoy',                       'P') IS NOT NULL DROP PROCEDURE sp_TurnosDeHoy;
+IF OBJECT_ID('sp_TurnosDeHoy',                      'P') IS NOT NULL DROP PROCEDURE sp_TurnosDeHoy;
 IF OBJECT_ID('sp_EstadisticasInstructorAsistencias','P') IS NOT NULL DROP PROCEDURE sp_EstadisticasInstructorAsistencias;
+IF OBJECT_ID('sp_FicharEntradaInstructor',          'P') IS NOT NULL DROP PROCEDURE sp_FicharEntradaInstructor;
+IF OBJECT_ID('sp_FicharSalidaInstructor',           'P') IS NOT NULL DROP PROCEDURE sp_FicharSalidaInstructor;
+IF OBJECT_ID('sp_ReporteMensualInstructores',       'P') IS NOT NULL DROP PROCEDURE sp_ReporteMensualInstructores;
+IF OBJECT_ID('sp_ReporteSemanalInstructores',       'P') IS NOT NULL DROP PROCEDURE sp_ReporteSemanalInstructores;
 GO
 
 -- ─────────────────────────────────────────────────────────────
@@ -28,7 +39,7 @@ BEGIN
 
     SELECT
         ia.id, ia.instructor_id, ia.turno_id, ia.fecha,
-        ia.hora_entrada, ia.hora_salida, ia.observaciones,
+        ia.hora_entrada, ia.hora_salida, ia.horas_trabajadas, ia.observaciones,
         ia.registrado_por, ia.creado_en,
         u.nombre + ' ' + u.apellido          AS instructor_nombre,
         u.foto                                AS instructor_foto,
@@ -62,7 +73,7 @@ BEGIN
 
     SELECT
         ia.id, ia.instructor_id, ia.turno_id, ia.fecha,
-        ia.hora_entrada, ia.hora_salida, ia.observaciones,
+        ia.hora_entrada, ia.hora_salida, ia.horas_trabajadas, ia.observaciones,
         ia.registrado_por, ia.creado_en,
         u.nombre + ' ' + u.apellido          AS instructor_nombre,
         u.foto                                AS instructor_foto,
@@ -85,7 +96,7 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
--- 3. REGISTRAR ENTRADA
+-- 3. REGISTRAR ENTRADA (por admin, vinculado a turno)
 -- ─────────────────────────────────────────────────────────────
 CREATE PROCEDURE sp_RegistrarEntradaInstructor
     @InstructorId   BIGINT,
@@ -99,7 +110,6 @@ BEGIN
 
     IF @Fecha IS NULL SET @Fecha = CAST(GETDATE() AS DATE);
 
-    -- Validar que el usuario exista
     IF NOT EXISTS (SELECT 1 FROM usuarios
                    WHERE id = @InstructorId AND activo = 1 AND eliminado_en IS NULL)
     BEGIN
@@ -107,7 +117,6 @@ BEGIN
         RETURN;
     END
 
-    -- No permitir doble entrada para el mismo instructor + turno + fecha
     IF EXISTS (
         SELECT 1 FROM instructor_asistencias
         WHERE instructor_id = @InstructorId
@@ -134,7 +143,7 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
--- 4. REGISTRAR SALIDA
+-- 4. REGISTRAR SALIDA (por admin, por ID de asistencia)
 -- ─────────────────────────────────────────────────────────────
 CREATE PROCEDURE sp_RegistrarSalidaInstructor
     @Id BIGINT
@@ -160,8 +169,12 @@ BEGIN
         RETURN;
     END
 
+    DECLARE @NuevaHoraSalida TIME = CAST(GETDATE() AS TIME);
+    DECLARE @Minutos         INT  = DATEDIFF(MINUTE, @HoraEntrada, @NuevaHoraSalida);
+
     UPDATE instructor_asistencias
-    SET hora_salida = CAST(GETDATE() AS TIME)
+    SET hora_salida      = @NuevaHoraSalida,
+        horas_trabajadas = @Minutos / 60.0
     WHERE id = @Id;
 
     SELECT @@ROWCOUNT AS filas_afectadas;
@@ -169,7 +182,7 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
--- 5. ACTUALIZAR (editar manual)
+-- 5. ACTUALIZAR (corrección admin — recalcula horas_trabajadas)
 -- ─────────────────────────────────────────────────────────────
 CREATE PROCEDURE sp_ActualizarInstructorAsistencia
     @Id            BIGINT,
@@ -188,10 +201,15 @@ BEGIN
     END
 
     UPDATE instructor_asistencias
-    SET turno_id      = @TurnoId,
-        hora_entrada  = ISNULL(@HoraEntrada, hora_entrada),
-        hora_salida   = @HoraSalida,
-        observaciones = @Observaciones
+    SET turno_id         = @TurnoId,
+        hora_entrada     = ISNULL(@HoraEntrada, hora_entrada),
+        hora_salida      = @HoraSalida,
+        observaciones    = @Observaciones,
+        horas_trabajadas = CASE
+            WHEN ISNULL(@HoraEntrada, hora_entrada) IS NOT NULL AND @HoraSalida IS NOT NULL
+            THEN DATEDIFF(MINUTE, ISNULL(@HoraEntrada, hora_entrada), @HoraSalida) / 60.0
+            ELSE NULL
+        END
     WHERE id = @Id;
 
     SELECT @@ROWCOUNT AS filas_afectadas;
@@ -212,14 +230,13 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
--- 7. TURNOS DE HOY (para el panel de "fichaje rápido")
+-- 7. TURNOS DE HOY
 -- ─────────────────────────────────────────────────────────────
 CREATE PROCEDURE sp_TurnosDeHoy
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Convertir DayOfWeek SQL Server (1=Dom..7=Sab) → app (1=Lun..7=Dom)
     DECLARE @DiaApp INT;
     SET @DiaApp = CASE DATEPART(WEEKDAY, GETDATE())
         WHEN 1 THEN 7 WHEN 2 THEN 1 WHEN 3 THEN 2 WHEN 4 THEN 3
@@ -239,7 +256,6 @@ BEGIN
         a.nombre        AS actividad_nombre,
         ISNULL(u.nombre + ' ' + u.apellido, 'Sin asignar') AS instructor_nombre,
         u.foto          AS instructor_foto,
-        -- Si ya tiene una asistencia hoy, traerla
         ia.id           AS asistencia_id,
         ia.hora_entrada,
         ia.hora_salida
@@ -275,5 +291,200 @@ BEGIN
                 WHERE fecha = @Hoy), 0) AS instructores_hoy,
         ISNULL((SELECT COUNT(*) FROM instructor_asistencias
                 WHERE fecha >= @PrimerDiaMes), 0) AS asistencias_mes;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 9. FICHAR ENTRADA (autenticación por DNI + contraseña)
+-- ─────────────────────────────────────────────────────────────
+CREATE PROCEDURE sp_FicharEntradaInstructor
+    @Dni          VARCHAR(15),
+    @PasswordHash VARCHAR(64)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @InstructorId BIGINT;
+    DECLARE @Nombre       NVARCHAR(100);
+    DECLARE @Apellido     NVARCHAR(100);
+
+    SELECT @InstructorId = id,
+           @Nombre       = nombre,
+           @Apellido     = apellido
+    FROM usuarios
+    WHERE dni = @Dni
+      AND password_hash = @PasswordHash
+      AND activo = 1
+      AND eliminado_en IS NULL;
+
+    IF @InstructorId IS NULL
+    BEGIN
+        RAISERROR('DNI o contraseña incorrectos.', 16, 1);
+        RETURN;
+    END
+
+    IF EXISTS (
+        SELECT 1 FROM instructor_asistencias
+        WHERE instructor_id = @InstructorId
+          AND fecha = CAST(GETDATE() AS DATE)
+    )
+    BEGIN
+        DECLARE @TieneSalida BIT;
+        SELECT @TieneSalida = CASE WHEN hora_salida IS NOT NULL THEN 1 ELSE 0 END
+        FROM instructor_asistencias
+        WHERE instructor_id = @InstructorId
+          AND fecha = CAST(GETDATE() AS DATE);
+
+        IF @TieneSalida = 0
+            RAISERROR('Ya registraste tu entrada hoy y aún no fichaste salida.', 16, 1);
+        ELSE
+            RAISERROR('Ya completaste tu jornada de hoy (entrada y salida registradas).', 16, 1);
+        RETURN;
+    END
+
+    INSERT INTO instructor_asistencias
+        (instructor_id, fecha, hora_entrada)
+    VALUES
+        (@InstructorId, CAST(GETDATE() AS DATE), CAST(GETDATE() AS TIME));
+
+    SELECT
+        SCOPE_IDENTITY()            AS id,
+        @InstructorId               AS instructor_id,
+        @Nombre + ' ' + @Apellido   AS nombre_completo,
+        CAST(GETDATE() AS TIME)     AS hora_entrada,
+        CAST(GETDATE() AS DATE)     AS fecha;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 10. FICHAR SALIDA (autenticación por DNI + contraseña)
+-- ─────────────────────────────────────────────────────────────
+CREATE PROCEDURE sp_FicharSalidaInstructor
+    @Dni          VARCHAR(15),
+    @PasswordHash VARCHAR(64)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @InstructorId BIGINT;
+    DECLARE @Nombre       NVARCHAR(100);
+    DECLARE @Apellido     NVARCHAR(100);
+
+    SELECT @InstructorId = id,
+           @Nombre       = nombre,
+           @Apellido     = apellido
+    FROM usuarios
+    WHERE dni = @Dni
+      AND password_hash = @PasswordHash
+      AND activo = 1
+      AND eliminado_en IS NULL;
+
+    IF @InstructorId IS NULL
+    BEGIN
+        RAISERROR('DNI o contraseña incorrectos.', 16, 1);
+        RETURN;
+    END
+
+    DECLARE @AsistenciaId BIGINT;
+    DECLARE @HoraEntrada  TIME;
+
+    SELECT @AsistenciaId = id,
+           @HoraEntrada  = hora_entrada
+    FROM instructor_asistencias
+    WHERE instructor_id = @InstructorId
+      AND fecha         = CAST(GETDATE() AS DATE)
+      AND hora_salida   IS NULL;
+
+    IF @AsistenciaId IS NULL
+    BEGIN
+        RAISERROR('No tenés una entrada registrada hoy sin salida.', 16, 1);
+        RETURN;
+    END
+
+    DECLARE @HoraSalida    TIME         = CAST(GETDATE() AS TIME);
+    DECLARE @MinutosTrabaj INT          = DATEDIFF(MINUTE, @HoraEntrada, @HoraSalida);
+    DECLARE @HorasTrabaj   DECIMAL(5,2) = @MinutosTrabaj / 60.0;
+
+    UPDATE instructor_asistencias SET
+        hora_salida      = @HoraSalida,
+        horas_trabajadas = @HorasTrabaj
+    WHERE id = @AsistenciaId;
+
+    SELECT
+        @AsistenciaId               AS id,
+        @InstructorId               AS instructor_id,
+        @Nombre + ' ' + @Apellido   AS nombre_completo,
+        @HoraEntrada                AS hora_entrada,
+        @HoraSalida                 AS hora_salida,
+        @HorasTrabaj                AS horas_trabajadas,
+        @MinutosTrabaj              AS minutos_trabajados;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 11. REPORTE MENSUAL DE INSTRUCTORES (para liquidación)
+-- ─────────────────────────────────────────────────────────────
+CREATE PROCEDURE sp_ReporteMensualInstructores
+    @Anio INT,
+    @Mes  INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        u.id                                                        AS instructor_id,
+        u.nombre + ' ' + u.apellido                                 AS nombre_completo,
+        u.tarifa_hora,
+        ISNULL(a.nombre, '—')                                       AS actividad_nombre,
+        COUNT(DISTINCT ia.fecha)                                     AS dias_asistidos,
+        ISNULL(SUM(ia.horas_trabajadas), 0)                         AS total_horas,
+        ISNULL(SUM(ia.horas_trabajadas), 0) * u.tarifa_hora         AS sueldo_estimado,
+        MIN(ia.fecha)                                                AS primer_dia,
+        MAX(ia.fecha)                                                AS ultimo_dia
+    FROM usuarios u
+    LEFT JOIN instructor_asistencias ia
+           ON ia.instructor_id = u.id
+          AND YEAR(ia.fecha)   = @Anio
+          AND MONTH(ia.fecha)  = @Mes
+    LEFT JOIN turnos t
+           ON t.id = ia.turno_id
+    LEFT JOIN actividades a
+           ON a.id = t.actividad_id
+    WHERE u.rol_id  = 2
+      AND u.activo  = 1
+      AND u.eliminado_en IS NULL
+    GROUP BY u.id, u.nombre, u.apellido, u.tarifa_hora, a.nombre
+    ORDER BY u.apellido ASC, u.nombre ASC;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 12. REPORTE SEMANAL DE INSTRUCTORES (detalle por día)
+-- ─────────────────────────────────────────────────────────────
+CREATE PROCEDURE sp_ReporteSemanalInstructores
+    @FechaDesde DATE,
+    @FechaHasta DATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        u.id                                            AS instructor_id,
+        u.nombre + ' ' + u.apellido                     AS nombre_completo,
+        u.tarifa_hora,
+        ia.fecha,
+        ia.hora_entrada,
+        ia.hora_salida,
+        ISNULL(ia.horas_trabajadas, 0)                  AS horas_trabajadas,
+        CASE WHEN ia.hora_salida IS NULL THEN 'Abierto'
+             ELSE 'Cerrado' END                          AS estado
+    FROM usuarios u
+    INNER JOIN instructor_asistencias ia
+            ON ia.instructor_id = u.id
+           AND ia.fecha BETWEEN @FechaDesde AND @FechaHasta
+    WHERE u.rol_id = 2
+      AND u.activo = 1
+      AND u.eliminado_en IS NULL
+    ORDER BY ia.fecha DESC, u.apellido ASC;
 END;
 GO

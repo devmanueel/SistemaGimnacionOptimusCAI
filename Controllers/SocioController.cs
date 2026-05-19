@@ -196,6 +196,32 @@ namespace Controllers
         }
 
         // ──────────────────────────────────────────────────────
+        // SOCIOS INACTIVOS — dar de baja en lote
+        // ──────────────────────────────────────────────────────
+        public List<SocioInactivo> ObtenerInactivosParaDarDeBaja(int mesesSinActividad = 2)
+        {
+            try { return _dao.ObtenerInactivosParaDarDeBaja(mesesSinActividad); }
+            catch (Exception ex) { throw new Exception("Error al obtener socios inactivos.\n" + ex.Message); }
+        }
+
+        public (bool ok, string mensaje, int afectados) DarDeBajaLote(List<long> ids)
+        {
+            if (ids == null || ids.Count == 0)
+                return (false, "No se seleccionó ningún socio.", 0);
+
+            string listaIds = string.Join(",", ids);
+            try
+            {
+                int afectados = _dao.DarDeBajaLote(listaIds);
+                return (true, afectados + " socio(s) dados de baja correctamente.", afectados);
+            }
+            catch (Exception ex)
+            {
+                return (false, "Error al dar de baja.\n" + ex.Message, 0);
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
         // VALIDACIONES CENTRALIZADAS
         // ──────────────────────────────────────────────────────
         private string ValidarCampos(string nombre, string apellido, string dni,

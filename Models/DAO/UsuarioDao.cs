@@ -34,8 +34,17 @@ namespace Models.Dao
                 Email = LeerColumnaSegura(r, "email"),
                 PasswordHash = LeerColumnaSegura(r, "password_hash") ?? string.Empty,
                 Foto = r["foto"] != DBNull.Value ? (byte[])r["foto"] : null,
-                Activo = Convert.ToBoolean(r["activo"])
+                Activo = Convert.ToBoolean(r["activo"]),
+                TarifaHora = LeerDecimalSegura(r, "tarifa_hora")
             };
+        }
+
+        private static decimal LeerDecimalSegura(SqlDataReader r, string columna)
+        {
+            for (int i = 0; i < r.FieldCount; i++)
+                if (r.GetName(i).Equals(columna, StringComparison.OrdinalIgnoreCase))
+                    return r[columna] != DBNull.Value ? Convert.ToDecimal(r[columna]) : 0m;
+            return 0m;
         }
 
         private static string LeerColumnaSegura(SqlDataReader r, string columna)
@@ -165,6 +174,7 @@ namespace Models.Dao
                     cmd.Parameters.AddWithValue("@Telefono", (object)u.Telefono ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@Email", (object)u.Email ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@PasswordHash", u.PasswordHash);
+                    cmd.Parameters.AddWithValue("@TarifaHora", u.TarifaHora);
 
                     // Para VARBINARY usamos un SqlParameter tipado
                     var fotoParam = new SqlParameter("@Foto", SqlDbType.VarBinary);
@@ -205,6 +215,8 @@ namespace Models.Dao
                     // Solo manda password si se quiere cambiar
                     cmd.Parameters.AddWithValue("@PasswordHash",
                         cambiarPassword ? (object)u.PasswordHash : DBNull.Value);
+
+                    cmd.Parameters.AddWithValue("@TarifaHora", u.TarifaHora);
 
                     // Solo manda foto si se quiere cambiar
                     var fotoParam = new SqlParameter("@Foto", SqlDbType.VarBinary);

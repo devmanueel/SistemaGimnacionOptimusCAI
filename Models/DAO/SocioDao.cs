@@ -234,5 +234,53 @@ namespace Models.Dao
                 }
             }
         }
+
+        // ──────────────────────────────────────────────────────
+        // SOCIOS INACTIVOS (candidatos a dar de baja)
+        // ──────────────────────────────────────────────────────
+        public List<SocioInactivo> ObtenerInactivosParaDarDeBaja(int mesesSinActividad = 2)
+        {
+            var lista = new List<SocioInactivo>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_SociosParaDarDeBaja", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@MesesSinActividad", mesesSinActividad);
+                    using (var reader = cmd.ExecuteReader())
+                        while (reader.Read())
+                            lista.Add(new SocioInactivo
+                            {
+                                Id = Convert.ToInt64(reader["id"]),
+                                Nombre = reader["nombre"].ToString(),
+                                Apellido = reader["apellido"].ToString(),
+                                Dni = reader["dni"].ToString(),
+                                NumeroSocio = Convert.ToInt32(reader["numero_socio"]),
+                                Foto = reader["foto"] != DBNull.Value ? (byte[])reader["foto"] : null,
+                                UltimaAsistencia = reader["ultima_asistencia"] != DBNull.Value
+                                    ? (DateTime?)Convert.ToDateTime(reader["ultima_asistencia"])
+                                    : null,
+                                DiasInactivo = Convert.ToInt32(reader["dias_inactivo"])
+                            });
+                }
+            }
+            return lista;
+        }
+
+        public int DarDeBajaLote(string ids)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_DarDeBajaSocios", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Ids", ids);
+                    var resultado = cmd.ExecuteScalar();
+                    return resultado != null ? Convert.ToInt32(resultado) : 0;
+                }
+            }
+        }
     }
 }

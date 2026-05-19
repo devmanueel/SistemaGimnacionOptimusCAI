@@ -166,6 +166,15 @@
                     </Grid>
                 </Border>
 
+                <!-- Botón Baja Inactivos -->
+                <Button x:Name="btnBajaInactivos"
+                        Content="Baja inactivos"
+                        Width="130"
+                        Height="34"
+                        Margin="0,0,10,0"
+                        Style="{StaticResource BotonDangerEstilo}"
+                        Click="btnBajaInactivos_Click"/>
+
                 <!-- Botón Nuevo Socio -->
                 <Button Content="Nuevo socio"
                         Width="120"

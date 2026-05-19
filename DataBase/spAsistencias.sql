@@ -1,64 +1,54 @@
-﻿-- ============================================================
+-- ============================================================
 --  STORED PROCEDURES — TABLA registros_acceso
 --  Sistema Gimnasio OptimusCAI · SQL Server / LocalDB
---
---  Reglas de validación implementadas:
---    1. El socio debe existir y estar activo
---    2. Debe tener una membresía activa (no vencida)
---    3. El día actual debe estar permitido por la actividad
---       (la actividad guarda dias_semana como JSON: "[1,3,5]")
---    4. El acceso siempre se registra (permitido o denegado)
+--  v1.1 — Problema 8: si el socio ya marcó hoy, registrar
+--          el acceso pero devolver descuento_aplicado = 0
+--          (no se "consume" un segundo día).
 -- ============================================================
 
 -- ─────────────────────────────────────────────────────────────
--- 1. VALIDAR ACCESO POR DNI (entrada manual o lectura de PIN)
---    Retorna una sola fila con:
---       resultado: 'permitido' / 'denegado_*'
---       mensaje:   texto para mostrar
---       socio_id, socio_nombre, foto, etc. para mostrar tarjeta
+-- 1. VALIDAR ACCESO POR DNI
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_ValidarAccesoPorDni
+IF OBJECT_ID('sp_ValidarAccesoPorDni', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ValidarAccesoPorDni;
+GO
+CREATE PROCEDURE sp_ValidarAccesoPorDni
     @Dni          CHAR(8),
-    @MetodoAcceso VARCHAR(20) = 'dni_pin'   -- 'huella' / 'dni_pin' / 'manual'
+    @MetodoAcceso VARCHAR(20) = 'dni_pin'
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Refrescar estados de membresías vencidas antes de validar
     UPDATE membresias
     SET estado = 'vencida'
     WHERE estado = 'activa' AND fecha_vencimiento < CAST(GETDATE() AS DATE);
 
-    DECLARE @SocioId       BIGINT;
-    DECLARE @SocioActivo   BIT;
-    DECLARE @SocioNombre   NVARCHAR(200);
-    DECLARE @NumeroSocio   INT;
-    DECLARE @Foto          VARBINARY(MAX);
-    DECLARE @MembresiaId   BIGINT;
-    DECLARE @ActividadId   BIGINT;
-    DECLARE @ActividadNom  NVARCHAR(150);
-    DECLARE @DiasSemana    NVARCHAR(MAX);
-    DECLARE @DiaActual     INT = DATEPART(WEEKDAY, GETDATE()); -- 1=Domingo en SQL Server por default
-    DECLARE @VencActual    DATE;
-    DECLARE @Resultado     VARCHAR(50);
-    DECLARE @Mensaje       NVARCHAR(300);
+    DECLARE @SocioId      BIGINT;
+    DECLARE @SocioActivo  BIT;
+    DECLARE @SocioNombre  NVARCHAR(200);
+    DECLARE @NumeroSocio  INT;
+    DECLARE @Foto         VARBINARY(MAX);
+    DECLARE @MembresiaId  BIGINT;
+    DECLARE @ActividadId  BIGINT;
+    DECLARE @ActividadNom NVARCHAR(150);
+    DECLARE @DiasSemana   NVARCHAR(MAX);
+    DECLARE @VencActual   DATE;
+    DECLARE @DiaActual    INT = DATEPART(WEEKDAY, GETDATE());
+    DECLARE @Resultado    VARCHAR(50);
+    DECLARE @Mensaje      NVARCHAR(300);
 
-    -- Convertir el día de SQL Server (1=Dom..7=Sáb) al formato
-    -- de nuestra app (1=Lun..7=Dom). Tabla nuestra: 1L 2M 3X 4J 5V 6S 7D
-    -- SET DATEFIRST 1; (Lunes primero) — pero hacemos cálculo manual:
     DECLARE @DiaApp INT;
-    -- @DiaActual: 1=Dom, 2=Lun, 3=Mar, 4=Mié, 5=Jue, 6=Vie, 7=Sáb
     SET @DiaApp = CASE @DiaActual
-        WHEN 1 THEN 7   -- Domingo
-        WHEN 2 THEN 1   -- Lunes
+        WHEN 1 THEN 7
+        WHEN 2 THEN 1
         WHEN 3 THEN 2
         WHEN 4 THEN 3
         WHEN 5 THEN 4
         WHEN 6 THEN 5
-        WHEN 7 THEN 6   -- Sábado
+        WHEN 7 THEN 6
     END;
 
-    -- ── 1. Buscar socio ────────────────────────────────────
+    -- 1. Buscar socio
     SELECT
         @SocioId     = id,
         @SocioActivo = activo,
@@ -71,19 +61,20 @@ BEGIN
     IF @SocioId IS NULL
     BEGIN
         SELECT
-            CAST(NULL AS BIGINT) AS socio_id,
-            'denegado_socio_inactivo' AS resultado,
+            CAST(NULL AS BIGINT)        AS socio_id,
+            'denegado_socio_inactivo'   AS resultado,
             'No se encontró ningún socio con ese DNI.' AS mensaje,
             CAST(NULL AS NVARCHAR(200)) AS socio_nombre,
-            CAST(NULL AS INT) AS numero_socio,
-            CAST(NULL AS VARBINARY(MAX)) AS foto,
+            CAST(NULL AS INT)           AS numero_socio,
+            CAST(NULL AS VARBINARY(MAX))AS foto,
             CAST(NULL AS NVARCHAR(150)) AS actividad_nombre,
-            CAST(NULL AS DATE) AS fecha_vencimiento,
-            CAST(NULL AS BIGINT) AS registro_id;
+            CAST(NULL AS DATE)          AS fecha_vencimiento,
+            CAST(NULL AS BIGINT)        AS registro_id,
+            CAST(0 AS BIT)              AS descuento_aplicado;
         RETURN;
     END
 
-    -- ── 2. Validar socio activo ────────────────────────────
+    -- 2. Validar socio activo
     IF @SocioActivo = 0
     BEGIN
         SET @Resultado = 'denegado_socio_inactivo';
@@ -93,19 +84,17 @@ BEGIN
         VALUES (@SocioId, @MetodoAcceso, @Resultado);
 
         SELECT
-            @SocioId AS socio_id,
-            @Resultado AS resultado,
-            @Mensaje AS mensaje,
-            @SocioNombre AS socio_nombre,
-            @NumeroSocio AS numero_socio,
+            @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
+            @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio,
             @Foto AS foto,
             CAST(NULL AS NVARCHAR(150)) AS actividad_nombre,
             CAST(NULL AS DATE) AS fecha_vencimiento,
-            CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id;
+            CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id,
+            CAST(0 AS BIT) AS descuento_aplicado;
         RETURN;
     END
 
-    -- ── 3. Buscar membresía activa más cercana a vencer ────
+    -- 3. Buscar membresía activa
     SELECT TOP 1
         @MembresiaId  = m.id,
         @ActividadId  = m.actividad_id,
@@ -114,8 +103,7 @@ BEGIN
         @VencActual   = m.fecha_vencimiento
     FROM membresias m
     INNER JOIN actividades a ON a.id = m.actividad_id
-    WHERE m.socio_id = @SocioId
-      AND m.estado = 'activa'
+    WHERE m.socio_id = @SocioId AND m.estado = 'activa'
     ORDER BY m.fecha_vencimiento ASC;
 
     IF @MembresiaId IS NULL
@@ -127,23 +115,19 @@ BEGIN
         VALUES (@SocioId, @MetodoAcceso, @Resultado);
 
         SELECT
-            @SocioId AS socio_id,
-            @Resultado AS resultado,
-            @Mensaje AS mensaje,
-            @SocioNombre AS socio_nombre,
-            @NumeroSocio AS numero_socio,
+            @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
+            @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio,
             @Foto AS foto,
             CAST(NULL AS NVARCHAR(150)) AS actividad_nombre,
             CAST(NULL AS DATE) AS fecha_vencimiento,
-            CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id;
+            CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id,
+            CAST(0 AS BIT) AS descuento_aplicado;
         RETURN;
     END
 
-    -- ── 4. Validar día permitido ────────────────────────────
-    -- Si dias_semana es NULL (mensual_con_clases), todos los días permitidos
+    -- 4. Validar día permitido
     IF @DiasSemana IS NOT NULL
     BEGIN
-        -- Buscamos si "@DiaApp" está en el JSON "[1,3,5]"
         IF NOT (
             @DiasSemana LIKE '%[' + CAST(@DiaApp AS VARCHAR(2)) + ']%'
          OR @DiasSemana LIKE '%,' + CAST(@DiaApp AS VARCHAR(2)) + ',%'
@@ -158,43 +142,53 @@ BEGIN
             VALUES (@SocioId, @MembresiaId, @MetodoAcceso, @Resultado);
 
             SELECT
-                @SocioId AS socio_id,
-                @Resultado AS resultado,
-                @Mensaje AS mensaje,
-                @SocioNombre AS socio_nombre,
-                @NumeroSocio AS numero_socio,
+                @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
+                @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio,
                 @Foto AS foto,
-                @ActividadNom AS actividad_nombre,
-                @VencActual AS fecha_vencimiento,
-                CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id;
+                @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
+                CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id,
+                CAST(0 AS BIT) AS descuento_aplicado;
             RETURN;
         END
     END
 
-    -- ── 5. ACCESO PERMITIDO ─────────────────────────────────
+    -- 5. ACCESO PERMITIDO
+    --    Verificar si ya marcó hoy (descuento_aplicado = 0 si ya lo hizo)
+    DECLARE @YaMarcoHoy BIT = 0;
+    IF EXISTS (
+        SELECT 1 FROM registros_acceso
+        WHERE socio_id  = @SocioId
+          AND resultado = 'permitido'
+          AND CAST(accedido_en AS DATE) = CAST(GETDATE() AS DATE)
+    )
+        SET @YaMarcoHoy = 1;
+
     SET @Resultado = 'permitido';
-    SET @Mensaje   = 'Acceso permitido. ¡A entrenar!';
+    SET @Mensaje   = CASE @YaMarcoHoy
+        WHEN 1 THEN '¡Ya registraste tu entrada hoy! Bienvenido de nuevo.'
+        ELSE         '¡Acceso permitido! A entrenar.'
+    END;
 
     INSERT INTO registros_acceso (socio_id, membresia_id, metodo_acceso, resultado)
     VALUES (@SocioId, @MembresiaId, @MetodoAcceso, @Resultado);
 
     SELECT
-        @SocioId AS socio_id,
-        @Resultado AS resultado,
-        @Mensaje AS mensaje,
-        @SocioNombre AS socio_nombre,
-        @NumeroSocio AS numero_socio,
+        @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
+        @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio,
         @Foto AS foto,
-        @ActividadNom AS actividad_nombre,
-        @VencActual AS fecha_vencimiento,
-        CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id;
+        @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
+        CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id,
+        CAST(1 - @YaMarcoHoy AS BIT) AS descuento_aplicado;
 END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
--- 2. OBTENER REGISTROS DEL DÍA (panel de "últimos accesos")
+-- 2. OBTENER REGISTROS DEL DÍA
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_ObtenerAccesosDelDia
+IF OBJECT_ID('sp_ObtenerAccesosDelDia', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ObtenerAccesosDelDia;
+GO
+CREATE PROCEDURE sp_ObtenerAccesosDelDia
     @Limite INT = 50
 AS
 BEGIN
@@ -207,22 +201,25 @@ BEGIN
         s.dni                        AS socio_dni,
         ISNULL(a.nombre, '—')        AS actividad_nombre
     FROM registros_acceso r
-    INNER JOIN socios       s ON s.id = r.socio_id
-    LEFT  JOIN membresias   m ON m.id = r.membresia_id
-    LEFT  JOIN actividades  a ON a.id = m.actividad_id
+    INNER JOIN socios      s ON s.id = r.socio_id
+    LEFT  JOIN membresias  m ON m.id = r.membresia_id
+    LEFT  JOIN actividades a ON a.id = m.actividad_id
     WHERE CAST(r.accedido_en AS DATE) = CAST(GETDATE() AS DATE)
     ORDER BY r.accedido_en DESC;
 END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
--- 3. OBTENER REGISTROS POR RANGO (con filtro)
+-- 3. BUSCAR ACCESOS POR RANGO
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_BuscarAccesos
-    @Texto         NVARCHAR(100) = '',
-    @FiltroResultado VARCHAR(30) = 'todos',  -- 'todos' / 'permitido' / 'denegado'
-    @FechaDesde    DATE          = NULL,
-    @FechaHasta    DATE          = NULL
+IF OBJECT_ID('sp_BuscarAccesos', 'P') IS NOT NULL
+    DROP PROCEDURE sp_BuscarAccesos;
+GO
+CREATE PROCEDURE sp_BuscarAccesos
+    @Texto           NVARCHAR(100) = '',
+    @FiltroResultado VARCHAR(30)   = 'todos',
+    @FechaDesde      DATE          = NULL,
+    @FechaHasta      DATE          = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -238,9 +235,9 @@ BEGIN
         s.dni                        AS socio_dni,
         ISNULL(a.nombre, '—')        AS actividad_nombre
     FROM registros_acceso r
-    INNER JOIN socios       s ON s.id = r.socio_id
-    LEFT  JOIN membresias   m ON m.id = r.membresia_id
-    LEFT  JOIN actividades  a ON a.id = m.actividad_id
+    INNER JOIN socios      s ON s.id = r.socio_id
+    LEFT  JOIN membresias  m ON m.id = r.membresia_id
+    LEFT  JOIN actividades a ON a.id = m.actividad_id
     WHERE CAST(r.accedido_en AS DATE) BETWEEN @FechaDesde AND @FechaHasta
       AND (
             @Texto = ''
@@ -261,14 +258,16 @@ GO
 -- ─────────────────────────────────────────────────────────────
 -- 4. ESTADÍSTICAS DEL DÍA
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_EstadisticasAccesos
+IF OBJECT_ID('sp_EstadisticasAccesos', 'P') IS NOT NULL
+    DROP PROCEDURE sp_EstadisticasAccesos;
+GO
+CREATE PROCEDURE sp_EstadisticasAccesos
 AS
 BEGIN
     SET NOCOUNT ON;
-
     SELECT
-        ISNULL(SUM(CASE WHEN resultado = 'permitido'      THEN 1 ELSE 0 END), 0) AS permitidos_hoy,
-        ISNULL(SUM(CASE WHEN resultado LIKE 'denegado%'   THEN 1 ELSE 0 END), 0) AS denegados_hoy,
+        ISNULL(SUM(CASE WHEN resultado = 'permitido'     THEN 1 ELSE 0 END), 0) AS permitidos_hoy,
+        ISNULL(SUM(CASE WHEN resultado LIKE 'denegado%'  THEN 1 ELSE 0 END), 0) AS denegados_hoy,
         ISNULL(COUNT(DISTINCT CASE WHEN resultado = 'permitido' THEN socio_id END), 0) AS socios_unicos_hoy,
         ISNULL((SELECT COUNT(*) FROM registros_acceso
                 WHERE resultado = 'permitido'
@@ -276,8 +275,4 @@ BEGIN
     FROM registros_acceso
     WHERE CAST(accedido_en AS DATE) = CAST(GETDATE() AS DATE);
 END;
-GO
-
--- Verificación
-EXEC sp_EstadisticasAccesos;
 GO
