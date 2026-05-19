@@ -83,6 +83,7 @@ namespace Entities
         public string ActividadNombre { get; set; }
         public DateTime? FechaVencimiento { get; set; }
         public long? RegistroId { get; set; }
+        public bool DescuentoAplicado { get; set; } = true;
 
         public bool EsPermitido => Resultado == "permitido";
 

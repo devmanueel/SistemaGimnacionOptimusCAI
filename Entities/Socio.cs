@@ -74,4 +74,25 @@ namespace Entities
 
         public override string ToString() => NombreCompleto;
     }
+
+    public class SocioInactivo
+    {
+        public long Id { get; set; }
+        public string Nombre { get; set; }
+        public string Apellido { get; set; }
+        public string Dni { get; set; }
+        public int NumeroSocio { get; set; }
+        public byte[] Foto { get; set; }
+        public DateTime? UltimaAsistencia { get; set; }
+        public int DiasInactivo { get; set; }
+
+        public string NombreCompleto => Nombre + " " + Apellido;
+        public string NumeroSocioFormateado => "#" + NumeroSocio.ToString("D4");
+        public string UltimaAsistenciaTexto =>
+            UltimaAsistencia.HasValue
+                ? UltimaAsistencia.Value.ToString("dd/MM/yyyy")
+                : "Nunca asistió";
+        public string DiasInactivoTexto =>
+            DiasInactivo >= 999 ? "Sin registros" : DiasInactivo + " días sin asistir";
+    }
 }

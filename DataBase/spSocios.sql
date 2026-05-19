@@ -1,10 +1,13 @@
-﻿-- ============================================================
+-- ============================================================
 --  STORED PROCEDURES — TABLA socios
---  Sistema Gimnasio OptimusCAI
---  SQL Server / LocalDB
+--  Sistema Gimnasio OptimusCAI · SQL Server / LocalDB
+--  v1.1 — Cambios:
+--    · Teléfono ya no es único (Problema 2)
+--    · registrado_por ya incluido en sp_InsertarSocio (estaba OK)
+--    · Nuevos SPs: sp_SociosParaDarDeBaja + sp_DarDeBajaSocios
 -- ============================================================
 
--- Agregar columna foto (VARBINARY) si no existe
+-- Agregar columna foto si no existe
 IF NOT EXISTS (
     SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
     WHERE TABLE_NAME = 'socios' AND COLUMN_NAME = 'foto'
@@ -14,10 +17,22 @@ BEGIN
 END
 GO
 
+-- Eliminar unique constraint de telefono si existe (Problema 2)
+IF EXISTS (
+    SELECT 1 FROM sys.indexes
+    WHERE name = 'UQ_socios_telefono'
+    AND object_id = OBJECT_ID('socios')
+)
+    DROP INDEX UQ_socios_telefono ON socios;
+GO
+
 -- ─────────────────────────────────────────────────────────────
--- 1. OBTENER TODOS LOS SOCIOS
+-- 1. OBTENER TODOS
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_ObtenerSocios
+IF OBJECT_ID('sp_ObtenerSocios', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ObtenerSocios;
+GO
+CREATE PROCEDURE sp_ObtenerSocios
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -38,7 +53,10 @@ GO
 -- ─────────────────────────────────────────────────────────────
 -- 2. OBTENER POR ID
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_ObtenerSocioPorId
+IF OBJECT_ID('sp_ObtenerSocioPorId', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ObtenerSocioPorId;
+GO
+CREATE PROCEDURE sp_ObtenerSocioPorId
     @Id BIGINT
 AS
 BEGIN
@@ -57,11 +75,14 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
--- 3. BUSCAR SOCIOS  (texto + filtro de estado)
+-- 3. BUSCAR
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_BuscarSocios
-    @Texto         NVARCHAR(100) = '',
-    @FiltroEstado  VARCHAR(20)   = 'todos'
+IF OBJECT_ID('sp_BuscarSocios', 'P') IS NOT NULL
+    DROP PROCEDURE sp_BuscarSocios;
+GO
+CREATE PROCEDURE sp_BuscarSocios
+    @Texto        NVARCHAR(100) = '',
+    @FiltroEstado VARCHAR(20)   = 'todos'
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -94,7 +115,10 @@ GO
 -- ─────────────────────────────────────────────────────────────
 -- 4. SIGUIENTE NÚMERO DE SOCIO
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_ObtenerSiguienteNumeroSocio
+IF OBJECT_ID('sp_ObtenerSiguienteNumeroSocio', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ObtenerSiguienteNumeroSocio;
+GO
+CREATE PROCEDURE sp_ObtenerSiguienteNumeroSocio
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -105,21 +129,24 @@ GO
 -- ─────────────────────────────────────────────────────────────
 -- 5. INSERTAR
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_InsertarSocio
+IF OBJECT_ID('sp_InsertarSocio', 'P') IS NOT NULL
+    DROP PROCEDURE sp_InsertarSocio;
+GO
+CREATE PROCEDURE sp_InsertarSocio
     @Nombre           NVARCHAR(100),
     @Apellido         NVARCHAR(100),
     @Dni              CHAR(8),
     @DniPin           CHAR(64),
-    @FechaNacimiento  DATE            = NULL,
-    @Sexo             VARCHAR(10)     = 'Otro',
-    @Telefono         NVARCHAR(20)    = NULL,
-    @Domicilio        NVARCHAR(200)   = NULL,
-    @Profesion        NVARCHAR(100)   = NULL,
-    @Email            NVARCHAR(191)   = NULL,
-    @ComoNosConocio   NVARCHAR(200)   = NULL,
-    @Observaciones    NVARCHAR(MAX)   = NULL,
-    @Foto             VARBINARY(MAX)  = NULL,
-    @RegistradoPor    BIGINT          = NULL
+    @FechaNacimiento  DATE           = NULL,
+    @Sexo             VARCHAR(10)    = 'Otro',
+    @Telefono         NVARCHAR(20)   = NULL,
+    @Domicilio        NVARCHAR(200)  = NULL,
+    @Profesion        NVARCHAR(100)  = NULL,
+    @Email            NVARCHAR(191)  = NULL,
+    @ComoNosConocio   NVARCHAR(200)  = NULL,
+    @Observaciones    NVARCHAR(MAX)  = NULL,
+    @Foto             VARBINARY(MAX) = NULL,
+    @RegistradoPor    BIGINT         = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -149,21 +176,24 @@ GO
 -- ─────────────────────────────────────────────────────────────
 -- 6. MODIFICAR
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_ModificarSocio
+IF OBJECT_ID('sp_ModificarSocio', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ModificarSocio;
+GO
+CREATE PROCEDURE sp_ModificarSocio
     @Id               BIGINT,
     @Nombre           NVARCHAR(100),
     @Apellido         NVARCHAR(100),
     @Dni              CHAR(8),
-    @DniPin           CHAR(64)        = NULL,
-    @FechaNacimiento  DATE            = NULL,
-    @Sexo             VARCHAR(10)     = 'Otro',
-    @Telefono         NVARCHAR(20)    = NULL,
-    @Domicilio        NVARCHAR(200)   = NULL,
-    @Profesion        NVARCHAR(100)   = NULL,
-    @Email            NVARCHAR(191)   = NULL,
-    @ComoNosConocio   NVARCHAR(200)   = NULL,
-    @Observaciones    NVARCHAR(MAX)   = NULL,
-    @Foto             VARBINARY(MAX)  = NULL
+    @DniPin           CHAR(64)       = NULL,
+    @FechaNacimiento  DATE           = NULL,
+    @Sexo             VARCHAR(10)    = 'Otro',
+    @Telefono         NVARCHAR(20)   = NULL,
+    @Domicilio        NVARCHAR(200)  = NULL,
+    @Profesion        NVARCHAR(100)  = NULL,
+    @Email            NVARCHAR(191)  = NULL,
+    @ComoNosConocio   NVARCHAR(200)  = NULL,
+    @Observaciones    NVARCHAR(MAX)  = NULL,
+    @Foto             VARBINARY(MAX) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -184,7 +214,7 @@ BEGIN
         dni_pin          = ISNULL(@DniPin,          dni_pin),
         fecha_nacimiento = ISNULL(@FechaNacimiento, fecha_nacimiento),
         sexo             = @Sexo,
-        telefono         = ISNULL(@Telefono,        telefono),
+        telefono         = @Telefono,
         domicilio        = ISNULL(@Domicilio,       domicilio),
         profesion        = ISNULL(@Profesion,       profesion),
         email            = ISNULL(@Email,           email),
@@ -201,7 +231,10 @@ GO
 -- ─────────────────────────────────────────────────────────────
 -- 7. CAMBIAR ESTADO
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_CambiarEstadoSocio
+IF OBJECT_ID('sp_CambiarEstadoSocio', 'P') IS NOT NULL
+    DROP PROCEDURE sp_CambiarEstadoSocio;
+GO
+CREATE PROCEDURE sp_CambiarEstadoSocio
     @Id     BIGINT,
     @Activo BIT
 AS
@@ -218,7 +251,10 @@ GO
 -- ─────────────────────────────────────────────────────────────
 -- 8. ELIMINAR (soft-delete)
 -- ─────────────────────────────────────────────────────────────
-CREATE OR ALTER PROCEDURE sp_EliminarSocio
+IF OBJECT_ID('sp_EliminarSocio', 'P') IS NOT NULL
+    DROP PROCEDURE sp_EliminarSocio;
+GO
+CREATE PROCEDURE sp_EliminarSocio
     @Id BIGINT
 AS
 BEGIN
@@ -233,7 +269,61 @@ BEGIN
 END;
 GO
 
--- Verificar
-EXEC sp_ObtenerSiguienteNumeroSocio;
-EXEC sp_ObtenerSocios;
+-- ─────────────────────────────────────────────────────────────
+-- 9. SOCIOS CANDIDATOS A DAR DE BAJA (sin actividad >= N meses)
+-- ─────────────────────────────────────────────────────────────
+IF OBJECT_ID('sp_SociosParaDarDeBaja', 'P') IS NOT NULL
+    DROP PROCEDURE sp_SociosParaDarDeBaja;
+GO
+CREATE PROCEDURE sp_SociosParaDarDeBaja
+    @MesesSinActividad INT = 2
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @Limite DATE = DATEADD(MONTH, -@MesesSinActividad, CAST(GETDATE() AS DATE));
+
+    SELECT
+        s.id, s.nombre, s.apellido, s.dni, s.numero_socio, s.foto, s.activo,
+        MAX(r.accedido_en)                                        AS ultima_asistencia,
+        ISNULL(DATEDIFF(DAY, MAX(r.accedido_en), GETDATE()), 999) AS dias_inactivo
+    FROM socios s
+    LEFT JOIN registros_acceso r ON r.socio_id = s.id AND r.resultado = 'permitido'
+    WHERE s.activo = 1
+      AND s.eliminado_en IS NULL
+    GROUP BY s.id, s.nombre, s.apellido, s.dni, s.numero_socio, s.foto, s.activo
+    HAVING MAX(r.accedido_en) < @Limite OR MAX(r.accedido_en) IS NULL
+    ORDER BY dias_inactivo DESC;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 10. DAR DE BAJA EN LOTE (lista de IDs separada por comas)
+-- ─────────────────────────────────────────────────────────────
+IF OBJECT_ID('sp_DarDeBajaSocios', 'P') IS NOT NULL
+    DROP PROCEDURE sp_DarDeBajaSocios;
+GO
+CREATE PROCEDURE sp_DarDeBajaSocios
+    @Ids NVARCHAR(MAX)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    CREATE TABLE #ids (id BIGINT);
+
+    DECLARE @pos INT = 1, @next INT, @val NVARCHAR(20);
+    SET @Ids = LTRIM(RTRIM(@Ids)) + ',';
+    WHILE @pos <= LEN(@Ids)
+    BEGIN
+        SET @next = CHARINDEX(',', @Ids, @pos);
+        IF @next = 0 BREAK;
+        SET @val = LTRIM(RTRIM(SUBSTRING(@Ids, @pos, @next - @pos)));
+        IF ISNUMERIC(@val) = 1 INSERT INTO #ids VALUES (CAST(@val AS BIGINT));
+        SET @pos = @next + 1;
+    END
+
+    UPDATE socios SET activo = 0, actualizado_en = GETDATE()
+    WHERE id IN (SELECT id FROM #ids);
+
+    SELECT @@ROWCOUNT AS afectados;
+END;
 GO

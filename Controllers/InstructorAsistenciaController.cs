@@ -1,4 +1,4 @@
-﻿// Controllers/InstructorAsistenciaController.cs — C# 7.3
+// Controllers/InstructorAsistenciaController.cs — C# 7.3
 using Entities;
 using Models.Dao;
 using System;
@@ -55,6 +55,12 @@ namespace Controllers
                     string.IsNullOrWhiteSpace(observaciones) ? null : observaciones.Trim(),
                     registradoPor);
                 if (id <= 0) return (false, "No se pudo registrar la entrada.", 0);
+
+                Auditor.Registrar("crear", "asistencia", id, new Dictionary<string, object> {
+                    { "instructor_id", instructorId },
+                    { "tipo", "entrada" }
+                });
+
                 return (true, "Entrada registrada.", id);
             }
             catch (Exception ex) { return (false, ex.Message, 0); }
@@ -66,9 +72,13 @@ namespace Controllers
             try
             {
                 bool ok = _dao.RegistrarSalida(id);
-                return ok
-                    ? (true, "Salida registrada.")
-                    : (false, "No se pudo registrar la salida.");
+                if (!ok) return (false, "No se pudo registrar la salida.");
+
+                Auditor.Registrar("editar", "asistencia", id, new Dictionary<string, object> {
+                    { "tipo", "salida" }
+                });
+
+                return (true, "Salida registrada.");
             }
             catch (Exception ex) { return (false, ex.Message); }
         }
@@ -81,9 +91,15 @@ namespace Controllers
             {
                 bool ok = _dao.Actualizar(id, turnoId, horaEntrada, horaSalida,
                     string.IsNullOrWhiteSpace(observaciones) ? null : observaciones.Trim());
-                return ok
-                    ? (true, "Asistencia actualizada.")
-                    : (false, "No se encontro la asistencia.");
+                if (!ok) return (false, "No se encontro la asistencia.");
+
+                Auditor.Registrar("editar", "asistencia", id, new Dictionary<string, object> {
+                    { "corregido_por_admin", true },
+                    { "hora_entrada_nueva", horaEntrada?.ToString() ?? "—" },
+                    { "hora_salida_nueva",  horaSalida?.ToString()  ?? "—" }
+                });
+
+                return (true, "Asistencia actualizada.");
             }
             catch (Exception ex) { return (false, ex.Message); }
         }
@@ -99,6 +115,68 @@ namespace Controllers
                     : (false, "No se pudo eliminar.");
             }
             catch (Exception ex) { return (false, ex.Message); }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // TAREA 7 — Fichaje por DNI + contraseña
+        // ──────────────────────────────────────────────────────
+        public (bool ok, string mensaje, FichajeResultado resultado) FicharEntrada(
+            string dni, string passwordHash)
+        {
+            if (string.IsNullOrWhiteSpace(dni))          return (false, "Ingresá tu DNI.", null);
+            if (string.IsNullOrWhiteSpace(passwordHash)) return (false, "Ingresá tu contraseña.", null);
+
+            try
+            {
+                var r = _dao.FicharEntrada(dni.Trim(), passwordHash);
+                if (r == null) return (false, "No se pudo registrar la entrada.", null);
+
+                Auditor.Registrar("crear", "asistencia", r.Id, new Dictionary<string, object> {
+                    { "instructor_id", r.InstructorId },
+                    { "hora_entrada",  r.HoraEntradaTexto },
+                    { "tipo",          "entrada_fichaje" }
+                });
+
+                return (true, $"Entrada registrada — {r.HoraEntradaTexto}", r);
+            }
+            catch (Exception ex) { return (false, ex.Message, null); }
+        }
+
+        public (bool ok, string mensaje, FichajeResultado resultado) FicharSalida(
+            string dni, string passwordHash)
+        {
+            if (string.IsNullOrWhiteSpace(dni))          return (false, "Ingresá tu DNI.", null);
+            if (string.IsNullOrWhiteSpace(passwordHash)) return (false, "Ingresá tu contraseña.", null);
+
+            try
+            {
+                var r = _dao.FicharSalida(dni.Trim(), passwordHash);
+                if (r == null) return (false, "No se pudo registrar la salida.", null);
+
+                Auditor.Registrar("editar", "asistencia", r.Id, new Dictionary<string, object> {
+                    { "hora_salida",      r.HoraSalidaTexto },
+                    { "horas_trabajadas", r.HorasTrabajadas },
+                    { "tipo",             "salida_fichaje" }
+                });
+
+                return (true, $"Salida registrada — {r.HorasTrabajadasTexto} trabajados", r);
+            }
+            catch (Exception ex) { return (false, ex.Message, null); }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // TAREA 4 & 5 — Reportes
+        // ──────────────────────────────────────────────────────
+        public List<ReporteInstructor> ObtenerReporteMensual(int anio, int mes)
+        {
+            try { return _dao.ObtenerReporteMensual(anio, mes); }
+            catch (Exception ex) { throw new Exception("Error al generar reporte mensual.\n" + ex.Message); }
+        }
+
+        public List<InstructorAsistencia> ObtenerReporteSemanal(DateTime desde, DateTime hasta)
+        {
+            try { return _dao.ObtenerReporteSemanal(desde, hasta); }
+            catch (Exception ex) { throw new Exception("Error al generar reporte semanal.\n" + ex.Message); }
         }
     }
 }

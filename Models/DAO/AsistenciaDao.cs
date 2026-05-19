@@ -44,7 +44,8 @@ namespace Models.Dao
                                 Foto = reader["foto"] != DBNull.Value ? (byte[])reader["foto"] : null,
                                 ActividadNombre = reader["actividad_nombre"] as string,
                                 FechaVencimiento = reader["fecha_vencimiento"] != DBNull.Value ? (DateTime?)reader["fecha_vencimiento"] : null,
-                                RegistroId = reader["registro_id"] != DBNull.Value ? (long?)Convert.ToInt64(reader["registro_id"]) : null
+                                RegistroId = reader["registro_id"] != DBNull.Value ? (long?)Convert.ToInt64(reader["registro_id"]) : null,
+                                DescuentoAplicado = reader["descuento_aplicado"] != DBNull.Value && Convert.ToBoolean(reader["descuento_aplicado"])
                             };
                         }
                     }

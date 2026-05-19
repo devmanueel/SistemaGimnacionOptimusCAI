@@ -228,24 +228,38 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
 
             // Configurar colores según resultado
-            if (r.EsPermitido)
+            if (r.EsPermitido && r.DescuentoAplicado)
             {
+                // Primera entrada del día — verde
                 lblIcono.Text = "✓";
-                lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));   // #00E676
+                lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
 
-                panelResultado.Background = new SolidColorBrush(Color.FromRgb(10, 26, 16));   // verde oscuro
+                panelResultado.Background = new SolidColorBrush(Color.FromRgb(10, 26, 16));
                 panelResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 230, 118));
                 panelResultado.BorderThickness = new Thickness(2);
 
                 panelDetalles.Background = new SolidColorBrush(Color.FromArgb(60, 0, 230, 118));
                 lblMensaje.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
             }
+            else if (r.EsPermitido && !r.DescuentoAplicado)
+            {
+                // Ya registró entrada hoy — ámbar
+                lblIcono.Text = "↩";
+                lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(255, 179, 0));
+
+                panelResultado.Background = new SolidColorBrush(Color.FromRgb(26, 20, 5));
+                panelResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 179, 0));
+                panelResultado.BorderThickness = new Thickness(2);
+
+                panelDetalles.Background = new SolidColorBrush(Color.FromArgb(60, 255, 179, 0));
+                lblMensaje.Foreground = new SolidColorBrush(Color.FromRgb(255, 200, 80));
+            }
             else
             {
                 lblIcono.Text = "✕";
-                lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));   // #FF5555
+                lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
 
-                panelResultado.Background = new SolidColorBrush(Color.FromRgb(26, 10, 10));   // rojo oscuro
+                panelResultado.Background = new SolidColorBrush(Color.FromRgb(26, 10, 10));
                 panelResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 85, 85));
                 panelResultado.BorderThickness = new Thickness(2);
 

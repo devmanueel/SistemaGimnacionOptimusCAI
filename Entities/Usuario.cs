@@ -23,6 +23,7 @@ namespace Entities
         public string PasswordHash { get; set; }  // SHA-256, nunca en claro
         public byte[] Foto { get; set; }  // Imagen guardada como bytes en la BD
         public bool Activo { get; set; }
+        public decimal TarifaHora { get; set; }
 
         // ── Viene del JOIN con la tabla roles ─────────────────────
         public string RolNombre { get; set; }  // "admin" o "empleado"
@@ -48,5 +49,7 @@ namespace Entities
         }
         /// <summary>Texto legible del estado para el DataGrid</summary>
         public string EstadoTexto => Activo ? "Activo" : "Inactivo";
+
+        public string TarifaTexto => TarifaHora > 0 ? "$" + TarifaHora.ToString("N2") + "/h" : "—";
     }
 }

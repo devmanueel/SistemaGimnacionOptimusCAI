@@ -50,7 +50,8 @@ namespace Controllers
             decimal montoPagado,
             string metodoPago,
             long registradoPor,
-            string observaciones)
+            string observaciones,
+            string tipoPlan = "mensual")
         {
             string err = ValidarCampos(socioId, actividadId, fechaInicio,
                                        fechaVencimiento, montoPagado, metodoPago);
@@ -63,6 +64,7 @@ namespace Controllers
                 InstructorId = instructorId,
                 FechaInicio = fechaInicio.Date,
                 FechaVencimiento = fechaVencimiento.Date,
+                TipoPlan = tipoPlan ?? "mensual",
                 MontoPagado = montoPagado,
                 MetodoPago = metodoPago ?? "efectivo",
                 RegistradoPor = registradoPor,
@@ -88,20 +90,29 @@ namespace Controllers
             long id,
             long? instructorId,
             DateTime fechaVencimiento,
-            string observaciones)
+            string observaciones,
+            long registradoPor = 0,
+            long? actividadId = null,
+            decimal? montoPagado = null,
+            string tipoPlan = null,
+            string metodoPago = null)
         {
             if (id <= 0) return (false, "ID de membresía inválido.");
-
-            if (fechaVencimiento.Date < DateTime.Today.AddYears(-2))
-                return (false, "La fecha de vencimiento es demasiado antigua.");
+            if (montoPagado.HasValue && montoPagado.Value <= 0)
+                return (false, "El monto debe ser mayor a $0.");
 
             try
             {
                 bool ok = _dao.ModificarMembresia(
                     id,
                     instructorId,
+                    actividadId,
                     fechaVencimiento.Date,
-                    string.IsNullOrWhiteSpace(observaciones) ? null : observaciones.Trim());
+                    string.IsNullOrWhiteSpace(observaciones) ? null : observaciones.Trim(),
+                    registradoPor,
+                    montoPagado,
+                    string.IsNullOrWhiteSpace(tipoPlan) ? null : tipoPlan,
+                    string.IsNullOrWhiteSpace(metodoPago) ? null : metodoPago);
 
                 return ok
                     ? (true, "Membresía actualizada correctamente.")
@@ -109,7 +120,10 @@ namespace Controllers
             }
             catch (Exception ex)
             {
-                return (false, "Error al actualizar.\n" + ex.Message);
+                // El SP lanza error si la fecha retrocede — lo propagamos tal cual
+                return (false, ex.Message.Contains("solo puede avanzar")
+                    ? "La fecha de vencimiento no puede retroceder. Los días solo pueden aumentar."
+                    : "Error al actualizar.\n" + ex.Message);
             }
         }
 
@@ -171,11 +185,11 @@ namespace Controllers
         // ──────────────────────────────────────────────────────
         // CANCELAR (alias de cambiar estado a "cancelada")
         // ──────────────────────────────────────────────────────
-        public (bool ok, string mensaje) Cancelar(long id)
+        public (bool ok, string mensaje) Cancelar(long id, long registradoPor = 0)
         {
             try
             {
-                bool ok = _dao.EliminarMembresia(id);
+                bool ok = _dao.EliminarMembresia(id, registradoPor);
                 return ok
                     ? (true, "Membresía cancelada.")
                     : (false, "No se encontró la membresía.");
