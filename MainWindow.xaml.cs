@@ -1,5 +1,6 @@
 ﻿// SistemaGimnacionOptimusCAI/MainWindow.xaml.cs — C# 7.3
 using Controllers;
+using Entities;
 using FontAwesome.WPF;
 using SistemaGimnacionOptimusCAI.Paginas;
 using System;
@@ -206,6 +207,27 @@ namespace SistemaGimnacionOptimusCAI
                 if ((Type)tag[1] == tipoPagina)
                 {
                     NavegarPagina(i);
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Navega a MembresiasPage y opcionalmente pre-carga un socio para alta de membresía.
+        /// </summary>
+        public void NavegarAMembresiasConSocio(Socio socio)
+        {
+            for (int i = 0; i < _botonesMenu.Count; i++)
+            {
+                var tag = _botonesMenu[i].Tag as object[];
+                if (tag == null || tag.Length < 3) continue;
+                if ((Type)tag[1] == typeof(MembresiasPage))
+                {
+                    ResaltarBotonActivo(_botonesMenu[i]);
+                    lblPaginaActual.Text = tag[2] as string;
+
+                    var pagina = new MembresiasPage(socio);
+                    frameContenido.Navigate(pagina);
                     return;
                 }
             }

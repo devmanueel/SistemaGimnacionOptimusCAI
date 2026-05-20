@@ -153,7 +153,7 @@ CREATE TABLE registros_acceso (
   socio_id       BIGINT           NOT NULL,
   membresia_id   BIGINT,
   metodo_acceso  VARCHAR(20)      NOT NULL CHECK (metodo_acceso IN ('huella','dni_pin','manual')),
-  resultado      VARCHAR(50)      NOT NULL CHECK (resultado IN ('permitido','denegado_huella','denegado_vencimiento','denegado_dia','denegado_socio_inactivo')),
+  resultado      VARCHAR(50)      NOT NULL CHECK (resultado IN ('permitido','denegado_huella','denegado_vencimiento','denegado_dia','denegado_socio_inactivo','denegado_limite_semana')),
   accedido_en    DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT pk_registros_acceso PRIMARY KEY (id)
 );

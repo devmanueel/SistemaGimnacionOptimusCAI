@@ -186,7 +186,7 @@ GO
 --      · Cancela la membresía activa anterior del mismo socio+actividad
 --      · Registra el cobro en caja automáticamente
 --      · Guarda en historial
---      · tipo_plan calcula la fecha_vencimiento si no se pasa
+--      · fechas automáticas: inicio = hoy, vencimiento = hoy + 31 días
 -- ─────────────────────────────────────────────────────────────
 IF OBJECT_ID('sp_InsertarMembresia', 'P') IS NOT NULL
     DROP PROCEDURE sp_InsertarMembresia;
@@ -196,7 +196,7 @@ CREATE PROCEDURE sp_InsertarMembresia
     @ActividadId      BIGINT,
     @InstructorId     BIGINT          = NULL,
     @FechaInicio      DATE,
-    @FechaVencimiento DATE            = NULL,
+    @FechaVencimiento DATE,
     @TipoPlan         VARCHAR(20)     = 'mensual',
     @MontoPagado      DECIMAL(12,2),
     @MetodoPago       VARCHAR(20)     = 'efectivo',
@@ -205,6 +205,10 @@ CREATE PROCEDURE sp_InsertarMembresia
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    -- Fechas automáticas (regla de negocio: siempre 31 días)
+    SET @FechaInicio = CAST(GETDATE() AS DATE);
+    SET @FechaVencimiento = DATEADD(DAY, 31, @FechaInicio);
 
     IF NOT EXISTS (SELECT 1 FROM socios WHERE id = @SocioId AND eliminado_en IS NULL)
     BEGIN
@@ -215,22 +219,6 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM actividades WHERE id = @ActividadId AND activo = 1)
     BEGIN
         RAISERROR('La actividad no existe o está inactiva.', 16, 1);
-        RETURN;
-    END
-
-    -- Calcular fecha_vencimiento según tipo_plan si no se pasó explícitamente
-    IF @FechaVencimiento IS NULL
-    BEGIN
-        SET @FechaVencimiento = CASE @TipoPlan
-            WHEN 'clase'   THEN @FechaInicio
-            WHEN 'semanal' THEN DATEADD(DAY,  7, @FechaInicio)
-            ELSE                DATEADD(DAY, 31, @FechaInicio)
-        END;
-    END
-
-    IF @FechaVencimiento < @FechaInicio
-    BEGIN
-        RAISERROR('La fecha de vencimiento debe ser igual o posterior a la de inicio.', 16, 1);
         RETURN;
     END
 

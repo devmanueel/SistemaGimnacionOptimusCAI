@@ -50,7 +50,7 @@ namespace Controllers
         // ──────────────────────────────────────────────────────
         // INSERTAR
         // ──────────────────────────────────────────────────────
-        public (bool ok, string mensaje, long nuevoId) Insertar(
+        public (bool ok, string mensaje, Socio socioCreado) Insertar(
             string nombre,
             string apellido,
             string dni,
@@ -68,7 +68,7 @@ namespace Controllers
             // Validaciones (Validador está en este mismo namespace)
             string err = ValidarCampos(nombre, apellido, dni, fechaNacimiento,
                                        telefono, email);
-            if (err != null) return (false, err, 0);
+            if (err != null) return (false, err, null);
 
             var socio = new Socio
             {
@@ -90,15 +90,15 @@ namespace Controllers
 
             try
             {
-                long id = _dao.InsertarSocio(socio);
-                if (id == -1) return (false, $"El DNI '{dni}' ya está registrado en el sistema.", 0);
-                if (id <= 0) return (false, "No se pudo guardar el socio. Intentá de nuevo.", 0);
+                Socio socioCreado = _dao.InsertarSocio(socio);
+                if (socioCreado == null) return (false, "No se pudo guardar el socio. Intentá de nuevo.", null);
+                if (socioCreado.Id <= 0) return (false, $"El DNI '{dni}' ya está registrado en el sistema.", null);
 
-                return (true, "Socio registrado correctamente.", id);
+                return (true, "Socio registrado correctamente.", socioCreado);
             }
             catch (Exception ex)
             {
-                return (false, "Error al insertar.\n" + ex.Message, 0);
+                return (false, "Error al insertar.\n" + ex.Message, null);
             }
         }
 

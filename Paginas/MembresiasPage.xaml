@@ -8,7 +8,8 @@
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       d:DesignHeight="768" d:DesignWidth="1280"
        Title="Membresías"
-       Background="#080A08">
+       Background="#080A08"
+       Loaded="Page_Loaded">
 
     <Page.Resources>
         <ResourceDictionary>
@@ -440,18 +441,15 @@
 
                             <!-- TIPO DE PLAN -->
                             <TextBlock Text="TIPO DE PLAN *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <ComboBox x:Name="cmbTipoPlan" Style="{StaticResource ComboBoxEstilo}"
-                                      SelectionChanged="cmbTipoPlan_SelectionChanged">
+                            <ComboBox x:Name="cmbTipoPlan" Style="{StaticResource ComboBoxEstilo}">
                                 <ComboBox.Resources>
                                     <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
                                     <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                 </ComboBox.Resources>
                                 <ComboBoxItem Content="Mensual (31 días)"    Tag="mensual" Foreground="{StaticResource TextPrimary}" IsSelected="True"/>
-                                <ComboBoxItem Content="Semanal (7 días)"     Tag="semanal" Foreground="{StaticResource TextPrimary}"/>
-                                <ComboBoxItem Content="Clase suelta (1 día)" Tag="clase"   Foreground="{StaticResource TextPrimary}"/>
                             </ComboBox>
 
-                            <!-- FECHAS lado a lado -->
+                            <!-- FECHAS lado a lado (automáticas, no editables) -->
                             <Grid Margin="0,0,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -461,12 +459,13 @@
                                     <TextBlock Text="INICIO *" Style="{StaticResource LabelCampoEstilo}"/>
                                     <DatePicker x:Name="dpInicio"
                                                     Style="{StaticResource DatePickerEstilo}"
-                                                    SelectedDateChanged="dpInicio_SelectedDateChanged"/>
+                                                    IsEnabled="False"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="6,0,0,0">
                                     <TextBlock Text="VENCIMIENTO *" Style="{StaticResource LabelCampoEstilo}"/>
                                     <DatePicker x:Name="dpVencimiento"
-                                                    Style="{StaticResource DatePickerEstilo}"/>
+                                                    Style="{StaticResource DatePickerEstilo}"
+                                                    IsEnabled="False"/>
                                 </StackPanel>
                             </Grid>
 

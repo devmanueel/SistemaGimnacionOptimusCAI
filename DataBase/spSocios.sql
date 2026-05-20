@@ -169,7 +169,12 @@ BEGIN
          @Telefono, @Domicilio, @Profesion, @Email, @ComoNosConocio, @Observaciones,
          @Foto, 1, @RegistradoPor);
 
-    SELECT SCOPE_IDENTITY() AS id;
+    DECLARE @NuevoId BIGINT = SCOPE_IDENTITY();
+
+    SELECT
+        @NuevoId                        AS id,
+        @NumeroSocio                    AS numero_socio,
+        @Nombre + ' ' + @Apellido       AS nombre_completo;
 END;
 GO
 

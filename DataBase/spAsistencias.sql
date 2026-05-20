@@ -1,9 +1,7 @@
 -- ============================================================
 --  STORED PROCEDURES — TABLA registros_acceso
 --  Sistema Gimnasio OptimusCAI · SQL Server / LocalDB
---  v1.1 — Problema 8: si el socio ya marcó hoy, registrar
---          el acceso pero devolver descuento_aplicado = 0
---          (no se "consume" un segundo día).
+--  v2.0 — Control de límites de asistencia por semana + domingo
 -- ============================================================
 
 -- ─────────────────────────────────────────────────────────────
@@ -36,6 +34,10 @@ BEGIN
     DECLARE @DiaActual    INT = DATEPART(WEEKDAY, GETDATE());
     DECLARE @Resultado    VARCHAR(50);
     DECLARE @Mensaje      NVARCHAR(300);
+    DECLARE @DiasSesiones TINYINT;
+    DECLARE @Lunes        DATE;
+    DECLARE @Sabado       DATE;
+    DECLARE @AsistenciasSemana TINYINT;
 
     DECLARE @DiaApp INT;
     SET @DiaApp = CASE @DiaActual
@@ -100,7 +102,8 @@ BEGIN
         @ActividadId  = m.actividad_id,
         @ActividadNom = a.nombre,
         @DiasSemana   = a.dias_semana,
-        @VencActual   = m.fecha_vencimiento
+        @VencActual   = m.fecha_vencimiento,
+        @DiasSesiones = a.dias_sesiones
     FROM membresias m
     INNER JOIN actividades a ON a.id = m.actividad_id
     WHERE m.socio_id = @SocioId AND m.estado = 'activa'
@@ -125,7 +128,26 @@ BEGIN
         RETURN;
     END
 
-    -- 4. Validar día permitido
+    -- 4. ¿Es domingo? (el gimnasio no abre)
+    IF @DiaActual = 1
+    BEGIN
+        SET @Resultado = 'denegado_dia';
+        SET @Mensaje   = 'El gimnasio no abre los domingos.';
+
+        INSERT INTO registros_acceso (socio_id, membresia_id, metodo_acceso, resultado)
+        VALUES (@SocioId, @MembresiaId, @MetodoAcceso, @Resultado);
+
+        SELECT
+            @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
+            @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio,
+            @Foto AS foto,
+            @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
+            CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id,
+            CAST(0 AS BIT) AS descuento_aplicado;
+        RETURN;
+    END
+
+    -- 5. Validar día permitido por actividad
     IF @DiasSemana IS NOT NULL
     BEGIN
         IF NOT (
@@ -152,7 +174,38 @@ BEGIN
         END
     END
 
-    -- 5. ACCESO PERMITIDO
+    -- 6. Validar límite de asistencias por semana (usando dias_sesiones)
+    IF @DiasSesiones IS NOT NULL AND @DiasSesiones > 0
+    BEGIN
+        SET @Lunes  = DATEADD(DAY, 2 - @DiaActual, CAST(GETDATE() AS DATE));
+        SET @Sabado = DATEADD(DAY, 7 - @DiaActual, CAST(GETDATE() AS DATE));
+
+        SELECT @AsistenciasSemana = COUNT(*)
+        FROM registros_acceso
+        WHERE socio_id  = @SocioId
+          AND resultado = 'permitido'
+          AND CAST(accedido_en AS DATE) BETWEEN @Lunes AND @Sabado;
+
+        IF @AsistenciasSemana >= @DiasSesiones
+        BEGIN
+            SET @Resultado = 'denegado_limite_semana';
+            SET @Mensaje   = 'Ya alcanzaste el límite de asistencias para esta semana.';
+
+            INSERT INTO registros_acceso (socio_id, membresia_id, metodo_acceso, resultado)
+            VALUES (@SocioId, @MembresiaId, @MetodoAcceso, @Resultado);
+
+            SELECT
+                @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
+                @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio,
+                @Foto AS foto,
+                @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
+                CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id,
+                CAST(0 AS BIT) AS descuento_aplicado;
+            RETURN;
+        END
+    END
+
+    -- 7. ACCESO PERMITIDO
     --    Verificar si ya marcó hoy (descuento_aplicado = 0 si ya lo hizo)
     DECLARE @YaMarcoHoy BIT = 0;
     IF EXISTS (

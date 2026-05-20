@@ -53,9 +53,11 @@ namespace Controllers
             string observaciones,
             string tipoPlan = "mensual")
         {
-            string err = ValidarCampos(socioId, actividadId, fechaInicio,
-                                       fechaVencimiento, montoPagado, metodoPago);
+            string err = ValidarCampos(socioId, actividadId, montoPagado, metodoPago);
             if (err != null) return (false, err, 0);
+
+            fechaInicio = DateTime.Today;
+            fechaVencimiento = DateTime.Today.AddDays(31);
 
             var membresia = new Membresia
             {
@@ -225,20 +227,10 @@ namespace Controllers
         // VALIDACIONES
         // ──────────────────────────────────────────────────────
         private string ValidarCampos(long socioId, long actividadId,
-                                     DateTime fechaInicio, DateTime fechaVencimiento,
                                      decimal monto, string metodoPago)
         {
             if (socioId <= 0) return "Tenés que seleccionar un socio.";
             if (actividadId <= 0) return "Tenés que seleccionar una actividad.";
-
-            if (fechaInicio.Date > fechaVencimiento.Date)
-                return "La fecha de inicio no puede ser posterior al vencimiento.";
-
-            if (fechaVencimiento.Date <= fechaInicio.Date)
-                return "La fecha de vencimiento debe ser posterior a la de inicio.";
-
-            if (fechaInicio.Date < DateTime.Today.AddMonths(-3))
-                return "La fecha de inicio es demasiado antigua (más de 3 meses atrás).";
 
             if (monto <= 0)
                 return "El monto pagado debe ser mayor a $0.";
