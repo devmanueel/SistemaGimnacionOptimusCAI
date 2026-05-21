@@ -35,6 +35,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private string _filtroEstado = "todos";
         private DateTime _fechaVencActual = DateTime.Today;
         private Socio _socioPreCargado = null;
+        private long _actividadActualId = 0;
+        private string _actividadActualCategoria = null;
+        private int? _actividadActualNivel = null;
 
         private long USUARIO_ACTUAL_ID => SesionManager.UsuarioId;
 
@@ -101,14 +104,32 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             lblTituloFormulario.Text = "COBRAR CUOTA";
 
+            cmbSocio.ItemsSource = _controller.ListarSociosParaCombo();
+
+            bool socioEncontrado = false;
             foreach (var item in cmbSocio.Items)
             {
                 var sci = item as SocioComboItem;
                 if (sci != null && sci.Id == socio.Id)
                 {
                     cmbSocio.SelectedItem = item;
+                    socioEncontrado = true;
                     break;
                 }
+            }
+
+            if (!socioEncontrado)
+            {
+                var nuevoItem = new SocioComboItem
+                {
+                    Id = socio.Id,
+                    NumeroSocio = socio.NumeroSocio,
+                    Nombre = socio.Nombre ?? "Socio",
+                    Apellido = socio.Apellido ?? "",
+                    Dni = socio.Dni ?? ""
+                };
+                cmbSocio.Items.Add(nuevoItem);
+                cmbSocio.SelectedItem = nuevoItem;
             }
 
             cmbActividad.SelectedIndex = -1;
@@ -119,6 +140,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtObservaciones.Text = string.Empty;
             panelPreviewMonto.Visibility = Visibility.Collapsed;
             LimpiarErrores();
+
+            dpInicio.SelectedDate = DateTime.Today;
+            dpInicio.IsEnabled = false;
+            dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+            dpVencimiento.IsEnabled = false;
 
             cmbActividad.Focus();
         }
@@ -274,10 +300,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (m == null) return;
 
             _esNuevo = false;
-            _fechaVencActual = m.FechaVencimiento;
 
             LimpiarFormulario();
+
             _idEditar = m.Id;
+            _actividadActualId = m.ActividadId;
+            _actividadActualCategoria = m.ActividadCategoria;
+            _actividadActualNivel = m.ActividadNivel;
 
             foreach (var item in cmbSocio.Items)
             {
@@ -291,7 +320,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 var aci = item as ActividadComboItem;
                 if (aci != null && aci.Id == m.ActividadId) { cmbActividad.SelectedItem = item; break; }
             }
-            cmbActividad.IsEnabled = true;
 
             foreach (var item in cmbInstructor.Items)
             {
@@ -448,6 +476,29 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     return;
                 }
 
+                // Validación de cambio de plan (solo si se cambia la actividad)
+                if (actividad != null && actividad.Id != _actividadActualId)
+                {
+                    // Validar misma categoría
+                    if (!string.IsNullOrEmpty(_actividadActualCategoria) && 
+                        !string.IsNullOrEmpty(actividad.Categoria) &&
+                        _actividadActualCategoria != actividad.Categoria)
+                    {
+                        NotificacionWindow.MostrarError(
+                            "No se puede cambiar a otra categoría. El cambio de plan solo está permitido dentro de la misma categoría.");
+                        return;
+                    }
+
+                    // Validar solo upgrade (nivel mayor)
+                    if (_actividadActualNivel.HasValue && actividad.Nivel.HasValue &&
+                        actividad.Nivel.Value <= _actividadActualNivel.Value)
+                    {
+                        NotificacionWindow.MostrarError(
+                            "Solo se permite cambiar a un plan superior (upgrade). El downgrade no está permitido.");
+                        return;
+                    }
+                }
+
                 long? actividadEditada = actividad != null ? (long?)actividad.Id : null;
 
                 var tipoPlanItem2 = cmbTipoPlan.SelectedItem as ComboBoxItem;
@@ -602,6 +653,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 dpInicio.SelectedDate = DateTime.Today;
                 dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+                cmbActividad.IsEnabled = true;
+            }
+            else
+            {
+                cmbActividad.IsEnabled = true;
             }
         }
 
@@ -646,6 +702,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtObservaciones.Text = string.Empty;
             panelPreviewMonto.Visibility = Visibility.Collapsed;
             _idEditar = 0;
+            // No resetear _actividadActualId, _actividadActualCategoria, _actividadActualNivel aquí
+            // porque se asignan después en btnEditar_Click
         }
 
         private Membresia ObtenerMembresiaDeFila(object sender)

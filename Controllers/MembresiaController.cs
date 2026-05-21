@@ -77,6 +77,15 @@ namespace Controllers
             {
                 long id = _dao.InsertarMembresia(membresia);
                 if (id <= 0) return (false, "No se pudo registrar la membresía.", 0);
+                
+                Auditor.Registrar("crear", "membresia", id, new Dictionary<string, object> {
+                    { "socio_id", socioId },
+                    { "actividad_id", actividadId },
+                    { "monto_pagado", montoPagado },
+                    { "metodo_pago", metodoPago },
+                    { "tipo_plan", tipoPlan ?? "mensual" }
+                });
+                
                 return (true, "Membresía registrada y cuota cobrada correctamente.", id);
             }
             catch (Exception ex)
@@ -86,7 +95,7 @@ namespace Controllers
         }
 
         // ──────────────────────────────────────────────────────
-        // MODIFICAR (datos secundarios)
+        // MODIFICAR (solo datos secundarios)
         // ──────────────────────────────────────────────────────
         public (bool ok, string mensaje) Modificar(
             long id,
@@ -116,16 +125,36 @@ namespace Controllers
                     string.IsNullOrWhiteSpace(tipoPlan) ? null : tipoPlan,
                     string.IsNullOrWhiteSpace(metodoPago) ? null : metodoPago);
 
+                if (ok)
+                {
+                    Auditor.Registrar("editar", "membresia", id, new Dictionary<string, object> {
+                        { "actividad_id", actividadId },
+                        { "monto_pagado", montoPagado },
+                        { "tipo_plan", tipoPlan },
+                        { "metodo_pago", metodoPago },
+                        { "fecha_vencimiento", fechaVencimiento.ToString("yyyy-MM-dd") }
+                    });
+                }
+
                 return ok
                     ? (true, "Membresía actualizada correctamente.")
                     : (false, "No se encontró la membresía para actualizar.");
             }
             catch (Exception ex)
             {
-                // El SP lanza error si la fecha retrocede — lo propagamos tal cual
-                return (false, ex.Message.Contains("solo puede avanzar")
-                    ? "La fecha de vencimiento no puede retroceder. Los días solo pueden aumentar."
-                    : "Error al actualizar.\n" + ex.Message);
+                // El SP lanza error si la fecha retrocede o si el cambio de plan no es válido
+                string mensaje = ex.Message;
+                
+                if (mensaje.Contains("solo puede avanzar"))
+                    return (false, "La fecha de vencimiento no puede retroceder. Los días solo pueden aumentar.");
+                
+                if (mensaje.Contains("categoría"))
+                    return (false, "No se puede cambiar a otra categoría. El cambio de plan solo está permitido dentro de la misma categoría.");
+                
+                if (mensaje.Contains("upgrade") || mensaje.Contains("superior"))
+                    return (false, "Solo se permite cambiar a un plan superior (upgrade). El downgrade no está permitido.");
+                
+                return (false, "Error al actualizar.\n" + ex.Message);
             }
         }
 

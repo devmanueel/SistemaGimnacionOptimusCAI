@@ -94,6 +94,11 @@ namespace Controllers
                 if (socioCreado == null) return (false, "No se pudo guardar el socio. Intentá de nuevo.", null);
                 if (socioCreado.Id <= 0) return (false, $"El DNI '{dni}' ya está registrado en el sistema.", null);
 
+                // Completar datos que el DAO no retorna
+                socioCreado.Nombre = socio.Nombre;
+                socioCreado.Apellido = socio.Apellido;
+                socioCreado.Dni = socio.Dni;
+
                 return (true, "Socio registrado correctamente.", socioCreado);
             }
             catch (Exception ex)

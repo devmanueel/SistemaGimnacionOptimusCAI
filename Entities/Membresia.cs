@@ -37,6 +37,8 @@ namespace Entities
         public byte[] SocioFoto { get; set; }
         public string ActividadNombre { get; set; }
         public string ActividadTipo { get; set; }
+        public string ActividadCategoria { get; set; }
+        public int? ActividadNivel { get; set; }
         public string InstructorNombre { get; set; }
         public string RegistradoPorNombre { get; set; }
         public int DiasParaVencer { get; set; }   // negativo si ya venció
@@ -151,6 +153,8 @@ namespace Entities
         public string Tipo { get; set; }
         public int DiasSesiones { get; set; }
         public decimal Precio { get; set; }
+        public string Categoria { get; set; }
+        public int? Nivel { get; set; }
 
         /// <summary>"Boxeo 3 Vxs — $22.000" — para el combo.</summary>
         public string TextoCombo
