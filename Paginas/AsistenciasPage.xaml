@@ -234,6 +234,30 @@
                                      DataObject.Pasting="txtDni_Pasting"
                                      KeyDown="txtDni_KeyDown"/>
                         </Border>
+                        <Border x:Name="panelSelectorActividad" 
+        Visibility="Collapsed"
+        Background="{StaticResource Bg2}" 
+        CornerRadius="12"
+        BorderBrush="{StaticResource Border1}" 
+        BorderThickness="1"
+        Margin="0,0,0,12">
+                            <StackPanel Margin="14,12">
+                                <TextBlock Text="SELECCIONÁ LA ACTIVIDAD"
+                   Style="{StaticResource LabelCampoEstilo}"
+                   Foreground="{StaticResource TextMuted}"
+                   Margin="0,0,0,8"/>
+                                <ComboBox x:Name="cmbActividades"
+                                          Style="{StaticResource ComboBoxEstilo}"
+                  Background="{StaticResource Bg3}"
+                  Foreground="{StaticResource TextPrimary}"
+                  BorderBrush="{StaticResource GreenMain}"
+                  BorderThickness="1"
+                  FontSize="14"
+                  Height="40"
+                  DisplayMemberPath="ActividadNombre"
+                  SelectionChanged="cmbActividades_SelectionChanged"/>
+                            </StackPanel>
+                        </Border>
 
                         <TextBlock Text="Ingresá el DNI y presioná ENTER"
                                    FontSize="11" Foreground="{StaticResource TextMuted}"

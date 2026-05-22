@@ -19,7 +19,7 @@ namespace Models.Dao
         // El SP hace todo: busca socio, valida activo, valida
         // membresía, valida día, registra el acceso y retorna.
         // ──────────────────────────────────────────────────────
-        public ResultadoValidacion ValidarAccesoPorDni(string dni, string metodoAcceso = "dni_pin")
+        public ResultadoValidacion ValidarAccesoPorDni(string dni, string metodoAcceso = "dni_pin", long? membresiaId = null)
         {
             using (var conn = GetConnection())
             {
@@ -29,6 +29,8 @@ namespace Models.Dao
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Dni", dni);
                     cmd.Parameters.AddWithValue("@MetodoAcceso", metodoAcceso);
+                    cmd.Parameters.AddWithValue("@MembresiaId", (object)membresiaId ?? DBNull.Value);
+
 
                     using (var reader = cmd.ExecuteReader())
                     {
@@ -149,6 +151,29 @@ namespace Models.Dao
                 SocioDni = r["socio_dni"].ToString(),
                 ActividadNombre = r["actividad_nombre"] as string
             };
+        }
+
+        public List<MembresiaOpcion> ObtenerMembresiasActivasPorDni(string dni)
+        {
+            var lista = new List<MembresiaOpcion>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ObtenerMembresiasActivasPorDni", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Dni", dni);
+                    using (var reader = cmd.ExecuteReader())
+                        while (reader.Read())
+                            lista.Add(new MembresiaOpcion
+                            {
+                                MembresiaId = Convert.ToInt64(reader["membresia_id"]),
+                                ActividadNombre = reader["actividad_nombre"].ToString(),
+                                FechaVencimiento = Convert.ToDateTime(reader["fecha_vencimiento"])
+                            });
+                }
+            }
+            return lista;
         }
     }
 }

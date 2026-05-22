@@ -658,3 +658,27 @@ BEGIN
     ORDER BY u.apellido, u.nombre;
 END;
 GO
+
+-----------------  NUEVO -----------------
+CREATE OR ALTER PROCEDURE sp_ObtenerMembresiasActivasPorDni
+    @Dni CHAR(8)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        m.id              AS membresia_id,
+        a.nombre          AS actividad_nombre,
+        m.fecha_vencimiento,
+        a.limite_por_semana,
+        a.limite_total
+    FROM socios s
+    INNER JOIN membresias  m ON m.socio_id    = s.id
+    INNER JOIN actividades a ON a.id          = m.actividad_id
+    WHERE s.dni          = @Dni
+      AND s.eliminado_en IS NULL
+      AND m.estado       = 'activa'
+      AND m.fecha_vencimiento >= CAST(GETDATE() AS DATE)
+    ORDER BY a.nombre;
+END;
+GO

@@ -9,6 +9,7 @@
 //   · Auto-cierre de la tarjeta a los 5 segundos
 //   · Lista de accesos del día con auto-refresh cada 10 segundos
 //   · Filtros por resultado (Todos / Permitidos / Denegados)
+//   · Selector de actividad cuando el socio tiene más de una membresía
 //
 //  Compatible con C# 7.3.
 // ============================================================
@@ -17,6 +18,7 @@ using Controllers;
 using Entities;
 using SistemaGimnacionOptimusCAI.Helpers;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -34,6 +36,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private readonly AsistenciaController _controller = new AsistenciaController();
 
         private string _filtroResultado = "todos";
+        private string _dniPendiente = null;   // DNI guardado mientras se elige actividad
         private DispatcherTimer _timerReloj;
         private DispatcherTimer _timerRefresh;
         private DispatcherTimer _timerOcultarResultado;
@@ -48,7 +51,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             IniciarReloj();
             IniciarAutoRefresh();
 
-            // Foco automático en el DNI al cargar
             Loaded += (s, e) => txtDni.Focus();
         }
 
@@ -58,11 +60,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private void IniciarReloj()
         {
             ActualizarReloj();
-
-            _timerReloj = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
+            _timerReloj = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _timerReloj.Tick += (s, e) => ActualizarReloj();
             _timerReloj.Start();
         }
@@ -85,10 +83,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─────────────────────────────────────────────────────
         private void IniciarAutoRefresh()
         {
-            _timerRefresh = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(10)
-            };
+            _timerRefresh = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
             _timerRefresh.Tick += (s, e) => { CargarAccesos(); ActualizarStats(); };
             _timerRefresh.Start();
         }
@@ -122,7 +117,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             catch
             {
-                statPermitidos.Text = statDenegados.Text = statSociosUnicos.Text = statSemana.Text = "—";
+                statPermitidos.Text = statDenegados.Text =
+                statSociosUnicos.Text = statSemana.Text = "—";
             }
         }
 
@@ -142,27 +138,41 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             Button[] chips = { chipTodos, chipPermitidos, chipDenegados };
             foreach (var c in chips)
-            {
-                // Al asignar el estilo completo, recuperás el espaciado y los efectos automáticos
-                if (c == seleccionado)
-                {
-                    c.Style = (Style)FindResource("BotonChipActivoEstilo");
-                }
-                else
-                {
-                    c.Style = (Style)FindResource("BotonChipEstilo");
-                }
-            }
+                c.Style = (Style)FindResource(c == seleccionado
+                    ? "BotonChipActivoEstilo"
+                    : "BotonChipEstilo");
         }
 
         // ─────────────────────────────────────────────────────
-        // VALIDAR ACCESO
+        // VALIDAR ACCESO — flujo principal
         // ─────────────────────────────────────────────────────
-        private void btnValidar_Click(object sender, RoutedEventArgs e) => ValidarAcceso();
+        private void btnValidar_Click(object sender, RoutedEventArgs e)
+        {
+            // Si el selector está visible y hay membresía elegida → validar con membresiaId
+            if (panelSelectorActividad.Visibility == Visibility.Visible
+                && cmbActividades.SelectedItem is MembresiaOpcion opcion
+                && _dniPendiente != null)
+            {
+                try
+                {
+                    var resultado = _controller.ValidarAcceso(_dniPendiente, "manual", opcion.MembresiaId);
+                    FinalizarValidacion(resultado);
+                }
+                catch (Exception ex)
+                {
+                    NotificacionWindow.MostrarError("Error al validar.\n" + ex.Message);
+                }
+                return;
+            }
+
+            ValidarAcceso();
+        }
 
         private void txtDni_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter) ValidarAcceso();
+            // ENTER solo dispara si el selector NO está visible
+            if (e.Key == Key.Enter && panelSelectorActividad.Visibility == Visibility.Collapsed)
+                ValidarAcceso();
         }
 
         private void ValidarAcceso()
@@ -178,15 +188,16 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             try
             {
                 var resultado = _controller.ValidarAcceso(dni, "manual");
-                MostrarResultado(resultado);
 
-                // Refrescar lista y stats
-                CargarAccesos();
-                ActualizarStats();
+                // Socio con más de una membresía activa → mostrar selector
+                if (resultado.Resultado == "seleccionar_membresia")
+                {
+                    _dniPendiente = dni;
+                    MostrarSelectorActividad(dni);
+                    return;
+                }
 
-                // Limpiar input y volver a poner foco
-                txtDni.Text = string.Empty;
-                txtDni.Focus();
+                FinalizarValidacion(resultado);
             }
             catch (Exception ex)
             {
@@ -195,27 +206,67 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ─────────────────────────────────────────────────────
+        // SELECTOR DE ACTIVIDAD
+        // ─────────────────────────────────────────────────────
+        private void MostrarSelectorActividad(string dni)
+        {
+            try
+            {
+                var membresias = _controller.ObtenerMembresiasActivasPorDni(dni);
+                cmbActividades.ItemsSource = membresias;
+                cmbActividades.SelectedIndex = -1;
+                panelSelectorActividad.Visibility = Visibility.Visible;
+                btnValidar.IsEnabled = false;
+                cmbActividades.Focus();
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError("Error al cargar actividades.\n" + ex.Message);
+            }
+        }
+
+        private void cmbActividades_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Habilitar botón solo cuando hay selección
+            btnValidar.IsEnabled = cmbActividades.SelectedItem != null;
+        }
+
+        // ─────────────────────────────────────────────────────
+        // FINALIZAR VALIDACIÓN — limpia estado y muestra resultado
+        // ─────────────────────────────────────────────────────
+        private void FinalizarValidacion(ResultadoValidacion resultado)
+        {
+            panelSelectorActividad.Visibility = Visibility.Collapsed;
+            cmbActividades.ItemsSource = null;
+            btnValidar.IsEnabled = true;
+            _dniPendiente = null;
+
+            MostrarResultado(resultado);
+            CargarAccesos();
+            ActualizarStats();
+
+            txtDni.Text = string.Empty;
+            txtDni.Focus();
+        }
+
+        // ─────────────────────────────────────────────────────
         // MOSTRAR RESULTADO en la tarjeta
         // ─────────────────────────────────────────────────────
         private void MostrarResultado(ResultadoValidacion r)
         {
-            // Cancelar timer anterior si estaba corriendo
             if (_timerOcultarResultado != null) _timerOcultarResultado.Stop();
 
             panelEsperando.Visibility = Visibility.Collapsed;
 
-            // Datos del socio
             lblSocioNombre.Text = string.IsNullOrEmpty(r.SocioNombre) ? "—" : r.SocioNombre;
             lblNumeroSocio.Text = r.NumeroSocio.HasValue ? r.NumeroSocioFormateado : "";
             lblMensaje.Text = r.Mensaje;
 
-            // Foto
             if (r.Foto != null && r.Foto.Length > 0)
                 imgFoto.ImageSource = BytesABitmapImage(r.Foto);
             else
                 imgFoto.ImageSource = null;
 
-            // Info de la membresía (solo si hay datos)
             if (!string.IsNullOrEmpty(r.ActividadNombre))
             {
                 lblActividad.Text = r.ActividadNombre;
@@ -227,17 +278,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 panelInfoMembresia.Visibility = Visibility.Collapsed;
             }
 
-            // Configurar colores según resultado
             if (r.EsPermitido && r.DescuentoAplicado)
             {
                 // Primera entrada del día — verde
                 lblIcono.Text = "✓";
                 lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-
                 panelResultado.Background = new SolidColorBrush(Color.FromRgb(10, 26, 16));
                 panelResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 230, 118));
                 panelResultado.BorderThickness = new Thickness(2);
-
                 panelDetalles.Background = new SolidColorBrush(Color.FromArgb(60, 0, 230, 118));
                 lblMensaje.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
             }
@@ -246,28 +294,24 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 // Ya registró entrada hoy — ámbar
                 lblIcono.Text = "↩";
                 lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(255, 179, 0));
-
                 panelResultado.Background = new SolidColorBrush(Color.FromRgb(26, 20, 5));
                 panelResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 179, 0));
                 panelResultado.BorderThickness = new Thickness(2);
-
                 panelDetalles.Background = new SolidColorBrush(Color.FromArgb(60, 255, 179, 0));
                 lblMensaje.Foreground = new SolidColorBrush(Color.FromRgb(255, 200, 80));
             }
             else
             {
+                // Denegado — rojo
                 lblIcono.Text = "✕";
                 lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
-
                 panelResultado.Background = new SolidColorBrush(Color.FromRgb(26, 10, 10));
                 panelResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 85, 85));
                 panelResultado.BorderThickness = new Thickness(2);
-
                 panelDetalles.Background = new SolidColorBrush(Color.FromArgb(60, 255, 85, 85));
                 lblMensaje.Foreground = new SolidColorBrush(Color.FromRgb(255, 130, 130));
             }
 
-            // Mostrar con animación de "pulse" (escala 0.8 → 1.0 + fade)
             panelResultado.Visibility = Visibility.Visible;
             panelResultado.Opacity = 0;
             scaleResultado.ScaleX = 0.8;
@@ -286,20 +330,12 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 From = 0.8,
                 To = 1.0,
                 Duration = new Duration(TimeSpan.FromMilliseconds(300)),
-                EasingFunction = new BackEase
-                {
-                    EasingMode = EasingMode.EaseOut,
-                    Amplitude = 0.4
-                }
+                EasingFunction = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.4 }
             };
             scaleResultado.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnim);
             scaleResultado.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnim);
 
-            // Auto-ocultar a los 5 segundos
-            _timerOcultarResultado = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(5)
-            };
+            _timerOcultarResultado = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
             _timerOcultarResultado.Tick += (s, e) =>
             {
                 _timerOcultarResultado.Stop();
