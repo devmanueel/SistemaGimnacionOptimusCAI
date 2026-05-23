@@ -47,7 +47,7 @@ BEGIN
         a.detalle, a.creado_en,
         ISNULL(u.nombre + ' ' + u.apellido, 'Sistema') AS actor_nombre,
         u.foto AS actor_foto,
-        ISNULL(r.nombre, '—')                          AS actor_rol
+        ISNULL(r.nombre, '-')                          AS actor_rol
     FROM auditoria a
     LEFT JOIN usuarios u ON u.id = a.actor_id
     LEFT JOIN roles    r ON r.id = u.rol_id
@@ -69,7 +69,7 @@ BEGIN
         a.detalle, a.creado_en,
         ISNULL(u.nombre + ' ' + u.apellido, 'Sistema') AS actor_nombre,
         u.foto AS actor_foto,
-        ISNULL(r.nombre, '—')                          AS actor_rol
+        ISNULL(r.nombre, '-')                          AS actor_rol
     FROM auditoria a
     LEFT JOIN usuarios u ON u.id = a.actor_id
     LEFT JOIN roles    r ON r.id = u.rol_id
@@ -99,7 +99,7 @@ BEGIN
         a.detalle, a.creado_en,
         ISNULL(u.nombre + ' ' + u.apellido, 'Sistema') AS actor_nombre,
         u.foto AS actor_foto,
-        ISNULL(r.nombre, '—')                          AS actor_rol
+        ISNULL(r.nombre, '-')                          AS actor_rol
     FROM auditoria a
     LEFT JOIN usuarios u ON u.id = a.actor_id
     LEFT JOIN roles    r ON r.id = u.rol_id

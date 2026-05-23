@@ -26,7 +26,7 @@ namespace Entities
         {
             get
             {
-                if (string.IsNullOrEmpty(Accion)) return "—";
+                if (string.IsNullOrEmpty(Accion)) return "-";
                 return char.ToUpper(Accion[0]) + Accion.Substring(1);
             }
         }
@@ -35,7 +35,7 @@ namespace Entities
         {
             get
             {
-                if (string.IsNullOrEmpty(Entidad)) return "—";
+                if (string.IsNullOrEmpty(Entidad)) return "-";
                 return char.ToUpper(Entidad[0]) + Entidad.Substring(1);
             }
         }

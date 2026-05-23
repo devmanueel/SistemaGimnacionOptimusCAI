@@ -126,7 +126,8 @@ namespace Controllers
             string domicilio = null,
             string telefono = null,
             string email = null,
-            byte[] foto = null)
+            byte[] foto = null,
+            decimal tarifaHora = 0)
         {
             // ── Validaciones ──────────────────────────────────────
             if (string.IsNullOrWhiteSpace(nombre))
@@ -137,6 +138,8 @@ namespace Controllers
                 return (false, "El DNI debe tener entre 7 y 8 dígitos.", 0);
             if (string.IsNullOrWhiteSpace(clave) || clave.Length < 4)
                 return (false, "La contraseña debe tener al menos 4 caracteres.", 0);
+            if (tarifaHora < 0)
+                return (false, "La tarifa por hora no puede ser negativa.", 0);
 
             var usuario = new Usuario
             {
@@ -149,7 +152,8 @@ namespace Controllers
                 Email = email?.Trim(),
                 PasswordHash = HashSHA256(clave),  // Hash antes de ir a la BD
                 Foto = foto,
-                Activo = true
+                Activo = true,
+                TarifaHora = tarifaHora
             };
 
             try
@@ -160,6 +164,10 @@ namespace Controllers
                     return (false, $"El DNI '{dni}' ya está registrado en el sistema.", 0);
                 if (id <= 0)
                     return (false, "No se pudo guardar el usuario. Intentá de nuevo.", 0);
+
+                Auditor.Registrar("crear", "usuario", id, new Dictionary<string, object> {
+                    { "nombre", nombre }, { "apellido", apellido }, { "dni", dni }, { "rol_id", rolId }
+                });
 
                 return (true, "Usuario registrado correctamente.", id);
             }
@@ -184,7 +192,8 @@ namespace Controllers
             string domicilio = null,
             string telefono = null,
             string email = null,
-            byte[] foto = null)
+            byte[] foto = null,
+            decimal tarifaHora = 0)
         {
             // ── Validaciones ──────────────────────────────────────
             if (string.IsNullOrWhiteSpace(nombre))
@@ -193,6 +202,8 @@ namespace Controllers
                 return (false, "El apellido es obligatorio.");
             if (string.IsNullOrWhiteSpace(dni) || dni.Length < 7)
                 return (false, "El DNI debe tener entre 7 y 8 dígitos.");
+            if (tarifaHora < 0)
+                return (false, "La tarifa por hora no puede ser negativa.");
 
             bool cambiarPassword = !string.IsNullOrWhiteSpace(claveNueva);
             bool cambiarFoto = foto != null;
@@ -208,12 +219,19 @@ namespace Controllers
                 Telefono = telefono?.Trim(),
                 Email = email?.Trim(),
                 PasswordHash = cambiarPassword ? HashSHA256(claveNueva) : null,
-                Foto = foto
+                Foto = foto,
+                TarifaHora = tarifaHora
             };
 
             try
             {
                 bool ok = _dao.ModificarUsuario(usuario, cambiarPassword, cambiarFoto);
+                if (ok)
+                {
+                    Auditor.Registrar("modificar", "usuario", id, new Dictionary<string, object> {
+                        { "nombre", nombre }, { "apellido", apellido }, { "dni", dni }
+                    });
+                }
                 return ok
                     ? (true, "Usuario actualizado correctamente.")
                     : (false, "No se encontró el usuario para actualizar.");
@@ -236,6 +254,10 @@ namespace Controllers
             {
                 bool ok = _dao.CambiarEstadoUsuario(id, nuevoEstado);
                 string accion = nuevoEstado ? "activado" : "desactivado";
+                if (ok)
+                {
+                    Auditor.Registrar(nuevoEstado ? "activar" : "desactivar", "usuario", id);
+                }
                 return ok
                     ? (true, $"Usuario {accion} correctamente.")
                     : (false, "No se encontró el usuario.");
@@ -247,6 +269,32 @@ namespace Controllers
         }
 
         // ──────────────────────────────────────────────────────────
+        // CAMBIAR CONTRASEÑA
+        // ──────────────────────────────────────────────────────────
+        public (bool ok, string mensaje) CambiarPassword(long id, string nuevaClave)
+        {
+            if (string.IsNullOrWhiteSpace(nuevaClave) || nuevaClave.Length < 4)
+                return (false, "La contraseña debe tener al menos 4 caracteres.");
+
+            try
+            {
+                string hash = HashSHA256(nuevaClave);
+                bool ok = _dao.CambiarPassword(id, hash);
+                if (ok)
+                {
+                    try { Auditor.Registrar("cambiar_password", "usuario", id); } catch { }
+                }
+                return ok
+                    ? (true, "Contraseña actualizada correctamente.")
+                    : (false, "No se encontró el usuario.");
+            }
+            catch (Exception ex)
+            {
+                return (false, "Error al cambiar la contraseña.\n" + ex.Message);
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
         // ELIMINAR (soft-delete)
         // ──────────────────────────────────────────────────────────
         public (bool ok, string mensaje) Eliminar(long id)
@@ -254,6 +302,10 @@ namespace Controllers
             try
             {
                 bool ok = _dao.EliminarUsuario(id);
+                if (ok)
+                {
+                    Auditor.Registrar("eliminar", "usuario", id);
+                }
                 return ok
                     ? (true, "Usuario eliminado del sistema.")
                     : (false, "No se encontró el usuario para eliminar.");

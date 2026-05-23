@@ -56,7 +56,7 @@ namespace Entities
         public bool EsError => Estado == "error";
 
         public string FechaCreado => CreadoEn.ToString("dd/MM HH:mm");
-        public string FechaEnviado => EnviadoEn.HasValue ? EnviadoEn.Value.ToString("dd/MM HH:mm") : "—";
+        public string FechaEnviado => EnviadoEn.HasValue ? EnviadoEn.Value.ToString("dd/MM HH:mm") : "-";
 
         public string DisparadorTexto
         {

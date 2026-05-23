@@ -10,7 +10,7 @@ BEGIN
     SET NOCOUNT ON;
     SELECT a.id, a.nombre, a.tipo, a.dias_sesiones, a.dias_semana,
            a.precio, a.activo, a.creado_en,
-           (SELECT COUNT(*) FROM membresias m
+           (SELECT COUNT(DISTINCT m.socio_id) FROM membresias m
             WHERE m.actividad_id = a.id AND m.estado = 'activa') AS cant_socios
     FROM actividades a
     ORDER BY a.nombre ASC;
@@ -25,7 +25,7 @@ BEGIN
     SET NOCOUNT ON;
     SELECT a.id, a.nombre, a.tipo, a.dias_sesiones, a.dias_semana,
            a.precio, a.activo, a.creado_en,
-           (SELECT COUNT(*) FROM membresias m
+           (SELECT COUNT(DISTINCT m.socio_id) FROM membresias m
             WHERE m.actividad_id = a.id AND m.estado = 'activa') AS cant_socios
     FROM actividades a
     WHERE a.id = @Id;
@@ -41,7 +41,7 @@ BEGIN
     SET NOCOUNT ON;
     SELECT a.id, a.nombre, a.tipo, a.dias_sesiones, a.dias_semana,
            a.precio, a.activo, a.creado_en,
-           (SELECT COUNT(*) FROM membresias m
+           (SELECT COUNT(DISTINCT m.socio_id) FROM membresias m
             WHERE m.actividad_id = a.id AND m.estado = 'activa') AS cant_socios
     FROM actividades a
     WHERE (@Texto = '' OR a.nombre LIKE '%' + @Texto + '%')

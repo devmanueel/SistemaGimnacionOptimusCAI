@@ -287,7 +287,7 @@
                             </DataGridTemplateColumn>
 
                             <!-- ACCIONES -->
-                            <DataGridTemplateColumn Header="ACCIONES" Width="110">
+                            <DataGridTemplateColumn Header="ACCIONES" Width="150">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -295,9 +295,17 @@
                                             <!-- BOTÓN EDITAR -->
                                             <Button Click="btnEditar_Click"
 Style="{StaticResource ButtonStyleEditar}"
-Margin="0,0,8,0"
+Margin="0,0,6,0"
 ToolTip="Editar usuario">
                                                 <fa:ImageAwesome Icon="Edit" Foreground="{StaticResource ColorEditarCyan}" Height="14"/>
+                                            </Button>
+
+                                            <!-- BOTÓN CAMBIAR CONTRASEÑA -->
+                                            <Button Click="btnCambiarClave_Click"
+Style="{StaticResource ButtonStyleEditar}"
+Margin="0,0,6,0"
+ToolTip="Cambiar contraseña">
+                                                <fa:ImageAwesome Icon="Key" Foreground="#FFB347" Height="14"/>
                                             </Button>
 
                                             <!-- BOTÓN ESTADO -->
@@ -465,6 +473,14 @@ Style="{StaticResource ButtonStyleEstado}">
                                        Text="Dejá vacío para no cambiar la contraseña."
                                        FontSize="11" Foreground="{StaticResource TextMuted}" FontStyle="Italic"
                                        Margin="0,-8,0,12" Visibility="Collapsed"/>
+
+                            <TextBlock Text="TARIFA POR HORA  (solo instructores)" Style="{StaticResource LabelCampoEstilo}"/>
+                            <TextBox x:Name="txtTarifaHora" Style="{StaticResource InputEstilo}"
+                                     MaxLength="10"
+                                     PreviewTextInput="txtTarifaHora_PreviewTextInput"/>
+                            <TextBlock Text="Dejá en 0 si es administrador. Ej: 5000 = $5.000/h"
+                                       FontSize="11" Foreground="{StaticResource TextMuted}"
+                                       FontStyle="Italic" Margin="0,-8,0,12"/>
 
                             <TextBlock Text="ROL *" Style="{StaticResource LabelCampoEstilo}"/>
 

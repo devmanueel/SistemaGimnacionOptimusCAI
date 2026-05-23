@@ -42,11 +42,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActividadController.cs" />
+    <Compile Include="ReporteController.cs" />
     <Compile Include="AsistenciaController.cs" />
     <Compile Include="AuditoriaController.cs" />
     <Compile Include="CajaController.cs" />
     <Compile Include="CasilleroController.cs" />
+    <Compile Include="ConfiguracionController.cs" />
     <Compile Include="Class1.cs" />
+    <Compile Include="FichaMedicaController.cs" />
     <Compile Include="InstructorAsistenciaController.cs" />
     <Compile Include="MembresiaController.cs" />
     <Compile Include="ProductoController.cs" />

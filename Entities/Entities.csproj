@@ -42,9 +42,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actividad.cs" />
+    <Compile Include="FormatoARS.cs" />
+    <Compile Include="ReporteFinanciero.cs" />
     <Compile Include="AuditoriaEntry.cs" />
     <Compile Include="CajaMovimiento.cs" />
     <Compile Include="Casillero.cs" />
+    <Compile Include="FichaMedica.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="InstructorAsistencia.cs" />
     <Compile Include="Membresia.cs" />

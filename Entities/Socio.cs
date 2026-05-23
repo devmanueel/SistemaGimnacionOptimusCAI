@@ -55,7 +55,7 @@ namespace Entities
             }
         }
 
-        public string EdadTexto => Edad.HasValue ? Edad.Value + " años" : "—";
+        public string EdadTexto => Edad.HasValue ? Edad.Value + " años" : "-";
 
         public string SexoTexto
         {

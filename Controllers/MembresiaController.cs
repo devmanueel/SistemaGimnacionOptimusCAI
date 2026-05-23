@@ -75,10 +75,18 @@ namespace Controllers
             {
                 long id = _dao.InsertarMembresia(membresia);
                 if (id <= 0) return (false, "No se pudo registrar la membresía.", 0);
+
+                Auditor.Registrar("crear", "membresia", id, new Dictionary<string, object> {
+                    { "socio_id", socioId }, { "actividad_id", actividadId },
+                    { "tipo_plan", tipoPlan }, { "monto", montoPagado }
+                });
+
                 return (true, "Membresía registrada y cuota cobrada correctamente.", id);
             }
             catch (Exception ex)
             {
+                if (ex.Message.Contains("ya tiene una membresía activa"))
+                    return (false, ex.Message, 0);
                 return (false, "Error al registrar la membresía.\n" + ex.Message, 0);
             }
         }
@@ -114,6 +122,12 @@ namespace Controllers
                     string.IsNullOrWhiteSpace(tipoPlan) ? null : tipoPlan,
                     string.IsNullOrWhiteSpace(metodoPago) ? null : metodoPago);
 
+                if (ok)
+                {
+                    Auditor.Registrar("modificar", "membresia", id, new Dictionary<string, object> {
+                        { "actividad_id", actividadId }, { "monto", montoPagado }
+                    });
+                }
                 return ok
                     ? (true, "Membresía actualizada correctamente.")
                     : (false, "No se encontró la membresía para actualizar.");
@@ -142,6 +156,12 @@ namespace Controllers
             try
             {
                 bool ok = _dao.CambiarEstadoMembresia(id, nuevoEstado);
+                if (ok)
+                {
+                    Auditor.Registrar("editar", "membresia", id, new Dictionary<string, object> {
+                        { "nuevo_estado", nuevoEstado }
+                    });
+                }
                 return ok
                     ? (true, "Estado de la membresía actualizado a '" + nuevoEstado + "'.")
                     : (false, "No se encontró la membresía.");
@@ -190,6 +210,10 @@ namespace Controllers
             try
             {
                 bool ok = _dao.EliminarMembresia(id, registradoPor);
+                if (ok)
+                {
+                    Auditor.Registrar("eliminar", "membresia", id);
+                }
                 return ok
                     ? (true, "Membresía cancelada.")
                     : (false, "No se encontró la membresía.");

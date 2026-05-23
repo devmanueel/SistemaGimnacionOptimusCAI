@@ -83,7 +83,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch
             {
                 statTotal.Text = statSinStock.Text =
-                    statBajoStock.Text = statValorInventario.Text = "—";
+                    statBajoStock.Text = statValorInventario.Text = "-";
             }
         }
 

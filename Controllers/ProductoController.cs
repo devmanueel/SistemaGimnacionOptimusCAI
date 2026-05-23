@@ -82,6 +82,11 @@ namespace Controllers
                 long id = _dao.InsertarProducto(p);
                 if (id == -1) return (false, "Ya existe un producto con ese nombre.", 0);
                 if (id <= 0) return (false, "No se pudo guardar el producto.", 0);
+
+                Auditor.Registrar("crear", "producto", id, new Dictionary<string, object> {
+                    { "nombre", nombre }, { "precio", precio }
+                });
+
                 return (true, "Producto creado correctamente.", id);
             }
             catch (Exception ex)
@@ -119,6 +124,12 @@ namespace Controllers
             try
             {
                 bool ok = _dao.ModificarProducto(p, foto != null);
+                if (ok)
+                {
+                    Auditor.Registrar("modificar", "producto", id, new Dictionary<string, object> {
+                        { "nombre", nombre }, { "precio", precio }
+                    });
+                }
                 return ok
                     ? (true, "Producto actualizado correctamente.")
                     : (false, "No se encontró el producto.");
@@ -176,6 +187,10 @@ namespace Controllers
             {
                 bool ok = _dao.CambiarEstado(id, nuevoEstado);
                 string accion = nuevoEstado ? "activado" : "desactivado";
+                if (ok)
+                {
+                    Auditor.Registrar(nuevoEstado ? "activar" : "desactivar", "producto", id);
+                }
                 return ok
                     ? (true, "Producto " + accion + ".")
                     : (false, "No se encontró el producto.");
@@ -194,6 +209,10 @@ namespace Controllers
             try
             {
                 bool ok = _dao.EliminarProducto(id);
+                if (ok)
+                {
+                    Auditor.Registrar("eliminar", "producto", id);
+                }
                 return ok
                     ? (true, "Producto eliminado.")
                     : (false, "No se pudo eliminar el producto.");

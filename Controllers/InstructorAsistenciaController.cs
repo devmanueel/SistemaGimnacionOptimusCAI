@@ -95,8 +95,8 @@ namespace Controllers
 
                 Auditor.Registrar("editar", "asistencia", id, new Dictionary<string, object> {
                     { "corregido_por_admin", true },
-                    { "hora_entrada_nueva", horaEntrada?.ToString() ?? "—" },
-                    { "hora_salida_nueva",  horaSalida?.ToString()  ?? "—" }
+                    { "hora_entrada_nueva", horaEntrada?.ToString() ?? "-" },
+                    { "hora_salida_nueva",  horaSalida?.ToString()  ?? "-" }
                 });
 
                 return (true, "Asistencia actualizada.");

@@ -21,7 +21,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private List<Producto> _productos = new List<Producto>();
         private string _filtroMetodo = "todos";
 
-        private const long USUARIO_ACTUAL_ID = 1;
+        private long USUARIO_ACTUAL_ID => SesionManager.UsuarioId;
 
         public VentasPage()
         {
@@ -63,7 +63,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch
             {
                 statVentasHoy.Text = statTotalHoy.Text =
-                    statVentasMes.Text = statTotalMes.Text = "—";
+                    statVentasMes.Text = statTotalMes.Text = "-";
             }
         }
 

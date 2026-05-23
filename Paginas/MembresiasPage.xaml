@@ -446,9 +446,12 @@
                                     <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
                                     <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                 </ComboBox.Resources>
-                                <ComboBoxItem Content="Mensual (31 días)"    Tag="mensual" Foreground="{StaticResource TextPrimary}" IsSelected="True"/>
-                                <ComboBoxItem Content="Semanal (7 días)"     Tag="semanal" Foreground="{StaticResource TextPrimary}"/>
-                                <ComboBoxItem Content="Clase suelta (1 día)" Tag="clase"   Foreground="{StaticResource TextPrimary}"/>
+                                <ComboBoxItem Content="Clase suelta (1 día)"   Tag="clase_suelta"  Foreground="{StaticResource TextPrimary}"/>
+                                <ComboBoxItem Content="Quincenal (15 días)"  Tag="quincenal"     Foreground="{StaticResource TextPrimary}"/>
+                                <ComboBoxItem Content="Mensual (31 días)"    Tag="mensual"       Foreground="{StaticResource TextPrimary}" IsSelected="True"/>
+                                <ComboBoxItem Content="Trimestral (90 días)" Tag="trimestral"    Foreground="{StaticResource TextPrimary}"/>
+                                <ComboBoxItem Content="Semestral (180 días)" Tag="semestral"     Foreground="{StaticResource TextPrimary}"/>
+                                <ComboBoxItem Content="Anual (365 días)"     Tag="anual"         Foreground="{StaticResource TextPrimary}"/>
                             </ComboBox>
 
                             <!-- FECHAS lado a lado -->

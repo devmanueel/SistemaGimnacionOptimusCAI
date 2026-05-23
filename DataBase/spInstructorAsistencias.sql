@@ -43,7 +43,7 @@ BEGIN
         ia.registrado_por, ia.creado_en,
         u.nombre + ' ' + u.apellido          AS instructor_nombre,
         u.foto                                AS instructor_foto,
-        ISNULL(a.nombre, '—')                 AS actividad_nombre,
+        ISNULL(a.nombre, '-')                 AS actividad_nombre,
         t.dia_semana, t.hora_inicio, t.hora_fin,
         ISNULL(uReg.nombre + ' ' + uReg.apellido, 'Sistema') AS registrado_por_nombre
     FROM instructor_asistencias ia
@@ -77,7 +77,7 @@ BEGIN
         ia.registrado_por, ia.creado_en,
         u.nombre + ' ' + u.apellido          AS instructor_nombre,
         u.foto                                AS instructor_foto,
-        ISNULL(a.nombre, '—')                 AS actividad_nombre,
+        ISNULL(a.nombre, '-')                 AS actividad_nombre,
         t.dia_semana, t.hora_inicio, t.hora_fin,
         ISNULL(uReg.nombre + ' ' + uReg.apellido, 'Sistema') AS registrado_por_nombre
     FROM instructor_asistencias ia
@@ -435,7 +435,7 @@ BEGIN
         u.id                                                        AS instructor_id,
         u.nombre + ' ' + u.apellido                                 AS nombre_completo,
         u.tarifa_hora,
-        ISNULL(a.nombre, '—')                                       AS actividad_nombre,
+        ISNULL(a.nombre, '-')                                       AS actividad_nombre,
         COUNT(DISTINCT ia.fecha)                                     AS dias_asistidos,
         ISNULL(SUM(ia.horas_trabajadas), 0)                         AS total_horas,
         ISNULL(SUM(ia.horas_trabajadas), 0) * u.tarifa_hora         AS sueldo_estimado,

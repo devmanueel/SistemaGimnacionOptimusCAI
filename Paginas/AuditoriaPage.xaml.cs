@@ -160,7 +160,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             catch
             {
-                statTotal.Text = statHoy.Text = statMes.Text = statUsuarios.Text = "—";
+                statTotal.Text = statHoy.Text = statMes.Text = statUsuarios.Text = "-";
             }
         }
 
@@ -381,7 +381,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             lblDatoEntidad.Text = _entryActual.EntidadTexto;
             lblDatoEntidadId.Text = _entryActual.EntidadId.HasValue
                                         ? "#" + _entryActual.EntidadId.Value
-                                        : "—";
+                                        : "-";
             lblDatoRegId.Text = "#" + _entryActual.Id.ToString("D6");
 
             // JSON formateado

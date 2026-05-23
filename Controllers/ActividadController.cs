@@ -66,6 +66,11 @@ namespace Controllers
                 long id = _dao.InsertarActividad(actividad);
                 if (id == -1) return (false, "Ya existe una actividad con ese nombre.", 0);
                 if (id <= 0) return (false, "No se pudo guardar la actividad.", 0);
+
+                Auditor.Registrar("crear", "actividad", id, new Dictionary<string, object> {
+                    { "nombre", nombre }, { "tipo", tipo }, { "precio", precio }
+                });
+
                 return (true, "Actividad creada correctamente.", id);
             }
             catch (Exception ex)
@@ -101,6 +106,12 @@ namespace Controllers
             try
             {
                 bool ok = _dao.ModificarActividad(actividad);
+                if (ok)
+                {
+                    Auditor.Registrar("modificar", "actividad", id, new Dictionary<string, object> {
+                        { "nombre", nombre }, { "tipo", tipo }, { "precio", precio }
+                    });
+                }
                 return ok
                     ? (true, "Actividad actualizada correctamente.")
                     : (false, "No se encontró la actividad.");
@@ -122,6 +133,10 @@ namespace Controllers
             {
                 bool ok = _dao.CambiarEstadoActividad(id, nuevoEstado);
                 string accion = nuevoEstado ? "activada" : "desactivada";
+                if (ok)
+                {
+                    Auditor.Registrar(nuevoEstado ? "activar" : "desactivar", "actividad", id);
+                }
                 return ok
                     ? (true, $"Actividad {accion} correctamente.")
                     : (false, "No se encontró la actividad.");
@@ -140,6 +155,10 @@ namespace Controllers
             try
             {
                 bool ok = _dao.EliminarActividad(id);
+                if (ok)
+                {
+                    Auditor.Registrar("eliminar", "actividad", id);
+                }
                 return ok
                     ? (true, "Actividad eliminada.")
                     : (false, "No se pudo eliminar la actividad.");

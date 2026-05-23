@@ -259,6 +259,22 @@ BEGIN
 END;
 GO
 
+-- ─────────────────────────────────────────────────────────────
+-- 9. CAMBIAR CONTRASEÑA
+-- ─────────────────────────────────────────────────────────────
+IF OBJECT_ID('sp_CambiarPasswordUsuario','P') IS NOT NULL DROP PROCEDURE sp_CambiarPasswordUsuario;
+GO
+CREATE PROCEDURE sp_CambiarPasswordUsuario
+    @Id              BIGINT,
+    @NuevoHashSHA256 VARCHAR(64)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE usuarios SET password_hash = @NuevoHashSHA256 WHERE id = @Id;
+    SELECT @@ROWCOUNT AS filas_afectadas;
+END;
+GO
+
 IF NOT EXISTS (SELECT 1 FROM usuarios WHERE dni = '00000001')
 BEGIN
     DECLARE @HashAdmin CHAR(64);

@@ -81,7 +81,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch
             {
                 statTotal.Text = statLibres.Text = statOcupados.Text =
-                    statMantenimiento.Text = statIngresoPotencial.Text = "—";
+                    statMantenimiento.Text = statIngresoPotencial.Text = "-";
             }
         }
 
