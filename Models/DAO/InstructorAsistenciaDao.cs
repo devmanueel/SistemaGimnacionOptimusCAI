@@ -265,7 +265,7 @@ namespace Models.Dao
                                 InstructorId    = Convert.ToInt64(r["instructor_id"]),
                                 NombreCompleto  = r["nombre_completo"] as string,
                                 TarifaHora      = r["tarifa_hora"]      != DBNull.Value ? Convert.ToDecimal(r["tarifa_hora"])      : 0m,
-                                ActividadNombre = r["actividad_nombre"] as string ?? "—",
+                                ActividadNombre = r["actividad_nombre"] as string ?? "-",
                                 DiasAsistidos   = Convert.ToInt32(r["dias_asistidos"]),
                                 TotalHoras      = r["total_horas"]      != DBNull.Value ? Convert.ToDecimal(r["total_horas"])      : 0m,
                                 SueldoEstimado  = r["sueldo_estimado"]  != DBNull.Value ? Convert.ToDecimal(r["sueldo_estimado"])  : 0m

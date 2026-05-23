@@ -183,10 +183,10 @@ GO
 -- ─────────────────────────────────────────────────────────────
 -- 5. INSERTAR — cobrar cuota nueva
 --    Reglas:
---      · Cancela la membresía activa anterior del mismo socio+actividad
+--      · Valida que no exista membresía activa de la misma actividad
+--      · Calcula vencimiento automático según el plan
 --      · Registra el cobro en caja automáticamente
 --      · Guarda en historial
---      · tipo_plan calcula la fecha_vencimiento si no se pasa
 -- ─────────────────────────────────────────────────────────────
 IF OBJECT_ID('sp_InsertarMembresia', 'P') IS NOT NULL
     DROP PROCEDURE sp_InsertarMembresia;
@@ -195,7 +195,7 @@ CREATE PROCEDURE sp_InsertarMembresia
     @SocioId          BIGINT,
     @ActividadId      BIGINT,
     @InstructorId     BIGINT          = NULL,
-    @FechaInicio      DATE,
+    @FechaInicio      DATE            = NULL,
     @FechaVencimiento DATE            = NULL,
     @TipoPlan         VARCHAR(20)     = 'mensual',
     @MontoPagado      DECIMAL(12,2),
@@ -205,6 +205,8 @@ CREATE PROCEDURE sp_InsertarMembresia
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    IF @FechaInicio IS NULL SET @FechaInicio = CAST(GETDATE() AS DATE);
 
     IF NOT EXISTS (SELECT 1 FROM socios WHERE id = @SocioId AND eliminado_en IS NULL)
     BEGIN
@@ -218,14 +220,34 @@ BEGIN
         RETURN;
     END
 
-    -- Calcular fecha_vencimiento según tipo_plan si no se pasó explícitamente
+    -- Validar que no existe membresía activa de la misma actividad para este socio
+    IF EXISTS (
+        SELECT 1 FROM membresias
+        WHERE socio_id     = @SocioId
+          AND actividad_id = @ActividadId
+          AND estado       = 'activa'
+    )
+    BEGIN
+        RAISERROR('Este socio ya tiene una membresía activa de esta actividad. Debe renovarla o darla de baja primero.', 16, 1);
+        RETURN;
+    END
+
+    -- Calcular vencimiento automático según plan
     IF @FechaVencimiento IS NULL
     BEGIN
-        SET @FechaVencimiento = CASE @TipoPlan
-            WHEN 'clase'   THEN @FechaInicio
-            WHEN 'semanal' THEN DATEADD(DAY,  7, @FechaInicio)
-            ELSE                DATEADD(DAY, 31, @FechaInicio)
+        DECLARE @DiasVigencia INT;
+        SET @DiasVigencia = CASE @TipoPlan
+            WHEN 'clase_suelta'  THEN 1
+            WHEN 'quincenal'     THEN 15
+            WHEN 'mensual'       THEN 31
+            WHEN 'trimestral'    THEN 90
+            WHEN 'semestral'     THEN 180
+            WHEN 'anual'         THEN 365
+            WHEN 'clase'         THEN 1
+            WHEN 'semanal'       THEN 7
+            ELSE 31
         END;
+        SET @FechaVencimiento = DATEADD(DAY, @DiasVigencia - 1, @FechaInicio);
     END
 
     IF @FechaVencimiento < @FechaInicio
@@ -233,15 +255,6 @@ BEGIN
         RAISERROR('La fecha de vencimiento debe ser igual o posterior a la de inicio.', 16, 1);
         RETURN;
     END
-
-    -- Cancelar membresías activas anteriores del mismo socio + actividad
-    UPDATE membresias
-    SET estado = 'cancelada',
-        actualizado_en = GETDATE(),
-        observaciones = ISNULL(observaciones + ' | ', '') + 'Reemplazada por nueva membresía'
-    WHERE socio_id = @SocioId
-      AND actividad_id = @ActividadId
-      AND estado IN ('activa', 'vencida');
 
     INSERT INTO membresias
         (socio_id, actividad_id, instructor_id, fecha_inicio, fecha_vencimiento,
@@ -275,7 +288,7 @@ BEGIN
     VALUES
         (@NuevaId, 'alta', @FechaInicio, @FechaVencimiento, @MontoPagado, @MetodoPago, @RegistradoPor);
 
-    SELECT @NuevaId AS id;
+    SELECT @NuevaId AS id, @FechaVencimiento AS fecha_vencimiento;
 END;
 GO
 
@@ -392,34 +405,50 @@ CREATE PROCEDURE sp_RenovarMembresia
     @MontoPagado   DECIMAL(12,2),
     @MetodoPago    VARCHAR(20)  = 'efectivo',
     @RegistradoPor BIGINT,
-    @DiasASumar    INT          = 31
+    @DiasASumar    INT          = 0
 AS
 BEGIN
     SET NOCOUNT ON;
 
     DECLARE @SocioId     BIGINT;
     DECLARE @ActividadId BIGINT;
-    DECLARE @VencActual  DATE;
-    DECLARE @NuevoVenc   DATE;
     DECLARE @TipoPlan    VARCHAR(20);
 
     SELECT @SocioId = socio_id, @ActividadId = actividad_id,
-           @VencActual = fecha_vencimiento, @TipoPlan = tipo_plan
+           @TipoPlan = tipo_plan
     FROM membresias WHERE id = @Id;
 
-    IF @SocioId IS NULL
+    IF @TipoPlan IS NULL
     BEGIN
-        RAISERROR('La membresía no existe.', 16, 1);
+        RAISERROR('Membresía no encontrada.', 16, 1);
         RETURN;
     END
 
-    IF @VencActual < CAST(GETDATE() AS DATE)
-        SET @NuevoVenc = DATEADD(DAY, @DiasASumar, CAST(GETDATE() AS DATE));
+    -- Calcular días según plan si no se pasó explícitamente
+    DECLARE @Dias INT;
+    IF @DiasASumar > 0
+        SET @Dias = @DiasASumar;
     ELSE
-        SET @NuevoVenc = DATEADD(DAY, @DiasASumar, @VencActual);
+        SET @Dias = CASE @TipoPlan
+            WHEN 'clase_suelta'  THEN 1
+            WHEN 'quincenal'     THEN 15
+            WHEN 'mensual'       THEN 31
+            WHEN 'trimestral'    THEN 90
+            WHEN 'semestral'     THEN 180
+            WHEN 'anual'         THEN 365
+            WHEN 'clase'         THEN 1
+            WHEN 'semanal'       THEN 7
+            ELSE 31
+        END;
 
-    UPDATE membresias
-    SET fecha_vencimiento = @NuevoVenc,
+    DECLARE @Hoy      DATE = CAST(GETDATE() AS DATE);
+    DECLARE @Vencim   DATE = DATEADD(DAY, @Dias - 1, @Hoy);
+
+    UPDATE membresias SET
+        fecha_inicio      = @Hoy,
+        fecha_vencimiento = @Vencim,
+        monto_pagado      = @MontoPagado,
+        metodo_pago       = @MetodoPago,
         estado            = 'activa',
         actualizado_en    = GETDATE()
     WHERE id = @Id;
@@ -438,9 +467,9 @@ BEGIN
     INSERT INTO membresia_historial
         (membresia_id, tipo_evento, fecha_desde, fecha_hasta, importe, metodo_pago, registrado_por)
     VALUES
-        (@Id, 'renovacion', @VencActual, @NuevoVenc, @MontoPagado, @MetodoPago, @RegistradoPor);
+        (@Id, 'renovacion', @Hoy, @Vencim, @MontoPagado, @MetodoPago, @RegistradoPor);
 
-    SELECT @NuevoVenc AS nueva_fecha_vencimiento;
+    SELECT @Id AS id, @Vencim AS nueva_fecha_vencimiento;
 END;
 GO
 

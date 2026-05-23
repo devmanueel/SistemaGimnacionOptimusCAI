@@ -139,7 +139,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             catch
             {
-                statActivas.Text = statPorVencer.Text = statVencidas.Text = statRecaudadoMes.Text = "—";
+                statActivas.Text = statPorVencer.Text = statVencidas.Text = statRecaudadoMes.Text = "-";
             }
         }
 
@@ -194,6 +194,21 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─────────────────────────────────────────────────────
         // AUTOCOMPLETADO de vencimiento al elegir tipo_plan o inicio
         // ─────────────────────────────────────────────────────
+        private int ObtenerDiasPlan(string plan)
+        {
+            switch (plan)
+            {
+                case "clase_suelta": return 1;
+                case "clase":        return 1;
+                case "quincenal":    return 15;
+                case "trimestral":   return 90;
+                case "semestral":    return 180;
+                case "anual":        return 365;
+                case "semanal":      return 7;
+                default:             return 31;
+            }
+        }
+
         private void cmbTipoPlan_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_esNuevo) return;
@@ -204,13 +219,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             string plan = item.Tag != null ? item.Tag.ToString() : "mensual";
             DateTime inicio = dpInicio.SelectedDate.Value;
-
-            if (plan == "clase")
-                dpVencimiento.SelectedDate = inicio;
-            else if (plan == "semanal")
-                dpVencimiento.SelectedDate = inicio.AddDays(7);
-            else
-                dpVencimiento.SelectedDate = inicio.AddDays(31);
+            int dias = ObtenerDiasPlan(plan);
+            dpVencimiento.SelectedDate = inicio.AddDays(dias - 1);
         }
 
         private void dpInicio_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
@@ -223,12 +233,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             if (_esNuevo)
             {
-                if (plan == "clase")
-                    dpVencimiento.SelectedDate = inicio;
-                else if (plan == "semanal")
-                    dpVencimiento.SelectedDate = inicio.AddDays(7);
-                else
-                    dpVencimiento.SelectedDate = inicio.AddDays(31);
+                int dias = ObtenerDiasPlan(plan);
+                dpVencimiento.SelectedDate = inicio.AddDays(dias - 1);
             }
         }
 
@@ -242,9 +248,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             LimpiarFormulario();
             LimpiarErrores();
 
-            // Defaults: hoy + 30 días
             dpInicio.SelectedDate = DateTime.Today;
-            dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+            dpVencimiento.SelectedDate = DateTime.Today.AddDays(30);
             cmbMetodoPago.SelectedIndex = 0;
 
             AbrirFormulario("COBRAR CUOTA");

@@ -44,12 +44,12 @@ namespace Entities
                 if (RolNombre == "empleado")
                     return "Empleado / Instructor";
 
-                return RolNombre ?? "—";
+                return RolNombre ?? "-";
             }
         }
         /// <summary>Texto legible del estado para el DataGrid</summary>
         public string EstadoTexto => Activo ? "Activo" : "Inactivo";
 
-        public string TarifaTexto => TarifaHora > 0 ? "$" + TarifaHora.ToString("N2") + "/h" : "—";
+        public string TarifaTexto => TarifaHora > 0 ? "$" + TarifaHora.ToString("N2") + "/h" : "-";
     }
 }

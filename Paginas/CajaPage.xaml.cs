@@ -32,8 +32,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private string _filtroTipo = "todos";
         private string _modoForm = "ingreso";   // "ingreso" o "gasto"
 
-        // TODO: reemplazar por el ID del usuario logueado cuando exista el sistema de login
-        private const long USUARIO_ACTUAL_ID = 1;
+        private long USUARIO_ACTUAL_ID => SesionManager.UsuarioId;
 
         // Conceptos sugeridos para los autocompletes
         private static readonly string[] ConceptosIngreso = {

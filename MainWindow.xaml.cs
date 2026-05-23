@@ -1,6 +1,8 @@
 ﻿// SistemaGimnacionOptimusCAI/MainWindow.xaml.cs — C# 7.3
 using Controllers;
+using Entities;
 using FontAwesome.WPF;
+using SistemaGimnacionOptimusCAI.Helpers;
 using SistemaGimnacionOptimusCAI.Paginas;
 using System;
 using System.Collections.Generic;
@@ -100,6 +102,7 @@ namespace SistemaGimnacionOptimusCAI
                 new MenuItem { Icono = FontAwesomeIcon.ClockOutline,        Texto = "Fichaje Instructores", TipoPagina = typeof(InstructorAsistenciasPage), SoloAdmin = false },
                 new MenuItem { Icono = FontAwesomeIcon.Clipboard,           Texto = "Rutinas",              TipoPagina = typeof(RutinasPage),               SoloAdmin = false },
                 new MenuItem { Icono = FontAwesomeIcon.Whatsapp,            Texto = "WhatsApp",             TipoPagina = typeof(WhatsappPage),              SoloAdmin = false },
+                new MenuItem { Icono = FontAwesomeIcon.BarChart,             Texto = "Reportes",             TipoPagina = typeof(ReportesPage),              SoloAdmin = false },
 
     // Solo admin
     new MenuItem { Icono = FontAwesomeIcon.SoccerBallOutline,Texto = "Actividades",          TipoPagina = typeof(ActividadesPage),          SoloAdmin = true },
@@ -325,6 +328,42 @@ namespace SistemaGimnacionOptimusCAI
 
         private void btnCerrarVentana_Click(object sender, RoutedEventArgs e)
             => Application.Current.Shutdown();
+
+        // ── BUSCADOR GLOBAL ───────────────────────────────────
+        private readonly SocioController _socioController = new SocioController();
+
+        private void txtBuscadorGlobal_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter) return;
+
+            string texto = txtBuscadorGlobal.Text.Trim();
+            if (string.IsNullOrWhiteSpace(texto)) return;
+
+            try
+            {
+                var resultados = _socioController.BuscarSocios(texto, "todos");
+                if (resultados == null || resultados.Count == 0)
+                {
+                    NotificacionWindow.MostrarAdvertencia("No se encontró ningún socio con '" + texto + "'.");
+                    return;
+                }
+
+                var socio = resultados[0];
+                var ficha = new FichaSocioWindow(socio);
+                ficha.Owner = this;
+                ficha.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError("Error en la búsqueda.\n" + ex.Message);
+            }
+
+            txtBuscadorGlobal.Text = string.Empty;
+        }
+
+        private void txtBuscadorGlobal_TextChanged(object sender, TextChangedEventArgs e)
+        {
+        }
 
         // ── DRAG WINDOW ───────────────────────────────────────
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

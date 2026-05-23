@@ -71,7 +71,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             catch
             {
-                statTotal.Text = statActivos.Text = statSociosTotal.Text = "—";
+                statTotal.Text = statActivos.Text = statSociosTotal.Text = "-";
             }
         }
 

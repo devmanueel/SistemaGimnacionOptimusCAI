@@ -32,7 +32,7 @@ namespace Entities
                     case 5: return "Viernes";
                     case 6: return "Sábado";
                     case 7: return "Domingo";
-                    default: return "—";
+                    default: return "-";
                 }
             }
         }
@@ -50,7 +50,7 @@ namespace Entities
                     case 5: return "VIE";
                     case 6: return "SÁB";
                     case 7: return "DOM";
-                    default: return "—";
+                    default: return "-";
                 }
             }
         }

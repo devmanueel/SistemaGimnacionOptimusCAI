@@ -94,7 +94,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             catch
             {
-                statTotal.Text = statActivos.Text = statInactivos.Text = statNuevosMes.Text = "—";
+                statTotal.Text = statActivos.Text = statInactivos.Text = statNuevosMes.Text = "-";
             }
         }
 
@@ -396,7 +396,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     comoNosConocio: comoConocio,
                     observaciones: txtObservaciones.Text,
                     foto: _fotoBytes,
-                    registradoPor: null);
+                    registradoPor: SesionManager.HaySesion ? (long?)SesionManager.UsuarioId : null);
 
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
                 NotificacionWindow.MostrarExito(r.mensaje, "¡Socio registrado!");

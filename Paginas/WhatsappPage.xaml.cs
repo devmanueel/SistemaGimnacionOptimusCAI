@@ -67,7 +67,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch
             {
                 statTotal.Text = statPendientes.Text =
-                    statEnviados.Text = statEnviadosHoy.Text = "—";
+                    statEnviados.Text = statEnviadosHoy.Text = "-";
             }
         }
 

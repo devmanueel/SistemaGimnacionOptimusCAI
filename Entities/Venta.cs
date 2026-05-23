@@ -34,7 +34,7 @@ namespace Entities
         {
             get
             {
-                if (string.IsNullOrEmpty(MetodoPago)) return "—";
+                if (string.IsNullOrEmpty(MetodoPago)) return "-";
                 return char.ToUpper(MetodoPago[0]) + MetodoPago.Substring(1);
             }
         }

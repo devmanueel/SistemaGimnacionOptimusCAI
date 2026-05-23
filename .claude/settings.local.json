@@ -3,7 +3,21 @@
     "allow": [
       "Bash(dotnet build *)",
       "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" SistemaGimnacionOptimusCAI.sln /p:Configuration=Debug /v:minimal)",
-      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"SistemaGimnacionOptimusCAI.sln\" \"/p:Configuration=Debug\" \"/v:minimal\")"
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"SistemaGimnacionOptimusCAI.sln\" \"/p:Configuration=Debug\" \"/v:minimal\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "PowerShell(nuget install *)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(dotnet nuget *)",
+      "PowerShell(dotnet restore *)",
+      "PowerShell(& \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI\\\\SistemaGimnacionOptimusCAI.sln\" /t:Build /p:Configuration=Debug /v:minimal /nologo 2>&1 | Out-String)",
+      "Bash(nuget install *)",
+      "Bash(curl --max-time 10 -sI https://www.nuget.org/api/v2/package/BouncyCastle/1.8.9)",
+      "Bash(curl --max-time 10 -sI -L \"https://www.nuget.org/api/v2/package/BouncyCastle.Cryptography/1.8.9\")",
+      "Bash(curl --max-time 10 -sI -L \"https://api.nuget.org/v3-flatcontainer/portable.bouncycastle/1.9.0/portable.bouncycastle.1.9.0.nupkg\")",
+      "Bash(curl --max-time 10 -sI -L \"https://api.nuget.org/v3-flatcontainer/bouncycastle/1.8.9/bouncycastle.1.8.9.nupkg\")",
+      "Bash('/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe' SistemaGimnacionOptimusCAI.csproj /t:Build /p:Configuration=Debug /v:minimal /m)"
     ]
   }
 }

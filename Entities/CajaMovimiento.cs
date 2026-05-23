@@ -69,7 +69,7 @@ namespace Entities
                 if (Tipo == "ingreso_clase") return "Clase";
                 if (Tipo == "gasto") return "Gasto";
                 if (Tipo == "movimiento_interno") return "Movim.";
-                return Tipo ?? "—";
+                return Tipo ?? "-";
             }
         }
 
@@ -78,7 +78,7 @@ namespace Entities
         {
             get
             {
-                if (string.IsNullOrEmpty(MetodoPago)) return "—";
+                if (string.IsNullOrEmpty(MetodoPago)) return "-";
                 return char.ToUpper(MetodoPago[0]) + MetodoPago.Substring(1);
             }
         }

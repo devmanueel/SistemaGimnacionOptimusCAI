@@ -55,6 +55,23 @@
     <Reference Include="FontAwesome.WPF, Version=4.7.0.37774, Culture=neutral, PublicKeyToken=0758b07a11a4f466, processorArchitecture=MSIL">
       <HintPath>packages\FontAwesome.WPF.4.7.0.9\lib\net40\FontAwesome.WPF.dll</HintPath>
     </Reference>
+    <Reference Include="itextsharp">
+      <HintPath>packages\iTextSharp.5.5.13.3\lib\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.9.0, Culture=neutral, PublicKeyToken=de99375e54769942, processorArchitecture=MSIL">
+      <HintPath>packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll</HintPath>
+      <Private>True</Private>
+      <SpecificVersion>True</SpecificVersion>
+    </Reference>
+    <Reference Include="ClosedXML">
+      <HintPath>packages\ClosedXML.0.95.4\lib\net46\ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml">
+      <HintPath>packages\DocumentFormat.OpenXml.2.7.2\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelNumberFormat">
+      <HintPath>packages\ExcelNumberFormat.1.0.10\lib\net20\ExcelNumberFormat.dll</HintPath>
+    </Reference>
     <Reference Include="MaterialDesignColors, Version=2.1.4.0, Culture=neutral, PublicKeyToken=df2a72020bd7962a, processorArchitecture=MSIL">
       <HintPath>packages\MaterialDesignColors.2.1.4\lib\net462\MaterialDesignColors.dll</HintPath>
     </Reference>
@@ -66,6 +83,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -97,6 +115,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Helpers\ByteToImageConverter.cs" />
+    <Compile Include="Helpers\CarnetGenerator.cs" />
+    <Compile Include="Helpers\ReportePdfExportador.cs" />
+    <Compile Include="Helpers\ReporteExcelExportador.cs" />
     <Compile Include="Helpers\InicialesConverter.cs" />
     <Compile Include="Helpers\Validador.cs" />
     <Compile Include="Helpers\WidthHeightToRectConverter.cs" />
@@ -175,6 +196,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Paginas\FichaSocioWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Paginas\ReportesPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Paginas\ActividadesPage.xaml.cs">
@@ -225,6 +254,12 @@
     <Compile Include="Paginas\WhatsappPage.xaml.cs">
       <DependentUpon>WhatsappPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Paginas\FichaSocioWindow.xaml.cs">
+      <DependentUpon>FichaSocioWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\ReportesPage.xaml.cs">
+      <DependentUpon>ReportesPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -250,6 +285,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll">
+      <Link>BouncyCastle.Crypto.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Controllers\Controllers.csproj">

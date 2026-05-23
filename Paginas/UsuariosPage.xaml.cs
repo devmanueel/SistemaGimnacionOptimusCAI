@@ -117,6 +117,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtEmail.Text = usuario.Email ?? string.Empty;
             txtTelefono.Text = usuario.Telefono ?? string.Empty;
             txtDomicilio.Text = usuario.Domicilio ?? string.Empty;
+            txtTarifaHora.Text = usuario.TarifaHora > 0 ? usuario.TarifaHora.ToString("F0") : "0";
             txtClave.Password = string.Empty;
             _fotoBytes = null;
 
@@ -176,6 +177,104 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ─────────────────────────────────────────────────────────
+        // CAMBIAR CONTRASEÑA
+        // ─────────────────────────────────────────────────────────
+        private void btnCambiarClave_Click(object sender, RoutedEventArgs e)
+        {
+            var usuario = ObtenerUsuarioDeFila(sender);
+            if (usuario == null) return;
+
+            string nuevaClave = MostrarDialogoClave(usuario.NombreCompleto);
+            if (string.IsNullOrWhiteSpace(nuevaClave)) return;
+
+            var resultado = _controller.CambiarPassword(usuario.Id, nuevaClave);
+            if (resultado.ok)
+                NotificacionWindow.MostrarExito(resultado.mensaje);
+            else
+                NotificacionWindow.MostrarError(resultado.mensaje);
+        }
+
+        private string MostrarDialogoClave(string nombreUsuario)
+        {
+            var win = new Window
+            {
+                Title = "Cambiar contraseña",
+                Width = 380,
+                Height = 200,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = Window.GetWindow(this),
+                ResizeMode = ResizeMode.NoResize,
+                WindowStyle = WindowStyle.ToolWindow,
+                Background = new SolidColorBrush(Color.FromRgb(16, 22, 16))
+            };
+
+            var panel = new StackPanel { Margin = new Thickness(20) };
+
+            var lbl = new TextBlock
+            {
+                Text = "Nueva contraseña para " + nombreUsuario + ":",
+                Foreground = new SolidColorBrush(Color.FromRgb(200, 210, 200)),
+                FontSize = 13,
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+
+            var pwd = new PasswordBox
+            {
+                FontSize = 14,
+                Height = 36,
+                Background = new SolidColorBrush(Color.FromRgb(24, 32, 24)),
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(60, 80, 60)),
+                Padding = new Thickness(8, 6, 8, 6)
+            };
+
+            var btnPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 14, 0, 0)
+            };
+
+            string resultado = null;
+
+            var btnAceptar = new Button
+            {
+                Content = "GUARDAR",
+                Width = 100,
+                Height = 34,
+                Margin = new Thickness(0, 0, 8, 0),
+                Background = new SolidColorBrush(Color.FromRgb(122, 201, 67)),
+                Foreground = Brushes.Black,
+                FontWeight = FontWeights.Bold,
+                Cursor = Cursors.Hand
+            };
+            btnAceptar.Click += (s, ev) => { resultado = pwd.Password; win.Close(); };
+
+            var btnCancelar = new Button
+            {
+                Content = "Cancelar",
+                Width = 80,
+                Height = 34,
+                Background = Brushes.Transparent,
+                Foreground = new SolidColorBrush(Color.FromRgb(160, 170, 160)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(60, 80, 60)),
+                Cursor = Cursors.Hand
+            };
+            btnCancelar.Click += (s, ev) => win.Close();
+
+            btnPanel.Children.Add(btnAceptar);
+            btnPanel.Children.Add(btnCancelar);
+
+            panel.Children.Add(lbl);
+            panel.Children.Add(pwd);
+            panel.Children.Add(btnPanel);
+            win.Content = panel;
+
+            win.ShowDialog();
+            return resultado;
+        }
+
+        // ─────────────────────────────────────────────────────────
         // FOTO
         // ─────────────────────────────────────────────────────────
         private void btnSubirFoto_Click(object sender, RoutedEventArgs e)
@@ -220,6 +319,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             int rolId = Convert.ToInt32(rolItem.Tag);
 
+            decimal tarifaHora = 0;
+            if (!string.IsNullOrWhiteSpace(txtTarifaHora.Text))
+                decimal.TryParse(txtTarifaHora.Text, out tarifaHora);
+
             if (_esNuevo)
             {
                 var r = _controller.Insertar(
@@ -231,7 +334,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     domicilio: txtDomicilio.Text,
                     telefono: txtTelefono.Text,
                     email: txtEmail.Text,
-                    foto: _fotoBytes);
+                    foto: _fotoBytes,
+                    tarifaHora: tarifaHora);
 
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
                 NotificacionWindow.MostrarExito(r.mensaje, "¡Usuario registrado!");
@@ -248,7 +352,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     domicilio: txtDomicilio.Text,
                     telefono: txtTelefono.Text,
                     email: txtEmail.Text,
-                    foto: _fotoBytes);
+                    foto: _fotoBytes,
+                    tarifaHora: tarifaHora);
 
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
                 NotificacionWindow.MostrarExito(r.mensaje, "¡Usuario actualizado!");
@@ -300,6 +405,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // BLOQUEO DNI: solo números en tiempo real
         // ─────────────────────────────────────────────────────────
         private void txtDni_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !Regex.IsMatch(e.Text, @"^\d$");
+        }
+
+        private void txtTarifaHora_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !Regex.IsMatch(e.Text, @"^\d$");
         }
@@ -450,6 +560,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtEmail.Text = string.Empty;
             txtTelefono.Text = string.Empty;
             txtDomicilio.Text = string.Empty;
+            txtTarifaHora.Text = "0";
             txtClave.Password = string.Empty;
             cmbRol.SelectedIndex = 0;
             imgFotoFormulario.ImageSource = null;

@@ -103,7 +103,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch
             {
                 statHoy.Text = statAbiertas.Text =
-                    statInstructores.Text = statMes.Text = "—";
+                    statInstructores.Text = statMes.Text = "-";
             }
         }
 

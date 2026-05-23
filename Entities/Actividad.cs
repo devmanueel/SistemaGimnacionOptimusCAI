@@ -35,7 +35,7 @@ namespace Entities
             {
                 if (Tipo == "mensual") return "Mensual";
                 if (Tipo == "mensual_con_clases") return "Mensual con clases";
-                return Tipo ?? "—";
+                return Tipo ?? "-";
             }
         }
 

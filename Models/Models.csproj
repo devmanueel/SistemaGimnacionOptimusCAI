@@ -42,11 +42,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DAO\ActividadDao.cs" />
+    <Compile Include="DAO\ReporteDao.cs" />
     <Compile Include="DAO\AsistenciaDao.cs" />
     <Compile Include="DAO\AuditoriaDao.cs" />
     <Compile Include="DAO\CajaDao.cs" />
     <Compile Include="DAO\CasilleroDao.cs" />
+    <Compile Include="DAO\ConfiguracionDao.cs" />
     <Compile Include="DAO\ConnectionToDB.cs" />
+    <Compile Include="DAO\FichaMedicaDao.cs" />
     <Compile Include="DAO\InstructorAsistenciaDao.cs" />
     <Compile Include="DAO\MembresiaDao.cs" />
     <Compile Include="DAO\ProductoDao.cs" />

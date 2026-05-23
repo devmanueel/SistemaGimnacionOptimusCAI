@@ -199,7 +199,7 @@ BEGIN
         s.nombre + ' ' + s.apellido AS socio_nombre,
         s.foto                       AS socio_foto,
         s.dni                        AS socio_dni,
-        ISNULL(a.nombre, '—')        AS actividad_nombre
+        ISNULL(a.nombre, '-')        AS actividad_nombre
     FROM registros_acceso r
     INNER JOIN socios      s ON s.id = r.socio_id
     LEFT  JOIN membresias  m ON m.id = r.membresia_id
@@ -233,7 +233,7 @@ BEGIN
         s.nombre + ' ' + s.apellido AS socio_nombre,
         s.foto                       AS socio_foto,
         s.dni                        AS socio_dni,
-        ISNULL(a.nombre, '—')        AS actividad_nombre
+        ISNULL(a.nombre, '-')        AS actividad_nombre
     FROM registros_acceso r
     INNER JOIN socios      s ON s.id = r.socio_id
     LEFT  JOIN membresias  m ON m.id = r.membresia_id
