@@ -135,7 +135,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             cmbActividad.SelectedIndex = -1;
             cmbInstructor.SelectedIndex = 0;
             cmbMetodoPago.SelectedIndex = 0;
-            cmbTipoPlan.SelectedIndex = 0;
             txtMonto.Text = string.Empty;
             txtObservaciones.Text = string.Empty;
             panelPreviewMonto.Visibility = Visibility.Collapsed;
@@ -230,7 +229,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             catch
             {
-                statActivas.Text = statPorVencer.Text = statVencidas.Text = statRecaudadoMes.Text = "—";
+                statActivas.Text = statPorVencer.Text = statVencidas.Text = statRecaudadoMes.Text = "-";
             }
         }
 
@@ -291,6 +290,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             LimpiarFormulario();
             LimpiarErrores();
 
+            dpInicio.SelectedDate = DateTime.Today;
+            dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+            cmbMetodoPago.SelectedIndex = 0;
             AbrirFormulario("COBRAR CUOTA");
         }
 
@@ -340,13 +342,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtMonto.Text = m.MontoPagado.ToString("F0");
             txtMonto.IsEnabled = true;
             ActualizarPreviewMonto();
-
-            foreach (ComboBoxItem tp in cmbTipoPlan.Items)
-            {
-                if (tp.Tag != null && tp.Tag.ToString() == m.TipoPlan)
-                { cmbTipoPlan.SelectedItem = tp; break; }
-            }
-            cmbTipoPlan.IsEnabled = true;
 
             foreach (ComboBoxItem mp in cmbMetodoPago.Items)
             {
@@ -501,9 +496,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
                 long? actividadEditada = actividad != null ? (long?)actividad.Id : null;
 
-                var tipoPlanItem2 = cmbTipoPlan.SelectedItem as ComboBoxItem;
-                string tipoPlanEditado = tipoPlanItem2 != null && tipoPlanItem2.Tag != null
-                    ? tipoPlanItem2.Tag.ToString() : null;
+                string tipoPlanEditado = "mensual";
 
                 var metodoItem2 = cmbMetodoPago.SelectedItem as ComboBoxItem;
                 string metodoPagoEditado = metodoItem2 != null && metodoItem2.Tag != null
@@ -697,8 +690,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtMonto.IsEnabled = true;
             cmbMetodoPago.SelectedIndex = 0;
             cmbMetodoPago.IsEnabled = true;
-            cmbTipoPlan.SelectedIndex = 0;
-            cmbTipoPlan.IsEnabled = true;
             txtObservaciones.Text = string.Empty;
             panelPreviewMonto.Visibility = Visibility.Collapsed;
             _idEditar = 0;

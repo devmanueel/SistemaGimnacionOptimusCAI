@@ -99,6 +99,10 @@ namespace Controllers
                 socioCreado.Apellido = socio.Apellido;
                 socioCreado.Dni = socio.Dni;
 
+                Auditor.Registrar("crear", "socio", socioCreado.Id, new Dictionary<string, object> {
+                    { "nombre", nombre }, { "apellido", apellido }, { "dni", dni }
+                });
+
                 return (true, "Socio registrado correctamente.", socioCreado);
             }
             catch (Exception ex)
@@ -151,6 +155,12 @@ namespace Controllers
             try
             {
                 bool ok = _dao.ModificarSocio(socio, regenerarPin, foto != null);
+                if (ok)
+                {
+                    Auditor.Registrar("modificar", "socio", id, new Dictionary<string, object> {
+                        { "nombre", nombre }, { "apellido", apellido }, { "dni", dni }
+                    });
+                }
                 return ok
                     ? (true, "Socio actualizado correctamente.")
                     : (false, "No se encontró el socio para actualizar.");
@@ -172,6 +182,10 @@ namespace Controllers
             {
                 bool ok = _dao.CambiarEstadoSocio(id, nuevoEstado);
                 string accion = nuevoEstado ? "activado" : "desactivado";
+                if (ok)
+                {
+                    Auditor.Registrar(nuevoEstado ? "activar" : "desactivar", "socio", id);
+                }
                 return ok
                     ? (true, $"Socio {accion} correctamente.")
                     : (false, "No se encontró el socio.");
@@ -190,6 +204,10 @@ namespace Controllers
             try
             {
                 bool ok = _dao.EliminarSocio(id);
+                if (ok)
+                {
+                    Auditor.Registrar("eliminar", "socio", id);
+                }
                 return ok
                     ? (true, "Socio eliminado del sistema.")
                     : (false, "No se encontró el socio.");
@@ -248,6 +266,11 @@ namespace Controllers
                 if (fechaNac.Value < DateTime.Today.AddYears(-120))
                     return "La fecha de nacimiento no es válida.";
             }
+
+            if (string.IsNullOrWhiteSpace(telefono))
+                return "El número de celular es obligatorio.";
+            if (telefono.Trim().Length < 8)
+                return "El número de celular es inválido.";
 
             e = Validador.ValidarTelefono(telefono);
             if (e != null) return e;

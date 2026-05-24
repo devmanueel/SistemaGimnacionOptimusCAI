@@ -28,14 +28,14 @@ namespace Entities
         // Calculadas
         public string FechaTexto => Fecha.ToString("dd/MM/yyyy");
         public string FechaCorta => Fecha.ToString("dd/MM");
-        public string HoraEntradaTexto => HoraEntrada.HasValue ? HoraEntrada.Value.ToString(@"hh\:mm") : "—";
-        public string HoraSalidaTexto => HoraSalida.HasValue ? HoraSalida.Value.ToString(@"hh\:mm") : "—";
+        public string HoraEntradaTexto => HoraEntrada.HasValue ? HoraEntrada.Value.ToString(@"hh\:mm") : "-";
+        public string HoraSalidaTexto => HoraSalida.HasValue ? HoraSalida.Value.ToString(@"hh\:mm") : "-";
 
         public string HorasTrabajadasTexto
         {
             get
             {
-                if (HorasTrabajadas <= 0) return AsistenciaAbierta ? "en curso" : "—";
+                if (HorasTrabajadas <= 0) return AsistenciaAbierta ? "en curso" : "-";
                 int h = (int)HorasTrabajadas;
                 int m = (int)((HorasTrabajadas - h) * 60);
                 return h > 0 ? $"{h}h {m:D2}m" : $"{m} min";
@@ -51,7 +51,7 @@ namespace Entities
             {
                 if (AsistenciaAbierta) return "Abierta";
                 if (AsistenciaCerrada) return "Cerrada";
-                return "—";
+                return "-";
             }
         }
 
@@ -60,7 +60,7 @@ namespace Entities
         {
             get
             {
-                if (!AsistenciaCerrada) return "—";
+                if (!AsistenciaCerrada) return "-";
                 TimeSpan d = HoraSalida.Value - HoraEntrada.Value;
                 int h = (int)d.TotalHours;
                 int m = d.Minutes;
@@ -101,8 +101,8 @@ namespace Entities
 
         // Calculadas
         public string RangoHorario => HoraInicio.ToString(@"hh\:mm") + " — " + HoraFin.ToString(@"hh\:mm");
-        public string HoraEntradaTexto => HoraEntrada.HasValue ? HoraEntrada.Value.ToString(@"hh\:mm") : "—";
-        public string HoraSalidaTexto => HoraSalida.HasValue ? HoraSalida.Value.ToString(@"hh\:mm") : "—";
+        public string HoraEntradaTexto => HoraEntrada.HasValue ? HoraEntrada.Value.ToString(@"hh\:mm") : "-";
+        public string HoraSalidaTexto => HoraSalida.HasValue ? HoraSalida.Value.ToString(@"hh\:mm") : "-";
 
         public bool SinFichar => !AsistenciaId.HasValue;
         public bool EntradaRegistrada => AsistenciaId.HasValue && HoraEntrada.HasValue && !HoraSalida.HasValue;
@@ -117,7 +117,7 @@ namespace Entities
                 if (SinFichar) return "Pendiente";
                 if (EntradaRegistrada) return "En curso";
                 if (SalidaRegistrada) return "Finalizado";
-                return "—";
+                return "-";
             }
         }
     }
@@ -151,7 +151,7 @@ namespace Entities
         }
 
         public string SueldoTexto  => "$" + SueldoEstimado.ToString("N2");
-        public string TarifaTexto  => TarifaHora > 0 ? "$" + TarifaHora.ToString("N2") + "/h" : "—";
+        public string TarifaTexto  => TarifaHora > 0 ? "$" + TarifaHora.ToString("N2") + "/h" : "-";
     }
 
     public class FichajeResultado
@@ -163,14 +163,14 @@ namespace Entities
         public TimeSpan HoraSalida     { get; set; }
         public decimal  HorasTrabajadas { get; set; }
 
-        public string HoraEntradaTexto  => HoraEntrada  != default(TimeSpan) ? HoraEntrada.ToString(@"hh\:mm")  : "—";
-        public string HoraSalidaTexto   => HoraSalida   != default(TimeSpan) ? HoraSalida.ToString(@"hh\:mm")   : "—";
+        public string HoraEntradaTexto  => HoraEntrada  != default(TimeSpan) ? HoraEntrada.ToString(@"hh\:mm")  : "-";
+        public string HoraSalidaTexto   => HoraSalida   != default(TimeSpan) ? HoraSalida.ToString(@"hh\:mm")   : "-";
 
         public string HorasTrabajadasTexto
         {
             get
             {
-                if (HorasTrabajadas <= 0) return "—";
+                if (HorasTrabajadas <= 0) return "-";
                 int h = (int)HorasTrabajadas;
                 int m = (int)((HorasTrabajadas - h) * 60);
                 return h > 0 ? $"{h}h {m:D2}m" : $"{m} min";

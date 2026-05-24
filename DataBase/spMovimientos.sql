@@ -238,6 +238,48 @@ BEGIN
 END;
 GO
 
+-- ─────────────────────────────────────────────────────────────
+-- 8. COLUMNAS ADICIONALES (idempotentes)
+-- ─────────────────────────────────────────────────────────────
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id=OBJECT_ID('caja_movimientos') AND name='nombre_externo')
+    ALTER TABLE caja_movimientos ADD nombre_externo VARCHAR(150) NULL;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 9. FILTRAR CAJA (filtros avanzados)
+-- ─────────────────────────────────────────────────────────────
+IF OBJECT_ID('sp_FiltrarCaja','P') IS NOT NULL DROP PROCEDURE sp_FiltrarCaja;
+GO
+CREATE PROCEDURE sp_FiltrarCaja
+    @FechaDesde  DATE        = NULL,
+    @FechaHasta  DATE        = NULL,
+    @Tipo        VARCHAR(20) = NULL,
+    @Subtipo     VARCHAR(30) = NULL,
+    @MetodoPago  VARCHAR(30) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF @FechaDesde IS NULL SET @FechaDesde = DATEADD(DAY,-30,CAST(GETDATE() AS DATE));
+    IF @FechaHasta IS NULL SET @FechaHasta = CAST(GETDATE() AS DATE);
+
+    SELECT
+        cm.id, cm.tipo, cm.subtipo, cm.detalle AS concepto, cm.monto, cm.metodo_pago,
+        cm.socio_id, cm.membresia_id, cm.actividad_id, cm.venta_id,
+        cm.nombre_externo,
+        cm.usuario_id AS registrado_por, cm.creado_en,
+        ISNULL(u.nombre+' '+u.apellido,'Sistema') AS registrado_por_nombre,
+        SUM(CASE WHEN cm.tipo LIKE 'ingreso%' THEN cm.monto ELSE 0 END) OVER() AS total_ingresos,
+        SUM(CASE WHEN cm.tipo = 'gasto' OR cm.tipo = 'movimiento_interno' THEN cm.monto ELSE 0 END) OVER() AS total_egresos
+    FROM caja_movimientos cm
+    LEFT JOIN usuarios u ON u.id = cm.usuario_id
+    WHERE CAST(cm.creado_en AS DATE) BETWEEN @FechaDesde AND @FechaHasta
+      AND (@Tipo       IS NULL OR cm.tipo       = @Tipo OR (@Tipo = 'ingreso' AND cm.tipo LIKE 'ingreso%'))
+      AND (@Subtipo    IS NULL OR cm.subtipo    = @Subtipo)
+      AND (@MetodoPago IS NULL OR cm.metodo_pago = @MetodoPago)
+    ORDER BY cm.creado_en DESC;
+END;
+GO
+
 -- Verificación
 EXEC sp_ResumenCaja;
 EXEC sp_IngresosUltimos7Dias;

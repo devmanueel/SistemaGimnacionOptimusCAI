@@ -439,16 +439,6 @@
                                     </ComboBox.Resources>
                                 </ComboBox>
 
-                            <!-- TIPO DE PLAN -->
-                            <TextBlock Text="TIPO DE PLAN *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <ComboBox x:Name="cmbTipoPlan" Style="{StaticResource ComboBoxEstilo}">
-                                <ComboBox.Resources>
-                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
-                                    <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
-                                </ComboBox.Resources>
-                                <ComboBoxItem Content="Mensual (31 días)"    Tag="mensual" Foreground="{StaticResource TextPrimary}" IsSelected="True"/>
-                            </ComboBox>
-
                             <!-- FECHAS lado a lado (automáticas, no editables) -->
                             <Grid Margin="0,0,0,0">
                                 <Grid.ColumnDefinitions>

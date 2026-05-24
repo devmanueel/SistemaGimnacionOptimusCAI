@@ -251,6 +251,27 @@ namespace Models.Dao
         }
 
         // ──────────────────────────────────────────────────────────
+        // CAMBIAR CONTRASEÑA
+        // ──────────────────────────────────────────────────────────
+        public bool CambiarPassword(long id, string nuevoHash)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+
+                using (var cmd = new SqlCommand("sp_CambiarPasswordUsuario", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", id);
+                    cmd.Parameters.AddWithValue("@NuevoHashSHA256", nuevoHash);
+
+                    var filas = cmd.ExecuteScalar();
+                    return filas != null && Convert.ToInt32(filas) > 0;
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
         // ELIMINAR (soft-delete)
         // ──────────────────────────────────────────────────────────
         public bool EliminarUsuario(long id)

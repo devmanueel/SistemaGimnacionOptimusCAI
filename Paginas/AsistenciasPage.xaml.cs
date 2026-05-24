@@ -258,6 +258,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             panelEsperando.Visibility = Visibility.Collapsed;
 
+            // Datos del socio
             lblSocioNombre.Text = string.IsNullOrEmpty(r.SocioNombre) ? "—" : r.SocioNombre;
             lblNumeroSocio.Text = r.NumeroSocio.HasValue ? r.NumeroSocioFormateado : "";
             lblMensaje.Text = r.Mensaje;

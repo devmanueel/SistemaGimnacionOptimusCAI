@@ -90,6 +90,8 @@ namespace Controllers
             }
             catch (Exception ex)
             {
+                if (ex.Message.Contains("ya tiene una membresía activa"))
+                    return (false, ex.Message, 0);
                 return (false, "Error al registrar la membresía.\n" + ex.Message, 0);
             }
         }
@@ -135,7 +137,6 @@ namespace Controllers
                         { "fecha_vencimiento", fechaVencimiento.ToString("yyyy-MM-dd") }
                     });
                 }
-
                 return ok
                     ? (true, "Membresía actualizada correctamente.")
                     : (false, "No se encontró la membresía para actualizar.");
@@ -173,6 +174,12 @@ namespace Controllers
             try
             {
                 bool ok = _dao.CambiarEstadoMembresia(id, nuevoEstado);
+                if (ok)
+                {
+                    Auditor.Registrar("editar", "membresia", id, new Dictionary<string, object> {
+                        { "nuevo_estado", nuevoEstado }
+                    });
+                }
                 return ok
                     ? (true, "Estado de la membresía actualizado a '" + nuevoEstado + "'.")
                     : (false, "No se encontró la membresía.");
@@ -221,6 +228,10 @@ namespace Controllers
             try
             {
                 bool ok = _dao.EliminarMembresia(id, registradoPor);
+                if (ok)
+                {
+                    Auditor.Registrar("eliminar", "membresia", id);
+                }
                 return ok
                     ? (true, "Membresía cancelada.")
                     : (false, "No se encontró la membresía.");

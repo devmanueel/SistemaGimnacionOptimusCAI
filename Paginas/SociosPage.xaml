@@ -653,7 +653,7 @@
 
                             <!-- TAB 2: CONTACTO -->
                             <StackPanel x:Name="tabContacto" Visibility="Collapsed">
-                                <TextBlock Text="TELÉFONO" Style="{StaticResource LabelCampoEstilo}"/>
+                                <TextBlock Text="CELULAR *" Style="{StaticResource LabelCampoEstilo}"/>
                                 <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"
                                          MaxLength="20" LostFocus="txtTelefono_LostFocus"/>
                                 <TextBlock x:Name="errTelefono" Style="{StaticResource LabelErrorEstilo}"/>

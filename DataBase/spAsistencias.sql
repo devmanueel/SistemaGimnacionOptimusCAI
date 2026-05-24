@@ -239,16 +239,97 @@ BEGIN
 END;
 GO
 
-------- NUEVO -------
-
--- Agregar columnas
-ALTER TABLE actividades
-    ADD limite_por_semana TINYINT NULL,
-        limite_total      TINYINT NULL;
+-- ─────────────────────────────────────────────────────────────
+-- 2. OBTENER REGISTROS DEL DÍA
+-- ─────────────────────────────────────────────────────────────
+IF OBJECT_ID('sp_ObtenerAccesosDelDia', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ObtenerAccesosDelDia;
+GO
+CREATE PROCEDURE sp_ObtenerAccesosDelDia
+    @Limite INT = 50
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT TOP (@Limite)
+        r.id, r.socio_id, r.membresia_id, r.metodo_acceso, r.resultado, r.accedido_en,
+        s.numero_socio,
+        s.nombre + ' ' + s.apellido AS socio_nombre,
+        s.foto                       AS socio_foto,
+        s.dni                        AS socio_dni,
+        ISNULL(a.nombre, '-')        AS actividad_nombre
+    FROM registros_acceso r
+    INNER JOIN socios      s ON s.id = r.socio_id
+    LEFT  JOIN membresias  m ON m.id = r.membresia_id
+    LEFT  JOIN actividades a ON a.id = m.actividad_id
+    WHERE CAST(r.accedido_en AS DATE) = CAST(GETDATE() AS DATE)
+    ORDER BY r.accedido_en DESC;
+END;
 GO
 
--- Cargar valores según cada actividad
--- Ajustá los nombres si difieren en tu tabla
+-- ─────────────────────────────────────────────────────────────
+-- 3. BUSCAR ACCESOS POR RANGO
+-- ─────────────────────────────────────────────────────────────
+IF OBJECT_ID('sp_BuscarAccesos', 'P') IS NOT NULL
+    DROP PROCEDURE sp_BuscarAccesos;
+GO
+CREATE PROCEDURE sp_BuscarAccesos
+    @Texto           NVARCHAR(100) = '',
+    @FiltroResultado VARCHAR(30)   = 'todos',
+    @FechaDesde      DATE          = NULL,
+    @FechaHasta      DATE          = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @FechaDesde IS NULL SET @FechaDesde = DATEADD(DAY, -7, CAST(GETDATE() AS DATE));
+    IF @FechaHasta IS NULL SET @FechaHasta = CAST(GETDATE() AS DATE);
+
+    SELECT
+        r.id, r.socio_id, r.membresia_id, r.metodo_acceso, r.resultado, r.accedido_en,
+        s.numero_socio,
+        s.nombre + ' ' + s.apellido AS socio_nombre,
+        s.foto                       AS socio_foto,
+        s.dni                        AS socio_dni,
+        ISNULL(a.nombre, '-')        AS actividad_nombre
+    FROM registros_acceso r
+    INNER JOIN socios      s ON s.id = r.socio_id
+    LEFT  JOIN membresias  m ON m.id = r.membresia_id
+    LEFT  JOIN actividades a ON a.id = m.actividad_id
+    WHERE CAST(r.accedido_en AS DATE) BETWEEN @FechaDesde AND @FechaHasta
+      AND (
+            @Texto = ''
+         OR s.nombre   LIKE '%' + @Texto + '%'
+         OR s.apellido LIKE '%' + @Texto + '%'
+         OR s.dni      LIKE '%' + @Texto + '%'
+         OR CAST(s.numero_socio AS VARCHAR(20)) LIKE '%' + @Texto + '%'
+          )
+      AND (
+            @FiltroResultado = 'todos'
+         OR (@FiltroResultado = 'permitido' AND r.resultado = 'permitido')
+         OR (@FiltroResultado = 'denegado'  AND r.resultado LIKE 'denegado%')
+          )
+    ORDER BY r.accedido_en DESC;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 4. COLUMNAS DE LÍMITES (si no existen)
+-- ─────────────────────────────────────────────────────────────
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('actividades') AND name = 'limite_por_semana'
+)
+    ALTER TABLE actividades ADD limite_por_semana TINYINT NULL;
+GO
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('actividades') AND name = 'limite_total'
+)
+    ALTER TABLE actividades ADD limite_total TINYINT NULL;
+GO
+
+-- Cargar valores según cada actividad (ajustar nombres si difieren)
 UPDATE actividades SET limite_por_semana = 2,    limite_total = NULL WHERE nombre = 'Gimnasio 2 Veces Por Semana';
 UPDATE actividades SET limite_por_semana = 3,    limite_total = NULL WHERE nombre = 'Gimnasio 3 Veces Por Semana';
 UPDATE actividades SET limite_por_semana = NULL, limite_total = NULL WHERE nombre = 'Gimnasio Todos Los Dias';

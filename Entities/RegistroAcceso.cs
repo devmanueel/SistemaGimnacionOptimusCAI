@@ -50,7 +50,7 @@ namespace Entities
                 if (Resultado == "denegado_dia") return "Día no permitido";
                 if (Resultado == "denegado_socio_inactivo") return "Socio inactivo";
                 if (Resultado != null && Resultado.StartsWith("denegado_")) return "Acceso denegado";
-                return Resultado ?? "—";
+                return Resultado ?? "-";
             }
         }
 
@@ -62,7 +62,7 @@ namespace Entities
                 if (MetodoAcceso == "huella") return "Huella";
                 if (MetodoAcceso == "dni_pin") return "DNI / PIN";
                 if (MetodoAcceso == "manual") return "Manual";
-                return MetodoAcceso ?? "—";
+                return MetodoAcceso ?? "-";
             }
         }
     }
@@ -88,10 +88,10 @@ namespace Entities
         public bool EsPermitido => Resultado == "permitido";
 
         public string NumeroSocioFormateado
-            => NumeroSocio.HasValue ? "#" + NumeroSocio.Value.ToString("D4") : "—";
+            => NumeroSocio.HasValue ? "#" + NumeroSocio.Value.ToString("D4") : "-";
 
         public string FechaVencimientoTexto
-            => FechaVencimiento.HasValue ? FechaVencimiento.Value.ToString("dd/MM/yyyy") : "—";
+            => FechaVencimiento.HasValue ? FechaVencimiento.Value.ToString("dd/MM/yyyy") : "-";
 
         /// <summary>Días que faltan para que venza la membresía.</summary>
         public int? DiasParaVencer
@@ -107,7 +107,7 @@ namespace Entities
         {
             get
             {
-                if (!DiasParaVencer.HasValue) return "—";
+                if (!DiasParaVencer.HasValue) return "-";
                 int d = DiasParaVencer.Value;
                 if (d == 0) return "Vence hoy";
                 if (d == 1) return "Vence mañana";

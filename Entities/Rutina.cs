@@ -97,13 +97,13 @@ namespace Entities
 
         // Calculadas
         public string SeriesTexto
-            => Series.HasValue ? Series.Value + "x" : "—";
+            => Series.HasValue ? Series.Value + "x" : "-";
 
         public string DescansoTexto
         {
             get
             {
-                if (!DescansoSeg.HasValue) return "—";
+                if (!DescansoSeg.HasValue) return "-";
                 int s = DescansoSeg.Value;
                 if (s < 60) return s + "s";
                 int m = s / 60;
@@ -128,7 +128,7 @@ namespace Entities
                 if (!string.IsNullOrEmpty(Peso)) parts.Add(Peso);
                 if (DescansoSeg.HasValue && DescansoSeg.Value > 0) parts.Add(DescansoTexto);
 
-                return parts.Count == 0 ? "—" : string.Join(" · ", parts);
+                return parts.Count == 0 ? "-" : string.Join(" · ", parts);
             }
         }
 
@@ -152,7 +152,7 @@ namespace Entities
         public string AsignadoPorNombre { get; set; }
 
         public string FechaTexto => AsignadoEn.ToString("dd/MM/yyyy");
-        public string NumeroSocioTexto => NumeroSocio.HasValue ? "#" + NumeroSocio.Value.ToString("D4") : "—";
+        public string NumeroSocioTexto => NumeroSocio.HasValue ? "#" + NumeroSocio.Value.ToString("D4") : "-";
     }
 
     // ──────────────────────────────────────────────────────────

@@ -78,7 +78,7 @@ namespace Entities
         {
             get
             {
-                if (string.IsNullOrEmpty(Estado)) return "—";
+                if (string.IsNullOrEmpty(Estado)) return "-";
                 return char.ToUpper(Estado[0]) + Estado.Substring(1);
             }
         }
@@ -109,7 +109,7 @@ namespace Entities
         {
             get
             {
-                if (string.IsNullOrEmpty(MetodoPago)) return "—";
+                if (string.IsNullOrEmpty(MetodoPago)) return "-";
                 return char.ToUpper(MetodoPago[0]) + MetodoPago.Substring(1);
             }
         }
@@ -118,9 +118,18 @@ namespace Entities
         {
             get
             {
-                if (TipoPlan == "clase") return "Clase suelta";
-                if (TipoPlan == "semanal") return "Semanal";
-                return "Mensual";
+                switch (TipoPlan)
+                {
+                    case "clase_suelta":  return "Clase suelta";
+                    case "clase":         return "Clase suelta";
+                    case "quincenal":     return "Quincenal";
+                    case "semanal":       return "Semanal";
+                    case "mensual":       return "Mensual";
+                    case "trimestral":    return "Trimestral";
+                    case "semestral":     return "Semestral";
+                    case "anual":         return "Anual";
+                    default: return TipoPlan ?? "Mensual";
+                }
             }
         }
     }

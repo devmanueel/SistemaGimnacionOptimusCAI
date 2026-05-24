@@ -45,7 +45,7 @@ namespace Entities
                 if (Estado == "libre") return "Libre";
                 if (Estado == "ocupado") return "Ocupado";
                 if (Estado == "mantenimiento") return "Mantenimiento";
-                return Estado ?? "—";
+                return Estado ?? "-";
             }
         }
 
@@ -55,14 +55,14 @@ namespace Entities
 
         /// <summary>"Pérez, Juan" — nombre del socio asignado o vacío.</summary>
         public string AsignadoA
-            => string.IsNullOrEmpty(SocioNombre) ? "—" : SocioNombre;
+            => string.IsNullOrEmpty(SocioNombre) ? "-" : SocioNombre;
 
         /// <summary>"Desde 15/12/2025" — texto de cuándo se asignó.</summary>
         public string AsignadoDesdeTexto
         {
             get
             {
-                if (!AsignadoEn.HasValue) return "—";
+                if (!AsignadoEn.HasValue) return "-";
                 int dias = (DateTime.Today - AsignadoEn.Value.Date).Days;
                 if (dias == 0) return "Asignado hoy";
                 if (dias == 1) return "Asignado ayer";

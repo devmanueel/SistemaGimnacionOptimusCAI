@@ -189,7 +189,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             statSociosActivos.Text = activos.ToString();
             statMembresiasActivas.Text = membresiasActivas.ToString();
-            statIngresosMes.Text = resumenMes.BalanceTexto;
+            statIngresosMes.Text = resumenMes.TotalIngresosTexto;
+            statBalanceMes.Text = "Balance: " + resumenMes.BalanceTexto;
+            statBalanceMes.Foreground = resumenMes.Balance >= 0
+                ? new SolidColorBrush(Color.FromRgb(160, 192, 112))
+                : new SolidColorBrush(Color.FromRgb(255, 85, 85));
             statAsistenciasHoy.Text = stats.Count().ToString();
             // TODO: reemplazar con llamadas reales a tus DAOs
             // Ejemplo:
