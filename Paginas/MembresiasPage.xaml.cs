@@ -34,12 +34,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private long _idEditar = 0;
         private string _filtroEstado = "todos";
         private DateTime _fechaVencActual = DateTime.Today;
+        private Socio _socioPreCargado = null;
+        private long _actividadActualId = 0;
+        private string _actividadActualCategoria = null;
+        private int? _actividadActualNivel = null;
 
         private long USUARIO_ACTUAL_ID => SesionManager.UsuarioId;
 
-        public MembresiasPage()
+        public MembresiasPage() : this(null) { }
+
+        public MembresiasPage(Socio socioPreCargado)
         {
             InitializeComponent();
+            _socioPreCargado = socioPreCargado;
             CargarCombos();
             CargarMembresias();
             ResaltarChip(chipTodos);
@@ -56,6 +63,89 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 SesionManager.AbrirPanelAlNavegar = false;
                 if (SesionManager.EsAdmin) btnNuevo_Click(null, null);
             }
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (_socioPreCargado != null)
+            {
+                AbrirPanelNuevaMembresia(_socioPreCargado);
+                _socioPreCargado = null;
+            }
+        }
+
+        private void AbrirPanelNuevaMembresia(Socio socio)
+        {
+            _esNuevo = true;
+            _idEditar = 0;
+
+            panelFormulario.Visibility = Visibility.Visible;
+            panelFormulario.Opacity = 0;
+
+            var translate = new TranslateTransform { X = 60 };
+            panelFormulario.RenderTransform = translate;
+
+            var slide = new DoubleAnimation
+            {
+                From = 60,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromMilliseconds(350)),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+            translate.BeginAnimation(TranslateTransform.XProperty, slide);
+
+            var fade = new DoubleAnimation
+            {
+                From = 0,
+                To = 1,
+                Duration = new Duration(TimeSpan.FromMilliseconds(300))
+            };
+            panelFormulario.BeginAnimation(OpacityProperty, fade);
+
+            lblTituloFormulario.Text = "COBRAR CUOTA";
+
+            cmbSocio.ItemsSource = _controller.ListarSociosParaCombo();
+
+            bool socioEncontrado = false;
+            foreach (var item in cmbSocio.Items)
+            {
+                var sci = item as SocioComboItem;
+                if (sci != null && sci.Id == socio.Id)
+                {
+                    cmbSocio.SelectedItem = item;
+                    socioEncontrado = true;
+                    break;
+                }
+            }
+
+            if (!socioEncontrado)
+            {
+                var nuevoItem = new SocioComboItem
+                {
+                    Id = socio.Id,
+                    NumeroSocio = socio.NumeroSocio,
+                    Nombre = socio.Nombre ?? "Socio",
+                    Apellido = socio.Apellido ?? "",
+                    Dni = socio.Dni ?? ""
+                };
+                cmbSocio.Items.Add(nuevoItem);
+                cmbSocio.SelectedItem = nuevoItem;
+            }
+
+            cmbActividad.SelectedIndex = -1;
+            cmbInstructor.SelectedIndex = 0;
+            cmbMetodoPago.SelectedIndex = 0;
+            txtMonto.Text = string.Empty;
+            txtObservaciones.Text = string.Empty;
+            panelPreviewMonto.Visibility = Visibility.Collapsed;
+            LimpiarErrores();
+
+            dpInicio.SelectedDate = DateTime.Today;
+            dpInicio.IsEnabled = false;
+            dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+            dpVencimiento.IsEnabled = false;
+
+            cmbActividad.Focus();
         }
 
         // ─────────────────────────────────────────────────────
@@ -183,58 +273,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var act = cmbActividad.SelectedItem as ActividadComboItem;
             if (act == null) return;
 
-            // Sugerir el precio
             if (string.IsNullOrWhiteSpace(txtMonto.Text) || _esNuevo)
             {
                 txtMonto.Text = act.Precio.ToString("F0");
                 ActualizarPreviewMonto();
-            }
-        }
-
-        // ─────────────────────────────────────────────────────
-        // AUTOCOMPLETADO de vencimiento al elegir tipo_plan o inicio
-        // ─────────────────────────────────────────────────────
-        private int ObtenerDiasPlan(string plan)
-        {
-            switch (plan)
-            {
-                case "clase_suelta": return 1;
-                case "clase":        return 1;
-                case "quincenal":    return 15;
-                case "trimestral":   return 90;
-                case "semestral":    return 180;
-                case "anual":        return 365;
-                case "semanal":      return 7;
-                default:             return 31;
-            }
-        }
-
-        private void cmbTipoPlan_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_esNuevo) return;
-            if (dpInicio == null || !dpInicio.SelectedDate.HasValue) return;
-
-            var item = cmbTipoPlan.SelectedItem as ComboBoxItem;
-            if (item == null) return;
-
-            string plan = item.Tag != null ? item.Tag.ToString() : "mensual";
-            DateTime inicio = dpInicio.SelectedDate.Value;
-            int dias = ObtenerDiasPlan(plan);
-            dpVencimiento.SelectedDate = inicio.AddDays(dias - 1);
-        }
-
-        private void dpInicio_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!dpInicio.SelectedDate.HasValue) return;
-
-            var item = cmbTipoPlan.SelectedItem as ComboBoxItem;
-            string plan = item != null && item.Tag != null ? item.Tag.ToString() : "mensual";
-            DateTime inicio = dpInicio.SelectedDate.Value;
-
-            if (_esNuevo)
-            {
-                int dias = ObtenerDiasPlan(plan);
-                dpVencimiento.SelectedDate = inicio.AddDays(dias - 1);
             }
         }
 
@@ -249,9 +291,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             LimpiarErrores();
 
             dpInicio.SelectedDate = DateTime.Today;
-            dpVencimiento.SelectedDate = DateTime.Today.AddDays(30);
+            dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
             cmbMetodoPago.SelectedIndex = 0;
-
             AbrirFormulario("COBRAR CUOTA");
         }
 
@@ -261,12 +302,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (m == null) return;
 
             _esNuevo = false;
-            _fechaVencActual = m.FechaVencimiento;
 
             LimpiarFormulario();
-            _idEditar = m.Id;
 
-            // Pre-seleccionar socio (deshabilitado al editar)
+            _idEditar = m.Id;
+            _actividadActualId = m.ActividadId;
+            _actividadActualCategoria = m.ActividadCategoria;
+            _actividadActualNivel = m.ActividadNivel;
+
             foreach (var item in cmbSocio.Items)
             {
                 var sci = item as SocioComboItem;
@@ -279,9 +322,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 var aci = item as ActividadComboItem;
                 if (aci != null && aci.Id == m.ActividadId) { cmbActividad.SelectedItem = item; break; }
             }
-            cmbActividad.IsEnabled = true;
 
-            // Instructor
             foreach (var item in cmbInstructor.Items)
             {
                 var ici = item as InstructorComboItem;
@@ -297,16 +338,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             dpInicio.SelectedDate = m.FechaInicio;
             dpInicio.IsEnabled = false;
             dpVencimiento.SelectedDate = m.FechaVencimiento;
+            dpVencimiento.IsEnabled = false;
             txtMonto.Text = m.MontoPagado.ToString("F0");
             txtMonto.IsEnabled = true;
             ActualizarPreviewMonto();
-
-            foreach (ComboBoxItem tp in cmbTipoPlan.Items)
-            {
-                if (tp.Tag != null && tp.Tag.ToString() == m.TipoPlan)
-                { cmbTipoPlan.SelectedItem = tp; break; }
-            }
-            cmbTipoPlan.IsEnabled = true;
 
             foreach (ComboBoxItem mp in cmbMetodoPago.Items)
             {
@@ -397,8 +432,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var instructor = cmbInstructor.SelectedItem as InstructorComboItem;
             var metodoItem = cmbMetodoPago.SelectedItem as ComboBoxItem;
 
-            DateTime inicio = dpInicio.SelectedDate.Value;
-            DateTime venc = dpVencimiento.SelectedDate.Value;
+            DateTime inicio = DateTime.Today;
+            DateTime venc = DateTime.Today.AddDays(31);
             decimal monto = 0;
             decimal.TryParse(txtMonto.Text, out monto);
 
@@ -417,20 +452,18 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     return;
                 }
 
-                var tipoPlanItem = cmbTipoPlan.SelectedItem as ComboBoxItem;
-                string tipoPlan = tipoPlanItem != null && tipoPlanItem.Tag != null
-                    ? tipoPlanItem.Tag.ToString() : "mensual";
-
                 var r = _controller.Insertar(
                     socio.Id, actividad.Id, instructorId,
                     inicio, venc, monto, metodoPago,
-                    USUARIO_ACTUAL_ID, txtObservaciones.Text, tipoPlan);
+                    USUARIO_ACTUAL_ID, txtObservaciones.Text, "mensual");
 
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
                 NotificacionWindow.MostrarExito(r.mensaje, "¡Cuota cobrada!");
             }
             else
             {
+                venc = dpVencimiento.SelectedDate.Value;
+
                 if (venc.Date < _fechaVencActual.Date)
                 {
                     NotificacionWindow.MostrarError(
@@ -438,11 +471,32 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     return;
                 }
 
+                // Validación de cambio de plan (solo si se cambia la actividad)
+                if (actividad != null && actividad.Id != _actividadActualId)
+                {
+                    // Validar misma categoría
+                    if (!string.IsNullOrEmpty(_actividadActualCategoria) && 
+                        !string.IsNullOrEmpty(actividad.Categoria) &&
+                        _actividadActualCategoria != actividad.Categoria)
+                    {
+                        NotificacionWindow.MostrarError(
+                            "No se puede cambiar a otra categoría. El cambio de plan solo está permitido dentro de la misma categoría.");
+                        return;
+                    }
+
+                    // Validar solo upgrade (nivel mayor)
+                    if (_actividadActualNivel.HasValue && actividad.Nivel.HasValue &&
+                        actividad.Nivel.Value <= _actividadActualNivel.Value)
+                    {
+                        NotificacionWindow.MostrarError(
+                            "Solo se permite cambiar a un plan superior (upgrade). El downgrade no está permitido.");
+                        return;
+                    }
+                }
+
                 long? actividadEditada = actividad != null ? (long?)actividad.Id : null;
 
-                var tipoPlanItem2 = cmbTipoPlan.SelectedItem as ComboBoxItem;
-                string tipoPlanEditado = tipoPlanItem2 != null && tipoPlanItem2.Tag != null
-                    ? tipoPlanItem2.Tag.ToString() : null;
+                string tipoPlanEditado = "mensual";
 
                 var metodoItem2 = cmbMetodoPago.SelectedItem as ComboBoxItem;
                 string metodoPagoEditado = metodoItem2 != null && metodoItem2.Tag != null
@@ -508,8 +562,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─────────────────────────────────────────────────────
         private bool ValidarTodo()
         {
-            // Solo validamos los campos que se editan al insertar.
-            // En modo edición, varios campos están deshabilitados.
             if (_esNuevo)
             {
                 if (cmbSocio.SelectedItem == null)
@@ -521,12 +573,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 if (cmbActividad.SelectedItem == null)
                 {
                     NotificacionWindow.MostrarAdvertencia("Tenés que elegir una actividad.");
-                    return false;
-                }
-
-                if (!dpInicio.SelectedDate.HasValue)
-                {
-                    NotificacionWindow.MostrarAdvertencia("Falta la fecha de inicio.");
                     return false;
                 }
 
@@ -543,20 +589,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     NotificacionWindow.MostrarAdvertencia(err);
                     return false;
                 }
-            }
-
-            if (!dpVencimiento.SelectedDate.HasValue)
-            {
-                NotificacionWindow.MostrarAdvertencia("Falta la fecha de vencimiento.");
-                return false;
-            }
-
-            if (dpInicio.SelectedDate.HasValue &&
-                dpVencimiento.SelectedDate.Value.Date <= dpInicio.SelectedDate.Value.Date)
-            {
-                NotificacionWindow.MostrarError(
-                    "La fecha de vencimiento debe ser posterior a la de inicio.");
-                return false;
             }
 
             return true;
@@ -609,6 +641,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var fade = new DoubleAnimation
             { From = 0, To = 1, Duration = new Duration(TimeSpan.FromMilliseconds(300)) };
             panelFormulario.BeginAnimation(OpacityProperty, fade);
+
+            if (_esNuevo)
+            {
+                dpInicio.SelectedDate = DateTime.Today;
+                dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+                cmbActividad.IsEnabled = true;
+            }
+            else
+            {
+                cmbActividad.IsEnabled = true;
+            }
         }
 
         private void CerrarFormulario()
@@ -639,18 +682,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             cmbActividad.SelectedIndex = -1;
             cmbActividad.IsEnabled = true;
             cmbInstructor.SelectedIndex = 0;
-            dpInicio.SelectedDate = null;
-            dpInicio.IsEnabled = true;
-            dpVencimiento.SelectedDate = null;
+            dpInicio.SelectedDate = DateTime.Today;
+            dpInicio.IsEnabled = false;
+            dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+            dpVencimiento.IsEnabled = false;
             txtMonto.Text = string.Empty;
             txtMonto.IsEnabled = true;
             cmbMetodoPago.SelectedIndex = 0;
             cmbMetodoPago.IsEnabled = true;
-            cmbTipoPlan.SelectedIndex = 0;
-            cmbTipoPlan.IsEnabled = true;
             txtObservaciones.Text = string.Empty;
             panelPreviewMonto.Visibility = Visibility.Collapsed;
             _idEditar = 0;
+            // No resetear _actividadActualId, _actividadActualCategoria, _actividadActualNivel aquí
+            // porque se asignan después en btnEditar_Click
         }
 
         private Membresia ObtenerMembresiaDeFila(object sender)

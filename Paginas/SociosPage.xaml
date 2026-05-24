@@ -737,7 +737,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Button Grid.Column="0" Content="Cancelar"
-                                Style="{StaticResource BotonCerrarEstilo}"
+                                Style="{StaticResource BotonDangerLargoEstilo}"
                                 Margin="0,0,8,0" Click="btnCancelar_Click"/>
                         <Button x:Name="btnGuardar" Grid.Column="1" Content="GUARDAR"
                                 Style="{StaticResource BotonPrincipalEstilo}"

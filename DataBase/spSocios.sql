@@ -1,19 +1,40 @@
 -- ============================================================
 --  STORED PROCEDURES — TABLA socios
 --  Sistema Gimnasio OptimusCAI · SQL Server / LocalDB
---  v1.1 — Cambios:
+--  v1.2 — Cambios:
+--    · numero_socio ahora excluye eliminados al calcular siguiente
 --    · Teléfono ya no es único (Problema 2)
 --    · registrado_por ya incluido en sp_InsertarSocio (estaba OK)
 --    · Nuevos SPs: sp_SociosParaDarDeBaja + sp_DarDeBajaSocios
 -- ============================================================
 
--- Agregar columna foto si no existe
+-- Agregar columna numero_socio si no existe
+IF NOT EXISTS (
+    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_NAME = 'socios' AND COLUMN_NAME = 'numero_socio'
+)
+BEGIN
+    ALTER TABLE socios ADD numero_socio INT NULL;
+END
+GO
+
+-- Agregar columna foto si no existe (para guardar imagen como binario)
 IF NOT EXISTS (
     SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
     WHERE TABLE_NAME = 'socios' AND COLUMN_NAME = 'foto'
 )
 BEGIN
     ALTER TABLE socios ADD foto VARBINARY(MAX) NULL;
+END
+GO
+
+-- Eliminar columna foto_path si existe (ya no se usa, ahora guardamos binario)
+IF EXISTS (
+    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_NAME = 'socios' AND COLUMN_NAME = 'foto_path'
+)
+BEGIN
+    ALTER TABLE socios DROP COLUMN foto_path;
 END
 GO
 
@@ -122,7 +143,7 @@ CREATE PROCEDURE sp_ObtenerSiguienteNumeroSocio
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT ISNULL(MAX(numero_socio), 0) + 1 AS siguiente FROM socios;
+    SELECT ISNULL(MAX(numero_socio), 0) + 1 AS siguiente FROM socios WHERE eliminado_en IS NULL;
 END;
 GO
 
@@ -158,7 +179,7 @@ BEGIN
     END
 
     DECLARE @NumeroSocio INT;
-    SELECT @NumeroSocio = ISNULL(MAX(numero_socio), 0) + 1 FROM socios;
+    SELECT @NumeroSocio = ISNULL(MAX(numero_socio), 0) + 1 FROM socios WHERE eliminado_en IS NULL;
 
     INSERT INTO socios
         (numero_socio, nombre, apellido, dni, dni_pin, fecha_nacimiento, sexo,
@@ -169,7 +190,12 @@ BEGIN
          @Telefono, @Domicilio, @Profesion, @Email, @ComoNosConocio, @Observaciones,
          @Foto, 1, @RegistradoPor);
 
-    SELECT SCOPE_IDENTITY() AS id;
+    DECLARE @NuevoId BIGINT = SCOPE_IDENTITY();
+
+    SELECT
+        @NuevoId                        AS id,
+        @NumeroSocio                    AS numero_socio,
+        @Nombre + ' ' + @Apellido       AS nombre_completo;
 END;
 GO
 

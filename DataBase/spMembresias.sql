@@ -1,12 +1,13 @@
 -- ============================================================
 --  STORED PROCEDURES — TABLA membresias
 --  Sistema Gimnasio OptimusCAI · SQL Server / LocalDB
---  v1.1 — Reglas de negocio actualizadas:
+--  v1.2 — Reglas de negocio actualizadas:
 --    · Pago único e irrevocable (no se puede bajar el plan)
 --    · Fechas solo avanzan (nunca retroceden)
 --    · Sin congelamiento (estado 'suspendida' eliminado)
 --    · Historial de cada alta / modificación / anulación
 --    · tipo_plan: 'mensual' | 'semanal' | 'clase'
+--    · Cambio de plan: solo misma categoría y solo upgrade
 -- ============================================================
 
 -- ─────────────────────────────────────────────────────────────
@@ -17,6 +18,21 @@ IF NOT EXISTS (
     WHERE object_id = OBJECT_ID('membresias') AND name = 'tipo_plan'
 )
     ALTER TABLE membresias ADD tipo_plan VARCHAR(20) NOT NULL DEFAULT 'mensual';
+GO
+
+-- Agregar columnas categoria y nivel a actividades (para regla de cambio de plan)
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('actividades') AND name = 'categoria'
+)
+    ALTER TABLE actividades ADD categoria VARCHAR(50) NULL;
+GO
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('actividades') AND name = 'nivel'
+)
+    ALTER TABLE actividades ADD nivel TINYINT NULL;
 GO
 
 IF OBJECT_ID('membresia_historial') IS NULL
@@ -78,6 +94,8 @@ BEGIN
         s.foto                      AS socio_foto,
         a.nombre                    AS actividad_nombre,
         a.tipo                      AS actividad_tipo,
+        a.categoria                 AS actividad_categoria,
+        a.nivel                     AS actividad_nivel,
         ISNULL(i.nombre + ' ' + i.apellido, 'Sin asignar') AS instructor_nombre,
         ISNULL(u.nombre + ' ' + u.apellido, 'Sistema')     AS registrado_por_nombre,
         DATEDIFF(DAY, CAST(GETDATE() AS DATE), m.fecha_vencimiento) AS dias_para_vencer
@@ -113,6 +131,8 @@ BEGIN
         s.foto                      AS socio_foto,
         a.nombre                    AS actividad_nombre,
         a.tipo                      AS actividad_tipo,
+        a.categoria                 AS actividad_categoria,
+        a.nivel                     AS actividad_nivel,
         ISNULL(i.nombre + ' ' + i.apellido, 'Sin asignar') AS instructor_nombre,
         ISNULL(u.nombre + ' ' + u.apellido, 'Sistema')     AS registrado_por_nombre,
         DATEDIFF(DAY, CAST(GETDATE() AS DATE), m.fecha_vencimiento) AS dias_para_vencer
@@ -153,6 +173,8 @@ BEGIN
         s.foto                      AS socio_foto,
         a.nombre                    AS actividad_nombre,
         a.tipo                      AS actividad_tipo,
+        a.categoria                 AS actividad_categoria,
+        a.nivel                     AS actividad_nivel,
         ISNULL(i.nombre + ' ' + i.apellido, 'Sin asignar') AS instructor_nombre,
         ISNULL(u.nombre + ' ' + u.apellido, 'Sistema')     AS registrado_por_nombre,
         DATEDIFF(DAY, CAST(GETDATE() AS DATE), m.fecha_vencimiento) AS dias_para_vencer
@@ -163,19 +185,19 @@ BEGIN
     LEFT  JOIN usuarios    u ON u.id = m.registrado_por
     WHERE (
             @Texto = ''
-         OR s.nombre   LIKE '%' + @Texto + '%'
-         OR s.apellido LIKE '%' + @Texto + '%'
-         OR s.dni      LIKE '%' + @Texto + '%'
-         OR a.nombre   LIKE '%' + @Texto + '%'
-         OR CAST(s.numero_socio AS VARCHAR(20)) LIKE '%' + @Texto + '%'
-          )
+          OR s.nombre   LIKE '%' + @Texto + '%'
+          OR s.apellido LIKE '%' + @Texto + '%'
+          OR s.dni      LIKE '%' + @Texto + '%'
+          OR a.nombre   LIKE '%' + @Texto + '%'
+          OR CAST(s.numero_socio AS VARCHAR(20)) LIKE '%' + @Texto + '%'
+           )
       AND (
             @FiltroEstado = 'todos'
          OR (@FiltroEstado = 'por_vencer'
-             AND m.estado = 'activa'
-             AND DATEDIFF(DAY, CAST(GETDATE() AS DATE), m.fecha_vencimiento) BETWEEN 0 AND 7)
-         OR m.estado = @FiltroEstado
-          )
+              AND m.estado = 'activa'
+              AND DATEDIFF(DAY, CAST(GETDATE() AS DATE), m.fecha_vencimiento) BETWEEN 0 AND 7)
+          OR m.estado = @FiltroEstado
+           )
     ORDER BY m.creado_en DESC;
 END;
 GO
@@ -187,6 +209,7 @@ GO
 --      · Calcula vencimiento automático según el plan
 --      · Registra el cobro en caja automáticamente
 --      · Guarda en historial
+--      · fechas automáticas: inicio = hoy, vencimiento = hoy + 31 días
 -- ─────────────────────────────────────────────────────────────
 IF OBJECT_ID('sp_InsertarMembresia', 'P') IS NOT NULL
     DROP PROCEDURE sp_InsertarMembresia;
@@ -195,8 +218,8 @@ CREATE PROCEDURE sp_InsertarMembresia
     @SocioId          BIGINT,
     @ActividadId      BIGINT,
     @InstructorId     BIGINT          = NULL,
-    @FechaInicio      DATE            = NULL,
-    @FechaVencimiento DATE            = NULL,
+    @FechaInicio      DATE,
+    @FechaVencimiento DATE,
     @TipoPlan         VARCHAR(20)     = 'mensual',
     @MontoPagado      DECIMAL(12,2),
     @MetodoPago       VARCHAR(20)     = 'efectivo',
@@ -206,7 +229,9 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    IF @FechaInicio IS NULL SET @FechaInicio = CAST(GETDATE() AS DATE);
+    -- Fechas automáticas (regla de negocio: siempre 31 días)
+    SET @FechaInicio = CAST(GETDATE() AS DATE);
+    SET @FechaVencimiento = DATEADD(DAY, 31, @FechaInicio);
 
     IF NOT EXISTS (SELECT 1 FROM socios WHERE id = @SocioId AND eliminado_en IS NULL)
     BEGIN
@@ -220,39 +245,47 @@ BEGIN
         RETURN;
     END
 
-    -- Validar que no existe membresía activa de la misma actividad para este socio
-    IF EXISTS (
-        SELECT 1 FROM membresias
-        WHERE socio_id     = @SocioId
-          AND actividad_id = @ActividadId
-          AND estado       = 'activa'
-    )
+    -- Validar 1: No permitir si ya tiene membresía activa con la MISMA ACTIVIDAD
+    DECLARE @MembresiaMismaActividadId BIGINT;
+    DECLARE @ActividadNombre NVARCHAR(150);
+
+    SELECT TOP 1 
+        @MembresiaMismaActividadId = m.id,
+        @ActividadNombre = a.nombre
+    FROM membresias m
+    INNER JOIN actividades a ON a.id = m.actividad_id
+    WHERE m.socio_id = @SocioId
+      AND m.estado IN ('activa', 'vencida')
+      AND m.actividad_id = @ActividadId;
+
+    IF @MembresiaMismaActividadId IS NOT NULL
     BEGIN
-        RAISERROR('Este socio ya tiene una membresía activa de esta actividad. Debe renovarla o darla de baja primero.', 16, 1);
+        RAISERROR('El socio ya tiene una membresía activa con la actividad "%s". No se puede crear una nueva membresía con la misma actividad.', 16, 1, @ActividadNombre);
         RETURN;
     END
 
-    -- Calcular vencimiento automático según plan
-    IF @FechaVencimiento IS NULL
-    BEGIN
-        DECLARE @DiasVigencia INT;
-        SET @DiasVigencia = CASE @TipoPlan
-            WHEN 'clase_suelta'  THEN 1
-            WHEN 'quincenal'     THEN 15
-            WHEN 'mensual'       THEN 31
-            WHEN 'trimestral'    THEN 90
-            WHEN 'semestral'     THEN 180
-            WHEN 'anual'         THEN 365
-            WHEN 'clase'         THEN 1
-            WHEN 'semanal'       THEN 7
-            ELSE 31
-        END;
-        SET @FechaVencimiento = DATEADD(DAY, @DiasVigencia - 1, @FechaInicio);
-    END
+    -- Validar 2: No permitir si ya tiene membresía activa en la misma CATEGORÍA (diferente actividad)
+    DECLARE @CategoriaNueva VARCHAR(50);
+    DECLARE @CategoriaExistente VARCHAR(50);
+    DECLARE @MembresiaExistenteId BIGINT;
 
-    IF @FechaVencimiento < @FechaInicio
+    SELECT @CategoriaNueva = categoria 
+    FROM actividades 
+    WHERE id = @ActividadId;
+
+    SELECT TOP 1 
+        @CategoriaExistente = a.categoria,
+        @MembresiaExistenteId = m.id
+    FROM membresias m
+    INNER JOIN actividades a ON a.id = m.actividad_id
+    WHERE m.socio_id = @SocioId
+      AND m.estado IN ('activa', 'vencida')
+      AND a.categoria = @CategoriaNueva
+      AND m.actividad_id <> @ActividadId;
+
+    IF @MembresiaExistenteId IS NOT NULL
     BEGIN
-        RAISERROR('La fecha de vencimiento debe ser igual o posterior a la de inicio.', 16, 1);
+        RAISERROR('El socio ya tiene una membresía activa en la categoría "%s". No se puede crear otra membresía en la misma categoría.', 16, 1, @CategoriaExistente);
         RETURN;
     END
 
@@ -293,8 +326,38 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
+-- 5.5 OBTENER CATEGORÍA DE MEMBRESÍA ACTIVA POR SOCIO
+-- ─────────────────────────────────────────────────────────────
+IF OBJECT_ID('sp_ObtenerCategoriaMembresiaActiva', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ObtenerCategoriaMembresiaActiva;
+GO
+CREATE PROCEDURE sp_ObtenerCategoriaMembresiaActiva
+    @SocioId     BIGINT,
+    @ActividadId BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    DECLARE @CategoriaNueva VARCHAR(50);
+    
+    SELECT @CategoriaNueva = categoria 
+    FROM actividades 
+    WHERE id = @ActividadId;
+    
+    SELECT TOP 1 a.categoria
+    FROM membresias m
+    INNER JOIN actividades a ON a.id = m.actividad_id
+    WHERE m.socio_id = @SocioId
+      AND m.estado IN ('activa', 'vencida')
+      AND a.categoria = @CategoriaNueva
+      AND m.actividad_id <> @ActividadId;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
 -- 6. MODIFICAR — solo instructor, observaciones y fecha (solo adelante)
 --    Regla: la fecha_vencimiento solo puede avanzar, nunca retroceder.
+--    Regla de cambio de plan: solo misma categoría y solo upgrade (nivel mayor)
 -- ─────────────────────────────────────────────────────────────
 IF OBJECT_ID('sp_ModificarMembresia', 'P') IS NOT NULL
     DROP PROCEDURE sp_ModificarMembresia;
@@ -315,10 +378,12 @@ BEGIN
 
     DECLARE @VencActual   DATE;
     DECLARE @FechaInicio  DATE;
+    DECLARE @ActividadActualId BIGINT;
 
     SELECT
         @VencActual  = fecha_vencimiento,
-        @FechaInicio = fecha_inicio
+        @FechaInicio = fecha_inicio,
+        @ActividadActualId = actividad_id
     FROM membresias WHERE id = @Id;
 
     IF @VencActual IS NULL
@@ -332,6 +397,46 @@ BEGIN
     BEGIN
         RAISERROR('La fecha de vencimiento no puede ser anterior a la actual. Los días solo pueden aumentar.', 16, 1);
         RETURN;
+    END
+
+    -- Validación de cambio de plan (solo si se cambia la actividad)
+    IF @ActividadId IS NOT NULL AND @ActividadId <> @ActividadActualId
+    BEGIN
+        DECLARE @CategoriaActual VARCHAR(50);
+        DECLARE @NivelActual TINYINT;
+        DECLARE @CategoriaNueva VARCHAR(50);
+        DECLARE @NivelNuevo TINYINT;
+
+        -- Obtener categoría y nivel actual
+        SELECT 
+            @CategoriaActual = a.categoria,
+            @NivelActual = a.nivel
+        FROM actividades a
+        INNER JOIN membresias m ON m.actividad_id = a.id
+        WHERE m.id = @Id;
+
+        -- Obtener categoría y nivel nuevo
+        SELECT 
+            @CategoriaNueva = categoria,
+            @NivelNuevo = nivel
+        FROM actividades
+        WHERE id = @ActividadId;
+
+        -- Validar misma categoría
+        IF @CategoriaActual IS NOT NULL AND @CategoriaNueva IS NOT NULL 
+           AND @CategoriaActual <> @CategoriaNueva
+        BEGIN
+            RAISERROR('No se puede cambiar a otra categoría. El cambio de plan solo está permitido dentro de la misma categoría.', 16, 1);
+            RETURN;
+        END
+
+        -- Validar solo upgrade (nivel mayor)
+        IF @NivelActual IS NOT NULL AND @NivelNuevo IS NOT NULL 
+           AND @NivelNuevo <= @NivelActual
+        BEGIN
+            RAISERROR('Solo se permite cambiar a un plan superior (upgrade). El downgrade no está permitido.', 16, 1);
+            RETURN;
+        END
     END
 
     UPDATE membresias SET
@@ -535,7 +640,7 @@ CREATE PROCEDURE sp_ListarActividadesParaCombo
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT id, nombre, tipo, dias_sesiones, precio
+    SELECT id, nombre, tipo, dias_sesiones, precio, categoria, nivel
     FROM actividades
     WHERE activo = 1
     ORDER BY nombre;
@@ -559,5 +664,29 @@ BEGIN
       AND u.activo = 1
       AND u.eliminado_en IS NULL
     ORDER BY u.apellido, u.nombre;
+END;
+GO
+
+-----------------  NUEVO -----------------
+CREATE OR ALTER PROCEDURE sp_ObtenerMembresiasActivasPorDni
+    @Dni CHAR(8)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        m.id              AS membresia_id,
+        a.nombre          AS actividad_nombre,
+        m.fecha_vencimiento,
+        a.limite_por_semana,
+        a.limite_total
+    FROM socios s
+    INNER JOIN membresias  m ON m.socio_id    = s.id
+    INNER JOIN actividades a ON a.id          = m.actividad_id
+    WHERE s.dni          = @Dni
+      AND s.eliminado_en IS NULL
+      AND m.estado       = 'activa'
+      AND m.fecha_vencimiento >= CAST(GETDATE() AS DATE)
+    ORDER BY a.nombre;
 END;
 GO

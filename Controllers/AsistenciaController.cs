@@ -23,9 +23,8 @@ namespace Controllers
         //  Valida formato del DNI y delega al SP toda la lógica
         //  de membresía, día permitido, etc.
         // ──────────────────────────────────────────────────────
-        public ResultadoValidacion ValidarAcceso(string dni, string metodo = "dni_pin")
+        public ResultadoValidacion ValidarAcceso(string dni, string metodo = "dni_pin", long? membresiaId = null)
         {
-            // Validar DNI
             string err = Validador.ValidarDni(dni);
             if (err != null)
             {
@@ -35,10 +34,9 @@ namespace Controllers
                     Mensaje = err
                 };
             }
-
             try
             {
-                return _dao.ValidarAccesoPorDni(dni.Trim(), metodo);
+                return _dao.ValidarAccesoPorDni(dni.Trim(), metodo, membresiaId);
             }
             catch (Exception ex)
             {
@@ -76,6 +74,11 @@ namespace Controllers
         {
             try { return _dao.ObtenerEstadisticas(); }
             catch { return new EstadisticasAcceso(); }
+        }
+
+        public List<MembresiaOpcion> ObtenerMembresiasActivasPorDni(string dni)
+        {
+            return _dao.ObtenerMembresiasActivasPorDni(dni);
         }
     }
 }

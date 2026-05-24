@@ -525,9 +525,7 @@
                                 </Button>
 
                                 <Button x:Name="btnEliminar"
-                                        Style="{StaticResource ButtonStyleCancelar}"
-                                        FontWeight="SemiBold" FontSize="12"
-                                        Height="36"
+                                        Style="{StaticResource BotonDangerLargoEstilo}"
                                         ToolTip="Eliminar casillero"
                                         Click="btnEliminar_Click">
                                     <StackPanel Orientation="Horizontal">
@@ -541,8 +539,8 @@
                     </ScrollViewer>
 
                     <!-- Botón cerrar -->
-                    <Button Grid.Row="3" Content="Cerrar"
-                            Style="{StaticResource BotonCerrarEstilo}"
+                    <Button Grid.Row="3" Content="CERRAR"
+                            Style="{StaticResource BotonDangerLargoEstilo}"
                             Margin="22,12,22,18" Click="btnCerrar_Click"/>
                 </Grid>
             </Border>

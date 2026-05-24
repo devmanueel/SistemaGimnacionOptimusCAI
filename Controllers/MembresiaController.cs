@@ -53,9 +53,11 @@ namespace Controllers
             string observaciones,
             string tipoPlan = "mensual")
         {
-            string err = ValidarCampos(socioId, actividadId, fechaInicio,
-                                       fechaVencimiento, montoPagado, metodoPago);
+            string err = ValidarCampos(socioId, actividadId, montoPagado, metodoPago);
             if (err != null) return (false, err, 0);
+
+            fechaInicio = DateTime.Today;
+            fechaVencimiento = DateTime.Today.AddDays(31);
 
             var membresia = new Membresia
             {
@@ -75,12 +77,15 @@ namespace Controllers
             {
                 long id = _dao.InsertarMembresia(membresia);
                 if (id <= 0) return (false, "No se pudo registrar la membresía.", 0);
-
+                
                 Auditor.Registrar("crear", "membresia", id, new Dictionary<string, object> {
-                    { "socio_id", socioId }, { "actividad_id", actividadId },
-                    { "tipo_plan", tipoPlan }, { "monto", montoPagado }
+                    { "socio_id", socioId },
+                    { "actividad_id", actividadId },
+                    { "monto_pagado", montoPagado },
+                    { "metodo_pago", metodoPago },
+                    { "tipo_plan", tipoPlan ?? "mensual" }
                 });
-
+                
                 return (true, "Membresía registrada y cuota cobrada correctamente.", id);
             }
             catch (Exception ex)
@@ -92,7 +97,7 @@ namespace Controllers
         }
 
         // ──────────────────────────────────────────────────────
-        // MODIFICAR (datos secundarios)
+        // MODIFICAR (solo datos secundarios)
         // ──────────────────────────────────────────────────────
         public (bool ok, string mensaje) Modificar(
             long id,
@@ -124,8 +129,12 @@ namespace Controllers
 
                 if (ok)
                 {
-                    Auditor.Registrar("modificar", "membresia", id, new Dictionary<string, object> {
-                        { "actividad_id", actividadId }, { "monto", montoPagado }
+                    Auditor.Registrar("editar", "membresia", id, new Dictionary<string, object> {
+                        { "actividad_id", actividadId },
+                        { "monto_pagado", montoPagado },
+                        { "tipo_plan", tipoPlan },
+                        { "metodo_pago", metodoPago },
+                        { "fecha_vencimiento", fechaVencimiento.ToString("yyyy-MM-dd") }
                     });
                 }
                 return ok
@@ -134,10 +143,19 @@ namespace Controllers
             }
             catch (Exception ex)
             {
-                // El SP lanza error si la fecha retrocede — lo propagamos tal cual
-                return (false, ex.Message.Contains("solo puede avanzar")
-                    ? "La fecha de vencimiento no puede retroceder. Los días solo pueden aumentar."
-                    : "Error al actualizar.\n" + ex.Message);
+                // El SP lanza error si la fecha retrocede o si el cambio de plan no es válido
+                string mensaje = ex.Message;
+                
+                if (mensaje.Contains("solo puede avanzar"))
+                    return (false, "La fecha de vencimiento no puede retroceder. Los días solo pueden aumentar.");
+                
+                if (mensaje.Contains("categoría"))
+                    return (false, "No se puede cambiar a otra categoría. El cambio de plan solo está permitido dentro de la misma categoría.");
+                
+                if (mensaje.Contains("upgrade") || mensaje.Contains("superior"))
+                    return (false, "Solo se permite cambiar a un plan superior (upgrade). El downgrade no está permitido.");
+                
+                return (false, "Error al actualizar.\n" + ex.Message);
             }
         }
 
@@ -249,20 +267,10 @@ namespace Controllers
         // VALIDACIONES
         // ──────────────────────────────────────────────────────
         private string ValidarCampos(long socioId, long actividadId,
-                                     DateTime fechaInicio, DateTime fechaVencimiento,
                                      decimal monto, string metodoPago)
         {
             if (socioId <= 0) return "Tenés que seleccionar un socio.";
             if (actividadId <= 0) return "Tenés que seleccionar una actividad.";
-
-            if (fechaInicio.Date > fechaVencimiento.Date)
-                return "La fecha de inicio no puede ser posterior al vencimiento.";
-
-            if (fechaVencimiento.Date <= fechaInicio.Date)
-                return "La fecha de vencimiento debe ser posterior a la de inicio.";
-
-            if (fechaInicio.Date < DateTime.Today.AddMonths(-3))
-                return "La fecha de inicio es demasiado antigua (más de 3 meses atrás).";
 
             if (monto <= 0)
                 return "El monto pagado debe ser mayor a $0.";

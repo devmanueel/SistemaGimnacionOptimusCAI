@@ -465,6 +465,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             // Mostrar panel de ajuste de stock
             panelAjusteStock.Visibility = Visibility.Visible;
+            txtCantidadAjuste.Text = "0";
             ActualizarLabelStock(p.Stock);
 
             AbrirFormulario();
@@ -512,6 +513,22 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             else
             {
+                // Aplicar ajuste de stock si la cantidad es distinta de 0
+                int cantidadAjuste = 0;
+                int.TryParse(txtCantidadAjuste.Text, out cantidadAjuste);
+
+                if (cantidadAjuste != 0)
+                {
+                    string tipo = cantidadAjuste > 0 ? "sumar" : "restar";
+                    int cantidadAbs = cantidadAjuste > 0 ? cantidadAjuste : -cantidadAjuste;
+                    var rStock = _controller.AjustarStock(_idEditar, tipo, cantidadAbs);
+                    if (!rStock.ok)
+                    {
+                        NotificacionWindow.MostrarError(rStock.mensaje);
+                        return;
+                    }
+                }
+
                 var r = _controller.Modificar(
                     _idEditar, txtNombre.Text, txtDescripcion.Text, categoria,
                     precio, stockMin, _fotoBytes);
@@ -530,36 +547,21 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─────────────────────────────────────────────────────
         // AJUSTE DE STOCK
         // ─────────────────────────────────────────────────────
-        private void btnSumarStock_Click(object sender, RoutedEventArgs e) => AjustarStock("sumar");
-        private void btnRestarStock_Click(object sender, RoutedEventArgs e) => AjustarStock("restar");
-
-        private void AjustarStock(string tipo)
+        private void btnSumarStock_Click(object sender, RoutedEventArgs e)
         {
-            if (_idEditar <= 0) return;
-
             int cantidad = 0;
-            if (!int.TryParse(txtCantidadAjuste.Text, out cantidad) || cantidad <= 0)
-            {
-                NotificacionWindow.MostrarAdvertencia("Ingresá una cantidad válida (mayor a 0).");
-                return;
-            }
+            int.TryParse(txtCantidadAjuste.Text, out cantidad);
+            cantidad++;
+            txtCantidadAjuste.Text = cantidad.ToString();
+        }
 
-            try
-            {
-                var r = _controller.AjustarStock(_idEditar, tipo, cantidad);
-                if (r.ok)
-                {
-                    NotificacionWindow.MostrarExito(r.mensaje);
-                    txtStock.Text = r.stockFinal.ToString();
-                    ActualizarLabelStock(r.stockFinal);
-                    txtCantidadAjuste.Text = string.Empty;
-
-                    // Refrescar lista en background para que se vea el nuevo stock
-                    CargarProductos();
-                }
-                else NotificacionWindow.MostrarError(r.mensaje);
-            }
-            catch (Exception ex) { NotificacionWindow.MostrarError(ex.Message); }
+        private void btnRestarStock_Click(object sender, RoutedEventArgs e)
+        {
+            int cantidad = 0;
+            int.TryParse(txtCantidadAjuste.Text, out cantidad);
+            if (cantidad > 0)
+                cantidad--;
+            txtCantidadAjuste.Text = cantidad.ToString();
         }
 
         private void ActualizarLabelStock(int stock)
@@ -723,7 +725,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtPrecio.Text = string.Empty;
             txtStock.Text = "0";
             txtStockMin.Text = "5";
-            txtCantidadAjuste.Text = string.Empty;
+            txtCantidadAjuste.Text = "0";
             imgFotoFormulario.Source = null;
             lblSinFoto.Visibility = Visibility.Visible;
             _fotoBytes = null;

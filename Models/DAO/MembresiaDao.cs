@@ -47,6 +47,8 @@ namespace Models.Dao
                 SocioFoto = r["socio_foto"] != DBNull.Value ? (byte[])r["socio_foto"] : null,
                 ActividadNombre = r["actividad_nombre"].ToString(),
                 ActividadTipo = r["actividad_tipo"].ToString(),
+                ActividadCategoria = LeerColumnaSegura(r, "actividad_categoria"),
+                ActividadNivel = r["actividad_nivel"] != DBNull.Value ? (int?)Convert.ToInt32(r["actividad_nivel"]) : null,
                 InstructorNombre = r["instructor_nombre"].ToString(),
                 RegistradoPorNombre = r["registrado_por_nombre"].ToString(),
                 DiasParaVencer = Convert.ToInt32(r["dias_para_vencer"])
@@ -112,6 +114,27 @@ namespace Models.Dao
                 }
             }
             return lista;
+        }
+
+        // ──────────────────────────────────────────────────────
+        // OBTENER CATEGORÍA DE MEMBRESÍA ACTIVA POR SOCIO
+        // ──────────────────────────────────────────────────────
+        public string ObtenerCategoriaMembresiaActiva(long socioId, long actividadId)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ObtenerCategoriaMembresiaActiva", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@SocioId", socioId);
+                    cmd.Parameters.AddWithValue("@ActividadId", actividadId);
+                    var resultado = cmd.ExecuteScalar();
+                    return resultado != null && resultado != DBNull.Value 
+                        ? resultado.ToString() 
+                        : null;
+                }
+            }
         }
 
         // ──────────────────────────────────────────────────────
@@ -283,7 +306,9 @@ namespace Models.Dao
                                 Nombre = reader["nombre"].ToString(),
                                 Tipo = reader["tipo"].ToString(),
                                 DiasSesiones = Convert.ToInt32(reader["dias_sesiones"]),
-                                Precio = Convert.ToDecimal(reader["precio"])
+                                Precio = Convert.ToDecimal(reader["precio"]),
+                                Categoria = reader["categoria"] as string,
+                                Nivel = reader["nivel"] != DBNull.Value ? (int?)Convert.ToInt32(reader["nivel"]) : null
                             });
                 }
             }

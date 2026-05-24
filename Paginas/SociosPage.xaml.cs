@@ -399,6 +399,18 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     registradoPor: SesionManager.HaySesion ? (long?)SesionManager.UsuarioId : null);
 
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
+
+                bool asignar = NotificacionWindow.MostrarConfirmacion(
+                    "Socio guardado correctamente.\n\n¿Querés asignarle una membresía ahora?",
+                    "¡Socio creado!");
+
+                if (asignar && r.socioCreado != null)
+                {
+                    var mainWindow = Window.GetWindow(this) as MainWindow;
+                    mainWindow?.NavegarAMembresiasConSocio(r.socioCreado);
+                    return;
+                }
+
                 NotificacionWindow.MostrarExito(r.mensaje, "¡Socio registrado!");
             }
             else

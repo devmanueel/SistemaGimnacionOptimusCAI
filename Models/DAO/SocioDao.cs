@@ -124,9 +124,9 @@ namespace Models.Dao
 
         // ──────────────────────────────────────────────────────
         // INSERTAR
-        // Retorna: > 0 = ID generado / -1 = DNI duplicado / 0 = error
+        // Retorna: Socio con Id y NumeroSocio completados / null = error
         // ──────────────────────────────────────────────────────
-        public long InsertarSocio(Socio s)
+        public Socio InsertarSocio(Socio s)
         {
             using (var conn = GetConnection())
             {
@@ -152,8 +152,21 @@ namespace Models.Dao
                     fotoParam.Value = s.Foto != null ? (object)s.Foto : DBNull.Value;
                     cmd.Parameters.Add(fotoParam);
 
-                    var resultado = cmd.ExecuteScalar();
-                    return resultado != null ? Convert.ToInt64(resultado) : 0;
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            var id = Convert.ToInt64(reader["id"]);
+                            if (id == -1) return null; // DNI duplicado
+
+                            return new Socio
+                            {
+                                Id = id,
+                                NumeroSocio = Convert.ToInt32(reader["numero_socio"])
+                            };
+                        }
+                    }
+                    return null;
                 }
             }
         }
