@@ -54,7 +54,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             // Permisos según rol
             if (!SesionManager.EsAdmin)
             {
-                btnNuevo.Visibility = Visibility.Collapsed;
                 panelStatRecaudado.Visibility = Visibility.Collapsed;
             }
 
