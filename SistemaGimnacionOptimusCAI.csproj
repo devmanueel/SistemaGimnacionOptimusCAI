@@ -319,6 +319,14 @@
     <Resource Include="Assets\Logo-gimnasio.jpeg" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Sounds\acceso_ok.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Sounds\acceso_error.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.7.2 %28x86 y x64%29</ProductName>

@@ -347,7 +347,7 @@
                                                        Foreground="{StaticResource TextPrimary}"
                                                        TextTrimming="CharacterEllipsis"/>
                                         </Grid>
-                                        <Grid>
+                                        <Grid Margin="0,0,0,4">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="*"/>
@@ -355,6 +355,18 @@
                                             <TextBlock Grid.Column="0" Text="Vence: "
                                                        FontSize="11" Foreground="#AAAACC"/>
                                             <TextBlock Grid.Column="1" x:Name="lblVencimiento"
+                                                       Text="—" FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimary}"/>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Días restantes: "
+                                                       FontSize="11" Foreground="#AAAACC"/>
+                                            <TextBlock Grid.Column="1" x:Name="lblDiasRestantes"
                                                        Text="—" FontSize="11"
                                                        FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextPrimary}"/>

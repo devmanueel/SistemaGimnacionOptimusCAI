@@ -11,5 +11,10 @@ namespace Entities
         public long MembresiaId { get; set; }
         public string ActividadNombre { get; set; }
         public DateTime FechaVencimiento { get; set; }
+
+        public override string ToString()
+        {
+            return ActividadNombre ?? base.ToString();
+        }
     }
 }
