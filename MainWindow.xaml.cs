@@ -95,7 +95,7 @@ namespace SistemaGimnacionOptimusCAI
                 new MenuItem { Icono = FontAwesomeIcon.Users,               Texto = "Socios",               TipoPagina = typeof(SociosPage),                SoloAdmin = false },
                 new MenuItem { Icono = FontAwesomeIcon.IdCardOutline,       Texto = "Membresías",           TipoPagina = typeof(MembresiasPage),            SoloAdmin = false },
                 new MenuItem { Icono = FontAwesomeIcon.CheckSquareOutline,  Texto = "Asistencias",          TipoPagina = typeof(AsistenciasPage),           SoloAdmin = false },
-                new MenuItem { Icono = FontAwesomeIcon.Money,               Texto = "Caja",                 TipoPagina = typeof(CajaPage),                  SoloAdmin = true  },
+                new MenuItem { Icono = FontAwesomeIcon.Money,               Texto = "Caja",                 TipoPagina = typeof(CajaPage),                  SoloAdmin = false },
                 new MenuItem { Icono = FontAwesomeIcon.ShoppingBasket,      Texto = "Ventas",               TipoPagina = typeof(VentasPage),                SoloAdmin = false },
                 new MenuItem { Icono = FontAwesomeIcon.Book,                Texto = "Productos",            TipoPagina = typeof(ProductosPage),             SoloAdmin = false },
                 new MenuItem { Icono = FontAwesomeIcon.Calendar,            Texto = "Turnos",               TipoPagina = typeof(TurnosPage),                SoloAdmin = false },
@@ -108,7 +108,7 @@ namespace SistemaGimnacionOptimusCAI
     new MenuItem { Icono = FontAwesomeIcon.SoccerBallOutline,Texto = "Actividades",          TipoPagina = typeof(ActividadesPage),          SoloAdmin = true },
     new MenuItem { Icono = FontAwesomeIcon.Lock,            Texto = "Casilleros",           TipoPagina = typeof(CasillerosPage),            SoloAdmin = true },
     new MenuItem { Icono = FontAwesomeIcon.FileTextOutline,  Texto = "Auditoría",            TipoPagina = typeof(AuditoriaPage),            SoloAdmin = true },
-    new MenuItem { Icono = FontAwesomeIcon.User,            Texto = "Usuarios",             TipoPagina = typeof(UsuariosPage),              SoloAdmin = false }
+    new MenuItem { Icono = FontAwesomeIcon.User,            Texto = "Usuarios",             TipoPagina = typeof(UsuariosPage),              SoloAdmin = true  }
             };
 
             // Filtrar segun rol y crear los botones
@@ -349,6 +349,23 @@ namespace SistemaGimnacionOptimusCAI
 
         private void btnCerrarVentana_Click(object sender, RoutedEventArgs e)
             => Application.Current.Shutdown();
+
+        // ── USUARIO LOGUEADO ──────────────────────────────────
+        private void btnUsuario_Click(object sender, RoutedEventArgs e)
+        {
+            if (!SesionManager.HaySesion) return;
+
+            try
+            {
+                var ficha = new FichaUsuarioWindow(SesionManager.UsuarioId);
+                ficha.Owner = this;
+                ficha.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError("Error al abrir ficha de usuario.\n" + ex.Message);
+            }
+        }
 
         // ── BUSCADOR GLOBAL ───────────────────────────────────
         private readonly SocioController _socioController = new SocioController();

@@ -191,14 +191,14 @@ namespace Controllers
         }
 
         // ──────────────────────────────────────────────────────
-        // RENOVAR (+30 días + cobra)
+        // RENOVAR (+días según plan + cobra)
         // ──────────────────────────────────────────────────────
         public (bool ok, string mensaje, DateTime? nuevaFecha) Renovar(
             long id,
             decimal monto,
             string metodoPago,
             long registradoPor,
-            int diasASumar = 30)
+            int diasASumar = 31)
         {
             if (monto <= 0)
                 return (false, "El monto debe ser mayor a $0.", null);
@@ -288,5 +288,52 @@ namespace Controllers
 
             return null;
         }
+
+        // ──────────────────────────────────────────────────────
+        // UPGRADE — calcular opciones disponibles
+        // ──────────────────────────────────────────────────────
+        public List<OpcionUpgrade> CalcularUpgrade(long membresiaId)
+        {
+            try { return _dao.CalcularUpgrade(membresiaId); }
+            catch (Exception ex) { throw new Exception("Error al calcular upgrade.\n" + ex.Message); }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // UPGRADE — ejecutar el cambio y cobrar diferencia
+        // ──────────────────────────────────────────────────────
+        public ResultadoUpgrade EjecutarUpgrade(long membresiaId, long nuevaActividadId,
+                                                 string metodoPago, long registradoPor)
+        {
+            if (membresiaId <= 0) throw new Exception("ID de membresía inválido.");
+            if (nuevaActividadId <= 0) throw new Exception("ID de actividad inválido.");
+
+            try
+            {
+                var resultado = _dao.EjecutarUpgrade(membresiaId, nuevaActividadId,
+                                                      metodoPago ?? "efectivo", registradoPor);
+                if (resultado != null)
+                {
+                    Auditor.Registrar("editar", "membresia", membresiaId, new Dictionary<string, object> {
+                { "tipo",             "upgrade" },
+                { "nueva_actividad",  nuevaActividadId },
+                { "monto_cobrado",    resultado.MontoCobrado },
+                { "metodo_pago",      metodoPago }
+            });
+                }
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("ya tuvo un upgrade"))
+                    throw new Exception("Esta membresía ya tuvo un upgrade. Solo se permite uno por membresía.");
+                if (ex.Message.Contains("categoría"))
+                    throw new Exception("Solo se puede hacer upgrade dentro de la misma categoría.");
+                if (ex.Message.Contains("nivel superior"))
+                    throw new Exception("Solo se permite upgrade a una actividad de nivel superior.");
+                throw new Exception("Error al ejecutar el upgrade.\n" + ex.Message);
+            }
+        }
     }
+
+
 }

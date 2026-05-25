@@ -293,57 +293,32 @@
                         </Border>
                     </Grid>
 
-                    <!-- Gráfico de ingresos por mes — Canvas WPF nativo con selector de año -->
-                    <Border Background="#12121E" CornerRadius="12"
-                            BorderBrush="#252540" BorderThickness="1"
-                            Padding="20,16" Margin="0,0,0,14">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="220"/>
-                            </Grid.RowDefinitions>
-
-                            <!-- Header: título + selector de año -->
-                            <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <!-- Gráfico de barras — Ingresos por mes -->
+                    <Border Background="#0A120A" BorderBrush="#1E3020" BorderThickness="1"
+                            CornerRadius="10" Padding="16,12" Margin="0,0,0,14">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="INGRESOS POR MES"
-                                               FontFamily="Bahnschrift SemiBold"
-                                               FontSize="13" FontWeight="Bold"
-                                               Foreground="#E8E8FF"/>
-                                    <TextBlock x:Name="lblAnioGrafico"
-                                               Text="Año 2026"
-                                               FontSize="11" Foreground="#6A6A9A"
-                                               Margin="0,2,0,0"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                            VerticalAlignment="Center">
-                                    <Button x:Name="btnAnioAnterior"
-                                            Content="◀" Click="btnAnioAnterior_Click"
-                                            Background="Transparent" Foreground="#6A6A9A"
-                                            BorderThickness="0" FontSize="16"
-                                            Cursor="Hand" Width="32" Height="32"/>
-                                    <TextBlock x:Name="lblAnioSelector"
-                                               Text="2026"
-                                               FontFamily="Consolas" FontSize="14"
-                                               FontWeight="Bold" Foreground="#E8E8FF"
-                                               VerticalAlignment="Center" Margin="8,0"/>
-                                    <Button x:Name="btnAnioSiguiente"
-                                            Content="▶" Click="btnAnioSiguiente_Click"
-                                            Background="Transparent" Foreground="#6A6A9A"
-                                            BorderThickness="0" FontSize="16"
-                                            Cursor="Hand" Width="32" Height="32"/>
+                                <TextBlock x:Name="lblAnioGrafico" Text="INGRESOS POR MES — 2026"
+                                           FontSize="12" FontWeight="Bold" Foreground="#E8F0E8"
+                                           VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,12,0">
+                                        <Border Width="10" Height="10" Background="#00CFFF" CornerRadius="2" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Ingresos" FontSize="10" Foreground="#A0B0A0"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="10" Height="10" Background="#A78BFA" CornerRadius="2" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Egresos" FontSize="10" Foreground="#A0B0A0"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </Grid>
-
-                            <Canvas x:Name="canvasGrafico" Grid.Row="1" Background="Transparent"
-                                    SizeChanged="canvasGrafico_SizeChanged"/>
-                        </Grid>
+                            <Grid x:Name="gridGraficoMeses" Height="180" VerticalAlignment="Bottom"/>
+                            <Grid x:Name="gridGraficoLabels" Margin="0,4,0,0"/>
+                        </StackPanel>
                     </Border>
 
                     <!-- Botones de exportación -->

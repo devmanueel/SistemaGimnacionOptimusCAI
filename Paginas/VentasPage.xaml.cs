@@ -108,8 +108,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Width = 140,
                 Height = 180,
                 Margin = new Thickness(6),
-                Background = new SolidColorBrush(Color.FromRgb(22, 22, 42)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64)),
+                Background = new SolidColorBrush(Color.FromRgb(17, 24, 17)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(30, 40, 30)),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(10),
                 Cursor = System.Windows.Input.Cursors.Hand,
@@ -123,7 +123,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var cont = new Border
             {
                 Height = 90,
-                Background = new SolidColorBrush(Color.FromRgb(10, 10, 25))
+                Background = new SolidColorBrush(Color.FromRgb(17, 24, 17))
             };
             var g = new Grid();
             if (p.Foto != null && p.Foto.Length > 0)
@@ -139,6 +139,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 });
             cont.Child = g;
             stack.Children.Add(cont);
+            stack.Children.Add(new Border
+            {
+                Height = 1,
+                Background = new SolidColorBrush(Color.FromRgb(30, 40, 30))
+            });
 
             var info = new StackPanel { Margin = new Thickness(10, 8, 10, 8) };
             info.Children.Add(new TextBlock
@@ -146,7 +151,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Text = p.Nombre,
                 FontSize = 12,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255)),
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                 TextWrapping = TextWrapping.Wrap,
                 MaxHeight = 34,
                 Margin = new Thickness(0, 0, 0, 6)
@@ -172,7 +177,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 FontSize = 10,
                 Foreground = p.BajoStock
                     ? new SolidColorBrush(Color.FromRgb(255, 167, 38))
-                    : new SolidColorBrush(Color.FromRgb(106, 106, 154)),
+                    : new SolidColorBrush(Color.FromRgb(122, 173, 122)),
                 VerticalAlignment = VerticalAlignment.Center
             };
             Grid.SetColumn(ls, 1);

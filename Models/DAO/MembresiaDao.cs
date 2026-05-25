@@ -225,11 +225,11 @@ namespace Models.Dao
         }
 
         // ──────────────────────────────────────────────────────
-        // RENOVAR (suma 30 días + cobra)
+        // RENOVAR (suma días según plan + cobra)
         // Retorna la nueva fecha de vencimiento.
         // ──────────────────────────────────────────────────────
         public DateTime? RenovarMembresia(long id, decimal monto, string metodoPago,
-                                          long registradoPor, int diasASumar = 30)
+                                          long registradoPor, int diasASumar = 31)
         {
             using (var conn = GetConnection())
             {
@@ -343,6 +343,65 @@ namespace Models.Dao
                 }
             }
             return lista;
+        }
+
+        // ----------------
+        // NUEVO
+        // ----------------
+
+        // ── Calcular opciones de upgrade ──────────────────────
+        public List<OpcionUpgrade> CalcularUpgrade(long membresiaId)
+        {
+            var lista = new List<OpcionUpgrade>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_CalcularUpgrade", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@MembresiaId", membresiaId);
+                    using (var reader = cmd.ExecuteReader())
+                        while (reader.Read())
+                            lista.Add(new OpcionUpgrade
+                            {
+                                ActividadId = Convert.ToInt64(reader["actividad_id"]),
+                                ActividadNombre = reader["actividad_nombre"].ToString(),
+                                PrecioNuevo = Convert.ToDecimal(reader["precio_nuevo"]),
+                                PrecioActual = Convert.ToDecimal(reader["precio_actual"]),
+                                DiferenciaAPagar = Convert.ToDecimal(reader["diferencia_a_pagar"]),
+                                NivelNuevo = Convert.ToInt32(reader["nivel_nuevo"]),
+                                NivelActual = Convert.ToInt32(reader["nivel_actual"])
+                            });
+                }
+            }
+            return lista;
+        }
+
+        // ── Ejecutar upgrade ───────────────────────────────────
+        public ResultadoUpgrade EjecutarUpgrade(long membresiaId, long nuevaActividadId,
+                                                 string metodoPago, long registradoPor)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_EjecutarUpgrade", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@MembresiaId", membresiaId);
+                    cmd.Parameters.AddWithValue("@NuevaActividadId", nuevaActividadId);
+                    cmd.Parameters.AddWithValue("@MetodoPago", metodoPago);
+                    cmd.Parameters.AddWithValue("@RegistradoPor", registradoPor);
+                    using (var reader = cmd.ExecuteReader())
+                        if (reader.Read())
+                            return new ResultadoUpgrade
+                            {
+                                MembresiaId = Convert.ToInt64(reader["membresia_id"]),
+                                MontoCobrado = Convert.ToDecimal(reader["monto_cobrado"]),
+                                Mensaje = reader["mensaje"].ToString()
+                            };
+                }
+            }
+            return null;
         }
     }
 }

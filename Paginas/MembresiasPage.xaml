@@ -351,9 +351,9 @@
                                             <!-- RENOVAR -->
                                             <Button Style="{StaticResource ButtonStyleRenovar}" 
             Click="btnRenovar_Click" 
-            ToolTip="Renovar membresía (+30 días)"
-            Margin="0,0,4,0">
-                                                <TextBlock Text="+30d" FontSize="11" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
+            ToolTip="Renovar membresía (+31 días)"
+                                                        Margin="0,0,4,0">
+                                                <TextBlock Text="+31d" FontSize="11" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
                                             </Button>
                                             <!-- EDITAR -->
                                             <Button Click="btnEditar_Click" Style="{StaticResource ButtonStyleEditar}"
@@ -474,6 +474,41 @@
                                     <TextBlock x:Name="lblPreviewMonto" Text="$0"
                                                FontFamily="Consolas" FontSize="18" FontWeight="Bold"
                                                Foreground="#00E676" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- PANEL UPGRADE — solo visible al editar con actividad superior -->
+                            <Border x:Name="panelUpgrade" Background="#0A1F0A" CornerRadius="8"
+        BorderBrush="{StaticResource GreenDim}" BorderThickness="1"
+        Padding="12,10" Margin="0,0,0,14" Visibility="Collapsed">
+                                <StackPanel>
+                                    <TextBlock Text="UPGRADE DE MEMBRESÍA"
+                   FontSize="10" FontWeight="Bold"
+                   Foreground="{StaticResource GreenMain}"
+                   Margin="0,0,0,8"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock x:Name="lblUpgradeDetalle"
+                           Text="Diferencia a cobrar:"
+                           FontSize="11" Foreground="{StaticResource TextMuted}"
+                           Margin="0,0,0,2"/>
+                                            <TextBlock x:Name="lblUpgradeMonto"
+                           Text="$0"
+                           FontFamily="Consolas" FontSize="22" FontWeight="Bold"
+                           Foreground="{StaticResource GreenMain}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock x:Name="lblUpgradeNivel"
+                           Text="⬆ Nivel 1 → 2"
+                           FontSize="11" FontWeight="Bold"
+                           Foreground="#00C850"
+                           HorizontalAlignment="Right"/>
+                                        </StackPanel>
+                                    </Grid>
                                 </StackPanel>
                             </Border>
 

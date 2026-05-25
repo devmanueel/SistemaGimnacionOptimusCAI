@@ -1,0 +1,182 @@
+<Window x:Class="SistemaGimnacionOptimusCAI.Paginas.FichaUsuarioWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+        Title="Ficha de Usuario"
+        Height="480" Width="520"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ShowInTaskbar="False"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <helpers:ByteToImageConverter x:Key="ByteToImage"/>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Border Background="{StaticResource Bg1}" CornerRadius="16"
+            BorderBrush="{StaticResource Border2}" BorderThickness="1.5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- HEADER -->
+            <Border Grid.Row="0" Background="{StaticResource Bg2}" CornerRadius="16,16,0,0"
+                    Padding="24,18">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Foto / Iniciales -->
+                    <Border Grid.Column="0" Width="64" Height="64" CornerRadius="32"
+                            Background="{StaticResource GreenMain}" Margin="0,0,16,0">
+                        <Border.Clip>
+                            <EllipseGeometry Center="32,32" RadiusX="32" RadiusY="32"/>
+                        </Border.Clip>
+                        <Grid>
+                            <Image x:Name="imgFoto" Stretch="UniformToFill"/>
+                            <TextBlock x:Name="lblIniciales" Text="?" FontSize="22" FontWeight="Bold"
+                                       Foreground="#071207" HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Datos principales -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock x:Name="lblNombre" Text="—" FontSize="20" FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <Border x:Name="badgeRol" CornerRadius="8" Padding="10,2"
+                                    Background="{StaticResource Bg4}" Margin="0,0,12,0">
+                                <TextBlock x:Name="lblRol" Text="—" FontSize="10" FontWeight="Bold"
+                                           Foreground="{StaticResource GreenMain}"/>
+                            </Border>
+                            <TextBlock x:Name="lblEstado" Text="" FontSize="12"
+                                       Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Editar -->
+                    <Button Grid.Column="2" Content="✎" Click="btnEditar_Click"
+                            Width="36" Height="36" FontSize="16" FontWeight="Bold"
+                            Foreground="{StaticResource GreenMain}" Background="Transparent"
+                            BorderThickness="0" Cursor="Hand" VerticalAlignment="Top"
+                            ToolTip="Editar mis datos" Margin="0,0,8,0"/>
+
+                    <!-- Cerrar -->
+                    <Button Grid.Column="3" Content="X" Click="btnCerrar_Click"
+                            Width="36" Height="36" FontSize="16" FontWeight="Bold"
+                            Foreground="{StaticResource TextMuted}" Background="Transparent"
+                            BorderThickness="0" Cursor="Hand" VerticalAlignment="Top"/>
+                </Grid>
+            </Border>
+
+            <!-- CONTENIDO -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                          Style="{StaticResource PanelScrollViewerStyle}" Margin="24,20">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="DNI" Foreground="{StaticResource TextMuted}"
+                                       FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                            <Border Background="{StaticResource Bg3}" CornerRadius="8"
+                                    Padding="12,10" BorderBrush="{StaticResource Border2}"
+                                    BorderThickness="0.5">
+                                <TextBlock x:Name="lblDni" Text="—" FontSize="13"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="EMAIL" Foreground="{StaticResource TextMuted}"
+                                       FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                            <Border Background="{StaticResource Bg3}" CornerRadius="8"
+                                    Padding="12,10" BorderBrush="{StaticResource Border2}"
+                                    BorderThickness="0.5">
+                                <TextBlock x:Name="lblEmail" Text="—" FontSize="13"
+                                           Foreground="{StaticResource TextPrimary}"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="TELEFONO" Foreground="{StaticResource TextMuted}"
+                                       FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                            <Border Background="{StaticResource Bg3}" CornerRadius="8"
+                                    Padding="12,10" BorderBrush="{StaticResource Border2}"
+                                    BorderThickness="0.5">
+                                <TextBlock x:Name="lblTelefono" Text="—" FontSize="13"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="DOMICILIO" Foreground="{StaticResource TextMuted}"
+                                       FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                            <Border Background="{StaticResource Bg3}" CornerRadius="8"
+                                    Padding="12,10" BorderBrush="{StaticResource Border2}"
+                                    BorderThickness="0.5">
+                                <TextBlock x:Name="lblDomicilio" Text="—" FontSize="13"
+                                           Foreground="{StaticResource TextPrimary}"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="TARIFA / HORA" Foreground="{StaticResource TextMuted}"
+                                       FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                            <Border Background="{StaticResource Bg3}" CornerRadius="8"
+                                    Padding="12,10" BorderBrush="{StaticResource Border2}"
+                                    BorderThickness="0.5">
+                                <TextBlock x:Name="lblTarifa" Text="—" FontSize="13"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="USUARIO ID" Foreground="{StaticResource TextMuted}"
+                                       FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                            <Border Background="{StaticResource Bg3}" CornerRadius="8"
+                                    Padding="12,10" BorderBrush="{StaticResource Border2}"
+                                    BorderThickness="0.5">
+                                <TextBlock x:Name="lblId" Text="—" FontSize="13"
+                                           Foreground="{StaticResource TextPrimary}"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</Window>

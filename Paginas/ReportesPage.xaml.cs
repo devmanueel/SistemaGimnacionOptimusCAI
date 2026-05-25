@@ -223,115 +223,174 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void btnFiltrar_Click(object sender, RoutedEventArgs e) => CargarIngresos();
 
-        // ─── GRÁFICO DE BARRAS + LÍNEA TENDENCIA — Canvas WPF nativo ─
+        // ─── GRÁFICO DE BARRAS — refleja los movimientos del grid ───────────
         private void CargarGrafico()
         {
-            try
-            {
-                var datos = _ctrl.ObtenerGraficoPorMes(_anioGrafico);
+            gridGraficoMeses.Children.Clear();
+            gridGraficoLabels.Children.Clear();
+            gridGraficoMeses.ColumnDefinitions.Clear();
+            gridGraficoLabels.ColumnDefinitions.Clear();
 
-                _datosPorMes = new decimal[12];
-                if (datos != null)
+            if (_movimientos == null || _movimientos.Count == 0) return;
+
+            // Agrupar por Año-Mes usando los movimientos filtrados (mismo grid)
+            var mapa = new Dictionary<string, IngresosPorMes>();
+            foreach (var mov in _movimientos)
+            {
+                string clave = mov.Fecha.Year + "-" + mov.Fecha.Month.ToString("D2");
+                IngresosPorMes item;
+                if (!mapa.TryGetValue(clave, out item))
                 {
-                    foreach (var d in datos)
+                    item = new IngresosPorMes
                     {
-                        int idx = d.Mes - 1;
-                        if (idx >= 0 && idx < 12)
-                            _datosPorMes[idx] = d.Ingresos;
-                    }
+                        Mes = mov.Fecha.Month,
+                        MesNombre = new DateTime(mov.Fecha.Year, mov.Fecha.Month, 1)
+                            .ToString("MMM", new CultureInfo("es-AR")),
+                        Ingresos = 0,
+                        Egresos = 0
+                    };
+                    mapa.Add(clave, item);
                 }
 
-                lblAnioGrafico.Text  = "Año " + _anioGrafico;
-                lblAnioSelector.Text = _anioGrafico.ToString();
-
-                DibujarGraficoCanvas(_datosPorMes);
+                if (mov.EsIngreso)
+                    item.Ingresos += mov.Monto;
+                else
+                    item.Egresos += mov.Monto;
             }
-            catch (Exception ex)
+
+            // Generar meses desde enero hasta el mes actual del año filtrado
+            int anioGrafico = _hasta.Year;
+            int mesLimite = (anioGrafico == DateTime.Today.Year)
+                ? DateTime.Today.Month : 12;
+
+            var mesesMostrar = new List<IngresosPorMes>(mesLimite);
+            for (int m = 1; m <= mesLimite; m++)
             {
-                MessageBox.Show("No se pudo cargar el gráfico.\n" + ex.Message, "Aviso",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                string clave = anioGrafico + "-" + m.ToString("D2");
+                IngresosPorMes item;
+                if (mapa.TryGetValue(clave, out item))
+                    mesesMostrar.Add(item);
+                else
+                    mesesMostrar.Add(new IngresosPorMes
+                    {
+                        Mes = m,
+                        MesNombre = new DateTime(anioGrafico, m, 1)
+                            .ToString("MMM", new CultureInfo("es-AR")),
+                        Ingresos = 0,
+                        Egresos = 0
+                    });
             }
-        }
 
-        private void canvasGrafico_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            DibujarGraficoCanvas(_datosPorMes);
-        }
+            // Título según año y período filtrado
+            lblAnioGrafico.Text = "INGRESOS Y EGRESOS POR MES — " + anioGrafico;
 
-        private void DibujarGraficoCanvas(decimal[] datosPorMes)
-        {
-            canvasGrafico.Children.Clear();
-
-            double ancho = canvasGrafico.ActualWidth;
-            double alto  = canvasGrafico.ActualHeight;
-            if (ancho < 1) ancho = 600;
-            if (alto  < 1) alto  = 220;
-
-            double margenIzq = 60, margenDer = 20, margenSup = 20, margenInf = 40;
-            double areaAncho = ancho - margenIzq - margenDer;
-            double areaAlto  = alto  - margenSup - margenInf;
-
-            decimal maxVal = 10000;
-            foreach (var v in datosPorMes)
-                if (v > maxVal) maxVal = v;
-
-            double anchoBarra = (areaAncho / 12) * 0.6;
-            double espacio    = areaAncho / 12;
-
-            // Línea base del eje Y
-            var lineaBase = new System.Windows.Shapes.Line
+            decimal maxVal = 0;
+            foreach (var d in mesesMostrar)
             {
-                X1 = margenIzq, Y1 = margenSup + areaAlto,
-                X2 = margenIzq + areaAncho, Y2 = margenSup + areaAlto,
-                Stroke = new SolidColorBrush(Color.FromRgb(37, 37, 64)),
-                StrokeThickness = 1
+                decimal m = d.Ingresos > d.Egresos ? d.Ingresos : d.Egresos;
+                if (m > maxVal) maxVal = m;
+            }
+            if (maxVal == 0) maxVal = 1;
+
+            double maxBarH = 160;
+            double barW = 18;
+
+            var brushIng = new LinearGradientBrush(
+                Color.FromRgb(0, 230, 200), Color.FromRgb(0, 140, 180), 90);
+            var brushEgr = new LinearGradientBrush(
+                Color.FromRgb(190, 160, 255), Color.FromRgb(130, 100, 220), 90);
+            var brushEmpty = new SolidColorBrush(Color.FromRgb(40, 60, 40));
+
+            for (int i = 0; i < mesesMostrar.Count; i++)
+            {
+                gridGraficoMeses.ColumnDefinitions.Add(
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                gridGraficoLabels.ColumnDefinitions.Add(
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            }
+
+            var lineaBase = new Border
+            {
+                Height = 1,
+                Background = new SolidColorBrush(Color.FromRgb(30, 48, 32)),
+                VerticalAlignment = VerticalAlignment.Bottom
             };
-            canvasGrafico.Children.Add(lineaBase);
+            Grid.SetColumnSpan(lineaBase, mesesMostrar.Count);
+            gridGraficoMeses.Children.Add(lineaBase);
 
-            Color[] colores =
+            for (int col = 0; col < mesesMostrar.Count; col++)
             {
-                Color.FromRgb(0, 207, 255),   Color.FromRgb(32, 190, 255),
-                Color.FromRgb(64, 173, 255),  Color.FromRgb(96, 156, 255),
-                Color.FromRgb(118, 148, 255), Color.FromRgb(131, 145, 253),
-                Color.FromRgb(144, 142, 252), Color.FromRgb(152, 140, 251),
-                Color.FromRgb(160, 139, 251), Color.FromRgb(163, 139, 250),
-                Color.FromRgb(167, 139, 250), Color.FromRgb(170, 139, 250)
-            };
-
-            string[] nombresMes = { "Ene","Feb","Mar","Abr","May","Jun",
-                                    "Jul","Ago","Sep","Oct","Nov","Dic" };
-
-            var puntosLinea = new System.Windows.Media.PointCollection();
-
-            for (int i = 0; i < 12; i++)
-            {
-                double x      = margenIzq + i * espacio + (espacio - anchoBarra) / 2;
-                double pct    = maxVal > 0 ? (double)datosPorMes[i] / (double)maxVal : 0;
-                double hBarra = pct * areaAlto;
-                double y      = margenSup + areaAlto - hBarra;
-
-                var rect = new System.Windows.Shapes.Rectangle
+                var d = mesesMostrar[col];
+                var stack = new StackPanel
                 {
-                    Width   = anchoBarra,
-                    Height  = Math.Max(hBarra, 2),
-                    Fill    = new SolidColorBrush(colores[i]),
-                    RadiusX = 4, RadiusY = 4
+                    Orientation = Orientation.Horizontal,
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(4, 0, 4, 2)
                 };
-                Canvas.SetLeft(rect, x);
-                Canvas.SetTop(rect, y);
-                canvasGrafico.Children.Add(rect);
 
-                var lblMes = new TextBlock
+                double altIng = d.Ingresos > 0
+                    ? (double)(d.Ingresos / maxVal) * maxBarH
+                    : 0;
+                if (altIng < 4 && d.Ingresos > 0) altIng = 4;
+
+                if (altIng > 0)
                 {
-                    Text       = nombresMes[i],
-                    FontSize   = 9,
-                    Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154))
-                };
-                Canvas.SetLeft(lblMes, x + anchoBarra / 2 - 10);
-                Canvas.SetTop(lblMes, margenSup + areaAlto + 6);
-                canvasGrafico.Children.Add(lblMes);
+                    stack.Children.Add(new Border
+                    {
+                        Width = barW,
+                        Height = altIng,
+                        Background = brushIng,
+                        CornerRadius = new CornerRadius(3, 3, 0, 0),
+                        VerticalAlignment = VerticalAlignment.Bottom,
+                        Margin = new Thickness(0, 0, 2, 0),
+                        ToolTip = d.MesNombre.ToUpper() + " — Ingresos: " + FormatoARS.Moneda(d.Ingresos)
+                    });
+                }
 
-                puntosLinea.Add(new System.Windows.Point(x + anchoBarra / 2, y));
+                double altEgr = d.Egresos > 0
+                    ? (double)(d.Egresos / maxVal) * maxBarH
+                    : 0;
+                if (altEgr < 4 && d.Egresos > 0) altEgr = 4;
+
+                if (altEgr > 0)
+                {
+                    stack.Children.Add(new Border
+                    {
+                        Width = barW,
+                        Height = altEgr,
+                        Background = brushEgr,
+                        CornerRadius = new CornerRadius(3, 3, 0, 0),
+                        VerticalAlignment = VerticalAlignment.Bottom,
+                        ToolTip = d.MesNombre.ToUpper() + " — Egresos: " + FormatoARS.Moneda(d.Egresos)
+                    });
+                }
+
+                if (stack.Children.Count == 0)
+                {
+                    stack.Children.Add(new Border
+                    {
+                        Width = barW,
+                        Height = 4,
+                        Background = brushEmpty,
+                        CornerRadius = new CornerRadius(2),
+                        VerticalAlignment = VerticalAlignment.Bottom
+                    });
+                }
+
+                Grid.SetColumn(stack, col);
+                gridGraficoMeses.Children.Add(stack);
+
+                var lbl = new TextBlock
+                {
+                    Text = d.MesNombre.ToUpper(),
+                    FontSize = 10,
+                    Foreground = new SolidColorBrush(Color.FromRgb(130, 150, 130)),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    FontFamily = new System.Windows.Media.FontFamily("Segoe UI")
+                };
+                Grid.SetColumn(lbl, col);
+                gridGraficoLabels.Children.Add(lbl);
             }
 
             // Línea de tendencia naranja con puntos circulares
