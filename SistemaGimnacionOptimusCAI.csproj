@@ -61,10 +61,11 @@
     <Reference Include="itextsharp">
       <HintPath>packages\iTextSharp.5.5.13.3\lib\itextsharp.dll</HintPath>
     </Reference>
-    <Reference Include="BouncyCastle.Crypto, Version=1.8.9.0, Culture=neutral, PublicKeyToken=de99375e54769942, processorArchitecture=MSIL">
-      <HintPath>packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll</HintPath>
-      <Private>True</Private>
-      <SpecificVersion>True</SpecificVersion>
+    <Reference Include="zxing">
+      <HintPath>packages\ZXing.Net.0.16.9\lib\net47\zxing.dll</HintPath>
+    </Reference>
+    <Reference Include="zxing.presentation">
+      <HintPath>packages\ZXing.Net.0.16.9\lib\net47\zxing.presentation.dll</HintPath>
     </Reference>
     <Reference Include="ClosedXML">
       <HintPath>packages\ClosedXML.0.95.4\lib\net46\ClosedXML.dll</HintPath>
@@ -122,7 +123,6 @@
     <Compile Include="Helpers\ReportePdfExportador.cs" />
     <Compile Include="Helpers\ReporteExcelExportador.cs" />
     <Compile Include="Helpers\InicialesConverter.cs" />
-    <Compile Include="Helpers\Validador.cs" />
     <Compile Include="Helpers\WidthHeightToRectConverter.cs" />
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
@@ -289,10 +289,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll">
-      <Link>BouncyCastle.Crypto.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Controllers\Controllers.csproj">

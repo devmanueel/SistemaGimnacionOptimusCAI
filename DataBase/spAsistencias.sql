@@ -335,9 +335,26 @@ UPDATE actividades SET limite_por_semana = 3,    limite_total = NULL WHERE nombr
 UPDATE actividades SET limite_por_semana = NULL, limite_total = NULL WHERE nombre = 'Gimnasio Todos Los Dias';
 GO
 
-ALTER TABLE registros_acceso
-    DROP CONSTRAINT CK__registros__resul__5AEE82B9;
+-- Eliminar cualquier CHECK constraint existente sobre la columna resultado
+DECLARE @ck NVARCHAR(200);
+SELECT @ck = cc.name
+FROM sys.check_constraints cc
+INNER JOIN sys.columns c
+    ON c.object_id = cc.parent_object_id
+   AND c.column_id = cc.parent_column_id
+WHERE cc.parent_object_id = OBJECT_ID('registros_acceso')
+  AND c.name = 'resultado';
 
+IF @ck IS NOT NULL
+    EXEC('ALTER TABLE registros_acceso DROP CONSTRAINT [' + @ck + ']');
+GO
+
+-- Recrear con nombre explícito y valores actualizados
+IF NOT EXISTS (
+    SELECT 1 FROM sys.check_constraints
+    WHERE parent_object_id = OBJECT_ID('registros_acceso')
+      AND name = 'CK_registros_resultado'
+)
 ALTER TABLE registros_acceso
     ADD CONSTRAINT CK_registros_resultado
     CHECK (resultado IN (
@@ -347,5 +364,6 @@ ALTER TABLE registros_acceso
         'denegado_vencimiento',
         'denegado_huella',
         'denegado_limite',
-        'denegado_limite_semana'
+        'denegado_limite_semana',
+        'seleccionar_membresia'
     ));

@@ -209,9 +209,39 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="6" VerticalAlignment="Bottom">
-                                <Button Content="APLICAR FILTROS" Width="130"
-                                        Style="{StaticResource BotonPrincipalEstilo}"
-                                        Click="btnFiltrar_Click"/>
+                                <Button x:Name="btnFiltrar" Click="btnFiltrar_Click"
+                                        Width="160" Height="44" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="borderBtn" CornerRadius="10" BorderThickness="0">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                        <GradientStop Color="#00CFFF" Offset="0"/>
+                                                        <GradientStop Color="#A78BFA" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="🔍" FontSize="14"
+                                                               VerticalAlignment="Center" Margin="14,0,8,0"/>
+                                                    <TextBlock Grid.Column="1" Text="CONSULTAR"
+                                                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                                               FontSize="12" FontWeight="Bold"
+                                                               Foreground="#0A0A14"
+                                                               VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="borderBtn" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -263,31 +293,57 @@
                         </Border>
                     </Grid>
 
-                    <!-- Gráfico de barras WPF Canvas nativo -->
-                    <Border Background="#0A120A" BorderBrush="#1E3020" BorderThickness="1"
-                            CornerRadius="10" Padding="16,12" Margin="0,0,0,14">
-                        <StackPanel>
-                            <TextBlock x:Name="lblAnioGrafico" Text="INGRESOS POR MES — 2026"
-                                       FontSize="12" FontWeight="Bold" Foreground="#E8F0E8"
-                                       Margin="0,0,0,12"/>
-                            <Canvas x:Name="canvasGrafico" Height="180" Background="Transparent"/>
-                            <!-- Eje X con nombres de meses -->
-                            <ItemsControl x:Name="listaMeses">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid Rows="1"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding MesNombre}"
-                                                   FontSize="9" Foreground="#5A6B5A"
-                                                   HorizontalAlignment="Center"
-                                                   TextTrimming="CharacterEllipsis"/>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                    <!-- Gráfico de ingresos por mes — Canvas WPF nativo con selector de año -->
+                    <Border Background="#12121E" CornerRadius="12"
+                            BorderBrush="#252540" BorderThickness="1"
+                            Padding="20,16" Margin="0,0,0,14">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="220"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Header: título + selector de año -->
+                            <Grid Grid.Row="0" Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="INGRESOS POR MES"
+                                               FontFamily="Bahnschrift SemiBold"
+                                               FontSize="13" FontWeight="Bold"
+                                               Foreground="#E8E8FF"/>
+                                    <TextBlock x:Name="lblAnioGrafico"
+                                               Text="Año 2026"
+                                               FontSize="11" Foreground="#6A6A9A"
+                                               Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                            VerticalAlignment="Center">
+                                    <Button x:Name="btnAnioAnterior"
+                                            Content="◀" Click="btnAnioAnterior_Click"
+                                            Background="Transparent" Foreground="#6A6A9A"
+                                            BorderThickness="0" FontSize="16"
+                                            Cursor="Hand" Width="32" Height="32"/>
+                                    <TextBlock x:Name="lblAnioSelector"
+                                               Text="2026"
+                                               FontFamily="Consolas" FontSize="14"
+                                               FontWeight="Bold" Foreground="#E8E8FF"
+                                               VerticalAlignment="Center" Margin="8,0"/>
+                                    <Button x:Name="btnAnioSiguiente"
+                                            Content="▶" Click="btnAnioSiguiente_Click"
+                                            Background="Transparent" Foreground="#6A6A9A"
+                                            BorderThickness="0" FontSize="16"
+                                            Cursor="Hand" Width="32" Height="32"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Canvas x:Name="canvasGrafico" Grid.Row="1" Background="Transparent"
+                                    SizeChanged="canvasGrafico_SizeChanged"/>
+                        </Grid>
                     </Border>
 
                     <!-- Botones de exportación -->
@@ -351,9 +407,39 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="3" VerticalAlignment="Bottom">
-                                <Button Content="CONSULTAR" Width="110"
-                                        Style="{StaticResource BotonPrincipalEstilo}"
-                                        Click="btnConsultarSueldos_Click"/>
+                                <Button x:Name="btnConsultarSueldos" Click="btnConsultarSueldos_Click"
+                                        Width="160" Height="44" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="borderBtnS" CornerRadius="10" BorderThickness="0">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                        <GradientStop Color="#00CFFF" Offset="0"/>
+                                                        <GradientStop Color="#A78BFA" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="🔍" FontSize="14"
+                                                               VerticalAlignment="Center" Margin="14,0,8,0"/>
+                                                    <TextBlock Grid.Column="1" Text="CONSULTAR"
+                                                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                                               FontSize="12" FontWeight="Bold"
+                                                               Foreground="#0A0A14"
+                                                               VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="borderBtnS" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
                             </StackPanel>
                         </Grid>
                     </Border>

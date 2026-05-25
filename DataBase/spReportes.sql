@@ -167,8 +167,8 @@ BEGIN
     SELECT
         MONTH(creado_en)                        AS mes,
         DATENAME(MONTH, DATEFROMPARTS(@Anio, MONTH(creado_en), 1)) AS mes_nombre,
-        ISNULL(SUM(CASE WHEN tipo='ingreso' THEN monto ELSE 0 END), 0) AS ingresos,
-        ISNULL(SUM(CASE WHEN tipo='egreso'  THEN monto ELSE 0 END), 0) AS egresos
+        ISNULL(SUM(CASE WHEN tipo LIKE 'ingreso%'                        THEN monto ELSE 0 END), 0) AS ingresos,
+        ISNULL(SUM(CASE WHEN tipo IN ('gasto','movimiento_interno')    THEN monto ELSE 0 END), 0) AS egresos
     FROM caja_movimientos
     WHERE YEAR(creado_en) = @Anio
     GROUP BY MONTH(creado_en)

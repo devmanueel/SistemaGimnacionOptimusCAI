@@ -29,6 +29,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // Tarifa global de docentes (SDD_Fix_Sueldos_Docentes)
         private decimal _tarifaGlobalActual = 4000m;
 
+        // Gráfico por año
+        private int _anioGrafico = DateTime.Today.Year;
+        private decimal[] _datosPorMes = new decimal[12];
+
         public ReportesPage()
         {
             InitializeComponent();
@@ -46,7 +50,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             dpSueldoHasta.SelectedDate = _hasta;
 
             lblFechaHoy.Text = "Hoy: " + DateTime.Today.ToString("dddd dd/MM/yyyy");
-            lblAnioGrafico.Text = "INGRESOS POR MES — " + DateTime.Today.Year;
+            _anioGrafico = DateTime.Today.Year;
+            lblAnioGrafico.Text = "Año " + _anioGrafico;
+            lblAnioSelector.Text = _anioGrafico.ToString();
 
             ConfigurarTabsSegunRol();
             CargarFiltrosComboBox();
@@ -217,58 +223,156 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void btnFiltrar_Click(object sender, RoutedEventArgs e) => CargarIngresos();
 
-        // ─── GRÁFICO DE BARRAS WPF CANVAS ───────────────────────
+        // ─── GRÁFICO DE BARRAS + LÍNEA TENDENCIA — Canvas WPF nativo ─
         private void CargarGrafico()
         {
-            canvasGrafico.Children.Clear();
-            listaMeses.ItemsSource = null;
-
-            var datos = _ctrl.ObtenerGraficoPorMes(DateTime.Today.Year);
-            if (datos == null || datos.Count == 0) return;
-
-            listaMeses.ItemsSource = datos;
-
-            decimal maxVal = 0;
-            foreach (var d in datos)
-                if (d.Ingresos > maxVal) maxVal = d.Ingresos;
-            if (maxVal == 0) maxVal = 1;
-
-            double canvasH = canvasGrafico.ActualHeight;
-            if (canvasH < 1) canvasH = 180;
-            double barWidth  = canvasGrafico.ActualWidth > 0
-                ? (canvasGrafico.ActualWidth - 20) / datos.Count : 60;
-            double groupW    = barWidth * 0.8;
-
-            for (int i = 0; i < datos.Count; i++)
+            try
             {
-                var d = datos[i];
-                double x = 10 + i * barWidth;
+                var datos = _ctrl.ObtenerGraficoPorMes(_anioGrafico);
 
-                // Barra ingresos (cyan)
-                double hIngreso = (double)(d.Ingresos / maxVal) * (canvasH - 10);
-                var barI = new Rectangle
+                _datosPorMes = new decimal[12];
+                if (datos != null)
                 {
-                    Width  = groupW * 0.55,
-                    Height = Math.Max(hIngreso, 2),
-                    Fill   = new LinearGradientBrush(
-                        Color.FromRgb(0, 207, 255), Color.FromRgb(0, 140, 200), 90)
-                };
-                Canvas.SetLeft(barI, x);
-                Canvas.SetTop(barI, canvasH - barI.Height);
-                canvasGrafico.Children.Add(barI);
+                    foreach (var d in datos)
+                    {
+                        int idx = d.Mes - 1;
+                        if (idx >= 0 && idx < 12)
+                            _datosPorMes[idx] = d.Ingresos;
+                    }
+                }
 
-                // Barra egresos (violeta)
-                double hEgreso = (double)(d.Egresos / maxVal) * (canvasH - 10);
-                var barE = new Rectangle
-                {
-                    Width  = groupW * 0.40,
-                    Height = Math.Max(hEgreso, 2),
-                    Fill   = new SolidColorBrush(Color.FromRgb(167, 139, 250))
-                };
-                Canvas.SetLeft(barE, x + groupW * 0.58);
-                Canvas.SetTop(barE, canvasH - barE.Height);
-                canvasGrafico.Children.Add(barE);
+                lblAnioGrafico.Text  = "Año " + _anioGrafico;
+                lblAnioSelector.Text = _anioGrafico.ToString();
+
+                DibujarGraficoCanvas(_datosPorMes);
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show("No se pudo cargar el gráfico.\n" + ex.Message, "Aviso",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void canvasGrafico_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            DibujarGraficoCanvas(_datosPorMes);
+        }
+
+        private void DibujarGraficoCanvas(decimal[] datosPorMes)
+        {
+            canvasGrafico.Children.Clear();
+
+            double ancho = canvasGrafico.ActualWidth;
+            double alto  = canvasGrafico.ActualHeight;
+            if (ancho < 1) ancho = 600;
+            if (alto  < 1) alto  = 220;
+
+            double margenIzq = 60, margenDer = 20, margenSup = 20, margenInf = 40;
+            double areaAncho = ancho - margenIzq - margenDer;
+            double areaAlto  = alto  - margenSup - margenInf;
+
+            decimal maxVal = 10000;
+            foreach (var v in datosPorMes)
+                if (v > maxVal) maxVal = v;
+
+            double anchoBarra = (areaAncho / 12) * 0.6;
+            double espacio    = areaAncho / 12;
+
+            // Línea base del eje Y
+            var lineaBase = new System.Windows.Shapes.Line
+            {
+                X1 = margenIzq, Y1 = margenSup + areaAlto,
+                X2 = margenIzq + areaAncho, Y2 = margenSup + areaAlto,
+                Stroke = new SolidColorBrush(Color.FromRgb(37, 37, 64)),
+                StrokeThickness = 1
+            };
+            canvasGrafico.Children.Add(lineaBase);
+
+            Color[] colores =
+            {
+                Color.FromRgb(0, 207, 255),   Color.FromRgb(32, 190, 255),
+                Color.FromRgb(64, 173, 255),  Color.FromRgb(96, 156, 255),
+                Color.FromRgb(118, 148, 255), Color.FromRgb(131, 145, 253),
+                Color.FromRgb(144, 142, 252), Color.FromRgb(152, 140, 251),
+                Color.FromRgb(160, 139, 251), Color.FromRgb(163, 139, 250),
+                Color.FromRgb(167, 139, 250), Color.FromRgb(170, 139, 250)
+            };
+
+            string[] nombresMes = { "Ene","Feb","Mar","Abr","May","Jun",
+                                    "Jul","Ago","Sep","Oct","Nov","Dic" };
+
+            var puntosLinea = new System.Windows.Media.PointCollection();
+
+            for (int i = 0; i < 12; i++)
+            {
+                double x      = margenIzq + i * espacio + (espacio - anchoBarra) / 2;
+                double pct    = maxVal > 0 ? (double)datosPorMes[i] / (double)maxVal : 0;
+                double hBarra = pct * areaAlto;
+                double y      = margenSup + areaAlto - hBarra;
+
+                var rect = new System.Windows.Shapes.Rectangle
+                {
+                    Width   = anchoBarra,
+                    Height  = Math.Max(hBarra, 2),
+                    Fill    = new SolidColorBrush(colores[i]),
+                    RadiusX = 4, RadiusY = 4
+                };
+                Canvas.SetLeft(rect, x);
+                Canvas.SetTop(rect, y);
+                canvasGrafico.Children.Add(rect);
+
+                var lblMes = new TextBlock
+                {
+                    Text       = nombresMes[i],
+                    FontSize   = 9,
+                    Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154))
+                };
+                Canvas.SetLeft(lblMes, x + anchoBarra / 2 - 10);
+                Canvas.SetTop(lblMes, margenSup + areaAlto + 6);
+                canvasGrafico.Children.Add(lblMes);
+
+                puntosLinea.Add(new System.Windows.Point(x + anchoBarra / 2, y));
+            }
+
+            // Línea de tendencia naranja con puntos circulares
+            if (puntosLinea.Count >= 2)
+            {
+                var polilinea = new System.Windows.Shapes.Polyline
+                {
+                    Points          = puntosLinea,
+                    Stroke          = new SolidColorBrush(Color.FromRgb(255, 107, 53)),
+                    StrokeThickness = 2.5,
+                    StrokeLineJoin  = System.Windows.Media.PenLineJoin.Round
+                };
+                canvasGrafico.Children.Add(polilinea);
+
+                foreach (System.Windows.Point pt in puntosLinea)
+                {
+                    var circulo = new System.Windows.Shapes.Ellipse
+                    {
+                        Width  = 8, Height = 8,
+                        Fill   = new SolidColorBrush(Color.FromRgb(255, 107, 53)),
+                        Stroke = new SolidColorBrush(Color.FromRgb(18, 18, 30)),
+                        StrokeThickness = 1.5
+                    };
+                    Canvas.SetLeft(circulo, pt.X - 4);
+                    Canvas.SetTop(circulo, pt.Y - 4);
+                    canvasGrafico.Children.Add(circulo);
+                }
+            }
+        }
+
+        private void btnAnioAnterior_Click(object sender, RoutedEventArgs e)
+        {
+            _anioGrafico--;
+            CargarGrafico();
+        }
+
+        private void btnAnioSiguiente_Click(object sender, RoutedEventArgs e)
+        {
+            if (_anioGrafico >= DateTime.Today.Year) return;
+            _anioGrafico++;
+            CargarGrafico();
         }
 
         // ─── TAB 2: SUELDOS (tarifa global, SDD_Fix_Sueldos_Docentes) ──────────

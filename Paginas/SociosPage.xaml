@@ -653,9 +653,13 @@
 
                             <!-- TAB 2: CONTACTO -->
                             <StackPanel x:Name="tabContacto" Visibility="Collapsed">
-                                <TextBlock Text="CELULAR *" Style="{StaticResource LabelCampoEstilo}"/>
+                                <TextBlock Text="CELULAR * (10 dígitos, sin 0 inicial)" Style="{StaticResource LabelCampoEstilo}"/>
                                 <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"
-                                         MaxLength="20" LostFocus="txtTelefono_LostFocus"/>
+                                         MaxLength="10"
+                                         PreviewTextInput="txtTelefono_PreviewTextInput"
+                                         DataObject.Pasting="txtTelefono_Pasting"
+                                         LostFocus="txtTelefono_LostFocus"
+                                         ToolTip="Ingresá 10 dígitos sin el 0 inicial. Ejemplo: 3884123456"/>
                                 <TextBlock x:Name="errTelefono" Style="{StaticResource LabelErrorEstilo}"/>
 
                                 <TextBlock Text="EMAIL" Style="{StaticResource LabelCampoEstilo}"/>

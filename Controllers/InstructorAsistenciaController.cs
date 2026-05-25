@@ -118,17 +118,25 @@ namespace Controllers
         }
 
         // ──────────────────────────────────────────────────────
-        // TAREA 7 — Fichaje por DNI + contraseña
+        // FICHAJE — validado con DNI del usuario logueado
+        // El DNI ingresado debe coincidir con el de la sesión.
+        // No se requiere contraseña separada.
         // ──────────────────────────────────────────────────────
-        public (bool ok, string mensaje, FichajeResultado resultado) FicharEntrada(
-            string dni, string passwordHash)
+        public (bool ok, string mensaje, FichajeResultado resultado) FicharEntrada(string dniIngresado)
         {
-            if (string.IsNullOrWhiteSpace(dni))          return (false, "Ingresá tu DNI.", null);
-            if (string.IsNullOrWhiteSpace(passwordHash)) return (false, "Ingresá tu contraseña.", null);
+            if (string.IsNullOrWhiteSpace(dniIngresado))
+                return (false, "Ingresá tu DNI para confirmar tu identidad.", null);
+
+            if (!SesionManager.HaySesion)
+                return (false, "No hay sesión activa.", null);
+
+            if (!string.Equals(dniIngresado.Trim(), SesionManager.Dni,
+                                StringComparison.OrdinalIgnoreCase))
+                return (false, "El DNI ingresado no coincide con tu cuenta.", null);
 
             try
             {
-                var r = _dao.FicharEntrada(dni.Trim(), passwordHash);
+                var r = _dao.FicharEntrada(SesionManager.UsuarioId);
                 if (r == null) return (false, "No se pudo registrar la entrada.", null);
 
                 Auditor.Registrar("crear", "asistencia", r.Id, new Dictionary<string, object> {
@@ -142,15 +150,21 @@ namespace Controllers
             catch (Exception ex) { return (false, ex.Message, null); }
         }
 
-        public (bool ok, string mensaje, FichajeResultado resultado) FicharSalida(
-            string dni, string passwordHash)
+        public (bool ok, string mensaje, FichajeResultado resultado) FicharSalida(string dniIngresado)
         {
-            if (string.IsNullOrWhiteSpace(dni))          return (false, "Ingresá tu DNI.", null);
-            if (string.IsNullOrWhiteSpace(passwordHash)) return (false, "Ingresá tu contraseña.", null);
+            if (string.IsNullOrWhiteSpace(dniIngresado))
+                return (false, "Ingresá tu DNI para confirmar tu identidad.", null);
+
+            if (!SesionManager.HaySesion)
+                return (false, "No hay sesión activa.", null);
+
+            if (!string.Equals(dniIngresado.Trim(), SesionManager.Dni,
+                                StringComparison.OrdinalIgnoreCase))
+                return (false, "El DNI ingresado no coincide con tu cuenta.", null);
 
             try
             {
-                var r = _dao.FicharSalida(dni.Trim(), passwordHash);
+                var r = _dao.FicharSalida(SesionManager.UsuarioId);
                 if (r == null) return (false, "No se pudo registrar la salida.", null);
 
                 Auditor.Registrar("editar", "asistencia", r.Id, new Dictionary<string, object> {
@@ -162,6 +176,12 @@ namespace Controllers
                 return (true, $"Salida registrada — {r.HorasTrabajadasTexto} trabajados", r);
             }
             catch (Exception ex) { return (false, ex.Message, null); }
+        }
+
+        public List<InstructorAsistencia> BuscarPropias(DateTime? desde, DateTime? hasta)
+        {
+            try { return _dao.BuscarPropias(SesionManager.UsuarioId, desde, hasta); }
+            catch (Exception ex) { throw new Exception("Error al cargar tus asistencias.\n" + ex.Message); }
         }
 
         // ──────────────────────────────────────────────────────

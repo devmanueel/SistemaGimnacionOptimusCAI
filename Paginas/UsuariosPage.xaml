@@ -453,10 +453,14 @@ Style="{StaticResource ButtonStyleEstado}">
                                      LostFocus="txtEmail_LostFocus"/>
                             <TextBlock x:Name="errEmail" Style="{StaticResource LabelErrorEstilo}"/>
 
-                            <TextBlock Text="TELÉFONO  (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
+                            <TextBlock Text="TELÉFONO  (opcional, 10 dígitos sin 0 inicial)" Style="{StaticResource LabelCampoEstilo}"/>
 
                             <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"
-                                     MaxLength="20" LostFocus="txtTelefono_LostFocus"/>
+                                     MaxLength="10"
+                                     PreviewTextInput="txtTelefono_PreviewTextInput"
+                                     DataObject.Pasting="txtTelefono_Pasting"
+                                     LostFocus="txtTelefono_LostFocus"
+                                     ToolTip="Ingresá 10 dígitos sin el 0 inicial. Ejemplo: 3884123456"/>
                             <TextBlock x:Name="errTelefono" Style="{StaticResource LabelErrorEstilo}"/>
 
                             <TextBlock Text="DOMICILIO  (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
