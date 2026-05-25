@@ -279,21 +279,21 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 lblActividad.Text = r.ActividadNombre;
                 lblVencimiento.Text = r.FechaVencimientoTexto;
-                lblDiasRestantes.Text = r.DiasParaVencerTexto ?? "—";
+                lblAsistenciasRestantes.Text = r.AsistenciasRestantesTexto ?? "—";
 
-                if (r.DiasParaVencer.HasValue)
+                if (r.LimitePorSemana.HasValue)
                 {
-                    int d = r.DiasParaVencer.Value;
-                    if (d >= 7)
-                        lblDiasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-                    else if (d >= 0)
-                        lblDiasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(255, 179, 0));
+                    int rest = r.AsistenciasRestantesSemana ?? 0;
+                    if (rest > 1)
+                        lblAsistenciasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                    else if (rest == 1)
+                        lblAsistenciasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(255, 179, 0));
                     else
-                        lblDiasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+                        lblAsistenciasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
                 }
                 else
                 {
-                    lblDiasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 204));
+                    lblAsistenciasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 204));
                 }
 
                 panelInfoMembresia.Visibility = Visibility.Visible;

@@ -47,7 +47,9 @@ namespace Models.Dao
                                 ActividadNombre = reader["actividad_nombre"] as string,
                                 FechaVencimiento = reader["fecha_vencimiento"] != DBNull.Value ? (DateTime?)reader["fecha_vencimiento"] : null,
                                 RegistroId = reader["registro_id"] != DBNull.Value ? (long?)Convert.ToInt64(reader["registro_id"]) : null,
-                                DescuentoAplicado = reader["descuento_aplicado"] != DBNull.Value && Convert.ToBoolean(reader["descuento_aplicado"])
+                                DescuentoAplicado = reader["descuento_aplicado"] != DBNull.Value && Convert.ToBoolean(reader["descuento_aplicado"]),
+                                LimitePorSemana = reader["limite_por_semana"] != DBNull.Value ? (int?)Convert.ToInt32(reader["limite_por_semana"]) : null,
+                                AsistenciasRestantesSemana = reader["asistencias_restantes"] != DBNull.Value ? (int?)Convert.ToInt32(reader["asistencias_restantes"]) : null
                             };
                         }
                     }

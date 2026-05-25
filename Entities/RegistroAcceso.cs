@@ -84,6 +84,8 @@ namespace Entities
         public DateTime? FechaVencimiento { get; set; }
         public long? RegistroId { get; set; }
         public bool DescuentoAplicado { get; set; } = true;
+        public int? LimitePorSemana { get; set; }
+        public int? AsistenciasRestantesSemana { get; set; }
 
         public bool EsPermitido => Resultado == "permitido";
 
@@ -113,6 +115,19 @@ namespace Entities
                 if (d == 1) return "Vence mañana";
                 if (d > 1) return "Vence en " + d + " días";
                 return "Venció hace " + Math.Abs(d) + " días";
+            }
+        }
+
+        public string AsistenciasRestantesTexto
+        {
+            get
+            {
+                if (!LimitePorSemana.HasValue) return "Sin límite semanal";
+                if (!AsistenciasRestantesSemana.HasValue) return "-";
+                int r = AsistenciasRestantesSemana.Value;
+                if (r <= 0) return "Sin asistencias restantes esta semana";
+                if (r == 1) return "1 asistencia restante esta semana";
+                return r + " asistencias restantes esta semana";
             }
         }
     }

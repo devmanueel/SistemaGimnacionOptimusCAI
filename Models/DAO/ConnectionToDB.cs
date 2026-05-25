@@ -16,7 +16,7 @@ namespace Models.Dao
         // ── IMPORTANTE: cambiá esta ruta a la de tu archivo .mdf ──
         private readonly string _connectionString =
             @"Data Source=(LocalDB)\MSSQLLocalDB;" +
-            @"AttachDbFilename=C:\Users\USUARIO\Desktop\lpoo2\Proyectos\SistemaGimnacionOptimusCAI\DataBase\DB_CAI_Optimus.mdf;" +
+            @"AttachDbFilename=D:\JOAQUIN\PROYECTOS C#\SISTEMAGIMNACIONOPTIMUSCAI\DATABASE\DB_CAI_OPTIMUS.MDF;" +
             @"Integrated Security=True;Connect Timeout=30";
 
         /// <summary>
