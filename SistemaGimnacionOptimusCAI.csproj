@@ -203,6 +203,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Paginas\FichaUsuarioWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Paginas\EditarUsuarioWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Paginas\ReportesPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -259,6 +267,12 @@
     </Compile>
     <Compile Include="Paginas\FichaSocioWindow.xaml.cs">
       <DependentUpon>FichaSocioWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\FichaUsuarioWindow.xaml.cs">
+      <DependentUpon>FichaUsuarioWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\EditarUsuarioWindow.xaml.cs">
+      <DependentUpon>EditarUsuarioWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\ReportesPage.xaml.cs">
       <DependentUpon>ReportesPage.xaml</DependentUpon>

@@ -230,6 +230,40 @@ namespace Models.Dao
         }
 
         // ──────────────────────────────────────────────────────────
+        // MODIFICAR DATOS PROPIOS (sin cambiar rol ni tarifa)
+        // ──────────────────────────────────────────────────────────
+        public bool ModificarUsuarioPropio(Usuario u, bool cambiarPassword = false, bool cambiarFoto = false)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+
+                using (var cmd = new SqlCommand("sp_ModificarUsuarioPropio", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Id", u.Id);
+                    cmd.Parameters.AddWithValue("@Nombre", u.Nombre);
+                    cmd.Parameters.AddWithValue("@Apellido", u.Apellido);
+                    cmd.Parameters.AddWithValue("@Dni", u.Dni);
+                    cmd.Parameters.AddWithValue("@Domicilio", (object)u.Domicilio ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Telefono", (object)u.Telefono ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Email", (object)u.Email ?? DBNull.Value);
+
+                    cmd.Parameters.AddWithValue("@PasswordHash",
+                        cambiarPassword ? (object)u.PasswordHash : DBNull.Value);
+
+                    var fotoParam = new SqlParameter("@Foto", SqlDbType.VarBinary);
+                    fotoParam.Value = cambiarFoto && u.Foto != null ? (object)u.Foto : DBNull.Value;
+                    cmd.Parameters.Add(fotoParam);
+
+                    var filas = cmd.ExecuteScalar();
+                    return filas != null && Convert.ToInt32(filas) > 0;
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
         // CAMBIAR ESTADO (activar / desactivar)
         // ──────────────────────────────────────────────────────────
         public bool CambiarEstadoUsuario(long id, bool nuevoEstado)
