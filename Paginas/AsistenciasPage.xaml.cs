@@ -20,7 +20,9 @@ using SistemaGimnacionOptimusCAI.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Media;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -256,6 +258,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             if (_timerOcultarResultado != null) _timerOcultarResultado.Stop();
 
+            if (r.EsPermitido)
+                ReproducirSonido("acceso_ok.wav");
+            else
+                ReproducirSonido("acceso_error.wav");
+
             panelEsperando.Visibility = Visibility.Collapsed;
 
             // Datos del socio
@@ -271,7 +278,24 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (!string.IsNullOrEmpty(r.ActividadNombre))
             {
                 lblActividad.Text = r.ActividadNombre;
-                lblVencimiento.Text = r.FechaVencimientoTexto + "  (" + r.DiasParaVencerTexto + ")";
+                lblVencimiento.Text = r.FechaVencimientoTexto;
+                lblDiasRestantes.Text = r.DiasParaVencerTexto ?? "—";
+
+                if (r.DiasParaVencer.HasValue)
+                {
+                    int d = r.DiasParaVencer.Value;
+                    if (d >= 7)
+                        lblDiasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                    else if (d >= 0)
+                        lblDiasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(255, 179, 0));
+                    else
+                        lblDiasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+                }
+                else
+                {
+                    lblDiasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 204));
+                }
+
                 panelInfoMembresia.Visibility = Visibility.Visible;
             }
             else
@@ -393,6 +417,31 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 bmp.EndInit();
                 return bmp;
             }
+        }
+
+        // ─────────────────────────────────────────────────────
+        // SONIDO DE FEEDBACK (asíncrono, no bloquea UI)
+        // ─────────────────────────────────────────────────────
+        private void ReproducirSonido(string nombreArchivo)
+        {
+            try
+            {
+                string ruta = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Sounds", nombreArchivo);
+                if (!File.Exists(ruta)) return;
+
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        using (var player = new SoundPlayer(ruta))
+                        {
+                            player.PlaySync();
+                        }
+                    }
+                    catch { }
+                });
+            }
+            catch { }
         }
     }
 }

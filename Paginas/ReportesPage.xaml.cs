@@ -29,10 +29,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // Tarifa global de docentes (SDD_Fix_Sueldos_Docentes)
         private decimal _tarifaGlobalActual = 4000m;
 
-        // Gráfico por año
-        private int _anioGrafico = DateTime.Today.Year;
-        private decimal[] _datosPorMes = new decimal[12];
-
         public ReportesPage()
         {
             InitializeComponent();
@@ -44,15 +40,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _desde = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
             _hasta = DateTime.Today;
 
-            dpDesde.SelectedDate  = _desde;
-            dpHasta.SelectedDate  = _hasta;
+            dpDesde.SelectedDate = _desde;
+            dpHasta.SelectedDate = _hasta;
             dpSueldoDesde.SelectedDate = _desde;
             dpSueldoHasta.SelectedDate = _hasta;
 
             lblFechaHoy.Text = "Hoy: " + DateTime.Today.ToString("dddd dd/MM/yyyy");
-            _anioGrafico = DateTime.Today.Year;
-            lblAnioGrafico.Text = "Año " + _anioGrafico;
-            lblAnioSelector.Text = _anioGrafico.ToString();
+            lblAnioGrafico.Text = "INGRESOS POR MES — " + DateTime.Today.Year;
 
             ConfigurarTabsSegunRol();
             CargarFiltrosComboBox();
@@ -68,16 +62,16 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             if (SesionManager.EsAdmin)
             {
-                btnTabSueldos.Visibility   = Visibility.Visible;
-                btnTabDeudas.Visibility    = Visibility.Visible;
-                btnTabIngresos.Visibility  = Visibility.Visible;
+                btnTabSueldos.Visibility = Visibility.Visible;
+                btnTabDeudas.Visibility = Visibility.Visible;
+                btnTabIngresos.Visibility = Visibility.Visible;
             }
             else
             {
-                panelIngresos.Visibility  = Visibility.Collapsed;
+                panelIngresos.Visibility = Visibility.Collapsed;
                 btnTabIngresos.Visibility = Visibility.Collapsed;
-                btnTabSueldos.Visibility  = Visibility.Collapsed;
-                btnTabDeudas.Visibility   = Visibility.Collapsed;
+                btnTabSueldos.Visibility = Visibility.Collapsed;
+                btnTabDeudas.Visibility = Visibility.Collapsed;
                 MostrarTabMisVentas();
             }
         }
@@ -107,7 +101,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     cmbInstructor.Items.Add(new ComboBoxItem
                     {
                         Content = u.Apellido + ", " + u.Nombre,
-                        Tag     = (long?)u.Id
+                        Tag = (long?)u.Id
                     });
             }
             catch { }
@@ -117,17 +111,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─── NAVEGACIÓN DE TABS ─────────────────────────────────
         private void OcultarTodosLosTabPaneles()
         {
-            panelIngresos.Visibility  = Visibility.Collapsed;
-            panelSueldos.Visibility   = Visibility.Collapsed;
-            panelDeudas.Visibility    = Visibility.Collapsed;
+            panelIngresos.Visibility = Visibility.Collapsed;
+            panelSueldos.Visibility = Visibility.Collapsed;
+            panelDeudas.Visibility = Visibility.Collapsed;
             panelMisVentas.Visibility = Visibility.Collapsed;
         }
 
         private void ResetTabButtons()
         {
-            btnTabIngresos.Style  = (Style)FindResource("TabBtnStyle");
-            btnTabSueldos.Style   = (Style)FindResource("TabBtnStyle");
-            btnTabDeudas.Style    = (Style)FindResource("TabBtnStyle");
+            btnTabIngresos.Style = (Style)FindResource("TabBtnStyle");
+            btnTabSueldos.Style = (Style)FindResource("TabBtnStyle");
+            btnTabDeudas.Style = (Style)FindResource("TabBtnStyle");
             btnTabMisVentas.Style = (Style)FindResource("TabBtnStyle");
         }
 
@@ -185,16 +179,16 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _desde = dpDesde.SelectedDate ?? _desde;
             _hasta = dpHasta.SelectedDate ?? _hasta;
 
-            long? actividadId  = (cmbActividad.SelectedItem as ComboBoxItem)?.Tag as long?;
-            string metodoPago  = ((cmbMetodoPago.SelectedItem as ComboBoxItem)?.Tag as string);
+            long? actividadId = (cmbActividad.SelectedItem as ComboBoxItem)?.Tag as long?;
+            string metodoPago = ((cmbMetodoPago.SelectedItem as ComboBoxItem)?.Tag as string);
             if (string.IsNullOrEmpty(metodoPago)) metodoPago = null;
             long? instructorId = (cmbInstructor.SelectedItem as ComboBoxItem)?.Tag as long?;
 
             try
             {
                 _movimientos = _ctrl.ObtenerMovimientos(_desde, _hasta, actividadId, metodoPago, instructorId);
-                var result   = _ctrl.ObtenerTotales(_desde, _hasta);
-                _totales     = result.totales;
+                var result = _ctrl.ObtenerTotales(_desde, _hasta);
+                _totales = result.totales;
 
                 // Limitar a 500
                 bool hayMas = _movimientos.Count > 500;
@@ -204,13 +198,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 dgMovimientos.ItemsSource = _movimientos;
 
                 lblTotalIngresos.Text = _totales.TotalIngresosTexto;
-                lblTotalEgresos.Text  = _totales.TotalEgresosTexto;
-                lblBalance.Text       = _totales.BalanceTexto;
+                lblTotalEgresos.Text = _totales.TotalEgresosTexto;
+                lblBalance.Text = _totales.BalanceTexto;
                 lblBalance.Foreground = _totales.BalancePositivo
                     ? new SolidColorBrush(Color.FromRgb(122, 201, 67))
                     : new SolidColorBrush(Color.FromRgb(255, 85, 85));
                 lblCantIngresos.Text = _totales.CantidadIngresos + " movimientos";
-                lblCantEgresos.Text  = _totales.CantidadEgresos  + " movimientos";
+                lblCantEgresos.Text = _totales.CantidadEgresos + " movimientos";
 
                 CargarGrafico();
             }
@@ -392,46 +386,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Grid.SetColumn(lbl, col);
                 gridGraficoLabels.Children.Add(lbl);
             }
-
-            // Línea de tendencia naranja con puntos circulares
-            if (puntosLinea.Count >= 2)
-            {
-                var polilinea = new System.Windows.Shapes.Polyline
-                {
-                    Points          = puntosLinea,
-                    Stroke          = new SolidColorBrush(Color.FromRgb(255, 107, 53)),
-                    StrokeThickness = 2.5,
-                    StrokeLineJoin  = System.Windows.Media.PenLineJoin.Round
-                };
-                canvasGrafico.Children.Add(polilinea);
-
-                foreach (System.Windows.Point pt in puntosLinea)
-                {
-                    var circulo = new System.Windows.Shapes.Ellipse
-                    {
-                        Width  = 8, Height = 8,
-                        Fill   = new SolidColorBrush(Color.FromRgb(255, 107, 53)),
-                        Stroke = new SolidColorBrush(Color.FromRgb(18, 18, 30)),
-                        StrokeThickness = 1.5
-                    };
-                    Canvas.SetLeft(circulo, pt.X - 4);
-                    Canvas.SetTop(circulo, pt.Y - 4);
-                    canvasGrafico.Children.Add(circulo);
-                }
-            }
-        }
-
-        private void btnAnioAnterior_Click(object sender, RoutedEventArgs e)
-        {
-            _anioGrafico--;
-            CargarGrafico();
-        }
-
-        private void btnAnioSiguiente_Click(object sender, RoutedEventArgs e)
-        {
-            if (_anioGrafico >= DateTime.Today.Year) return;
-            _anioGrafico++;
-            CargarGrafico();
         }
 
         // ─── TAB 2: SUELDOS (tarifa global, SDD_Fix_Sueldos_Docentes) ──────────
@@ -461,7 +415,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 // Defensivo: salir de cualquier edición pendiente antes de reasignar ItemsSource
                 // (evita el error "No se permite Refresh durante AddNew o EditItem").
                 dgSueldos.CommitEdit(DataGridEditingUnit.Cell, true);
-                dgSueldos.CommitEdit(DataGridEditingUnit.Row,  true);
+                dgSueldos.CommitEdit(DataGridEditingUnit.Row, true);
 
                 var desde = dpSueldoDesde.SelectedDate;
                 var hasta = dpSueldoHasta.SelectedDate;
@@ -470,7 +424,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
                 foreach (var d in _sueldos)
                 {
-                    d.TarifaHora     = _tarifaGlobalActual;
+                    d.TarifaHora = _tarifaGlobalActual;
                     d.SueldoEstimado = d.HorasTotales * _tarifaGlobalActual;
                 }
 
@@ -515,7 +469,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 {
                     foreach (var d in _sueldos)
                     {
-                        d.TarifaHora     = nuevaTarifa;
+                        d.TarifaHora = nuevaTarifa;
                         d.SueldoEstimado = d.HorasTotales * nuevaTarifa;
                     }
                     dgSueldos.Items.Refresh();
@@ -542,10 +496,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             try
             {
                 var result = _ctrl.ObtenerSociosDeuda(7);
-                dgVencidas.ItemsSource   = result.vencidas;
-                dgProximas.ItemsSource   = result.proximas;
-                lblCountVencidas.Text    = result.vencidas.Count.ToString();
-                lblCountProximas.Text    = result.proximas.Count.ToString();
+                dgVencidas.ItemsSource = result.vencidas;
+                dgProximas.ItemsSource = result.proximas;
+                lblCountVencidas.Text = result.vencidas.Count.ToString();
+                lblCountProximas.Text = result.proximas.Count.ToString();
             }
             catch (Exception ex)
             {
@@ -558,7 +512,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void btnWhatsAppDeuda_Click(object sender, RoutedEventArgs e)
         {
-            var btn   = sender as Button;
+            var btn = sender as Button;
             var socio = btn?.Tag as SocioConDeuda;
             if (socio == null) return;
 
@@ -586,7 +540,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 var result = _ctrl.ObtenerMisVentasDelDia();
                 dgMisVentas.ItemsSource = result.ventas;
-                lblResumenVentas.Text   =
+                lblResumenVentas.Text =
                     "Hoy vendiste " + result.cantidadVentas + " " +
                     (result.cantidadVentas == 1 ? "vez" : "veces") +
                     " por un total de $" + result.totalDia.ToString("N2");
@@ -611,7 +565,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             try
             {
-                var exp  = new ReportePdfExportador();
+                var exp = new ReportePdfExportador();
                 string path = exp.ExportarIngresos(_movimientos, _totales, _desde, _hasta);
                 Process.Start(path);
             }
@@ -632,7 +586,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             try
             {
-                var exp  = new ReporteExcelExportador();
+                var exp = new ReporteExcelExportador();
                 string path = exp.ExportarIngresos(_movimientos, _totales, _desde, _hasta);
                 Process.Start(path);
             }
@@ -654,7 +608,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             try
             {
-                var exp  = new ReportePdfExportador();
+                var exp = new ReportePdfExportador();
                 string path = exp.ExportarSueldos(_sueldos,
                     dpSueldoDesde.SelectedDate ?? _desde,
                     dpSueldoHasta.SelectedDate ?? _hasta);
@@ -677,7 +631,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             try
             {
-                var exp  = new ReporteExcelExportador();
+                var exp = new ReporteExcelExportador();
                 string path = exp.ExportarSueldos(_sueldos,
                     dpSueldoDesde.SelectedDate ?? _desde,
                     dpSueldoHasta.SelectedDate ?? _hasta);
@@ -696,7 +650,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             try
             {
                 var result = _ctrl.ObtenerSociosDeuda(7);
-                var exp    = new ReportePdfExportador();
+                var exp = new ReportePdfExportador();
                 string path = exp.ExportarDeudas(result.vencidas, result.proximas);
                 Process.Start(path);
             }
