@@ -245,6 +245,35 @@ namespace Controllers
         }
 
         // ──────────────────────────────────────────────────────
+        // HUELLAS DIGITALES
+        // ──────────────────────────────────────────────────────
+
+        public (bool ok, string mensaje) ActualizarHuellaGuid(long socioId, Guid? guid)
+        {
+            try
+            {
+                _dao.ActualizarHuellaGuid(socioId, guid);
+                string accion = guid.HasValue ? "registrada" : "eliminada";
+                return (true, "Huella " + accion + " correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return (false, "Error al actualizar la huella.\n" + ex.Message);
+            }
+        }
+
+        /// <summary>Retorna el DNI del socio con ese GUID de huella, o null si no existe.</summary>
+        public string ObtenerDniPorHuellaGuid(Guid guid)
+        {
+            try
+            {
+                var resultado = _dao.ObtenerDniPorHuellaGuid(guid);
+                return resultado?.dni;
+            }
+            catch { return null; }
+        }
+
+        // ──────────────────────────────────────────────────────
         // VALIDACIONES CENTRALIZADAS
         // ──────────────────────────────────────────────────────
         private string ValidarCampos(string nombre, string apellido, string dni,

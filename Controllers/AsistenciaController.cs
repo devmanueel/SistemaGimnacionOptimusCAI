@@ -17,6 +17,7 @@ namespace Controllers
     public class AsistenciaController
     {
         private readonly AsistenciaDao _dao = new AsistenciaDao();
+        private readonly SocioController _socioCtrl = new SocioController();
 
         // ──────────────────────────────────────────────────────
         // VALIDAR ACCESO POR DNI
@@ -44,6 +45,36 @@ namespace Controllers
                 {
                     Resultado = "denegado_socio_inactivo",
                     Mensaje = "Error al validar el acceso.\n" + ex.Message
+                };
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // VALIDAR ACCESO POR HUELLA
+        //  Identifica al socio por su GUID de huella y delega
+        //  al flujo estándar de validación por DNI.
+        // ──────────────────────────────────────────────────────
+        public ResultadoValidacion ValidarAccesoPorHuella(Guid huellaGuid)
+        {
+            try
+            {
+                string dni = _socioCtrl.ObtenerDniPorHuellaGuid(huellaGuid);
+                if (string.IsNullOrEmpty(dni))
+                {
+                    return new ResultadoValidacion
+                    {
+                        Resultado = "denegado_huella",
+                        Mensaje   = "Huella no registrada en el sistema."
+                    };
+                }
+                return _dao.ValidarAccesoPorDni(dni, "huella", null);
+            }
+            catch (Exception ex)
+            {
+                return new ResultadoValidacion
+                {
+                    Resultado = "denegado_huella",
+                    Mensaje   = "Error al validar por huella.\n" + ex.Message
                 };
             }
         }

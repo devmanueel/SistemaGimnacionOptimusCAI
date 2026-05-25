@@ -1,10 +1,12 @@
 using Controllers;
 using Entities;
+using FontAwesome.WPF;
 using SistemaGimnacionOptimusCAI.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace SistemaGimnacionOptimusCAI.Paginas
@@ -25,6 +27,25 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarMembresias();
             CargarAsistencias();
             CargarFichaMedica();
+            ActualizarBtnHuella();
+        }
+
+        private void ActualizarBtnHuella()
+        {
+            bool tieneHuella = _socio.TieneHuella;
+            bool lectorDisponible = BiometricManager.Servicio?.Disponible == true;
+
+            if (!lectorDisponible)
+            {
+                btnHuella.IsEnabled = false;
+                btnHuella.ToolTip = "Lector de huellas no detectado";
+                return;
+            }
+
+            lblBtnHuella.Text = tieneHuella ? "ACTUALIZAR HUELLA" : "REGISTRAR HUELLA";
+            iconBtnHuella.Foreground = tieneHuella
+                ? new SolidColorBrush(Color.FromRgb(0x4A, 0xDE, 0x80))
+                : (Brush)FindResource("TextPrimary");
         }
 
         private void CargarDatosSocio()
@@ -159,6 +180,21 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch (Exception ex)
             {
                 NotificacionWindow.MostrarError("Error al generar el carnet.\n" + ex.Message);
+            }
+        }
+
+        private void btnHuella_Click(object sender, RoutedEventArgs e)
+        {
+            var win = new EnrolarHuellaWindow(_socio) { Owner = this };
+            bool? result = win.ShowDialog();
+            if (result == true)
+            {
+                // Actualizar estado del botón reflejando que ahora tiene huella
+                _socio.HuellaGuid = Guid.NewGuid(); // cualquier guid para marcar TieneHuella=true
+                ActualizarBtnHuella();
+                NotificacionWindow.MostrarExito(
+                    "Huella registrada. El socio ya puede acceder con su huella.",
+                    "Huella digital");
             }
         }
 

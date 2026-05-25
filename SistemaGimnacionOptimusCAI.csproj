@@ -124,6 +124,8 @@
     <Compile Include="Helpers\ReporteExcelExportador.cs" />
     <Compile Include="Helpers\InicialesConverter.cs" />
     <Compile Include="Helpers\WidthHeightToRectConverter.cs" />
+    <Compile Include="Helpers\WinBioNative.cs" />
+    <Compile Include="Helpers\BiometricService.cs" />
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -215,6 +217,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Paginas\EnrolarHuellaWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Paginas\ActividadesPage.xaml.cs">
@@ -276,6 +282,9 @@
     </Compile>
     <Compile Include="Paginas\ReportesPage.xaml.cs">
       <DependentUpon>ReportesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Paginas\EnrolarHuellaWindow.xaml.cs">
+      <DependentUpon>EnrolarHuellaWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
