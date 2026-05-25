@@ -20,6 +20,7 @@ IF OBJECT_ID('sp_TurnosDeHoy',                      'P') IS NOT NULL DROP PROCED
 IF OBJECT_ID('sp_EstadisticasInstructorAsistencias','P') IS NOT NULL DROP PROCEDURE sp_EstadisticasInstructorAsistencias;
 IF OBJECT_ID('sp_FicharEntradaInstructor',          'P') IS NOT NULL DROP PROCEDURE sp_FicharEntradaInstructor;
 IF OBJECT_ID('sp_FicharSalidaInstructor',           'P') IS NOT NULL DROP PROCEDURE sp_FicharSalidaInstructor;
+IF OBJECT_ID('sp_BuscarMisAsistencias',             'P') IS NOT NULL DROP PROCEDURE sp_BuscarMisAsistencias;
 IF OBJECT_ID('sp_ReporteMensualInstructores',       'P') IS NOT NULL DROP PROCEDURE sp_ReporteMensualInstructores;
 IF OBJECT_ID('sp_ReporteSemanalInstructores',       'P') IS NOT NULL DROP PROCEDURE sp_ReporteSemanalInstructores;
 GO
@@ -295,51 +296,66 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
--- 9. FICHAR ENTRADA (autenticación por DNI + contraseña)
+-- 9. FICHAR ENTRADA (validado por ID de sesión, multi-turno
+--    con cooldown de 10 minutos entre sesiones del mismo día)
 -- ─────────────────────────────────────────────────────────────
 CREATE PROCEDURE sp_FicharEntradaInstructor
-    @Dni          VARCHAR(15),
-    @PasswordHash VARCHAR(64)
+    @InstructorId BIGINT
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @InstructorId BIGINT;
-    DECLARE @Nombre       NVARCHAR(100);
-    DECLARE @Apellido     NVARCHAR(100);
+    DECLARE @Nombre   NVARCHAR(100);
+    DECLARE @Apellido NVARCHAR(100);
 
-    SELECT @InstructorId = id,
-           @Nombre       = nombre,
-           @Apellido     = apellido
+    SELECT @Nombre = nombre, @Apellido = apellido
     FROM usuarios
-    WHERE dni = @Dni
-      AND password_hash = @PasswordHash
+    WHERE id = @InstructorId
       AND activo = 1
       AND eliminado_en IS NULL;
 
-    IF @InstructorId IS NULL
+    IF @Nombre IS NULL
     BEGIN
-        RAISERROR('DNI o contraseña incorrectos.', 16, 1);
+        RAISERROR('Instructor no encontrado o inactivo.', 16, 1);
         RETURN;
     END
 
+    -- Bloquear si hay una entrada abierta (sin salida)
     IF EXISTS (
         SELECT 1 FROM instructor_asistencias
         WHERE instructor_id = @InstructorId
           AND fecha = CAST(GETDATE() AS DATE)
+          AND hora_salida IS NULL
     )
     BEGIN
-        DECLARE @TieneSalida BIT;
-        SELECT @TieneSalida = CASE WHEN hora_salida IS NOT NULL THEN 1 ELSE 0 END
-        FROM instructor_asistencias
-        WHERE instructor_id = @InstructorId
-          AND fecha = CAST(GETDATE() AS DATE);
-
-        IF @TieneSalida = 0
-            RAISERROR('Ya registraste tu entrada hoy y aún no fichaste salida.', 16, 1);
-        ELSE
-            RAISERROR('Ya completaste tu jornada de hoy (entrada y salida registradas).', 16, 1);
+        RAISERROR('Tenés una entrada abierta sin salida. Registrá tu salida primero.', 16, 1);
         RETURN;
+    END
+
+    -- Cooldown de 10 minutos desde la última salida del día
+    DECLARE @UltimaSalidaDT DATETIME;
+    SELECT TOP 1
+        @UltimaSalidaDT = DATEADD(MILLISECOND,
+                              DATEDIFF(MILLISECOND, 0, hora_salida),
+                              CAST(fecha AS DATETIME))
+    FROM instructor_asistencias
+    WHERE instructor_id = @InstructorId
+      AND fecha = CAST(GETDATE() AS DATE)
+      AND hora_salida IS NOT NULL
+    ORDER BY id DESC;
+
+    IF @UltimaSalidaDT IS NOT NULL
+    BEGIN
+        DECLARE @MinutosDesde INT = DATEDIFF(MINUTE, @UltimaSalidaDT, GETDATE());
+        IF @MinutosDesde < 10
+        BEGIN
+            DECLARE @Restantes INT = 10 - @MinutosDesde;
+            DECLARE @MsgEspera NVARCHAR(200) =
+                N'Debés esperar ' + CAST(@Restantes AS NVARCHAR) +
+                N' minuto(s) antes de registrar una nueva entrada.';
+            RAISERROR(@MsgEspera, 16, 1);
+            RETURN;
+        END
     END
 
     INSERT INTO instructor_asistencias
@@ -357,47 +373,45 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
--- 10. FICHAR SALIDA (autenticación por DNI + contraseña)
+-- 10. FICHAR SALIDA (toma la última entrada abierta del día)
 -- ─────────────────────────────────────────────────────────────
 CREATE PROCEDURE sp_FicharSalidaInstructor
-    @Dni          VARCHAR(15),
-    @PasswordHash VARCHAR(64)
+    @InstructorId BIGINT
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @InstructorId BIGINT;
-    DECLARE @Nombre       NVARCHAR(100);
-    DECLARE @Apellido     NVARCHAR(100);
+    DECLARE @Nombre   NVARCHAR(100);
+    DECLARE @Apellido NVARCHAR(100);
 
-    SELECT @InstructorId = id,
-           @Nombre       = nombre,
-           @Apellido     = apellido
+    SELECT @Nombre = nombre, @Apellido = apellido
     FROM usuarios
-    WHERE dni = @Dni
-      AND password_hash = @PasswordHash
+    WHERE id = @InstructorId
       AND activo = 1
       AND eliminado_en IS NULL;
 
-    IF @InstructorId IS NULL
+    IF @Nombre IS NULL
     BEGIN
-        RAISERROR('DNI o contraseña incorrectos.', 16, 1);
+        RAISERROR('Instructor no encontrado o inactivo.', 16, 1);
         RETURN;
     END
 
     DECLARE @AsistenciaId BIGINT;
     DECLARE @HoraEntrada  TIME;
 
-    SELECT @AsistenciaId = id,
-           @HoraEntrada  = hora_entrada
+    -- Última entrada abierta del día
+    SELECT TOP 1
+        @AsistenciaId = id,
+        @HoraEntrada  = hora_entrada
     FROM instructor_asistencias
     WHERE instructor_id = @InstructorId
-      AND fecha         = CAST(GETDATE() AS DATE)
-      AND hora_salida   IS NULL;
+      AND fecha = CAST(GETDATE() AS DATE)
+      AND hora_salida IS NULL
+    ORDER BY id DESC;
 
     IF @AsistenciaId IS NULL
     BEGIN
-        RAISERROR('No tenés una entrada registrada hoy sin salida.', 16, 1);
+        RAISERROR('No tenés una entrada abierta hoy. Registrá tu entrada primero.', 16, 1);
         RETURN;
     END
 
@@ -418,6 +432,40 @@ BEGIN
         @HoraSalida                 AS hora_salida,
         @HorasTrabaj                AS horas_trabajadas,
         @MinutosTrabaj              AS minutos_trabajados;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 13. MIS ASISTENCIAS (filtro por instructor logueado)
+-- ─────────────────────────────────────────────────────────────
+CREATE PROCEDURE sp_BuscarMisAsistencias
+    @InstructorId BIGINT,
+    @FechaDesde   DATE = NULL,
+    @FechaHasta   DATE = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @FechaDesde IS NULL SET @FechaDesde = DATEADD(DAY, -30, CAST(GETDATE() AS DATE));
+    IF @FechaHasta IS NULL SET @FechaHasta = CAST(GETDATE() AS DATE);
+
+    SELECT
+        ia.id, ia.instructor_id, ia.turno_id, ia.fecha,
+        ia.hora_entrada, ia.hora_salida, ia.horas_trabajadas, ia.observaciones,
+        ia.registrado_por, ia.creado_en,
+        u.nombre + ' ' + u.apellido          AS instructor_nombre,
+        u.foto                                AS instructor_foto,
+        ISNULL(a.nombre, '-')                 AS actividad_nombre,
+        t.dia_semana, t.hora_inicio, t.hora_fin,
+        ISNULL(uReg.nombre + ' ' + uReg.apellido, 'Sistema') AS registrado_por_nombre
+    FROM instructor_asistencias ia
+    INNER JOIN usuarios     u    ON u.id = ia.instructor_id
+    LEFT  JOIN turnos       t    ON t.id = ia.turno_id
+    LEFT  JOIN actividades  a    ON a.id = t.actividad_id
+    LEFT  JOIN usuarios     uReg ON uReg.id = ia.registrado_por
+    WHERE ia.instructor_id = @InstructorId
+      AND ia.fecha BETWEEN @FechaDesde AND @FechaHasta
+    ORDER BY ia.fecha DESC, ia.hora_entrada DESC;
 END;
 GO
 

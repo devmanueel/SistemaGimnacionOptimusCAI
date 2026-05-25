@@ -22,6 +22,14 @@ namespace Models.Dao
             return null;
         }
 
+        private static int? LeerColumnaSeguraInt(SqlDataReader r, string columna)
+        {
+            for (int i = 0; i < r.FieldCount; i++)
+                if (r.GetName(i).Equals(columna, StringComparison.OrdinalIgnoreCase))
+                    return r[columna] != DBNull.Value ? (int?)Convert.ToInt32(r[columna]) : null;
+            return null;
+        }
+
         private static Membresia MapearMembresia(SqlDataReader r)
         {
             return new Membresia
@@ -48,7 +56,7 @@ namespace Models.Dao
                 ActividadNombre = r["actividad_nombre"].ToString(),
                 ActividadTipo = r["actividad_tipo"].ToString(),
                 ActividadCategoria = LeerColumnaSegura(r, "actividad_categoria"),
-                ActividadNivel = r["actividad_nivel"] != DBNull.Value ? (int?)Convert.ToInt32(r["actividad_nivel"]) : null,
+                ActividadNivel = LeerColumnaSeguraInt(r, "actividad_nivel"),
                 InstructorNombre = r["instructor_nombre"].ToString(),
                 RegistradoPorNombre = r["registrado_por_nombre"].ToString(),
                 DiasParaVencer = Convert.ToInt32(r["dias_para_vencer"])
@@ -307,8 +315,8 @@ namespace Models.Dao
                                 Tipo = reader["tipo"].ToString(),
                                 DiasSesiones = Convert.ToInt32(reader["dias_sesiones"]),
                                 Precio = Convert.ToDecimal(reader["precio"]),
-                                Categoria = reader["categoria"] as string,
-                                Nivel = reader["nivel"] != DBNull.Value ? (int?)Convert.ToInt32(reader["nivel"]) : null
+                                Categoria = LeerColumnaSegura(reader, "categoria"),
+                                Nivel = LeerColumnaSeguraInt(reader, "nivel")
                             });
                 }
             }

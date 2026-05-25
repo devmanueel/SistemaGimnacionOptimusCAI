@@ -388,8 +388,48 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                Controllers.Validador.ValidarEmail(txtEmail.Text));
 
         private void txtTelefono_LostFocus(object sender, RoutedEventArgs e)
-            => AplicarEstadoCampo(txtTelefono, errTelefono,
-               Controllers.Validador.ValidarTelefono(txtTelefono.Text));
+        {
+            // El teléfono es opcional en usuarios: solo validar si fue ingresado
+            string err = string.IsNullOrWhiteSpace(txtTelefono.Text)
+                ? null
+                : Controllers.Validador.ValidarTelefono(txtTelefono.Text);
+            AplicarEstadoCampo(txtTelefono, errTelefono, err);
+        }
+
+        private void txtTelefono_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !Controllers.Validador.EsCaracterTelefonoValido(e.Text);
+        }
+
+        private void txtTelefono_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string texto = e.DataObject.GetData(typeof(string)) as string ?? string.Empty;
+                var soloDigitos = new System.Text.StringBuilder();
+                foreach (char c in texto)
+                    if (char.IsDigit(c)) soloDigitos.Append(c);
+
+                string resultado = soloDigitos.ToString();
+                if (resultado.Length > 10)
+                    resultado = resultado.Substring(0, 10);
+
+                if (resultado.Length > 0)
+                {
+                    var tb = sender as TextBox;
+                    if (tb != null)
+                    {
+                        tb.Text = resultado;
+                        tb.CaretIndex = tb.Text.Length;
+                    }
+                }
+                e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
 
         private void txtClave_PasswordChanged(object sender, RoutedEventArgs e)
         {
@@ -447,7 +487,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             AplicarEstadoCampo(txtEmail, errEmail, errE);
             if (errE != null) ok = false;
 
-            string errT = Controllers.Validador.ValidarTelefono(txtTelefono.Text);
+            string errT = string.IsNullOrWhiteSpace(txtTelefono.Text)
+                ? null
+                : Controllers.Validador.ValidarTelefono(txtTelefono.Text);
             AplicarEstadoCampo(txtTelefono, errTelefono, errT);
             if (errT != null) ok = false;
 

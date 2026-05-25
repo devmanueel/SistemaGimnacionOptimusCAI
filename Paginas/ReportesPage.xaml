@@ -209,9 +209,39 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="6" VerticalAlignment="Bottom">
-                                <Button Content="APLICAR FILTROS" Width="130"
-                                        Style="{StaticResource BotonPrincipalEstilo}"
-                                        Click="btnFiltrar_Click"/>
+                                <Button x:Name="btnFiltrar" Click="btnFiltrar_Click"
+                                        Width="160" Height="44" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="borderBtn" CornerRadius="10" BorderThickness="0">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                        <GradientStop Color="#00CFFF" Offset="0"/>
+                                                        <GradientStop Color="#A78BFA" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="🔍" FontSize="14"
+                                                               VerticalAlignment="Center" Margin="14,0,8,0"/>
+                                                    <TextBlock Grid.Column="1" Text="CONSULTAR"
+                                                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                                               FontSize="12" FontWeight="Bold"
+                                                               Foreground="#0A0A14"
+                                                               VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="borderBtn" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -352,9 +382,39 @@
                             </StackPanel>
 
                             <StackPanel Grid.Column="3" VerticalAlignment="Bottom">
-                                <Button Content="CONSULTAR" Width="110"
-                                        Style="{StaticResource BotonPrincipalEstilo}"
-                                        Click="btnConsultarSueldos_Click"/>
+                                <Button x:Name="btnConsultarSueldos" Click="btnConsultarSueldos_Click"
+                                        Width="160" Height="44" Cursor="Hand">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="borderBtnS" CornerRadius="10" BorderThickness="0">
+                                                <Border.Background>
+                                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                        <GradientStop Color="#00CFFF" Offset="0"/>
+                                                        <GradientStop Color="#A78BFA" Offset="1"/>
+                                                    </LinearGradientBrush>
+                                                </Border.Background>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="🔍" FontSize="14"
+                                                               VerticalAlignment="Center" Margin="14,0,8,0"/>
+                                                    <TextBlock Grid.Column="1" Text="CONSULTAR"
+                                                               FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                                               FontSize="12" FontWeight="Bold"
+                                                               Foreground="#0A0A14"
+                                                               VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="borderBtnS" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
                             </StackPanel>
                         </Grid>
                     </Border>

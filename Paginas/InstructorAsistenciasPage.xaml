@@ -181,18 +181,13 @@
                                   Style="{StaticResource PanelScrollViewerStyle}">
                         <StackPanel Margin="22,16,22,22">
 
-                            <!-- DNI -->
-                            <TextBlock Text="DNI" Style="{StaticResource LabelCampoEstilo}"/>
+                            <!-- DNI como validador de identidad -->
+                            <TextBlock Text="INGRESÁ TU DNI PARA VALIDAR"
+                                       Style="{StaticResource LabelCampoEstilo}"/>
                             <TextBox x:Name="txtFichajeDni"
                                      Style="{StaticResource InputEstilo}"
                                      Height="42" Margin="0,0,0,0"
                                      MaxLength="15"/>
-
-                            <!-- Contraseña -->
-                            <TextBlock Text="CONTRASEÑA" Style="{StaticResource LabelCampoEstilo}" Margin="2,14,0,6"/>
-                            <PasswordBox x:Name="pbFichajePassword"
-                                         Style="{StaticResource PasswordEstilo}"
-                                         Height="42"/>
 
                             <!-- Botones fichaje -->
                             <Button x:Name="btnFicharEntrada"
@@ -239,17 +234,99 @@
             <!-- ══ SECCIÓN B — PANEL ADMIN ══ -->
             <Grid Grid.Column="1">
 
-                <!-- No admin -->
+                <!-- No admin: historial propio -->
                 <Border x:Name="borderNoAdmin" Visibility="Collapsed"
                         Background="{StaticResource Bg1}" CornerRadius="12"
-                        BorderBrush="{StaticResource Border1}" BorderThickness="0.5">
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <fa:ImageAwesome Icon="Lock" Foreground="{StaticResource TextMuted}"
-                                         Height="48" HorizontalAlignment="Center" Opacity="0.4"/>
-                        <TextBlock Text="Panel exclusivo para administradores"
-                                   FontSize="14" Foreground="{StaticResource TextMuted}"
-                                   HorizontalAlignment="Center" Margin="0,16,0,0"/>
-                    </StackPanel>
+                        BorderBrush="{StaticResource Border1}" BorderThickness="0.5" ClipToBounds="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Background="#4ADE80"/>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="22,18,22,12">
+                            <fa:ImageAwesome Icon="History" Foreground="#00E676"
+                                             Height="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="MIS ASISTENCIAS"
+                                       FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                       FontSize="14" FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimary}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <DataGrid Grid.Row="2" x:Name="gridMisAsistencias"
+                                  IsReadOnly="True" AutoGenerateColumns="False"
+                                  CanUserAddRows="False" CanUserResizeRows="False"
+                                  Background="Transparent" BorderThickness="0"
+                                  RowHeaderWidth="0" RowHeight="50"
+                                  GridLinesVisibility="Horizontal"
+                                  HorizontalGridLinesBrush="#111811"
+                                  SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="FECHA"  Binding="{Binding FechaCorta}" Width="0.8*"/>
+                                <DataGridTemplateColumn Header="ENTRADA" Width="0.9*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding HoraEntradaTexto}"
+                                                       FontFamily="Consolas" FontSize="13" FontWeight="Bold"
+                                                       Foreground="#00E676" Margin="4,0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="SALIDA" Width="0.9*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding HoraSalidaTexto}"
+                                                       FontFamily="Consolas" FontSize="13" FontWeight="Bold"
+                                                       Margin="4,0">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{StaticResource GreenMain}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding AsistenciaAbierta}" Value="True">
+                                                                <Setter Property="Foreground" Value="#D4830A"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="HORAS"  Binding="{Binding HorasTrabajadasTexto}" Width="0.8*"/>
+                                <DataGridTemplateColumn Header="ESTADO" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border CornerRadius="4" Padding="8,4" HorizontalAlignment="Left">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#0A2A14"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding AsistenciaAbierta}" Value="True">
+                                                                <Setter Property="Background" Value="#1E1600"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding EstadoTexto}" FontSize="11" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#00E676"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding AsistenciaAbierta}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#D4830A"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
                 </Border>
 
                 <!-- Admin content -->

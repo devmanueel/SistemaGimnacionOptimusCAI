@@ -29,6 +29,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // Tarifa global de docentes (SDD_Fix_Sueldos_Docentes)
         private decimal _tarifaGlobalActual = 4000m;
 
+        // Gráfico por año
+        private int _anioGrafico = DateTime.Today.Year;
+        private decimal[] _datosPorMes = new decimal[12];
+
         public ReportesPage()
         {
             InitializeComponent();
@@ -46,7 +50,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             dpSueldoHasta.SelectedDate = _hasta;
 
             lblFechaHoy.Text = "Hoy: " + DateTime.Today.ToString("dddd dd/MM/yyyy");
-            lblAnioGrafico.Text = "INGRESOS POR MES — " + DateTime.Today.Year;
+            _anioGrafico = DateTime.Today.Year;
+            lblAnioGrafico.Text = "Año " + _anioGrafico;
+            lblAnioSelector.Text = _anioGrafico.ToString();
 
             ConfigurarTabsSegunRol();
             CargarFiltrosComboBox();
@@ -386,6 +392,46 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Grid.SetColumn(lbl, col);
                 gridGraficoLabels.Children.Add(lbl);
             }
+
+            // Línea de tendencia naranja con puntos circulares
+            if (puntosLinea.Count >= 2)
+            {
+                var polilinea = new System.Windows.Shapes.Polyline
+                {
+                    Points          = puntosLinea,
+                    Stroke          = new SolidColorBrush(Color.FromRgb(255, 107, 53)),
+                    StrokeThickness = 2.5,
+                    StrokeLineJoin  = System.Windows.Media.PenLineJoin.Round
+                };
+                canvasGrafico.Children.Add(polilinea);
+
+                foreach (System.Windows.Point pt in puntosLinea)
+                {
+                    var circulo = new System.Windows.Shapes.Ellipse
+                    {
+                        Width  = 8, Height = 8,
+                        Fill   = new SolidColorBrush(Color.FromRgb(255, 107, 53)),
+                        Stroke = new SolidColorBrush(Color.FromRgb(18, 18, 30)),
+                        StrokeThickness = 1.5
+                    };
+                    Canvas.SetLeft(circulo, pt.X - 4);
+                    Canvas.SetTop(circulo, pt.Y - 4);
+                    canvasGrafico.Children.Add(circulo);
+                }
+            }
+        }
+
+        private void btnAnioAnterior_Click(object sender, RoutedEventArgs e)
+        {
+            _anioGrafico--;
+            CargarGrafico();
+        }
+
+        private void btnAnioSiguiente_Click(object sender, RoutedEventArgs e)
+        {
+            if (_anioGrafico >= DateTime.Today.Year) return;
+            _anioGrafico++;
+            CargarGrafico();
         }
 
         // ─── TAB 2: SUELDOS (tarifa global, SDD_Fix_Sueldos_Docentes) ──────────

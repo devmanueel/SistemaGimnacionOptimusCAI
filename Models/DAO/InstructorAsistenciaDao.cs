@@ -197,7 +197,7 @@ namespace Models.Dao
             return new EstadisticasInstructorAsistencias();
         }
 
-        public FichajeResultado FicharEntrada(string dni, string passwordHash)
+        public FichajeResultado FicharEntrada(long instructorId)
         {
             using (var conn = GetConnection())
             {
@@ -205,8 +205,7 @@ namespace Models.Dao
                 using (var cmd = new SqlCommand("sp_FicharEntradaInstructor", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@Dni", dni);
-                    cmd.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                    cmd.Parameters.AddWithValue("@InstructorId", instructorId);
                     using (var r = cmd.ExecuteReader())
                         if (r.Read())
                             return new FichajeResultado
@@ -221,7 +220,7 @@ namespace Models.Dao
             return null;
         }
 
-        public FichajeResultado FicharSalida(string dni, string passwordHash)
+        public FichajeResultado FicharSalida(long instructorId)
         {
             using (var conn = GetConnection())
             {
@@ -229,8 +228,7 @@ namespace Models.Dao
                 using (var cmd = new SqlCommand("sp_FicharSalidaInstructor", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@Dni", dni);
-                    cmd.Parameters.AddWithValue("@PasswordHash", passwordHash);
+                    cmd.Parameters.AddWithValue("@InstructorId", instructorId);
                     using (var r = cmd.ExecuteReader())
                         if (r.Read())
                             return new FichajeResultado
@@ -238,13 +236,33 @@ namespace Models.Dao
                                 Id              = Convert.ToInt64(r["id"]),
                                 InstructorId    = Convert.ToInt64(r["instructor_id"]),
                                 NombreCompleto  = r["nombre_completo"] as string,
-                                HoraEntrada     = r["hora_entrada"]    != DBNull.Value ? (TimeSpan)r["hora_entrada"]             : default(TimeSpan),
-                                HoraSalida      = r["hora_salida"]     != DBNull.Value ? (TimeSpan)r["hora_salida"]              : default(TimeSpan),
+                                HoraEntrada     = r["hora_entrada"]    != DBNull.Value ? (TimeSpan)r["hora_entrada"]              : default(TimeSpan),
+                                HoraSalida      = r["hora_salida"]     != DBNull.Value ? (TimeSpan)r["hora_salida"]               : default(TimeSpan),
                                 HorasTrabajadas = r["horas_trabajadas"] != DBNull.Value ? Convert.ToDecimal(r["horas_trabajadas"]) : 0m
                             };
                 }
             }
             return null;
+        }
+
+        public List<InstructorAsistencia> BuscarPropias(long instructorId,
+                                                         DateTime? desde, DateTime? hasta)
+        {
+            var lista = new List<InstructorAsistencia>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_BuscarMisAsistencias", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@InstructorId", instructorId);
+                    cmd.Parameters.AddWithValue("@FechaDesde", (object)desde ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@FechaHasta", (object)hasta ?? DBNull.Value);
+                    using (var r = cmd.ExecuteReader())
+                        while (r.Read()) lista.Add(Mapear(r));
+                }
+            }
+            return lista;
         }
 
         public List<ReporteInstructor> ObtenerReporteMensual(int anio, int mes)

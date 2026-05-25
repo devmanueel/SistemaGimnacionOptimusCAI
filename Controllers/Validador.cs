@@ -56,23 +56,36 @@ namespace Controllers
         }
 
         // ── TELÉFONO ──────────────────────────────────────────────
-        public static string ValidarTelefono(string valor)
+        // Exactamente 10 dígitos numéricos, sin 0 inicial, sin prefijo 15.
+        public static string ValidarTelefono(string telefono)
         {
-            if (string.IsNullOrWhiteSpace(valor))
-                return null; // Opcional
+            if (string.IsNullOrWhiteSpace(telefono))
+                return "El número de celular es obligatorio.";
 
-            valor = valor.Trim();
+            foreach (char c in telefono)
+            {
+                if (!char.IsDigit(c))
+                    return "El celular solo puede contener números, sin letras ni símbolos.";
+            }
 
-            if (!Regex.IsMatch(valor, @"^[\d\+\-\s\(\)]+$"))
-                return "El teléfono solo puede contener números, +, -, paréntesis y espacios.";
+            if (telefono.Length != 10)
+                return "El celular debe tener exactamente 10 dígitos (sin el 0 inicial). Ejemplo: 3884123456";
 
-            string soloDigitos = Regex.Replace(valor, @"\D", "");
-            if (soloDigitos.Length < 6)
-                return "El teléfono debe tener al menos 6 dígitos.";
-            if (soloDigitos.Length > 15)
-                return "El teléfono no puede superar los 15 dígitos.";
+            if (telefono[0] == '0')
+                return "No ingreses el 0 inicial. Ejemplo: 3884123456 (no 03884123456)";
+
+            if (telefono.StartsWith("15"))
+                return "No ingreses el 15. Ejemplo: 3884123456 (no 1512345678)";
 
             return null;
+        }
+
+        public static bool EsCaracterTelefonoValido(string texto)
+        {
+            if (string.IsNullOrEmpty(texto)) return false;
+            foreach (char c in texto)
+                if (!char.IsDigit(c)) return false;
+            return true;
         }
 
         // ── EMAIL ─────────────────────────────────────────────────

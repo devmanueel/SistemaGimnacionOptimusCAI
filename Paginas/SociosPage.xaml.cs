@@ -482,6 +482,41 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             else e.CancelCommand();
         }
 
+        private void txtTelefono_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !Controllers.Validador.EsCaracterTelefonoValido(e.Text);
+        }
+
+        private void txtTelefono_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string texto = e.DataObject.GetData(typeof(string)) as string ?? string.Empty;
+                var soloDigitos = new System.Text.StringBuilder();
+                foreach (char c in texto)
+                    if (char.IsDigit(c)) soloDigitos.Append(c);
+
+                string resultado = soloDigitos.ToString();
+                if (resultado.Length > 10)
+                    resultado = resultado.Substring(0, 10);
+
+                if (resultado.Length > 0)
+                {
+                    var tb = sender as TextBox;
+                    if (tb != null)
+                    {
+                        tb.Text = resultado;
+                        tb.CaretIndex = tb.Text.Length;
+                    }
+                }
+                e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
         private bool ValidarTodo()
         {
             bool ok = true;

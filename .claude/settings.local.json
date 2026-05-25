@@ -17,7 +17,9 @@
       "Bash(curl --max-time 10 -sI -L \"https://www.nuget.org/api/v2/package/BouncyCastle.Cryptography/1.8.9\")",
       "Bash(curl --max-time 10 -sI -L \"https://api.nuget.org/v3-flatcontainer/portable.bouncycastle/1.9.0/portable.bouncycastle.1.9.0.nupkg\")",
       "Bash(curl --max-time 10 -sI -L \"https://api.nuget.org/v3-flatcontainer/bouncycastle/1.8.9/bouncycastle.1.8.9.nupkg\")",
-      "Bash('/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe' SistemaGimnacionOptimusCAI.csproj /t:Build /p:Configuration=Debug /v:minimal /m)"
+      "Bash('/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe' SistemaGimnacionOptimusCAI.csproj /t:Build /p:Configuration=Debug /v:minimal /m)",
+      "Bash(dir C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI *)",
+      "PowerShell(Test-Path *)"
     ]
   }
 }

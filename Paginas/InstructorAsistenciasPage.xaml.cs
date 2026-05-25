@@ -4,8 +4,6 @@ using Entities;
 using SistemaGimnacionOptimusCAI.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -32,8 +30,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarCombosReporteMensual();
             IniciarReloj();
             ConfigurarPanelAdmin();
-            SetTab("historial");
-            CargarHistorial();
+
+            if (SesionManager.EsAdmin)
+            {
+                SetTab("historial");
+                CargarHistorial();
+            }
+            else
+            {
+                CargarMisAsistencias();
+            }
+
             ActualizarStats();
         }
 
@@ -110,17 +117,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ── FICHAJE RÁPIDO ────────────────────────────────────
         private void btnFicharEntrada_Click(object sender, RoutedEventArgs e)
         {
-            string dni  = txtFichajeDni.Text.Trim();
-            string hash = HashPassword(pbFichajePassword.Password);
+            string dni = txtFichajeDni.Text.Trim();
 
-            var (ok, mensaje, resultado) = _controller.FicharEntrada(dni, hash);
+            var (ok, mensaje, resultado) = _controller.FicharEntrada(dni);
 
             if (ok)
             {
                 MostrarResultadoFichaje(resultado, esSalida: false);
                 LimpiarFormFichaje();
                 ActualizarStats();
-                CargarHistorial();
+                if (SesionManager.EsAdmin) CargarHistorial();
+                else CargarMisAsistencias();
             }
             else
             {
@@ -130,17 +137,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void btnFicharSalida_Click(object sender, RoutedEventArgs e)
         {
-            string dni  = txtFichajeDni.Text.Trim();
-            string hash = HashPassword(pbFichajePassword.Password);
+            string dni = txtFichajeDni.Text.Trim();
 
-            var (ok, mensaje, resultado) = _controller.FicharSalida(dni, hash);
+            var (ok, mensaje, resultado) = _controller.FicharSalida(dni);
 
             if (ok)
             {
                 MostrarResultadoFichaje(resultado, esSalida: true);
                 LimpiarFormFichaje();
                 ActualizarStats();
-                CargarHistorial();
+                if (SesionManager.EsAdmin) CargarHistorial();
+                else CargarMisAsistencias();
             }
             else
             {
@@ -175,11 +182,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void LimpiarFormFichaje()
         {
-            txtFichajeDni.Text   = string.Empty;
-            pbFichajePassword.Clear();
+            txtFichajeDni.Text = string.Empty;
         }
 
-        // ── HISTORIAL ─────────────────────────────────────────
+        // ── HISTORIAL (solo admin) ────────────────────────────
         private void CargarHistorial()
         {
             try
@@ -188,6 +194,21 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     txtBuscar.Text, null,
                     dpDesde.SelectedDate, dpHasta.SelectedDate);
                 gridHistorial.ItemsSource = lista;
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError(ex.Message);
+            }
+        }
+
+        // ── MIS ASISTENCIAS (usuario no-admin) ────────────────
+        private void CargarMisAsistencias()
+        {
+            try
+            {
+                var lista = _controller.BuscarPropias(
+                    DateTime.Today.AddDays(-30), DateTime.Today);
+                gridMisAsistencias.ItemsSource = lista;
             }
             catch (Exception ex)
             {
@@ -332,18 +353,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ── HELPERS ───────────────────────────────────────────
-        private static string HashPassword(string password)
-        {
-            if (string.IsNullOrEmpty(password)) return string.Empty;
-            using (var sha = SHA256.Create())
-            {
-                byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(password));
-                var sb = new StringBuilder();
-                foreach (byte b in bytes) sb.Append(b.ToString("x2"));
-                return sb.ToString().ToUpper();
-            }
-        }
-
         private static TimeSpan? ParseHora(string texto)
         {
             if (string.IsNullOrWhiteSpace(texto)) return null;
