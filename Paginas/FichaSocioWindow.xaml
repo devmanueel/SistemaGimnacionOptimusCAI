@@ -69,7 +69,7 @@
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
                         <Button Content="GENERAR CARNET" Click="btnGenerarCarnet_Click"
                                 Style="{StaticResource BotonPrincipalEstilo}"
-                                Height="32" Padding="14,0" FontSize="11" Margin="0,0,8,0"/>
+                                Height="40" Padding="20,0" FontSize="12" Margin="0,0,8,0" Cursor="Hand"/>
                         <Button Content="X" Click="btnCerrar_Click"
                                 Width="36" Height="36" FontSize="16" FontWeight="Bold"
                                 Foreground="{StaticResource TextMuted}" Background="Transparent"
@@ -151,48 +151,49 @@
 
                 <!-- TAB FICHA MÉDICA -->
                 <TabItem Header="FICHA MÉDICA">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="20,12">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="20,12"
+                                  Style="{StaticResource PanelScrollViewerStyle}">
                         <StackPanel>
-                            <Grid>
+                            <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                    <TextBlock Text="PESO (KG)" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,4"/>
+                                    <TextBlock Text="PESO (KG)" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
                                     <TextBox x:Name="txtPeso" Style="{StaticResource InputEstilo}" MaxLength="6"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="4,0,4,0">
-                                    <TextBlock Text="ALTURA (CM)" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,4"/>
+                                    <TextBlock Text="ALTURA (CM)" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
                                     <TextBox x:Name="txtAltura" Style="{StaticResource InputEstilo}" MaxLength="3"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Margin="8,0,0,0">
-                                    <TextBlock Text="GRUPO SANGUÍNEO" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,4"/>
+                                    <TextBlock Text="GRUPO SANGUÍNEO" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
                                     <TextBox x:Name="txtGrupo" Style="{StaticResource InputEstilo}" MaxLength="5"/>
                                 </StackPanel>
                             </Grid>
-                            <TextBlock Text="ENFERMEDADES" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,12,0,4"/>
+                            <TextBlock Text="ENFERMEDADES" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
                             <TextBox x:Name="txtEnfermedades" Style="{StaticResource InputEstilo}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
-                            <TextBlock Text="MEDICAMENTOS" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,8,0,4"/>
+                            <TextBlock Text="MEDICAMENTOS" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,16,0,6"/>
                             <TextBox x:Name="txtMedicamentos" Style="{StaticResource InputEstilo}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
-                            <TextBlock Text="RESTRICCIONES FÍSICAS" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,8,0,4"/>
+                            <TextBlock Text="RESTRICCIONES FÍSICAS" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,16,0,6"/>
                             <TextBox x:Name="txtRestricciones" Style="{StaticResource InputEstilo}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
-                            <Grid Margin="0,8,0,0">
+                            <Grid Margin="0,16,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                    <TextBlock Text="CONTACTO EMERGENCIA" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,4"/>
+                                    <TextBlock Text="CONTACTO EMERGENCIA" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
                                     <TextBox x:Name="txtContactoEmergencia" Style="{StaticResource InputEstilo}" MaxLength="150"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                    <TextBlock Text="TEL. EMERGENCIA" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,4"/>
+                                    <TextBlock Text="TEL. EMERGENCIA" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
                                     <TextBox x:Name="txtTelEmergencia" Style="{StaticResource InputEstilo}" MaxLength="20"/>
                                 </StackPanel>
                             </Grid>
-                            <Grid Margin="0,8,0,0">
+                            <Grid Margin="0,16,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
@@ -201,15 +202,15 @@
                                           Foreground="{StaticResource TextPrimary}" FontSize="12"
                                           Margin="0,0,20,0" VerticalAlignment="Center"/>
                                 <StackPanel Grid.Column="1">
-                                    <TextBlock Text="FECHA APTO" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,4"/>
+                                    <TextBlock Text="FECHA APTO" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
                                     <DatePicker x:Name="dpFechaApto" Style="{StaticResource DatePickerEstilo}" Width="160" HorizontalAlignment="Left"/>
                                 </StackPanel>
                             </Grid>
-                            <TextBlock Text="OBSERVACIONES" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,8,0,4"/>
+                            <TextBlock Text="OBSERVACIONES" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,16,0,6"/>
                             <TextBox x:Name="txtObsMedicas" Style="{StaticResource InputEstilo}" Height="50" TextWrapping="Wrap" AcceptsReturn="True"/>
                             <Button Content="GUARDAR FICHA MÉDICA" Click="btnGuardarFicha_Click"
                                     Style="{StaticResource BotonPrincipalEstilo}"
-                                    Height="40" Width="220" Margin="0,14,0,0" HorizontalAlignment="Left"/>
+                                    Height="44" Width="Auto" Padding="28,0" Margin="0,20,0,0" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>

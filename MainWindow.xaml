@@ -127,7 +127,7 @@ Background="{StaticResource Bg4}">
             </Grid.RowDefinitions>
 
             <!-- Barra superior -->
-            <Border Grid.Row="0" Background="{StaticResource Bg0}"
+            <Border Grid.Row="0" Background="{StaticResource Bg1}"
                     BorderBrush="{StaticResource Border1}" BorderThickness="0,0,0,0.5"
                     MouseLeftButtonDown="Window_MouseLeftButtonDown">
                 <Grid>
@@ -139,27 +139,14 @@ Background="{StaticResource Bg4}">
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="20,0,0,0"
                                 VerticalAlignment="Center">
                         <!-- Buscador global -->
-                        <Border Background="{StaticResource Bg2}" CornerRadius="8"
-                                BorderBrush="{StaticResource Border2}" BorderThickness="1"
-                                Width="320" Height="32" Margin="0,0,20,0"
-                                VerticalAlignment="Center">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="36"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="&#x1F50D;" FontSize="13"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                <TextBox x:Name="txtBuscadorGlobal" Grid.Column="1"
-                                         BorderThickness="0" Background="Transparent"
-                                         Foreground="{StaticResource TextPrimary}"
-                                         CaretBrush="{StaticResource GreenMain}"
-                                         FontSize="12" VerticalContentAlignment="Center"
-                                         Tag="Buscar socio por nombre, apellido o DNI..."
-                                         KeyDown="txtBuscadorGlobal_KeyDown"
-                                         TextChanged="txtBuscadorGlobal_TextChanged"/>
-                            </Grid>
-                        </Border>
+                        <TextBox x:Name="txtBuscadorGlobal"
+                                 Style="{StaticResource BuscadorStyle}"
+                                 Width="320"
+                                 Margin="0,0,20,0"
+                                 VerticalAlignment="Center"
+                                 Tag="Buscar socio por nombre, apellido o DNI..."
+                                 KeyDown="txtBuscadorGlobal_KeyDown"
+                                 TextChanged="txtBuscadorGlobal_TextChanged"/>
                         <TextBlock x:Name="lblPaginaActual" Text=""
                                    FontSize="13" Foreground="{StaticResource TextMuted}"
                                    VerticalAlignment="Center"/>

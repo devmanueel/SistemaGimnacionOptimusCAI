@@ -4,7 +4,7 @@
 //  Code-behind del módulo más complejo:
 //   · Carga de 3 combos (Socios, Actividades, Instructores)
 //   · Autocompletado de precio al elegir actividad
-//   · Autocompletado de vencimiento (inicio + 30 días)
+//   · Autocompletado de vencimiento (inicio + 31 días)
 //   · Renovación rápida con prompt
 //   · Stats incluyendo "recaudado del mes"
 //   · 5 chips de filtro (Todos / Activas / Por vencer / Vencidas / Canceladas)
@@ -273,11 +273,71 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var act = cmbActividad.SelectedItem as ActividadComboItem;
             if (act == null) return;
 
-            if (string.IsNullOrWhiteSpace(txtMonto.Text) || _esNuevo)
+            if (_esNuevo)
             {
+                // Modo nuevo: autocompletar precio normalmente
+                txtMonto.Text = act.Precio.ToString("F0");
+                ActualizarPreviewMonto();
+                panelUpgrade.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            // Modo editar: verificar si es upgrade
+            if (act.Id != _actividadActualId
+                && !string.IsNullOrEmpty(_actividadActualCategoria)
+                && act.Categoria == _actividadActualCategoria
+                && _actividadActualNivel.HasValue
+                && act.Nivel.HasValue
+                && act.Nivel.Value > _actividadActualNivel.Value)
+            {
+                // Es un upgrade — calcular diferencia
+                decimal precioActual = 0;
+                foreach (var item in cmbActividad.Items)
+                {
+                    var a = item as ActividadComboItem;
+                    if (a != null && a.Id == _actividadActualId)
+                    {
+                        precioActual = a.Precio;
+                        break;
+                    }
+                }
+
+                decimal diferencia = Math.Abs(act.Precio - precioActual);
+
+                // Mostrar panel upgrade
+                lblUpgradeDetalle.Text = "Diferencia a cobrar (" +
+                    ObtenerNombreActividad(_actividadActualId) + " → " + act.Nombre + "):";
+                lblUpgradeMonto.Text = "$" + diferencia.ToString("N0");
+                lblUpgradeNivel.Text = "⬆ Nivel " + _actividadActualNivel.Value +
+                                         " → " + act.Nivel.Value;
+                panelUpgrade.Visibility = Visibility.Visible;
+
+                // Poner la diferencia en el campo monto
+                txtMonto.Text = diferencia.ToString("F0");
+                ActualizarPreviewMonto();
+            }
+            else if (act.Id == _actividadActualId)
+            {
+                // Volvió a la actividad original — ocultar upgrade
+                panelUpgrade.Visibility = Visibility.Collapsed;
                 txtMonto.Text = act.Precio.ToString("F0");
                 ActualizarPreviewMonto();
             }
+            else
+            {
+                panelUpgrade.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        // Helper para obtener el nombre de una actividad por id
+        private string ObtenerNombreActividad(long actividadId)
+        {
+            foreach (var item in cmbActividad.Items)
+            {
+                var a = item as ActividadComboItem;
+                if (a != null && a.Id == actividadId) return a.Nombre;
+            }
+            return "actividad actual";
         }
 
         // ─────────────────────────────────────────────────────
@@ -471,46 +531,85 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     return;
                 }
 
-                // Validación de cambio de plan (solo si se cambia la actividad)
-                if (actividad != null && actividad.Id != _actividadActualId)
+                var metodoItemEditar = cmbMetodoPago.SelectedItem as ComboBoxItem;
+                string metodoPagoEditar = metodoItemEditar != null && metodoItemEditar.Tag != null
+                    ? metodoItemEditar.Tag.ToString() : "efectivo";
+
+                // Verificar si es upgrade
+                bool esUpgrade = actividad != null
+                    && actividad.Id != _actividadActualId
+                    && !string.IsNullOrEmpty(_actividadActualCategoria)
+                    && actividad.Categoria == _actividadActualCategoria
+                    && _actividadActualNivel.HasValue
+                    && actividad.Nivel.HasValue
+                    && actividad.Nivel.Value > _actividadActualNivel.Value;
+
+                if (esUpgrade)
                 {
-                    // Validar misma categoría
-                    if (!string.IsNullOrEmpty(_actividadActualCategoria) && 
-                        !string.IsNullOrEmpty(actividad.Categoria) &&
-                        _actividadActualCategoria != actividad.Categoria)
-                    {
-                        NotificacionWindow.MostrarError(
-                            "No se puede cambiar a otra categoría. El cambio de plan solo está permitido dentro de la misma categoría.");
-                        return;
-                    }
+                    decimal diferencia = Math.Abs(actividad.Precio - ObtenerPrecioActividad(_actividadActualId));
 
-                    // Validar solo upgrade (nivel mayor)
-                    if (_actividadActualNivel.HasValue && actividad.Nivel.HasValue &&
-                        actividad.Nivel.Value <= _actividadActualNivel.Value)
+                    bool confirmo = NotificacionWindow.MostrarConfirmacion(
+                        "Vas a hacer un upgrade de membresía:\n\n" +
+                        "📋 " + ObtenerNombreActividad(_actividadActualId) + " → " + actividad.Nombre + "\n" +
+                        "💰 Diferencia a cobrar: $" + diferencia.ToString("N0") + "\n" +
+                        "💳 Método: " + metodoPagoEditar + "\n\n" +
+                        "⚠️ Solo se permite un upgrade por membresía.\n\n" +
+                        "¿Confirmás el upgrade y el cobro?",
+                        "Confirmar upgrade");
+
+                    if (!confirmo) return;
+
+                    try
                     {
-                        NotificacionWindow.MostrarError(
-                            "Solo se permite cambiar a un plan superior (upgrade). El downgrade no está permitido.");
-                        return;
+                        var r = _controller.EjecutarUpgrade(
+                            _idEditar, actividad.Id, metodoPagoEditar, USUARIO_ACTUAL_ID);
+
+                        if (r == null)
+                        { NotificacionWindow.MostrarError("No se pudo ejecutar el upgrade."); return; }
+
+                        NotificacionWindow.MostrarExito(
+                            "Upgrade realizado correctamente.\nMonto cobrado: $" + r.MontoCobrado.ToString("N0"),
+                            "¡Upgrade exitoso!");
                     }
+                    catch (Exception ex)
+                    { NotificacionWindow.MostrarError(ex.Message); return; }
                 }
+                else
+                {
+                    // Validación de cambio de plan no permitido
+                    if (actividad != null && actividad.Id != _actividadActualId)
+                    {
+                        if (!string.IsNullOrEmpty(_actividadActualCategoria) &&
+                            !string.IsNullOrEmpty(actividad.Categoria) &&
+                            _actividadActualCategoria != actividad.Categoria)
+                        {
+                            NotificacionWindow.MostrarError(
+                                "No se puede cambiar a otra categoría. El cambio de plan solo está permitido dentro de la misma categoría.");
+                            return;
+                        }
 
-                long? actividadEditada = actividad != null ? (long?)actividad.Id : null;
+                        if (_actividadActualNivel.HasValue && actividad.Nivel.HasValue &&
+                            actividad.Nivel.Value <= _actividadActualNivel.Value)
+                        {
+                            NotificacionWindow.MostrarError(
+                                "Solo se permite cambiar a un plan superior (upgrade). El downgrade no está permitido.");
+                            return;
+                        }
+                    }
 
-                string tipoPlanEditado = "mensual";
+                    // Modificación normal
+                    long? actividadEditada = actividad != null ? (long?)actividad.Id : null;
+                    decimal montoEditado = 0;
+                    decimal.TryParse(txtMonto.Text, out montoEditado);
+                    decimal? montoParam = montoEditado > 0 ? (decimal?)montoEditado : null;
 
-                var metodoItem2 = cmbMetodoPago.SelectedItem as ComboBoxItem;
-                string metodoPagoEditado = metodoItem2 != null && metodoItem2.Tag != null
-                    ? metodoItem2.Tag.ToString() : null;
+                    var r = _controller.Modificar(_idEditar, instructorId, venc,
+                        txtObservaciones.Text, USUARIO_ACTUAL_ID,
+                        actividadEditada, montoParam, "mensual", metodoPagoEditar);
 
-                decimal montoEditado = 0;
-                decimal.TryParse(txtMonto.Text, out montoEditado);
-                decimal? montoParam = montoEditado > 0 ? (decimal?)montoEditado : null;
-
-                var r = _controller.Modificar(_idEditar, instructorId, venc,
-                    txtObservaciones.Text, USUARIO_ACTUAL_ID,
-                    actividadEditada, montoParam, tipoPlanEditado, metodoPagoEditado);
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-                NotificacionWindow.MostrarExito(r.mensaje, "¡Actualizado!");
+                    if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
+                    NotificacionWindow.MostrarExito(r.mensaje, "¡Actualizado!");
+                }
             }
 
             CerrarFormulario();
@@ -703,5 +802,18 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (btn == null) return null;
             return btn.DataContext as Membresia;
         }
+
+        // ─────────────────────────────────────────────────────
+// HELPERS ACTIVIDAD
+// ─────────────────────────────────────────────────────
+private decimal ObtenerPrecioActividad(long actividadId)
+{
+    foreach (var item in cmbActividad.Items)
+    {
+        var a = item as ActividadComboItem;
+        if (a != null && a.Id == actividadId) return a.Precio;
+    }
+    return 0;
+}
     }
 }

@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Cadena de conexion a la base de datos
+Models/DAO/ConnectionToDB.cs
