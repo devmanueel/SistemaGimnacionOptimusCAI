@@ -43,7 +43,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 Content = "Todos los usuarios",
                 Tag = (long?)null,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255)),
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                 IsSelected = true
             });
             try
@@ -55,7 +55,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     {
                         Content = u.Nombre + " " + u.Apellido,
                         Tag = (long?)u.Id,
-                        Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255))
+                        Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232))
                     });
                 }
             }
@@ -67,7 +67,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 Content = "Todas las entidades",
                 Tag = "",
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255)),
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                 IsSelected = true
             });
             foreach (var ent in _controller.ListarEntidades())
@@ -77,7 +77,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 {
                     Content = display,
                     Tag = ent,
-                    Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255))
+                    Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232))
                 });
             }
 
@@ -87,7 +87,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 Content = "Todas las acciones",
                 Tag = "",
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255)),
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                 IsSelected = true
             });
             foreach (var ac in _controller.ListarAcciones())
@@ -97,7 +97,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 {
                     Content = display,
                     Tag = ac,
-                    Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255))
+                    Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232))
                 });
             }
         }
@@ -196,8 +196,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             return new Border
             {
-                Background = new SolidColorBrush(Color.FromRgb(15, 15, 30)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(37, 37, 64)),
+                Background = new SolidColorBrush(Color.FromRgb(13, 17, 13)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(30, 40, 30)),
                 BorderThickness = new Thickness(0, 0, 0, 1),
                 Padding = new Thickness(20, 8, 20, 8),
                 Margin = new Thickness(0, 4, 0, 0),
@@ -206,7 +206,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     Text = textoDia.ToUpper(),
                     FontSize = 10,
                     FontWeight = FontWeights.Bold,
-                    Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154))
+                    Foreground = new SolidColorBrush(Color.FromRgb(61, 92, 61))
                 }
             };
         }
@@ -219,11 +219,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var card = new Border
             {
                 Background = new SolidColorBrush(seleccionado
-                                    ? Color.FromRgb(22, 24, 50)
-                                    : Color.FromRgb(15, 15, 30)),
+                                    ? Color.FromRgb(22, 32, 22)
+                                    : Color.FromRgb(13, 17, 13)),
                 BorderBrush = new SolidColorBrush(seleccionado
-                                    ? Color.FromRgb(167, 139, 250)
-                                    : Color.FromRgb(26, 26, 46)),
+                                    ? Color.FromRgb(74, 222, 128)
+                                    : Color.FromRgb(30, 40, 30)),
                 BorderThickness = new Thickness(0, 0, 0, 1),
                 Padding = new Thickness(20, 12, 20, 12),
                 Cursor = Cursors.Hand,
@@ -244,7 +244,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 FontFamily = new FontFamily("Consolas"),
                 FontSize = 12,
                 FontWeight = FontWeights.Bold,
-                Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154)),
+                Foreground = new SolidColorBrush(Color.FromRgb(61, 92, 61)),
                 VerticalAlignment = VerticalAlignment.Center,
                 Width = 50
             };
@@ -278,7 +278,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Text = e.ResumenAccion,
                 FontSize = 13,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255))
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232))
             });
             stack.Children.Add(linea1);
 
@@ -286,7 +286,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 Text = "por " + e.ActorNombre,
                 FontSize = 11,
-                Foreground = new SolidColorBrush(Color.FromRgb(160, 160, 192)),
+                Foreground = new SolidColorBrush(Color.FromRgb(122, 173, 122)),
                 Margin = new Thickness(0, 2, 0, 0)
             });
 

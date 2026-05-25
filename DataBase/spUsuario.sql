@@ -275,6 +275,48 @@ BEGIN
 END;
 GO
 
+-- ─────────────────────────────────────────────────────────────
+-- 10. MODIFICAR DATOS PROPIOS (sin cambiar rol ni tarifa)
+-- ─────────────────────────────────────────────────────────────
+CREATE OR ALTER PROCEDURE sp_ModificarUsuarioPropio
+    @Id           BIGINT,
+    @Nombre       NVARCHAR(100),
+    @Apellido     NVARCHAR(100),
+    @Dni          CHAR(8),
+    @Domicilio    NVARCHAR(200)    = NULL,
+    @Telefono     NVARCHAR(20)     = NULL,
+    @Email        NVARCHAR(191)    = NULL,
+    @PasswordHash CHAR(64)         = NULL,
+    @Foto         VARBINARY(MAX)   = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (
+        SELECT 1 FROM usuarios
+        WHERE dni = @Dni AND id <> @Id AND eliminado_en IS NULL
+    )
+    BEGIN
+        RAISERROR('El DNI ya está siendo utilizado por otro usuario.', 16, 1);
+        RETURN;
+    END
+
+    UPDATE usuarios SET
+        nombre        = @Nombre,
+        apellido      = @Apellido,
+        dni           = @Dni,
+        domicilio     = ISNULL(@Domicilio, domicilio),
+        telefono      = ISNULL(@Telefono,  telefono),
+        email         = ISNULL(@Email,     email),
+        password_hash = ISNULL(@PasswordHash, password_hash),
+        foto          = ISNULL(@Foto, foto),
+        actualizado_en = GETDATE()
+    WHERE id = @Id AND eliminado_en IS NULL;
+
+    SELECT @@ROWCOUNT AS filas_afectadas;
+END;
+GO
+
 IF NOT EXISTS (SELECT 1 FROM usuarios WHERE dni = '00000001')
 BEGIN
     DECLARE @HashAdmin CHAR(64);

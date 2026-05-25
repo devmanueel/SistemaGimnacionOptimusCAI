@@ -547,7 +547,16 @@ BEGIN
         END;
 
     DECLARE @Hoy      DATE = CAST(GETDATE() AS DATE);
-    DECLARE @Vencim   DATE = DATEADD(DAY, @Dias - 1, @Hoy);
+    DECLARE @Vencim   DATE;
+
+    -- Obtener vencimiento actual
+    SELECT @Vencim = fecha_vencimiento FROM membresias WHERE id = @Id;
+
+    -- Si ya venció, arrancar desde hoy; si no, sumar al vencimiento actual
+    IF @Vencim < @Hoy
+        SET @Vencim = DATEADD(DAY, @Dias, @Hoy);
+    ELSE
+        SET @Vencim = DATEADD(DAY, @Dias, @Vencim);
 
     UPDATE membresias SET
         fecha_inicio      = @Hoy,
@@ -574,7 +583,7 @@ BEGIN
     VALUES
         (@Id, 'renovacion', @Hoy, @Vencim, @MontoPagado, @MetodoPago, @RegistradoPor);
 
-    SELECT @Id AS id, @Vencim AS nueva_fecha_vencimiento;
+    SELECT @Vencim AS nueva_fecha_vencimiento;
 END;
 GO
 
@@ -688,5 +697,191 @@ BEGIN
       AND m.estado       = 'activa'
       AND m.fecha_vencimiento >= CAST(GETDATE() AS DATE)
     ORDER BY a.nombre;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- SP_CALCULARUPGRADE
+-- Devuelve las actividades disponibles para upgrade y el monto
+-- a pagar (diferencia entre precio actual y precio nuevo)
+-- ─────────────────────────────────────────────────────────────
+CREATE OR ALTER PROCEDURE sp_CalcularUpgrade
+    @MembresiaId BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @ActividadActualId BIGINT;
+    DECLARE @CategoriaActual   VARCHAR(50);
+    DECLARE @NivelActual       TINYINT;
+    DECLARE @PrecioActual      DECIMAL(12,2);
+    DECLARE @UpgradeRealizado  BIT;
+
+    -- Datos de la membresía actual
+    SELECT
+        @ActividadActualId = m.actividad_id,
+        @CategoriaActual   = a.categoria,
+        @NivelActual       = a.nivel,
+        @PrecioActual      = a.precio,
+        @UpgradeRealizado  = m.upgrade_realizado
+    FROM membresias m
+    INNER JOIN actividades a ON a.id = m.actividad_id
+    WHERE m.id = @MembresiaId AND m.estado = 'activa';
+
+    IF @ActividadActualId IS NULL
+    BEGIN
+        RAISERROR('La membresía no existe o no está activa.', 16, 1);
+        RETURN;
+    END
+
+    -- Validar que no haya hecho upgrade antes
+    IF @UpgradeRealizado = 1
+    BEGIN
+        RAISERROR('Esta membresía ya tuvo un upgrade. Solo se permite un upgrade por membresía.', 16, 1);
+        RETURN;
+    END
+
+    -- Devolver actividades disponibles con la diferencia de precio
+    SELECT
+        a.id                          AS actividad_id,
+        a.nombre                      AS actividad_nombre,
+        a.precio                      AS precio_nuevo,
+        @PrecioActual                 AS precio_actual,
+        a.precio - @PrecioActual      AS diferencia_a_pagar,
+        a.nivel                       AS nivel_nuevo,
+        @NivelActual                  AS nivel_actual
+    FROM actividades a
+    WHERE a.categoria = @CategoriaActual
+      AND a.nivel     > @NivelActual
+      AND a.activo    = 1
+      AND a.id       <> @ActividadActualId
+    ORDER BY a.nivel;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- SP_EJECUTARUPGRADE
+-- Aplica el upgrade: cambia la actividad, registra en caja
+-- e historial y marca upgrade_realizado = 1
+-- ─────────────────────────────────────────────────────────────
+CREATE OR ALTER PROCEDURE sp_EjecutarUpgrade
+    @MembresiaId      BIGINT,
+    @NuevaActividadId BIGINT,
+    @MetodoPago       VARCHAR(20) = 'efectivo',
+    @RegistradoPor    BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @SocioId           BIGINT;
+    DECLARE @ActividadActualId BIGINT;
+    DECLARE @CategoriaActual   VARCHAR(50);
+    DECLARE @NivelActual       TINYINT;
+    DECLARE @PrecioActual      DECIMAL(12,2);
+    DECLARE @CategoriaNueva    VARCHAR(50);
+    DECLARE @NivelNuevo        TINYINT;
+    DECLARE @PrecioNuevo       DECIMAL(12,2);
+    DECLARE @Diferencia        DECIMAL(12,2);
+    DECLARE @UpgradeRealizado  BIT;
+    DECLARE @FechaInicio       DATE;
+    DECLARE @FechaVenc         DATE;
+
+    -- Datos de la membresía actual
+    SELECT
+        @SocioId           = m.socio_id,
+        @ActividadActualId = m.actividad_id,
+        @CategoriaActual   = a.categoria,
+        @NivelActual       = a.nivel,
+        @PrecioActual      = a.precio,
+        @UpgradeRealizado  = m.upgrade_realizado,
+        @FechaInicio       = m.fecha_inicio,
+        @FechaVenc         = m.fecha_vencimiento
+    FROM membresias m
+    INNER JOIN actividades a ON a.id = m.actividad_id
+    WHERE m.id = @MembresiaId AND m.estado = 'activa';
+
+    IF @SocioId IS NULL
+    BEGIN
+        RAISERROR('La membresía no existe o no está activa.', 16, 1);
+        RETURN;
+    END
+
+    IF @UpgradeRealizado = 1
+    BEGIN
+        RAISERROR('Esta membresía ya tuvo un upgrade. Solo se permite un upgrade por membresía.', 16, 1);
+        RETURN;
+    END
+
+    -- Datos de la nueva actividad
+    SELECT
+        @CategoriaNueva = categoria,
+        @NivelNuevo     = nivel,
+        @PrecioNuevo    = precio
+    FROM actividades
+    WHERE id = @NuevaActividadId AND activo = 1;
+
+    IF @CategoriaNueva IS NULL
+    BEGIN
+        RAISERROR('La nueva actividad no existe o está inactiva.', 16, 1);
+        RETURN;
+    END
+
+    -- Validar misma categoría
+    IF @CategoriaActual <> @CategoriaNueva
+    BEGIN
+        RAISERROR('Solo se puede hacer upgrade dentro de la misma categoría.', 16, 1);
+        RETURN;
+    END
+
+    -- Validar que sea upgrade (nivel mayor)
+    IF @NivelNuevo <= @NivelActual
+    BEGIN
+        RAISERROR('Solo se permite upgrade a una actividad de nivel superior.', 16, 1);
+        RETURN;
+    END
+
+    SET @Diferencia = @PrecioNuevo - @PrecioActual;
+
+    -- Aplicar el upgrade
+    UPDATE membresias SET
+        actividad_id      = @NuevaActividadId,
+        actividad_original = @ActividadActualId,  -- guardar la original
+        upgrade_realizado  = 1,
+        monto_pagado       = monto_pagado + @Diferencia,
+        actualizado_en     = GETDATE(),
+        observaciones      = ISNULL(observaciones + ' | ', '') +
+                             'Upgrade realizado el ' + CONVERT(VARCHAR, GETDATE(), 103) +
+                             '. Diferencia cobrada: $' + CAST(@Diferencia AS VARCHAR(20))
+    WHERE id = @MembresiaId;
+
+    -- Registrar en caja
+    INSERT INTO caja_movimientos
+        (tipo, subtipo, usuario_id, socio_id, membresia_id, actividad_id,
+         detalle, metodo_pago, monto)
+    SELECT
+        'ingreso_cuota',
+        'Upgrade de membresía',
+        @RegistradoPor,
+        @SocioId,
+        @MembresiaId,
+        @NuevaActividadId,
+        'Upgrade a ' + a.nombre + ' (' + s.nombre + ' ' + s.apellido + ')',
+        @MetodoPago,
+        @Diferencia
+    FROM socios s, actividades a
+    WHERE s.id = @SocioId AND a.id = @NuevaActividadId;
+
+    -- Historial
+    INSERT INTO membresia_historial
+        (membresia_id, tipo_evento, fecha_desde, fecha_hasta,
+         importe, metodo_pago, registrado_por)
+    VALUES
+        (@MembresiaId, 'modificacion', @FechaInicio, @FechaVenc,
+         @Diferencia, @MetodoPago, @RegistradoPor);
+
+    SELECT
+        @MembresiaId  AS membresia_id,
+        @Diferencia   AS monto_cobrado,
+        'Upgrade realizado correctamente.' AS mensaje;
 END;
 GO

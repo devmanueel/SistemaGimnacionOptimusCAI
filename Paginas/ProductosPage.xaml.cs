@@ -254,6 +254,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             contenedorFoto.Child = gridFoto;
             stack.Children.Add(contenedorFoto);
+            stack.Children.Add(new Border
+            {
+                Height = 1,
+                Background = new SolidColorBrush(Color.FromRgb(30, 40, 30))
+            });
 
             // ── Datos abajo ──
             var infoStack = new StackPanel { Margin = new Thickness(14, 12, 14, 12) };

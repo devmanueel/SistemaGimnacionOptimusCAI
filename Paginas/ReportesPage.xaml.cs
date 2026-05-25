@@ -217,57 +217,174 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void btnFiltrar_Click(object sender, RoutedEventArgs e) => CargarIngresos();
 
-        // ─── GRÁFICO DE BARRAS WPF CANVAS ───────────────────────
+        // ─── GRÁFICO DE BARRAS — refleja los movimientos del grid ───────────
         private void CargarGrafico()
         {
-            canvasGrafico.Children.Clear();
-            listaMeses.ItemsSource = null;
+            gridGraficoMeses.Children.Clear();
+            gridGraficoLabels.Children.Clear();
+            gridGraficoMeses.ColumnDefinitions.Clear();
+            gridGraficoLabels.ColumnDefinitions.Clear();
 
-            var datos = _ctrl.ObtenerGraficoPorMes(DateTime.Today.Year);
-            if (datos == null || datos.Count == 0) return;
+            if (_movimientos == null || _movimientos.Count == 0) return;
 
-            listaMeses.ItemsSource = datos;
+            // Agrupar por Año-Mes usando los movimientos filtrados (mismo grid)
+            var mapa = new Dictionary<string, IngresosPorMes>();
+            foreach (var mov in _movimientos)
+            {
+                string clave = mov.Fecha.Year + "-" + mov.Fecha.Month.ToString("D2");
+                IngresosPorMes item;
+                if (!mapa.TryGetValue(clave, out item))
+                {
+                    item = new IngresosPorMes
+                    {
+                        Mes = mov.Fecha.Month,
+                        MesNombre = new DateTime(mov.Fecha.Year, mov.Fecha.Month, 1)
+                            .ToString("MMM", new CultureInfo("es-AR")),
+                        Ingresos = 0,
+                        Egresos = 0
+                    };
+                    mapa.Add(clave, item);
+                }
+
+                if (mov.EsIngreso)
+                    item.Ingresos += mov.Monto;
+                else
+                    item.Egresos += mov.Monto;
+            }
+
+            // Generar meses desde enero hasta el mes actual del año filtrado
+            int anioGrafico = _hasta.Year;
+            int mesLimite = (anioGrafico == DateTime.Today.Year)
+                ? DateTime.Today.Month : 12;
+
+            var mesesMostrar = new List<IngresosPorMes>(mesLimite);
+            for (int m = 1; m <= mesLimite; m++)
+            {
+                string clave = anioGrafico + "-" + m.ToString("D2");
+                IngresosPorMes item;
+                if (mapa.TryGetValue(clave, out item))
+                    mesesMostrar.Add(item);
+                else
+                    mesesMostrar.Add(new IngresosPorMes
+                    {
+                        Mes = m,
+                        MesNombre = new DateTime(anioGrafico, m, 1)
+                            .ToString("MMM", new CultureInfo("es-AR")),
+                        Ingresos = 0,
+                        Egresos = 0
+                    });
+            }
+
+            // Título según año y período filtrado
+            lblAnioGrafico.Text = "INGRESOS Y EGRESOS POR MES — " + anioGrafico;
 
             decimal maxVal = 0;
-            foreach (var d in datos)
-                if (d.Ingresos > maxVal) maxVal = d.Ingresos;
+            foreach (var d in mesesMostrar)
+            {
+                decimal m = d.Ingresos > d.Egresos ? d.Ingresos : d.Egresos;
+                if (m > maxVal) maxVal = m;
+            }
             if (maxVal == 0) maxVal = 1;
 
-            double canvasH = canvasGrafico.ActualHeight;
-            if (canvasH < 1) canvasH = 180;
-            double barWidth  = canvasGrafico.ActualWidth > 0
-                ? (canvasGrafico.ActualWidth - 20) / datos.Count : 60;
-            double groupW    = barWidth * 0.8;
+            double maxBarH = 160;
+            double barW = 18;
 
-            for (int i = 0; i < datos.Count; i++)
+            var brushIng = new LinearGradientBrush(
+                Color.FromRgb(0, 230, 200), Color.FromRgb(0, 140, 180), 90);
+            var brushEgr = new LinearGradientBrush(
+                Color.FromRgb(190, 160, 255), Color.FromRgb(130, 100, 220), 90);
+            var brushEmpty = new SolidColorBrush(Color.FromRgb(40, 60, 40));
+
+            for (int i = 0; i < mesesMostrar.Count; i++)
             {
-                var d = datos[i];
-                double x = 10 + i * barWidth;
+                gridGraficoMeses.ColumnDefinitions.Add(
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                gridGraficoLabels.ColumnDefinitions.Add(
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            }
 
-                // Barra ingresos (cyan)
-                double hIngreso = (double)(d.Ingresos / maxVal) * (canvasH - 10);
-                var barI = new Rectangle
-                {
-                    Width  = groupW * 0.55,
-                    Height = Math.Max(hIngreso, 2),
-                    Fill   = new LinearGradientBrush(
-                        Color.FromRgb(0, 207, 255), Color.FromRgb(0, 140, 200), 90)
-                };
-                Canvas.SetLeft(barI, x);
-                Canvas.SetTop(barI, canvasH - barI.Height);
-                canvasGrafico.Children.Add(barI);
+            var lineaBase = new Border
+            {
+                Height = 1,
+                Background = new SolidColorBrush(Color.FromRgb(30, 48, 32)),
+                VerticalAlignment = VerticalAlignment.Bottom
+            };
+            Grid.SetColumnSpan(lineaBase, mesesMostrar.Count);
+            gridGraficoMeses.Children.Add(lineaBase);
 
-                // Barra egresos (violeta)
-                double hEgreso = (double)(d.Egresos / maxVal) * (canvasH - 10);
-                var barE = new Rectangle
+            for (int col = 0; col < mesesMostrar.Count; col++)
+            {
+                var d = mesesMostrar[col];
+                var stack = new StackPanel
                 {
-                    Width  = groupW * 0.40,
-                    Height = Math.Max(hEgreso, 2),
-                    Fill   = new SolidColorBrush(Color.FromRgb(167, 139, 250))
+                    Orientation = Orientation.Horizontal,
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Margin = new Thickness(4, 0, 4, 2)
                 };
-                Canvas.SetLeft(barE, x + groupW * 0.58);
-                Canvas.SetTop(barE, canvasH - barE.Height);
-                canvasGrafico.Children.Add(barE);
+
+                double altIng = d.Ingresos > 0
+                    ? (double)(d.Ingresos / maxVal) * maxBarH
+                    : 0;
+                if (altIng < 4 && d.Ingresos > 0) altIng = 4;
+
+                if (altIng > 0)
+                {
+                    stack.Children.Add(new Border
+                    {
+                        Width = barW,
+                        Height = altIng,
+                        Background = brushIng,
+                        CornerRadius = new CornerRadius(3, 3, 0, 0),
+                        VerticalAlignment = VerticalAlignment.Bottom,
+                        Margin = new Thickness(0, 0, 2, 0),
+                        ToolTip = d.MesNombre.ToUpper() + " — Ingresos: " + FormatoARS.Moneda(d.Ingresos)
+                    });
+                }
+
+                double altEgr = d.Egresos > 0
+                    ? (double)(d.Egresos / maxVal) * maxBarH
+                    : 0;
+                if (altEgr < 4 && d.Egresos > 0) altEgr = 4;
+
+                if (altEgr > 0)
+                {
+                    stack.Children.Add(new Border
+                    {
+                        Width = barW,
+                        Height = altEgr,
+                        Background = brushEgr,
+                        CornerRadius = new CornerRadius(3, 3, 0, 0),
+                        VerticalAlignment = VerticalAlignment.Bottom,
+                        ToolTip = d.MesNombre.ToUpper() + " — Egresos: " + FormatoARS.Moneda(d.Egresos)
+                    });
+                }
+
+                if (stack.Children.Count == 0)
+                {
+                    stack.Children.Add(new Border
+                    {
+                        Width = barW,
+                        Height = 4,
+                        Background = brushEmpty,
+                        CornerRadius = new CornerRadius(2),
+                        VerticalAlignment = VerticalAlignment.Bottom
+                    });
+                }
+
+                Grid.SetColumn(stack, col);
+                gridGraficoMeses.Children.Add(stack);
+
+                var lbl = new TextBlock
+                {
+                    Text = d.MesNombre.ToUpper(),
+                    FontSize = 10,
+                    Foreground = new SolidColorBrush(Color.FromRgb(130, 150, 130)),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    FontFamily = new System.Windows.Media.FontFamily("Segoe UI")
+                };
+                Grid.SetColumn(lbl, col);
+                gridGraficoLabels.Children.Add(lbl);
             }
         }
 

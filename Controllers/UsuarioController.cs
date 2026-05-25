@@ -246,6 +246,66 @@ namespace Controllers
         }
 
         // ──────────────────────────────────────────────────────────
+        // MODIFICAR DATOS PROPIOS
+        // El usuario solo puede editar sus datos básicos.
+        // No puede cambiar rol ni tarifa.
+        // ──────────────────────────────────────────────────────────
+        public (bool ok, string mensaje) ModificarPropio(
+            long id,
+            string nombre,
+            string apellido,
+            string dni,
+            string claveNueva = null,
+            string domicilio = null,
+            string telefono = null,
+            string email = null,
+            byte[] foto = null)
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                return (false, "El nombre es obligatorio.");
+            if (string.IsNullOrWhiteSpace(apellido))
+                return (false, "El apellido es obligatorio.");
+            if (string.IsNullOrWhiteSpace(dni) || dni.Length < 7)
+                return (false, "El DNI debe tener entre 7 y 8 dígitos.");
+
+            bool cambiarPassword = !string.IsNullOrWhiteSpace(claveNueva);
+            bool cambiarFoto = foto != null;
+
+            var usuario = new Usuario
+            {
+                Id = id,
+                Nombre = nombre.Trim(),
+                Apellido = apellido.Trim(),
+                Dni = dni.Trim(),
+                Domicilio = domicilio?.Trim(),
+                Telefono = telefono?.Trim(),
+                Email = email?.Trim(),
+                PasswordHash = cambiarPassword ? HashSHA256(claveNueva) : null,
+                Foto = foto
+            };
+
+            try
+            {
+                bool ok = _dao.ModificarUsuarioPropio(usuario, cambiarPassword, cambiarFoto);
+                if (ok)
+                {
+                    Auditor.Registrar("modificar", "usuario_propio", id, new Dictionary<string, object> {
+                        { "nombre", nombre }, { "apellido", apellido }, { "dni", dni }
+                    });
+                }
+                return ok
+                    ? (true, "Datos actualizados correctamente.")
+                    : (false, "No se encontró el usuario para actualizar.");
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message.Contains("DNI")
+                    ? ex.Message
+                    : "Error al actualizar.\n" + ex.Message);
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
         // CAMBIAR ESTADO (toggle activo/inactivo)
         // ──────────────────────────────────────────────────────────
         public (bool ok, string mensaje) CambiarEstado(long id, bool nuevoEstado)
