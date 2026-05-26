@@ -17,6 +17,21 @@ BEGIN
 END;
 GO
 
+-- 1b. OBTENER SOLO ACTIVAS (para combos/filtros)
+CREATE OR ALTER PROCEDURE sp_ObtenerActividadesActivas
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT a.id, a.nombre, a.tipo, a.dias_sesiones, a.dias_semana,
+           a.precio, a.activo, a.creado_en,
+           (SELECT COUNT(DISTINCT m.socio_id) FROM membresias m
+            WHERE m.actividad_id = a.id AND m.estado = 'activa') AS cant_socios
+    FROM actividades a
+    WHERE a.activo = 1
+    ORDER BY a.nombre ASC;
+END;
+GO
+
 -- 2. OBTENER POR ID
 CREATE OR ALTER PROCEDURE sp_ObtenerActividadPorId
     @Id BIGINT

@@ -27,6 +27,12 @@ namespace Controllers
             catch (Exception ex) { throw new Exception("No se pudieron cargar las actividades.\n" + ex.Message); }
         }
 
+        public List<Actividad> ObtenerActividadesActivas()
+        {
+            try { return _dao.ObtenerActividadesActivas(); }
+            catch (Exception ex) { throw new Exception("No se pudieron cargar las actividades.\n" + ex.Message); }
+        }
+
         public List<Actividad> BuscarActividades(string texto, string filtroEstado = "todos")
         {
             try { return _dao.BuscarActividades(texto, filtroEstado); }

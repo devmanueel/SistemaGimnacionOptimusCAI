@@ -20,26 +20,44 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace SistemaGimnacionOptimusCAI.Paginas
 {
     public partial class SociosPage : Page
     {
         private readonly SocioController _controller = new SocioController();
+        private readonly ActividadController _actividadController = new ActividadController();
+        private readonly UsuarioController _usuarioController = new UsuarioController();
 
         private bool _esNuevo = true;
         private long _idEditar = 0;
         private byte[] _fotoBytes = null;
         private string _filtroEstado = "todos";
+        private string _filtroAvanzado = "todos";
         private string _tabActivo = "datos";
+        private Visibility _filtrosVisibilidad = Visibility.Collapsed;
+        private List<DataGridColumn> _columnasDinamicas = new List<DataGridColumn>();
+
+        // Valores de filtros avanzados (se aplican solo al presionar "Filtrar")
+        private long? _filtroActividadId = null;
+        private DateTime? _filtroFechaDesde = null;
+        private DateTime? _filtroFechaHasta = null;
+        private int? _filtroDias = null;
+        private long? _filtroInstructorId = null;
+        private string _filtroSexo = null;
 
         public SociosPage()
         {
             InitializeComponent();
+            panelFiltrosAvanzados.Visibility = Visibility.Collapsed;
+            ActualizarStats();
+            CargarCombosFiltros();
             CargarSocios();
             ResaltarChip(chipTodos);
             CambiarTab("datos");
@@ -51,15 +69,56 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ─────────────────────────────────────────────────────
+        // CARGA DE COMBOS
+        // ─────────────────────────────────────────────────────
+        private void CargarCombosFiltros()
+        {
+            try
+            {
+                var actividades = _actividadController.ObtenerActividadesActivas();
+                if (cmbFiltroActividad != null) cmbFiltroActividad.ItemsSource = actividades;
+
+                var instructores = _usuarioController.ObtenerUsuariosActivosPorRol(2);
+                if (cmbFiltroInstructor != null) cmbFiltroInstructor.ItemsSource = instructores;
+            }
+            catch { }
+        }
+
+        // ─────────────────────────────────────────────────────
         // CARGA + STATS
         // ─────────────────────────────────────────────────────
         private void CargarSocios()
         {
             try
             {
-                var lista = _controller.BuscarSocios(txtBuscar.Text, _filtroEstado);
-                gridSocios.ItemsSource = lista;
-                ActualizarStats();
+                // 1. Traer TODOS los datos sin filtro de estado
+                var listaCompleta = _controller.ListarSociosConMembresias(
+                    txtBuscar != null ? txtBuscar.Text : "",
+                    "todos",  // siempre traer todos para contar correctamente
+                    _filtroAvanzado,
+                    _filtroActividadId,
+                    _filtroFechaDesde,
+                    _filtroFechaHasta,
+                    _filtroDias,
+                    _filtroInstructorId,
+                    _filtroSexo);
+
+                // 2. Actualizar chips con la lista completa
+                ActualizarContadoresChips(listaCompleta);
+
+                // 3. Filtrar por estado del chip para mostrar en la tabla
+                List<SocioConMembresia> listaFiltrada;
+                if (_filtroEstado == "todos")
+                    listaFiltrada = listaCompleta;
+                else if (_filtroEstado == "activos")
+                    listaFiltrada = listaCompleta.FindAll(s => s.MembresiaEstado == "activa");
+                else if (_filtroEstado == "inactivos")
+                    listaFiltrada = listaCompleta.FindAll(s => s.MembresiaEstado != "activa");
+                else
+                    listaFiltrada = listaCompleta;
+
+                if (gridSocios != null)
+                    gridSocios.ItemsSource = listaFiltrada;
             }
             catch (Exception ex)
             {
@@ -88,13 +147,39 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 statActivos.Text = activos.ToString();
                 statInactivos.Text = inactivos.ToString();
                 statNuevosMes.Text = nuevosMes.ToString();
+            }
+            catch
+            {
+                statTotal.Text = statActivos.Text = statInactivos.Text = statNuevosMes.Text = "-";
+            }
+        }
+
+        private void ActualizarContadoresChips(List<SocioConMembresia> lista)
+        {
+            try
+            {
+                int total = lista != null ? lista.Count : 0;
+                int activos = 0;
+                int inactivos = 0;
+
+                if (lista != null)
+                {
+                    foreach (var s in lista)
+                    {
+                        if (s.MembresiaEstado == "activa") activos++;
+                        else inactivos++;
+                    }
+                }
+
                 chipTodosNum.Text = $"({total})";
                 chipActivosNum.Text = $"({activos})";
                 chipInactivosNum.Text = $"({inactivos})";
             }
             catch
             {
-                statTotal.Text = statActivos.Text = statInactivos.Text = statNuevosMes.Text = "-";
+                chipTodosNum.Text = "(0)";
+                chipActivosNum.Text = "(0)";
+                chipInactivosNum.Text = "(0)";
             }
         }
 
@@ -111,6 +196,230 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _filtroEstado = btn.Tag.ToString();
             ResaltarChip(btn);
             CargarSocios();
+        }
+
+        private void btnToggleFiltros_Click(object sender, RoutedEventArgs e)
+        {
+            _filtrosVisibilidad = _filtrosVisibilidad == Visibility.Visible
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+            if (panelFiltrosAvanzados != null)
+                panelFiltrosAvanzados.Visibility = _filtrosVisibilidad;
+            CargarSocios();
+        }
+
+        private void cmbFiltroAvanzado_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbFiltroAvanzado == null || cmbFiltroAvanzado.SelectedItem == null) return;
+
+            if (cmbFiltroAvanzado.SelectedItem is ComboBoxItem item && item.Tag != null)
+            {
+                _filtroAvanzado = item.Tag.ToString();
+            }
+            else
+            {
+                _filtroAvanzado = "todos";
+            }
+
+            // Limpiar selecciones de filtros previos y resetear variables
+            if (cmbFiltroActividad != null) { cmbFiltroActividad.Visibility = Visibility.Collapsed; cmbFiltroActividad.SelectedIndex = -1; }
+            if (filtroVencimiento != null) { filtroVencimiento.Visibility = Visibility.Collapsed; dpFiltroDesde.SelectedDate = null; dpFiltroHasta.SelectedDate = null; }
+            if (cmbFiltroInstructor != null) { cmbFiltroInstructor.Visibility = Visibility.Collapsed; cmbFiltroInstructor.SelectedIndex = -1; }
+            if (cmbFiltroSexo != null) { cmbFiltroSexo.Visibility = Visibility.Collapsed; cmbFiltroSexo.SelectedIndex = 0; }
+            if (cmbFiltroDias != null) { cmbFiltroDias.Visibility = Visibility.Collapsed; cmbFiltroDias.SelectedIndex = 0; }
+
+            _filtroActividadId = null;
+            _filtroFechaDesde = null;
+            _filtroFechaHasta = null;
+            _filtroDias = null;
+            _filtroInstructorId = null;
+            _filtroSexo = null;
+
+            switch (_filtroAvanzado)
+            {
+                case "actividad":    if (cmbFiltroActividad != null) cmbFiltroActividad.Visibility = Visibility.Visible; break;
+                case "vencimiento":  if (filtroVencimiento != null) filtroVencimiento.Visibility = Visibility.Visible; break;
+                case "instructor":   if (cmbFiltroInstructor != null) cmbFiltroInstructor.Visibility = Visibility.Visible; break;
+                case "sexo":         if (cmbFiltroSexo != null) cmbFiltroSexo.Visibility = Visibility.Visible; break;
+                case "inactividad":  if (cmbFiltroDias != null) cmbFiltroDias.Visibility = Visibility.Visible; break;
+            }
+        }
+
+        private void GuardarValoresFiltroAvanzado(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbFiltroActividad != null && cmbFiltroActividad.SelectedItem != null)
+            {
+                var act = cmbFiltroActividad.SelectedItem as Actividad;
+                _filtroActividadId = act != null ? act.Id : (long?)null;
+            }
+            else
+            {
+                _filtroActividadId = null;
+            }
+
+            if (dpFiltroDesde != null) _filtroFechaDesde = dpFiltroDesde.SelectedDate;
+            if (dpFiltroHasta != null) _filtroFechaHasta = dpFiltroHasta.SelectedDate;
+
+            if (cmbFiltroDias != null && cmbFiltroDias.SelectedItem != null)
+            {
+                var itemDias = cmbFiltroDias.SelectedItem as ComboBoxItem;
+                if (itemDias != null && itemDias.Tag != null)
+                {
+                    string tagStr = itemDias.Tag.ToString().Trim();
+                    if (!string.IsNullOrEmpty(tagStr) && int.TryParse(tagStr, out int diasVal))
+                        _filtroDias = diasVal;
+                    else
+                        _filtroDias = null;
+                }
+                else
+                {
+                    _filtroDias = null;
+                }
+            }
+            else
+            {
+                _filtroDias = null;
+            }
+
+            if (cmbFiltroInstructor != null && cmbFiltroInstructor.SelectedItem != null)
+            {
+                var u = cmbFiltroInstructor.SelectedItem as Usuario;
+                _filtroInstructorId = u != null ? u.Id : (long?)null;
+            }
+            else
+            {
+                _filtroInstructorId = null;
+            }
+
+            if (cmbFiltroSexo != null && cmbFiltroSexo.SelectedItem != null)
+            {
+                var itemSexo = cmbFiltroSexo.SelectedItem as ComboBoxItem;
+                if (itemSexo != null && itemSexo.Tag != null)
+                {
+                    string tagStr = itemSexo.Tag.ToString().Trim();
+                    _filtroSexo = !string.IsNullOrEmpty(tagStr) ? tagStr : null;
+                }
+                else
+                {
+                    _filtroSexo = null;
+                }
+            }
+            else
+            {
+                _filtroSexo = null;
+            }
+        }
+
+        private void btnFiltrar_Click(object sender, RoutedEventArgs e)
+        {
+            GuardarValoresFiltroAvanzado(null, null);
+            CargarSocios();
+        }
+
+        private void AplicarFiltroAvanzado(object sender, SelectionChangedEventArgs e) { }
+        private void AplicarFiltroAvanzado(object sender, RoutedEventArgs e) { }
+
+        private void ConfigurarColumnasGrid()
+        {
+            if (gridSocios == null) return;
+
+            // Remover columnas dinámicas previas
+            foreach (var col in _columnasDinamicas)
+                gridSocios.Columns.Remove(col);
+            _columnasDinamicas.Clear();
+
+            if (_filtroAvanzado == "actividad")
+            {
+                var col = CrearColumnaTexto("ACTIVIDAD", "ActividadNombre", new DataGridLength(1.2, DataGridLengthUnitType.Star));
+                gridSocios.Columns.Add(col);
+                _columnasDinamicas.Add(col);
+            }
+
+            if (_filtroAvanzado == "instructor")
+            {
+                var col = CrearColumnaTexto("PROFESOR", "InstructorNombre", new DataGridLength(1.2, DataGridLengthUnitType.Star));
+                gridSocios.Columns.Add(col);
+                _columnasDinamicas.Add(col);
+            }
+        }
+
+        private DataGridTextColumn CrearColumnaTexto(string header, string binding, object ancho)
+        {
+            var col = new DataGridTextColumn
+            {
+                Header = header,
+                Binding = new System.Windows.Data.Binding(binding),
+                FontSize = 12
+            };
+            if (ancho is DataGridLength) col.Width = (DataGridLength)ancho;
+            else if (ancho is double) col.Width = new DataGridLength((double)ancho);
+            else if (ancho is int) col.Width = new DataGridLength((int)ancho);
+            return col;
+        }
+
+        private DataGridTemplateColumn CrearColumnaAvatar()
+        {
+            var col = new DataGridTemplateColumn { Width = 56, Header = "" };
+            var factory = new FrameworkElementFactory(typeof(Grid));
+            factory.SetValue(Grid.WidthProperty, 40.0);
+            factory.SetValue(Grid.HeightProperty, 40.0);
+            factory.SetValue(Grid.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+
+            var imgFactory = new FrameworkElementFactory(typeof(Image));
+            var binding = new System.Windows.Data.Binding("Foto") { Converter = new ByteToImageConverter() };
+            imgFactory.SetBinding(Image.SourceProperty, binding);
+            imgFactory.SetValue(Image.WidthProperty, 40.0);
+            imgFactory.SetValue(Image.HeightProperty, 40.0);
+            imgFactory.SetValue(Image.StretchProperty, Stretch.UniformToFill);
+            imgFactory.SetValue(Image.ClipProperty, new RectangleGeometry { Rect = new Rect(0, 0, 40, 40), RadiusX = 20, RadiusY = 20 });
+            factory.AppendChild(imgFactory);
+
+            col.CellTemplate = new DataTemplate { VisualTree = factory };
+            return col;
+        }
+
+        private DataGridTemplateColumn CrearColumnaEstado()
+        {
+            var col = new DataGridTemplateColumn { Header = "ESTADO", Width = 100 };
+            var spFactory = new FrameworkElementFactory(typeof(StackPanel));
+            spFactory.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
+            spFactory.SetValue(StackPanel.VerticalAlignmentProperty, VerticalAlignment.Center);
+
+            var ellipseFactory = new FrameworkElementFactory(typeof(Ellipse));
+            ellipseFactory.SetValue(Ellipse.WidthProperty, 6.0);
+            ellipseFactory.SetValue(Ellipse.HeightProperty, 6.0);
+            ellipseFactory.SetValue(Ellipse.VerticalAlignmentProperty, VerticalAlignment.Center);
+            ellipseFactory.SetValue(Ellipse.MarginProperty, new Thickness(0, 0, 6, 0));
+
+            var estiloEllipse = new Style(typeof(Ellipse));
+            estiloEllipse.Setters.Add(new Setter(Ellipse.FillProperty, (Brush)FindResource("TextMuted")));
+            estiloEllipse.Triggers.Add(new DataTrigger
+            {
+                Binding = new System.Windows.Data.Binding("MembresiaEstado"),
+                Value = "activa",
+                Setters = { new Setter(Ellipse.FillProperty, (Brush)FindResource("GreenMain")) }
+            });
+            ellipseFactory.SetValue(Ellipse.StyleProperty, estiloEllipse);
+            spFactory.AppendChild(ellipseFactory);
+
+            var textFactory = new FrameworkElementFactory(typeof(TextBlock));
+            textFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("EstadoTexto"));
+            textFactory.SetValue(TextBlock.FontSizeProperty, 12.0);
+            textFactory.SetValue(TextBlock.FontWeightProperty, FontWeights.SemiBold);
+
+            var estiloText = new Style(typeof(TextBlock));
+            estiloText.Setters.Add(new Setter(TextBlock.ForegroundProperty, (Brush)FindResource("TextMuted")));
+            estiloText.Triggers.Add(new DataTrigger
+            {
+                Binding = new System.Windows.Data.Binding("MembresiaEstado"),
+                Value = "activa",
+                Setters = { new Setter(TextBlock.ForegroundProperty, (Brush)FindResource("GreenMain")) }
+            });
+            textFactory.SetValue(TextBlock.StyleProperty, estiloText);
+            spFactory.AppendChild(textFactory);
+
+            col.CellTemplate = new DataTemplate { VisualTree = spFactory };
+            return col;
         }
 
         private void ResaltarChip(Button seleccionado)
@@ -651,11 +960,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _idEditar = 0;
         }
 
-        private Socio ObtenerSocioDeFila(object sender)
+        private SocioConMembresia ObtenerSocioDeFila(object sender)
         {
             var btn = sender as Button;
             if (btn == null) return null;
-            return btn.DataContext as Socio;
+            return btn.DataContext as SocioConMembresia;
         }
 
         private static BitmapImage BytesABitmapImage(byte[] bytes)
