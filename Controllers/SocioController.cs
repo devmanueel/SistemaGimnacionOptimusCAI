@@ -36,17 +36,25 @@ namespace Controllers
         }
 
         public List<SocioConMembresia> ListarSociosConMembresias(
-            string texto, string filtroEstado, string filtroAvanzado,
-            long? actividadId, DateTime? fechaDesde, DateTime? fechaHasta,
-            int? diasSinAsistencia, long? instructorId, string sexo)
+            string texto              = "",
+            string filtroEstado       = "todos",
+            long?  filtroActividadId  = null,
+            bool?  filtroCuotaVencida = null,
+            long?  filtroInstructorId = null,
+            string filtroSexo         = null,
+            int?   filtroDejaronVenir = null)
         {
             try
             {
                 return _dao.ListarSociosConMembresias(
-                    texto, filtroEstado, filtroAvanzado, actividadId,
-                    fechaDesde, fechaHasta, diasSinAsistencia, instructorId, sexo);
+                    texto, filtroEstado, filtroActividadId,
+                    filtroCuotaVencida, filtroInstructorId,
+                    filtroSexo, filtroDejaronVenir);
             }
-            catch (Exception ex) { throw new Exception("Error al listar socios con membresías.\n" + ex.Message); }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al listar socios.\n" + ex.Message);
+            }
         }
 
         public Socio ObtenerPorId(long id)

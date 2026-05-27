@@ -39,10 +39,20 @@ namespace Entities
         public DateTime? FechaVencimiento { get; set; }
         public string MembresiaEstado { get; set; }
         public DateTime? UltimaAsistencia { get; set; }
+        public int? DiasSinAsistir { get; set; }
         public string InstructorNombre { get; set; }
 
         // Propiedades calculadas
         public string NombreCompleto => $"{Apellido}, {Nombre}";
+
+        public string SexoTexto =>
+            Sexo == "M" ? "Masculino" :
+            Sexo == "F" ? "Femenino"  : "Otro";
+
+        public string DiasSinAsistirTexto =>
+            DiasSinAsistir.HasValue
+                ? DiasSinAsistir.Value + " días"
+                : "—";
 
         public string EstadoTexto
         {

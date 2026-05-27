@@ -109,9 +109,13 @@ namespace Models.Dao
         // LISTAR SOCIOS CON MEMBRESÍAS (una fila por membresía)
         // ──────────────────────────────────────────────────────
         public List<SocioConMembresia> ListarSociosConMembresias(
-            string texto, string filtroEstado, string filtroAvanzado,
-            long? actividadId, DateTime? fechaDesde, DateTime? fechaHasta,
-            int? diasSinAsistencia, long? instructorId, string sexo)
+            string texto              = "",
+            string filtroEstado       = "todos",
+            long?  filtroActividadId  = null,
+            bool?  filtroCuotaVencida = null,
+            long?  filtroInstructorId = null,
+            string filtroSexo         = null,
+            int?   filtroDejaronVenir = null)
         {
             var lista = new List<SocioConMembresia>();
             using (var conn = GetConnection())
@@ -120,15 +124,13 @@ namespace Models.Dao
                 using (var cmd = new SqlCommand("sp_ListarSociosConMembresias", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.Add("@Texto", SqlDbType.NVarChar, 100).Value = texto ?? string.Empty;
-                    cmd.Parameters.Add("@FiltroEstado", SqlDbType.VarChar, 20).Value = filtroEstado ?? "todos";
-                    cmd.Parameters.Add("@FiltroAvanzado", SqlDbType.VarChar, 30).Value = filtroAvanzado ?? "todos";
-                    cmd.Parameters.Add("@ActividadId", SqlDbType.BigInt).Value = (object)actividadId ?? DBNull.Value;
-                    cmd.Parameters.Add("@FechaDesde", SqlDbType.Date).Value = (object)fechaDesde ?? DBNull.Value;
-                    cmd.Parameters.Add("@FechaHasta", SqlDbType.Date).Value = (object)fechaHasta ?? DBNull.Value;
-                    cmd.Parameters.Add("@DiasSinAsistencia", SqlDbType.Int).Value = (object)diasSinAsistencia ?? DBNull.Value;
-                    cmd.Parameters.Add("@InstructorId", SqlDbType.BigInt).Value = (object)instructorId ?? DBNull.Value;
-                    cmd.Parameters.Add("@Sexo", SqlDbType.VarChar, 10).Value = (object)sexo ?? DBNull.Value;
+                    cmd.Parameters.AddWithValue("@Texto",               texto ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@FiltroEstado",        filtroEstado ?? "todos");
+                    cmd.Parameters.AddWithValue("@FiltroActividadId",   (object)filtroActividadId  ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@FiltroCuotaVencida",  (object)filtroCuotaVencida ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@FiltroInstructorId",  (object)filtroInstructorId ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@FiltroSexo",          (object)filtroSexo         ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@FiltroDejaronVenir",  (object)filtroDejaronVenir ?? DBNull.Value);
 
                     using (var reader = cmd.ExecuteReader())
                         while (reader.Read())
@@ -142,30 +144,26 @@ namespace Models.Dao
         {
             return new SocioConMembresia
             {
-                Id = Convert.ToInt64(r["id"]),
+                Id = Convert.ToInt64(r["socio_id"]),
                 NumeroSocio = Convert.ToInt32(r["numero_socio"]),
                 Nombre = r["nombre"].ToString(),
                 Apellido = r["apellido"].ToString(),
                 Dni = r["dni"].ToString(),
-                DniPin = r["dni_pin"].ToString(),
                 Foto = r["foto"] != DBNull.Value ? (byte[])r["foto"] : null,
-                FechaNacimiento = r["fecha_nacimiento"] != DBNull.Value ? (DateTime?)r["fecha_nacimiento"] : null,
                 Sexo = r["sexo"] as string ?? "Otro",
+                FechaNacimiento = r["fecha_nacimiento"] != DBNull.Value ? (DateTime?)r["fecha_nacimiento"] : null,
                 Telefono = r["telefono"] as string,
-                Domicilio = r["domicilio"] as string,
-                Profesion = r["profesion"] as string,
                 Email = r["email"] as string,
-                ComoNosConocio = r["como_nos_conocio"] as string,
-                Observaciones = r["observaciones"] as string,
-                Activo = Convert.ToBoolean(r["activo"]),
-                RegistradoPor = r["registrado_por"] != DBNull.Value ? (long?)Convert.ToInt64(r["registrado_por"]) : null,
-                RegistradoPorNombre = r["registrado_por_nombre"] as string,
-                CreadoEn = r["creado_en"] != DBNull.Value ? Convert.ToDateTime(r["creado_en"]) : DateTime.MinValue,
-                ActualizadoEn = r["actualizado_en"] != DBNull.Value ? Convert.ToDateTime(r["actualizado_en"]) : DateTime.MinValue,
+                Activo = Convert.ToBoolean(r["socio_activo"]),
                 ActividadNombre = r["actividad_nombre"] as string ?? "—",
                 FechaVencimiento = r["fecha_vencimiento"] != DBNull.Value ? (DateTime?)r["fecha_vencimiento"] : null,
                 MembresiaEstado = r["membresia_estado"] != DBNull.Value ? r["membresia_estado"].ToString() : null,
-                UltimaAsistencia = r["ultima_asistencia"] != DBNull.Value ? (DateTime?)r["ultima_asistencia"] : null,
+                UltimaAsistencia = r["ultima_asistencia"] != DBNull.Value
+                    ? (DateTime?)Convert.ToDateTime(r["ultima_asistencia"])
+                    : null,
+                DiasSinAsistir = r["dias_sin_asistir"] != DBNull.Value
+                    ? (int?)Convert.ToInt32(r["dias_sin_asistir"])
+                    : null,
                 InstructorNombre = r["instructor_nombre"] as string ?? "Sin asignar"
             };
         }

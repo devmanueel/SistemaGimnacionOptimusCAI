@@ -44,20 +44,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private Visibility _filtrosVisibilidad = Visibility.Collapsed;
         private List<DataGridColumn> _columnasDinamicas = new List<DataGridColumn>();
 
-        // Valores de filtros avanzados (se aplican solo al presionar "Filtrar")
-        private long? _filtroActividadId = null;
-        private DateTime? _filtroFechaDesde = null;
-        private DateTime? _filtroFechaHasta = null;
-        private int? _filtroDias = null;
-        private long? _filtroInstructorId = null;
-        private string _filtroSexo = null;
+        // Filtros avanzados (se aplican solo al presionar "Filtrar")
+        private long?  _filtroActividadId  = null;
+        private bool?  _filtroCuotaVencida = null;
+        private long?  _filtroInstructorId = null;
+        private string _filtroSexo         = null;
+        private int?   _filtroDejaronVenir = null;
 
         public SociosPage()
         {
             InitializeComponent();
             panelFiltrosAvanzados.Visibility = Visibility.Collapsed;
             ActualizarStats();
-            CargarCombosFiltros();
+            CargarInstructores();
             CargarSocios();
             ResaltarChip(chipTodos);
             CambiarTab("datos");
@@ -69,9 +68,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ─────────────────────────────────────────────────────
-        // CARGA DE COMBOS
+        // CARGA DE COMBOS (instructores rolId = 2, actividades)
         // ─────────────────────────────────────────────────────
-        private void CargarCombosFiltros()
+        private void CargarInstructores()
         {
             try
             {
@@ -91,19 +90,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             try
             {
-                // 1. Traer TODOS los datos sin filtro de estado
+                // 1. Traer TODOS los datos con filtros avanzados aplicados (SIN filtro de chip)
                 var listaCompleta = _controller.ListarSociosConMembresias(
-                    txtBuscar != null ? txtBuscar.Text : "",
-                    "todos",  // siempre traer todos para contar correctamente
-                    _filtroAvanzado,
-                    _filtroActividadId,
-                    _filtroFechaDesde,
-                    _filtroFechaHasta,
-                    _filtroDias,
-                    _filtroInstructorId,
-                    _filtroSexo);
+                    texto:              txtBuscar != null ? txtBuscar.Text.Trim() : "",
+                    filtroEstado:       "todos",  // siempre traer todos para contar correctamente
+                    filtroActividadId:  _filtroActividadId,
+                    filtroCuotaVencida: _filtroCuotaVencida,
+                    filtroInstructorId: _filtroInstructorId,
+                    filtroSexo:         _filtroSexo,
+                    filtroDejaronVenir: _filtroDejaronVenir);
 
-                // 2. Actualizar chips con la lista completa
+                // 2. Actualizar chips con la lista completa (sin filtro de chip)
                 ActualizarContadoresChips(listaCompleta);
 
                 // 3. Filtrar por estado del chip para mostrar en la tabla
@@ -119,6 +116,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
                 if (gridSocios != null)
                     gridSocios.ItemsSource = listaFiltrada;
+
+                ActualizarResumenFiltros(listaFiltrada);
             }
             catch (Exception ex)
             {
@@ -183,6 +182,70 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
+        private void ActualizarResumenFiltros(List<SocioConMembresia> lista)
+        {
+            if (panelResumenFiltros == null || lblFiltrosActivos == null || lblCantidadSocios == null)
+                return;
+
+            bool hayFiltroAvanzado = _filtroActividadId.HasValue
+                || _filtroCuotaVencida.HasValue
+                || _filtroInstructorId.HasValue
+                || !string.IsNullOrEmpty(_filtroSexo)
+                || _filtroDejaronVenir.HasValue;
+
+            if (_filtroEstado == "todos" && !hayFiltroAvanzado)
+            {
+                panelResumenFiltros.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            panelResumenFiltros.Visibility = Visibility.Visible;
+
+            var partes = new List<string>();
+
+            // Chip estado
+            if (_filtroEstado == "activos")
+                partes.Add("los socios activos");
+            else if (_filtroEstado == "inactivos")
+                partes.Add("los socios inactivos");
+            else
+                partes.Add("todos los socios");
+
+            // Filtros avanzados
+            if (_filtroActividadId.HasValue && cmbFiltroActividad.SelectedItem != null)
+            {
+                var act = cmbFiltroActividad.SelectedItem as Actividad;
+                if (act != null)
+                    partes.Add(string.Format("cuya actividad es '{0}'", act.Nombre));
+            }
+
+            if (_filtroCuotaVencida.HasValue && _filtroCuotaVencida.Value)
+                partes.Add("con cuota vencida");
+
+            if (_filtroInstructorId.HasValue && cmbFiltroInstructor.SelectedItem != null)
+            {
+                var inst = cmbFiltroInstructor.SelectedItem as Usuario;
+                if (inst != null)
+                    partes.Add(string.Format("que asisten con el profesor '{0}'", inst.NombreCompleto));
+            }
+
+            if (!string.IsNullOrEmpty(_filtroSexo))
+            {
+                string sexoTexto = _filtroSexo == "M" ? "Masculino" :
+                                   _filtroSexo == "F" ? "Femenino" : "Otro";
+                partes.Add(string.Format("cuyo sexo es {0}", sexoTexto));
+            }
+
+            if (_filtroDejaronVenir.HasValue)
+                partes.Add(string.Format("que no asisten hace más de {0} días", _filtroDejaronVenir.Value));
+
+            string textoFiltros = "Se muestran " + string.Join(" ", partes.ToArray());
+            lblFiltrosActivos.Text = textoFiltros;
+
+            int cantidad = lista != null ? lista.Count : 0;
+            lblCantidadSocios.Text = string.Format("Cantidad de socios: {0}", cantidad);
+        }
+
         // ─────────────────────────────────────────────────────
         // BÚSQUEDA / FILTROS / SELECCIÓN
         // ─────────────────────────────────────────────────────
@@ -210,109 +273,100 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void cmbFiltroAvanzado_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cmbFiltroAvanzado == null || cmbFiltroAvanzado.SelectedItem == null) return;
+            // Ocultar todos los controles secundarios
+            if (cmbFiltroActividad  != null) cmbFiltroActividad.Visibility  = Visibility.Collapsed;
+            if (cmbFiltroInstructor != null) cmbFiltroInstructor.Visibility = Visibility.Collapsed;
+            if (cmbFiltroSexo       != null) cmbFiltroSexo.Visibility       = Visibility.Collapsed;
+            if (cmbFiltroDias       != null) cmbFiltroDias.Visibility       = Visibility.Collapsed;
 
-            if (cmbFiltroAvanzado.SelectedItem is ComboBoxItem item && item.Tag != null)
-            {
-                _filtroAvanzado = item.Tag.ToString();
-            }
-            else
-            {
-                _filtroAvanzado = "todos";
-            }
+            var item = cmbFiltroAvanzado.SelectedItem as ComboBoxItem;
+            if (item == null) return;
 
-            // Limpiar selecciones de filtros previos y resetear variables
-            if (cmbFiltroActividad != null) { cmbFiltroActividad.Visibility = Visibility.Collapsed; cmbFiltroActividad.SelectedIndex = -1; }
-            if (filtroVencimiento != null) { filtroVencimiento.Visibility = Visibility.Collapsed; dpFiltroDesde.SelectedDate = null; dpFiltroHasta.SelectedDate = null; }
-            if (cmbFiltroInstructor != null) { cmbFiltroInstructor.Visibility = Visibility.Collapsed; cmbFiltroInstructor.SelectedIndex = -1; }
-            if (cmbFiltroSexo != null) { cmbFiltroSexo.Visibility = Visibility.Collapsed; cmbFiltroSexo.SelectedIndex = 0; }
-            if (cmbFiltroDias != null) { cmbFiltroDias.Visibility = Visibility.Collapsed; cmbFiltroDias.SelectedIndex = 0; }
-
-            _filtroActividadId = null;
-            _filtroFechaDesde = null;
-            _filtroFechaHasta = null;
-            _filtroDias = null;
-            _filtroInstructorId = null;
-            _filtroSexo = null;
-
-            switch (_filtroAvanzado)
+            switch (item.Content?.ToString())
             {
-                case "actividad":    if (cmbFiltroActividad != null) cmbFiltroActividad.Visibility = Visibility.Visible; break;
-                case "vencimiento":  if (filtroVencimiento != null) filtroVencimiento.Visibility = Visibility.Visible; break;
-                case "instructor":   if (cmbFiltroInstructor != null) cmbFiltroInstructor.Visibility = Visibility.Visible; break;
-                case "sexo":         if (cmbFiltroSexo != null) cmbFiltroSexo.Visibility = Visibility.Visible; break;
-                case "inactividad":  if (cmbFiltroDias != null) cmbFiltroDias.Visibility = Visibility.Visible; break;
-            }
-        }
-
-        private void GuardarValoresFiltroAvanzado(object sender, SelectionChangedEventArgs e)
-        {
-            if (cmbFiltroActividad != null && cmbFiltroActividad.SelectedItem != null)
-            {
-                var act = cmbFiltroActividad.SelectedItem as Actividad;
-                _filtroActividadId = act != null ? act.Id : (long?)null;
-            }
-            else
-            {
-                _filtroActividadId = null;
-            }
-
-            if (dpFiltroDesde != null) _filtroFechaDesde = dpFiltroDesde.SelectedDate;
-            if (dpFiltroHasta != null) _filtroFechaHasta = dpFiltroHasta.SelectedDate;
-
-            if (cmbFiltroDias != null && cmbFiltroDias.SelectedItem != null)
-            {
-                var itemDias = cmbFiltroDias.SelectedItem as ComboBoxItem;
-                if (itemDias != null && itemDias.Tag != null)
-                {
-                    string tagStr = itemDias.Tag.ToString().Trim();
-                    if (!string.IsNullOrEmpty(tagStr) && int.TryParse(tagStr, out int diasVal))
-                        _filtroDias = diasVal;
-                    else
-                        _filtroDias = null;
-                }
-                else
-                {
-                    _filtroDias = null;
-                }
-            }
-            else
-            {
-                _filtroDias = null;
-            }
-
-            if (cmbFiltroInstructor != null && cmbFiltroInstructor.SelectedItem != null)
-            {
-                var u = cmbFiltroInstructor.SelectedItem as Usuario;
-                _filtroInstructorId = u != null ? u.Id : (long?)null;
-            }
-            else
-            {
-                _filtroInstructorId = null;
-            }
-
-            if (cmbFiltroSexo != null && cmbFiltroSexo.SelectedItem != null)
-            {
-                var itemSexo = cmbFiltroSexo.SelectedItem as ComboBoxItem;
-                if (itemSexo != null && itemSexo.Tag != null)
-                {
-                    string tagStr = itemSexo.Tag.ToString().Trim();
-                    _filtroSexo = !string.IsNullOrEmpty(tagStr) ? tagStr : null;
-                }
-                else
-                {
-                    _filtroSexo = null;
-                }
-            }
-            else
-            {
-                _filtroSexo = null;
+                case "Actividad":
+                    cmbFiltroActividad.Visibility = Visibility.Visible;
+                    break;
+                case "Cuota vencida":
+                    // No necesita control secundario
+                    break;
+                case "Profesor":
+                    cmbFiltroInstructor.Visibility = Visibility.Visible;
+                    break;
+                case "Sexo":
+                    cmbFiltroSexo.Visibility = Visibility.Visible;
+                    break;
+                case "Dejaron de venir":
+                    cmbFiltroDias.Visibility = Visibility.Visible;
+                    break;
             }
         }
 
         private void btnFiltrar_Click(object sender, RoutedEventArgs e)
         {
-            GuardarValoresFiltroAvanzado(null, null);
+            var item = cmbFiltroAvanzado.SelectedItem as ComboBoxItem;
+            string filtroActivo = item?.Content?.ToString();
+
+            // Resetear todos los filtros avanzados
+            _filtroActividadId  = null;
+            _filtroCuotaVencida = null;
+            _filtroInstructorId = null;
+            _filtroSexo         = null;
+            _filtroDejaronVenir = null;
+
+            switch (filtroActivo)
+            {
+                case "Actividad":
+                    if (cmbFiltroActividad.SelectedValue != null)
+                        _filtroActividadId = (long?)cmbFiltroActividad.SelectedValue;
+                    break;
+
+                case "Cuota vencida":
+                    _filtroCuotaVencida = true;
+                    break;
+
+                case "Profesor":
+                    if (cmbFiltroInstructor.SelectedValue != null)
+                        _filtroInstructorId = (long?)cmbFiltroInstructor.SelectedValue;
+                    break;
+
+                case "Sexo":
+                    if (cmbFiltroSexo.SelectedItem is ComboBoxItem itemSexo)
+                        _filtroSexo = itemSexo.Tag?.ToString();
+                    break;
+
+                case "Dejaron de venir":
+                    if (cmbFiltroDias.SelectedItem is ComboBoxItem itemDias
+                        && int.TryParse(itemDias.Tag?.ToString(), out int dias))
+                        _filtroDejaronVenir = dias;
+                    break;
+            }
+
+            CargarSocios();
+        }
+
+        private void btnLimpiarFiltros_Click(object sender, RoutedEventArgs e)
+        {
+            // Resetear variables
+            _filtroActividadId  = null;
+            _filtroCuotaVencida = null;
+            _filtroInstructorId = null;
+            _filtroSexo         = null;
+            _filtroDejaronVenir = null;
+
+            // Resetear controles
+            cmbFiltroAvanzado.SelectedIndex   = -1;
+            cmbFiltroActividad.SelectedIndex  = -1;
+            cmbFiltroInstructor.SelectedIndex = -1;
+            cmbFiltroSexo.SelectedIndex       = -1;
+            cmbFiltroDias.SelectedIndex       = -1;
+
+            // Ocultar todos los secundarios
+            cmbFiltroActividad.Visibility  = Visibility.Collapsed;
+            cmbFiltroInstructor.Visibility = Visibility.Collapsed;
+            cmbFiltroSexo.Visibility       = Visibility.Collapsed;
+            cmbFiltroDias.Visibility       = Visibility.Collapsed;
+
             CargarSocios();
         }
 
