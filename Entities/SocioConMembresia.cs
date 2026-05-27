@@ -35,6 +35,7 @@ namespace Entities
         public DateTime ActualizadoEn { get; set; }
 
         // Campos de la membresía
+        public long MembresiaId { get; set; }
         public string ActividadNombre { get; set; }
         public DateTime? FechaVencimiento { get; set; }
         public string MembresiaEstado { get; set; }

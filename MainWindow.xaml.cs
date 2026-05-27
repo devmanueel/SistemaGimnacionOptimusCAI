@@ -235,6 +235,27 @@ namespace SistemaGimnacionOptimusCAI
             }
         }
 
+        /// <summary>
+        /// Navega a MembresiasPage y abre directamente el panel de edición de una membresía.
+        /// </summary>
+        public void NavegarAMembresiasConMembresia(long membresiaId)
+        {
+            for (int i = 0; i < _botonesMenu.Count; i++)
+            {
+                var tag = _botonesMenu[i].Tag as object[];
+                if (tag == null || tag.Length < 3) continue;
+                if ((Type)tag[1] == typeof(MembresiasPage))
+                {
+                    ResaltarBotonActivo(_botonesMenu[i]);
+                    lblPaginaActual.Text = tag[2] as string;
+
+                    var pagina = new MembresiasPage(membresiaId);
+                    frameContenido.Navigate(pagina);
+                    return;
+                }
+            }
+        }
+
         // ── NAVEGACION ────────────────────────────────────────
         private void NavegarPagina(int indice)
         {
