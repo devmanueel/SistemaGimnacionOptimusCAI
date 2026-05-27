@@ -450,16 +450,16 @@
                 </StackPanel>
 
                 <!-- Resumen de filtros activos -->
-                
+                <StackPanel x:Name="panelResumenFiltros" Orientation="Vertical">
                     <TextBlock x:Name="lblFiltrosActivos" 
                                Foreground="{StaticResource GreenMain}" 
                                FontSize="12" FontWeight="SemiBold"
-                               VerticalAlignment="Center" Margin="0, 12"/>
+                               VerticalAlignment="Center" Margin="0,12"/>
                     <TextBlock x:Name="lblCantidadSocios" 
                                Foreground="{StaticResource TextMuted}" 
                                FontSize="12" Margin="0,4"
                                VerticalAlignment="Center" FontWeight="Bold"/>
-                
+                </StackPanel>
             </StackPanel>
         </Border>
 

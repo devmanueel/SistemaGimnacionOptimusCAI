@@ -14,6 +14,7 @@ using Controllers;                         // ← Controller + Validador
 using Entities;
 using Microsoft.Win32;
 using SistemaGimnacionOptimusCAI.Helpers;  // ← NotificacionWindow + ByteToImageConverter
+using SistemaGimnacionOptimusCAI.Ventanas;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -60,11 +61,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarSocios();
             ResaltarChip(chipTodos);
             CambiarTab("datos");
-            if (SesionManager.AbrirPanelAlNavegar)
-            {
-                SesionManager.AbrirPanelAlNavegar = false;
-                btnNuevo_Click(null, null);
-            }
         }
 
         // ─────────────────────────────────────────────────────
@@ -629,17 +625,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void btnNuevo_Click(object sender, RoutedEventArgs e)
         {
-            _esNuevo = true;
-            _idEditar = 0;
-            LimpiarFormulario();
-            LimpiarErrores();
+            var ventana = new NuevoSocioWindow
+            {
+                Owner = Window.GetWindow(this)
+            };
 
-            int siguiente = _controller.ObtenerSiguienteNumeroSocio();
-            lblNumeroSocio.Text = "#" + siguiente.ToString("D4");
+            bool? resultado = ventana.ShowDialog();
 
-            chkRegenerarPin.Visibility = Visibility.Collapsed;
-            CambiarTab("datos");
-            AbrirFormulario("NUEVO SOCIO");
+            // Si el socio (o socio + membresía) fue creado, recargar la tabla
+            if (resultado == true)
+            {
+                CargarSocios();
+                ActualizarStats();
+            }
         }
 
         private void btnEditar_Click(object sender, RoutedEventArgs e)
