@@ -61,6 +61,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarSocios();
             ResaltarChip(chipTodos);
             CambiarTab("datos");
+            if (SesionManager.AbrirPanelAlNavegar)
+            {
+                SesionManager.AbrirPanelAlNavegar = false;
+                btnNuevo_Click(null, null);
+            }
         }
 
         // ─────────────────────────────────────────────────────

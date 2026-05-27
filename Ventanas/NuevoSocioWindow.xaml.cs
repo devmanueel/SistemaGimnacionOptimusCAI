@@ -2,8 +2,8 @@
 //  Archivo: NuevoSocioWindow.xaml.cs
 //
 //  Ventana emergente de 2 pasos para crear socio + membresía.
-//  Paso 1: datos del socio → guarda con sp_InsertarSocio
-//  Paso 2: membresía → guarda con sp_InsertarMembresia
+//  Paso 1: datos del socio → validación
+//  Paso 2: membresía → guarda socio + membresía juntos
 //  Compatible con C# 7.3
 // ============================================================
 
@@ -73,11 +73,29 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 EjecutarPaso2();
         }
 
-        // ── PASO 1: validar y guardar socio ───────────────────
+        // ── PASO 1: validar datos y pasar al paso 2 ───────────
         private void EjecutarPaso1()
         {
             if (!ValidarPaso1()) return;
 
+            // Mostrar preview del socio en el paso 2 (aún no guardado)
+            string nombreCompleto = txtApellido.Text.Trim() + ", " + txtNombre.Text.Trim();
+            lblSocioCreado.Text = nombreCompleto;
+            lblNumeroSocio.Text = "Socio pendiente de registro";
+
+            IrAPaso2();
+        }
+
+        // ── PASO 2: guardar socio + membresía juntos ──────────
+        private void EjecutarPaso2()
+        {
+            if (cmbActividad.SelectedItem == null)
+            {
+                NotificacionWindow.MostrarAdvertencia("Seleccioná una actividad para continuar.");
+                return;
+            }
+
+            // ── 1. Guardar el socio ───────────────────────────
             string sexo = "Otro";
             var sexoItem = cmbSexo.SelectedItem as ComboBoxItem;
             if (sexoItem?.Tag != null) sexo = sexoItem.Tag.ToString();
@@ -85,7 +103,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
             string comoConocio = (cmbComoConocio.SelectedItem as ComboBoxItem)?.Content?.ToString()
                                  ?? string.Empty;
 
-            var resultado = _socioCtrl.Insertar(
+            var resultadoSocio = _socioCtrl.Insertar(
                 nombre:          txtNombre.Text.Trim(),
                 apellido:        txtApellido.Text.Trim(),
                 dni:             txtDni.Text.Trim(),
@@ -100,38 +118,20 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 foto:            _fotoBytes,
                 registradoPor:   SesionManager.HaySesion ? (long?)SesionManager.UsuarioId : null);
 
-            if (!resultado.ok)
+            if (!resultadoSocio.ok)
             {
-                NotificacionWindow.MostrarError(resultado.mensaje);
+                NotificacionWindow.MostrarError(resultadoSocio.mensaje);
                 return;
             }
 
-            // Guardar datos del socio creado para el paso 2
-            _socioId     = resultado.socioCreado.Id;
-            _numeroSocio = resultado.socioCreado.NumeroSocio;
+            _socioId     = resultadoSocio.socioCreado.Id;
+            _numeroSocio = resultadoSocio.socioCreado.NumeroSocio;
 
-            // Actualizar UI del paso 2
-            lblSocioCreado.Text  = resultado.socioCreado.Apellido + ", " + resultado.socioCreado.Nombre;
-            lblNumeroSocio.Text  = "#" + _numeroSocio.ToString("D4") + " — Socio registrado correctamente";
-
-            // Pasar al paso 2
-            IrAPaso2();
-        }
-
-        // ── PASO 2: validar y guardar membresía ───────────────
-        private void EjecutarPaso2()
-        {
-            if (cmbActividad.SelectedItem == null)
-            {
-                NotificacionWindow.MostrarAdvertencia("Seleccioná una actividad para continuar.");
-                return;
-            }
-
-            var actividad    = cmbActividad.SelectedItem as Actividad;
+            // ── 2. Guardar la membresía ───────────────────────
+            var actividad = cmbActividad.SelectedItem as Actividad;
             var metodoPagoItem = cmbMetodoPago.SelectedItem as ComboBoxItem;
-            string metodoPago  = metodoPagoItem?.Tag?.ToString() ?? "efectivo";
+            string metodoPago = metodoPagoItem?.Tag?.ToString() ?? "efectivo";
 
-            // Instructor (puede ser null)
             long? instructorId = null;
             if (cmbInstructor.SelectedIndex > 0)
             {
@@ -139,62 +139,71 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 if (inst != null) instructorId = inst.Id;
             }
 
-            DateTime fechaInicio      = DateTime.Today;
-            DateTime fechaVencimiento = DateTime.Today.AddDays(31);
-
-            var resultado = _membresiaCtrl.Insertar(
+            var resultadoMem = _membresiaCtrl.Insertar(
                 socioId:          _socioId,
                 actividadId:      actividad.Id,
                 instructorId:     instructorId,
-                fechaInicio:      fechaInicio,
-                fechaVencimiento: fechaVencimiento,
+                fechaInicio:      DateTime.Today,
+                fechaVencimiento: DateTime.Today.AddDays(31),
                 montoPagado:      actividad.Precio,
                 metodoPago:       metodoPago,
                 registradoPor:    SesionManager.HaySesion ? SesionManager.UsuarioId : 0L,
                 observaciones:    null);
 
-            if (!resultado.ok)
+            if (!resultadoMem.ok)
             {
-                NotificacionWindow.MostrarError(resultado.mensaje);
+                NotificacionWindow.MostrarError(resultadoMem.mensaje);
                 return;
             }
 
-            // Preguntar por huella digital (no implementado todavía)
+            // ── 3. Preguntar por huella digital ───────────────
             bool registrarHuella = NotificacionWindow.MostrarConfirmacion(
                 "Membresía creada correctamente.\n\n¿Querés registrar la huella digital del socio ahora?",
                 "¡Todo listo!");
 
             if (registrarHuella)
             {
-                // TODO: implementar registro de huella en una versión futura
                 NotificacionWindow.MostrarAdvertencia(
                     "El registro de huella digital estará disponible próximamente.",
                     "Próximamente");
             }
 
-            // Cerrar la ventana con resultado exitoso
             DialogResult = true;
             Close();
         }
 
-        // ── Navegación entre pasos ────────────────────────────
+        // ── Navegación: Paso 1 → Paso 2 ──────────────────────
         private void IrAPaso2()
         {
             _pasoActual = 2;
 
-            // Mostrar paso 2, ocultar paso 1
             panelPaso1.Visibility = Visibility.Collapsed;
             panelPaso2.Visibility = Visibility.Visible;
 
-            // Actualizar indicador visual
-            circuloPaso2.Background    = (System.Windows.Media.Brush)FindResource("GreenMain");
-            lblPaso2.Foreground        = (System.Windows.Media.Brush)FindResource("GreenMain");
+            circuloPaso2.Background = (System.Windows.Media.Brush)FindResource("GreenMain");
+            lblPaso2.Foreground     = (System.Windows.Media.Brush)FindResource("GreenMain");
 
-            // Actualizar textos
             lblTitulo.Text      = "NUEVA MEMBRESÍA";
             lblSubtitulo.Text   = "Asigná una actividad al nuevo socio";
             btnAccion.Content   = "COBRAR ✓";
             btnCancelar.Content = "← Volver";
+        }
+
+        // ── Navegación: Paso 2 → Paso 1 ──────────────────────
+        private void VolverAPaso1()
+        {
+            _pasoActual = 1;
+
+            panelPaso2.Visibility = Visibility.Collapsed;
+            panelPaso1.Visibility = Visibility.Visible;
+
+            circuloPaso2.Background = (System.Windows.Media.Brush)FindResource("Bg3");
+            lblPaso2.Foreground     = (System.Windows.Media.Brush)FindResource("TextMuted");
+
+            lblTitulo.Text      = "NUEVO SOCIO";
+            lblSubtitulo.Text   = "Completá los datos del nuevo socio";
+            btnAccion.Content   = "SIGUIENTE →";
+            btnCancelar.Content = "Cancelar";
         }
 
         // ── Cambio de actividad → mostrar precio ──────────────
@@ -233,29 +242,34 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
             }
         }
 
-        // ── Botones Cancelar / Cerrar ─────────────────────────
+        // ── Botón inferior izquierdo (Cancelar / ← Volver) ────
         private void btnCancelar_Click(object sender, RoutedEventArgs e)
         {
-            if (_pasoActual == 2 && _socioId > 0)
+            if (_pasoActual == 2)
             {
-                // El socio ya fue guardado — preguntar si cerrar de todas formas
-                bool cerrar = NotificacionWindow.MostrarConfirmacion(
-                    "El socio ya fue registrado. ¿Cerrar sin asignar membresía?",
-                    "¿Cerrar?");
-                if (!cerrar) return;
-
-                DialogResult = true; // igual recargamos la tabla
+                // Volver al paso 1 para modificar datos del socio
+                VolverAPaso1();
             }
             else
             {
+                // Paso 1: cancelar todo
                 DialogResult = false;
+                Close();
             }
-            Close();
         }
 
+        // ── Botón X del header ────────────────────────────────
         private void btnCerrar_Click(object sender, RoutedEventArgs e)
         {
-            btnCancelar_Click(sender, e);
+            if (_pasoActual == 2)
+            {
+                bool cerrar = NotificacionWindow.MostrarConfirmacion(
+                    "¿Cancelar el registro del socio y cerrar?",
+                    "¿Cerrar?");
+                if (!cerrar) return;
+            }
+            DialogResult = false;
+            Close();
         }
 
         // ── Validaciones Paso 1 ───────────────────────────────
