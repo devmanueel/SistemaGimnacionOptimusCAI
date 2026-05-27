@@ -16,6 +16,18 @@ namespace Models.Dao
 {
     public class SocioDao : ConnectionToDB
     {
+        // Lee un GUID nullable de un DataReader (columna puede no existir en SPs viejos)
+        private static Guid? LeerGuid(SqlDataReader r, string columna)
+        {
+            try
+            {
+                int ordinal = r.GetOrdinal(columna);
+                if (r.IsDBNull(ordinal)) return null;
+                return r.GetGuid(ordinal);
+            }
+            catch (IndexOutOfRangeException) { return null; }
+        }
+
         // Helper: convierte una fila DataReader a Socio
         private static Socio MapearSocio(SqlDataReader r)
         {
@@ -37,6 +49,7 @@ namespace Models.Dao
                 ComoNosConocio = r["como_nos_conocio"] as string,
                 Observaciones = r["observaciones"] as string,
                 Activo = Convert.ToBoolean(r["activo"]),
+                HuellaGuid = LeerGuid(r, "huella_guid"),
                 RegistradoPor = r["registrado_por"] != DBNull.Value ? (long?)Convert.ToInt64(r["registrado_por"]) : null,
                 RegistradoPorNombre = r["registrado_por_nombre"] as string,
                 CreadoEn = Convert.ToDateTime(r["creado_en"]),
@@ -294,6 +307,46 @@ namespace Models.Dao
                     return resultado != null ? Convert.ToInt32(resultado) : 0;
                 }
             }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // HUELLAS DIGITALES
+        // ──────────────────────────────────────────────────────
+
+        public void ActualizarHuellaGuid(long socioId, Guid? guid)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_SocioActualizarHuellaGuid", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", socioId);
+                    cmd.Parameters.AddWithValue("@HuellaGuid",
+                        guid.HasValue ? (object)guid.Value : DBNull.Value);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>Retorna (id, dni) del socio con esa huella, o null si no existe.</summary>
+        public (long id, string dni)? ObtenerDniPorHuellaGuid(Guid guid)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_SocioDniPorHuellaGuid", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@HuellaGuid", guid);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                            return (Convert.ToInt64(reader["id"]), reader["dni"].ToString());
+                    }
+                }
+            }
+            return null;
         }
     }
 }

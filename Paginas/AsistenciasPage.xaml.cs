@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Media;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -38,10 +39,15 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private readonly AsistenciaController _controller = new AsistenciaController();
 
         private string _filtroResultado = "todos";
-        private string _dniPendiente = null;   // DNI guardado mientras se elige actividad
+        private string _dniPendiente = null;
         private DispatcherTimer _timerReloj;
         private DispatcherTimer _timerRefresh;
         private DispatcherTimer _timerOcultarResultado;
+
+        // Modo huella
+        private bool _modoHuellaActivo = false;
+        private CancellationTokenSource _huellaIdCts;
+        private Task _huellaIdTask;
 
         public AsistenciasPage()
         {
@@ -53,7 +59,173 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             IniciarReloj();
             IniciarAutoRefresh();
 
-            Loaded += (s, e) => txtDni.Focus();
+            Loaded += (s, e) =>
+            {
+                txtDni.Focus();
+                ConfigurarBtnHuella();
+            };
+
+            Unloaded += (s, e) => DetenerModoHuella();
+        }
+
+        // ─────────────────────────────────────────────────────
+        // BOTÓN MODO HUELLA — configuración inicial
+        // ─────────────────────────────────────────────────────
+        private void ConfigurarBtnHuella()
+        {
+            // Esperar a que el servicio termine de inicializar (puede tardar ~1s)
+            Task.Run(async () =>
+            {
+                // Reintentar hasta 8s que el servicio se inicialice
+                for (int i = 0; i < 16; i++)
+                {
+                    var svc = BiometricManager.Servicio;
+                    if (svc != null) break;
+                    await Task.Delay(500);
+                }
+
+                Dispatcher.Invoke(() =>
+                {
+                    var svc = BiometricManager.Servicio;
+                    if (svc != null && svc.Disponible)
+                    {
+                        btnModoHuella.Visibility = Visibility.Visible;
+                        lblEstadoLector.Visibility = Visibility.Visible;
+                        lblEstadoLector.Text = "Lector de huellas listo";
+                    }
+                    else
+                    {
+                        btnModoHuella.Visibility = Visibility.Collapsed;
+                        lblEstadoLector.Visibility = Visibility.Visible;
+                        lblEstadoLector.Text = svc?.MensajeEstado ?? "Lector no disponible";
+                    }
+                });
+            });
+        }
+
+        // ─────────────────────────────────────────────────────
+        // MODO HUELLA — activar / desactivar
+        // ─────────────────────────────────────────────────────
+        private void btnModoHuella_Click(object sender, RoutedEventArgs e)
+        {
+            if (_modoHuellaActivo)
+                DetenerModoHuella();
+            else
+                ActivarModoHuella();
+        }
+
+        private void ActivarModoHuella()
+        {
+            var svc = BiometricManager.Servicio;
+            if (svc == null || !svc.Disponible)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "El lector de huellas no está disponible.\n" + svc?.MensajeEstado);
+                return;
+            }
+
+            _modoHuellaActivo = true;
+
+            // UI: modo huella ON
+            lblModoHuella.Text    = "DESACTIVAR MODO HUELLA";
+            iconModoHuella.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x55, 0x55));
+            panelEsperando.Visibility     = Visibility.Collapsed;
+            panelResultado.Visibility     = Visibility.Collapsed;
+            panelHuellaEsperando.Visibility = Visibility.Visible;
+            lblHuellaEstado.Text  = "APOYÁ TU DEDO EN EL LECTOR";
+            txtDni.IsEnabled      = false;
+            btnValidar.IsEnabled  = false;
+
+            // Empezar loop de identificación en hilo secundario
+            _huellaIdCts  = new CancellationTokenSource();
+            var token     = _huellaIdCts.Token;
+            _huellaIdTask = Task.Run(() =>
+                svc.IniciarIdentificacion(token, OnHuellaIdentificada));
+        }
+
+        private void DetenerModoHuella()
+        {
+            if (!_modoHuellaActivo) return;
+            _modoHuellaActivo = false;
+
+            _huellaIdCts?.Cancel();
+            BiometricManager.Servicio?.Cancelar();
+
+            // UI: modo huella OFF
+            Dispatcher.Invoke(() =>
+            {
+                lblModoHuella.Text    = "ACTIVAR MODO HUELLA";
+                iconModoHuella.Foreground = (Brush)FindResource("GreenMain");
+                panelHuellaEsperando.Visibility = Visibility.Collapsed;
+                panelEsperando.Visibility       = Visibility.Visible;
+                txtDni.IsEnabled   = true;
+                btnValidar.IsEnabled = true;
+                txtDni.Focus();
+            });
+        }
+
+        private void OnHuellaIdentificada(Guid? guid)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (!_modoHuellaActivo) return;
+
+                if (!guid.HasValue)
+                {
+                    // Huella no reconocida
+                    lblHuellaEstado.Text  = "HUELLA NO RECONOCIDA";
+                    lblHuellaDetalle.Text = "Este dedo no está registrado en el sistema";
+                    iconHuellaEsperando.Foreground =
+                        new SolidColorBrush(Color.FromRgb(0xFF, 0x55, 0x55));
+
+                    ReproducirSonido("acceso_error.wav");
+
+                    // Restaurar después de 2 segundos
+                    var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+                    timer.Tick += (s, e) =>
+                    {
+                        timer.Stop();
+                        if (_modoHuellaActivo)
+                        {
+                            lblHuellaEstado.Text  = "APOYÁ TU DEDO EN EL LECTOR";
+                            lblHuellaDetalle.Text = "Modo huella activo";
+                            iconHuellaEsperando.Foreground =
+                                (Brush)FindResource("GreenMain");
+                        }
+                    };
+                    timer.Start();
+                    return;
+                }
+
+                // Validar acceso por huella
+                try
+                {
+                    var resultado = _controller.ValidarAccesoPorHuella(guid.Value);
+                    panelHuellaEsperando.Visibility = Visibility.Collapsed;
+                    FinalizarValidacion(resultado);
+
+                    // Después de mostrar el resultado, volver al modo huella
+                    var timer = new DispatcherTimer
+                    { Interval = TimeSpan.FromSeconds(5.5) };
+                    timer.Tick += (s, e) =>
+                    {
+                        timer.Stop();
+                        if (_modoHuellaActivo)
+                        {
+                            panelResultado.Visibility       = Visibility.Collapsed;
+                            panelHuellaEsperando.Visibility = Visibility.Visible;
+                            lblHuellaEstado.Text  = "APOYÁ TU DEDO EN EL LECTOR";
+                            lblHuellaDetalle.Text = "Modo huella activo";
+                            iconHuellaEsperando.Foreground = (Brush)FindResource("GreenMain");
+                        }
+                    };
+                    timer.Start();
+                }
+                catch (Exception ex)
+                {
+                    NotificacionWindow.MostrarError("Error al validar huella.\n" + ex.Message);
+                }
+            });
         }
 
         // ─────────────────────────────────────────────────────

@@ -29,6 +29,7 @@ namespace Entities
         public string ComoNosConocio { get; set; }
         public string Observaciones { get; set; }
         public bool Activo { get; set; } = true;
+        public Guid? HuellaGuid { get; set; }
         public long? RegistradoPor { get; set; }
         public string RegistradoPorNombre { get; set; }   // viene del JOIN
         public DateTime CreadoEn { get; set; }
@@ -71,6 +72,9 @@ namespace Entities
 
         /// <summary>Indica si tiene huella registrada (PIN distinto del default).</summary>
         public bool TienePin => !string.IsNullOrEmpty(DniPin) && DniPin.Length == 64;
+
+        /// <summary>Indica si tiene huella dactilar registrada en el lector.</summary>
+        public bool TieneHuella => HuellaGuid.HasValue;
 
         public override string ToString() => NombreCompleto;
     }

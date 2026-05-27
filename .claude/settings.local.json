@@ -19,7 +19,22 @@
       "Bash(curl --max-time 10 -sI -L \"https://api.nuget.org/v3-flatcontainer/bouncycastle/1.8.9/bouncycastle.1.8.9.nupkg\")",
       "Bash('/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe' SistemaGimnacionOptimusCAI.csproj /t:Build /p:Configuration=Debug /v:minimal /m)",
       "Bash(dir C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI *)",
-      "PowerShell(Test-Path *)"
+      "PowerShell(Test-Path *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI\\\\DataBase\" -File | Where-Object { $_.Extension -eq '.sql' } | Select-Object Name)",
+      "Bash(where msbuild *)",
+      "Bash(ls \"/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\")",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe\" SistemaGimnacionOptimusCAI.sln /t:Build /p:Configuration=Debug /nologo /v:minimal)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "PowerShell(Get-Service *)",
+      "PowerShell(& \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI\\\\SistemaGimnacionOptimusCAI.sln\" /t:Build /p:Configuration=Debug /verbosity:minimal 2>&1 | Select-Object -Last 30)",
+      "PowerShell(Start-Service *)",
+      "PowerShell(& \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI\\\\SistemaGimnacionOptimusCAI.sln\" /t:Clean /p:Configuration=Debug /verbosity:minimal 2>&1 | Select-Object -Last 10)",
+      "PowerShell(& \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI\\\\SistemaGimnacionOptimusCAI.sln\" /t:Build /p:Configuration=Debug /verbosity:minimal 2>&1 | Select-Object -Last 15)",
+      "PowerShell([System.Reflection.Assembly]::Load\\(\"System.ServiceProcess, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a\"\\) | Select-Object FullName, Location)",
+      "PowerShell(& \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI\\\\SistemaGimnacionOptimusCAI.sln\" /t:Build /p:Configuration=Debug /verbosity:minimal 2>&1 | Select-Object -Last 10)"
     ]
   }
 }
