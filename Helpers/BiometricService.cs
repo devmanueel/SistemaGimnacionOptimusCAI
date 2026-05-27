@@ -11,6 +11,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.ServiceProcess;
 using System.Threading;
 
 namespace SistemaGimnacionOptimusCAI.Helpers
@@ -38,6 +39,10 @@ namespace SistemaGimnacionOptimusCAI.Helpers
         {
             try
             {
+                // Asegurar que el servicio Windows Biometric esté corriendo
+                if (!AsegurarServicioWbio())
+                    return false;
+
                 // 1. Detectar unidades biométricas
                 _unitIds = EnumerarUnidades();
                 if (_unitIds.Length == 0)
@@ -61,6 +66,44 @@ namespace SistemaGimnacionOptimusCAI.Helpers
             catch (Exception ex)
             {
                 MensajeEstado = "Error al inicializar el lector: " + ex.Message;
+                return false;
+            }
+        }
+
+        // ── Servicio Windows Biometric ──────────────────────────
+
+        private bool AsegurarServicioWbio()
+        {
+            try
+            {
+                using (var sc = new ServiceController("WbioSrvc"))
+                {
+                    if (sc.Status == ServiceControllerStatus.Running)
+                        return true;
+
+                    if (sc.Status == ServiceControllerStatus.Stopped)
+                    {
+                        sc.Start();
+                        sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(10));
+                    }
+
+                    return sc.Status == ServiceControllerStatus.Running;
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                MensajeEstado = "El servicio Windows Biometric Framework no está instalado.";
+                return false;
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                MensajeEstado = "No se pudo iniciar el servicio biométrico.\n" +
+                                "Ejecutá el programa como Administrador o iniciá el servicio manualmente.";
+                return false;
+            }
+            catch (System.TimeoutException)
+            {
+                MensajeEstado = "El servicio biométrico tardó demasiado en iniciar.";
                 return false;
             }
         }

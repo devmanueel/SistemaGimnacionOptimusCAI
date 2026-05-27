@@ -33,15 +33,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private void ActualizarBtnHuella()
         {
             bool tieneHuella = _socio.TieneHuella;
-            bool lectorDisponible = BiometricManager.Servicio?.Disponible == true;
+            var servicio = BiometricManager.Servicio;
+            bool lectorDisponible = servicio?.Disponible == true;
 
             if (!lectorDisponible)
             {
                 btnHuella.IsEnabled = false;
-                btnHuella.ToolTip = "Lector de huellas no detectado";
+                string motivo = servicio?.MensajeEstado ?? "Servicio biométrico no inicializado";
+                btnHuella.ToolTip = motivo;
+                lblBtnHuella.Text = "HUELLA (NO DISPONIBLE)";
                 return;
             }
 
+            btnHuella.IsEnabled = true;
             lblBtnHuella.Text = tieneHuella ? "ACTUALIZAR HUELLA" : "REGISTRAR HUELLA";
             iconBtnHuella.Foreground = tieneHuella
                 ? new SolidColorBrush(Color.FromRgb(0x4A, 0xDE, 0x80))
