@@ -22,8 +22,6 @@
             <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
             <helpers:InicialesConverter x:Key="InicialesConverter"/>
 
-            <Visibility x:Key="FiltrosAvanzadosVisibility">Collapsed</Visibility>
-
             <Style x:Key="InputErrorEstilo" TargetType="TextBox" BasedOn="{StaticResource InputEstilo}">
                 <Setter Property="Background"      Value="#1E0A0A"/>
                 <Setter Property="BorderBrush"     Value="{StaticResource ColorError}"/>
@@ -313,19 +311,6 @@
                 </StackPanel>
             </Button>
 
-            <!-- Botón para activar/desactivar filtros avanzados -->
-            <Button x:Name="btnToggleFiltros"
-                    Style="{StaticResource BotonChipEstilo}"
-                    Click="btnToggleFiltros_Click"
-                    Margin="20,0,0,0"
-                    Height="30">
-                <StackPanel Orientation="Horizontal">
-                    <fa:ImageAwesome Icon="Filter" Height="12" Foreground="{StaticResource TextMuted}"
-                                     VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <TextBlock Text="Filtros avanzados" Foreground="{StaticResource TextMuted}"/>
-                </StackPanel>
-            </Button>
-
         </StackPanel>
 
         <!-- ══════════════════════════════════════════════════
@@ -336,131 +321,154 @@
                 BorderBrush="{StaticResource Border1}" 
                 BorderThickness="0.5"
                 CornerRadius="10"
-                Margin="16,8,16,0"
-                Padding="12,10"
-                Visibility="Collapsed">
-            <StackPanel Orientation="Vertical">
-                <!-- Fila de controles -->
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <fa:ImageAwesome Icon="Filter" Height="12" Foreground="{StaticResource GreenMain}"
-                                     VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock Text="FILTRO:" Foreground="{StaticResource TextMuted}" FontSize="11"
-                               FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    
-                    <ComboBox x:Name="cmbFiltroAvanzado" Width="180" Height="32" Margin="12, 0, 0, 0"
-                              Style="{StaticResource ComboBoxEstilo}"
-                              VerticalAlignment="Center"
-                              SelectionChanged="cmbFiltroAvanzado_SelectionChanged">
-                        <ComboBoxItem Content="Todos"              Tag="todos" IsSelected="True"/>
-                        <ComboBoxItem Content="Actividad"          Tag="actividad"/>
-                        <ComboBoxItem Content="Cuota vencida"      Tag="vencimiento"/>
-                        <ComboBoxItem Content="Profesor"           Tag="instructor"/>
-                        <ComboBoxItem Content="Sexo"               Tag="sexo"/>
-                        <ComboBoxItem Content="Dejaron de venir"   Tag="inactividad"/>
-                    </ComboBox>
+                Margin="16,12,16,0"
+                Padding="12,26"
+                Visibility="Visible">
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-                    <!-- Filtro: Actividad -->
-                    <ComboBox x:Name="cmbFiltroActividad" Width="220" Height="32"
-                              Style="{StaticResource ComboBoxEstilo}"
-                              SelectedValuePath="Id"
-                              Margin="12,0,0,0" Visibility="Collapsed"
-                              VerticalAlignment="Center"
-                              SelectionChanged="AplicarFiltroAvanzado">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Nombre}"/>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                <!-- Columna 0: Filtros -->
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <fa:ImageAwesome Icon="Filter" Height="12" Foreground="{StaticResource GreenMain}"
+                                         VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="FILTRO:" Foreground="{StaticResource TextMuted}" FontSize="11"
+                                   FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
 
-                    <!-- Filtro: Cuota vencida -->
-                    <StackPanel x:Name="filtroVencimiento" Orientation="Horizontal" Visibility="Collapsed" 
-                                Margin="12,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="Desde:" Foreground="{StaticResource TextMuted}" FontSize="12"
-                                   VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <DatePicker x:Name="dpFiltroDesde" Style="{StaticResource DatePickerEstilo}"
-                                    Width="120" Height="32" Margin="0,0,8,0"
-                                    VerticalAlignment="Center"
-                                    SelectedDateChanged="AplicarFiltroAvanzado"/>
-                        <TextBlock Text="Hasta:" Foreground="{StaticResource TextMuted}" FontSize="12"
-                                   VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <DatePicker x:Name="dpFiltroHasta" Style="{StaticResource DatePickerEstilo}"
-                                    Width="120" Height="32"
-                                    VerticalAlignment="Center"
-                                    SelectedDateChanged="AplicarFiltroAvanzado"/>
+                        <ComboBox x:Name="cmbFiltroAvanzado" Width="180" Height="32" Margin="12, 0, 0, 0"
+                                  Style="{StaticResource ComboBoxEstilo}"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="cmbFiltroAvanzado_SelectionChanged">
+                            <ComboBoxItem Content="Todos"              Tag="todos" IsSelected="True"/>
+                            <ComboBoxItem Content="Actividad"          Tag="actividad"/>
+                            <ComboBoxItem Content="Cuota vencida"      Tag="vencimiento"/>
+                            <ComboBoxItem Content="Profesor"           Tag="instructor"/>
+                            <ComboBoxItem Content="Sexo"               Tag="sexo"/>
+                            <ComboBoxItem Content="Dejaron de venir"   Tag="inactividad"/>
+                        </ComboBox>
+
+                        <!-- Filtro: Actividad -->
+                        <ComboBox x:Name="cmbFiltroActividad" Width="220" Height="32"
+                                  Style="{StaticResource ComboBoxEstilo}"
+                                  SelectedValuePath="Id"
+                                  Margin="12,0,0,0" Visibility="Collapsed"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="AplicarFiltroAvanzado">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Nombre}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <!-- Filtro: Cuota vencida -->
+                        <StackPanel x:Name="filtroVencimiento" Orientation="Horizontal" Visibility="Collapsed"
+                                    Margin="12,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Desde:" Foreground="{StaticResource TextMuted}" FontSize="12"
+                                       VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <DatePicker x:Name="dpFiltroDesde" Style="{StaticResource DatePickerEstilo}"
+                                        Width="120" Height="32" Margin="0,0,8,0"
+                                        VerticalAlignment="Center"
+                                        SelectedDateChanged="AplicarFiltroAvanzado"/>
+                            <TextBlock Text="Hasta:" Foreground="{StaticResource TextMuted}" FontSize="12"
+                                       VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <DatePicker x:Name="dpFiltroHasta" Style="{StaticResource DatePickerEstilo}"
+                                        Width="120" Height="32"
+                                        VerticalAlignment="Center"
+                                        SelectedDateChanged="AplicarFiltroAvanzado"/>
+                        </StackPanel>
+
+                        <!-- Filtro: Profesor -->
+                        <ComboBox x:Name="cmbFiltroInstructor" Width="200" Height="32"
+                                  Style="{StaticResource ComboBoxEstilo}"
+                                  SelectedValuePath="Id"
+                                  Margin="12,0,0,0" Visibility="Collapsed"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="AplicarFiltroAvanzado">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding NombreCompleto}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <!-- Filtro: Sexo -->
+                        <ComboBox x:Name="cmbFiltroSexo" Width="140" Height="32"
+                                  Style="{StaticResource ComboBoxEstilo}"
+                                  Margin="12,0,0,0" Visibility="Collapsed"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="AplicarFiltroAvanzado">
+                            <ComboBoxItem Content="Todos"    Tag="" IsSelected="True"/>
+                            <ComboBoxItem Content="Masculino" Tag="M"/>
+                            <ComboBoxItem Content="Femenino"  Tag="F"/>
+                            <ComboBoxItem Content="Otro"      Tag="Otro"/>
+                        </ComboBox>
+
+                        <!-- Filtro: Dejaron de venir -->
+                        <ComboBox x:Name="cmbFiltroDias" Width="150" Height="32"
+                                  Style="{StaticResource ComboBoxEstilo}"
+                                  Margin="12,0,0,0" Visibility="Collapsed"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="AplicarFiltroAvanzado">
+                            <ComboBoxItem Content="Seleccionar..." Tag="" IsSelected="True"/>
+                            <ComboBoxItem Content="7 días"         Tag="7"/>
+                            <ComboBoxItem Content="15 días"        Tag="15"/>
+                            <ComboBoxItem Content="30 días"        Tag="30"/>
+                            <ComboBoxItem Content="60 días"        Tag="60"/>
+                            <ComboBoxItem Content="90 días"        Tag="90"/>
+                        </ComboBox>
+
+                        <!-- Botón Filtrar -->
+                        <Button x:Name="btnFiltrar"
+                                Content="Filtrar"
+                                Width="80" Height="32"
+                                Margin="16,0,0,0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource BotonNuevoSocioStyle}"
+                                Click="btnFiltrar_Click"/>
+
+                        <!-- Botón Limpiar -->
+                        <Button x:Name="btnLimpiarFiltros"
+                                Content="Limpiar"
+                                Width="80" Height="32"
+                                Margin="8,0,0,0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource BotonChipEstilo}"
+                                Click="btnLimpiarFiltros_Click"/>
                     </StackPanel>
 
-                    <!-- Filtro: Profesor -->
-                    <ComboBox x:Name="cmbFiltroInstructor" Width="200" Height="32"
-                              Style="{StaticResource ComboBoxEstilo}"
-                              SelectedValuePath="Id"
-                              Margin="12,0,0,0" Visibility="Collapsed"
-                              VerticalAlignment="Center"
-                              SelectionChanged="AplicarFiltroAvanzado">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding NombreCompleto}"/>
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-
-                    <!-- Filtro: Sexo -->
-                    <ComboBox x:Name="cmbFiltroSexo" Width="140" Height="32"
-                              Style="{StaticResource ComboBoxEstilo}"
-                              Margin="12,0,0,0" Visibility="Collapsed"
-                              VerticalAlignment="Center"
-                              SelectionChanged="AplicarFiltroAvanzado">
-                        <ComboBoxItem Content="Todos"    Tag="" IsSelected="True"/>
-                        <ComboBoxItem Content="Masculino" Tag="M"/>
-                        <ComboBoxItem Content="Femenino"  Tag="F"/>
-                        <ComboBoxItem Content="Otro"      Tag="Otro"/>
-                    </ComboBox>
-
-                    <!-- Filtro: Dejaron de venir -->
-                    <ComboBox x:Name="cmbFiltroDias" Width="150" Height="32"
-                              Style="{StaticResource ComboBoxEstilo}"
-                              Margin="12,0,0,0" Visibility="Collapsed"
-                              VerticalAlignment="Center"
-                              SelectionChanged="AplicarFiltroAvanzado">
-                        <ComboBoxItem Content="Seleccionar..." Tag="" IsSelected="True"/>
-                        <ComboBoxItem Content="7 días"         Tag="7"/>
-                        <ComboBoxItem Content="15 días"        Tag="15"/>
-                        <ComboBoxItem Content="30 días"        Tag="30"/>
-                        <ComboBoxItem Content="60 días"        Tag="60"/>
-                        <ComboBoxItem Content="90 días"        Tag="90"/>
-                    </ComboBox>
-
-                    <!-- Botón Filtrar -->
-                    <Button x:Name="btnFiltrar"
-                            Content="Filtrar"
-                            Width="80" Height="32"
-                            Margin="16,0,0,0"
-                            VerticalAlignment="Center"
-                            Style="{StaticResource BotonNuevoSocioStyle}"
-                            Click="btnFiltrar_Click"/>
-
-                    <!-- Botón Limpiar -->
-                    <Button x:Name="btnLimpiarFiltros"
-                            Content="Limpiar"
-                            Width="80" Height="32"
-                            Margin="8,0,0,0"
-                            VerticalAlignment="Center"
-                            Style="{StaticResource BotonChipEstilo}"
-                            Click="btnLimpiarFiltros_Click"/>
+                    <!-- Resumen de filtros activos -->
+                    <StackPanel x:Name="panelResumenFiltros" Orientation="Vertical">
+                        <TextBlock x:Name="lblFiltrosActivos"
+                                   Foreground="{StaticResource GreenMain}"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Margin="0,12"/>
+                        <TextBlock x:Name="lblCantidadSocios"
+                                   Foreground="{StaticResource TextMuted}"
+                                   FontSize="12" Margin="0,4"
+                                   VerticalAlignment="Center" FontWeight="Bold"/>
+                    </StackPanel>
                 </StackPanel>
 
-                <!-- Resumen de filtros activos -->
-                <StackPanel x:Name="panelResumenFiltros" Orientation="Vertical">
-                    <TextBlock x:Name="lblFiltrosActivos" 
-                               Foreground="{StaticResource GreenMain}" 
-                               FontSize="12" FontWeight="SemiBold"
-                               VerticalAlignment="Center" Margin="0,12"/>
-                    <TextBlock x:Name="lblCantidadSocios" 
-                               Foreground="{StaticResource TextMuted}" 
-                               FontSize="12" Margin="0,4"
-                               VerticalAlignment="Center" FontWeight="Bold"/>
+                <!-- Columna 1: Ordenar por -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                            VerticalAlignment="Center" Margin="20,0,0,0">
+                    <TextBlock Text="ORDENAR POR:" Foreground="{StaticResource TextMuted}" FontSize="11"
+                               FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,15"/>
+                    <ComboBox x:Name="cmbOrdenarPor" Width="200" Height="32"
+                              Style="{StaticResource ComboBoxEstilo}"
+                              VerticalAlignment="Center"
+                              SelectionChanged="cmbOrdenarPor_SelectionChanged">
+                        <ComboBoxItem Content="Nombre A - Z"            Tag="nombre_asc" IsSelected="True"/>
+                        <ComboBoxItem Content="Nombre Z - A"            Tag="nombre_desc"/>
+                        <ComboBoxItem Content="Vencimiento más actual"  Tag="vencimiento_desc"/>
+                        <ComboBoxItem Content="Vencimiento más antiguo" Tag="vencimiento_asc"/>
+                    </ComboBox>
                 </StackPanel>
-            </StackPanel>
+            </Grid>
         </Border>
 
         <!-- ══════════════════════════════════════════════════

@@ -18,6 +18,7 @@ using SistemaGimnacionOptimusCAI.Ventanas;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -43,7 +44,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private string _filtroEstado = "todos";
         private string _filtroAvanzado = "todos";
         private string _tabActivo = "datos";
-        private Visibility _filtrosVisibilidad = Visibility.Collapsed;
         private List<DataGridColumn> _columnasDinamicas = new List<DataGridColumn>();
 
         // Filtros avanzados (se aplican solo al presionar "Filtrar")
@@ -52,6 +52,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private long?  _filtroInstructorId = null;
         private string _filtroSexo         = null;
         private int?   _filtroDejaronVenir = null;
+
+        // Ordenamiento
+        private string _ordenamiento = "nombre_asc";
 
         // Edición de membresía
         private long _membresiaIdEditar = 0;
@@ -62,7 +65,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         public SociosPage()
         {
             InitializeComponent();
-            panelFiltrosAvanzados.Visibility = Visibility.Collapsed;
             ActualizarStats();
             CargarInstructores();
             CargarCombosMembresia();
@@ -127,6 +129,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     gridSocios.ItemsSource = listaFiltrada;
 
                 ActualizarResumenFiltros(listaFiltrada);
+                AplicarOrdenamiento();
             }
             catch (Exception ex)
             {
@@ -270,16 +273,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarSocios();
         }
 
-        private void btnToggleFiltros_Click(object sender, RoutedEventArgs e)
-        {
-            _filtrosVisibilidad = _filtrosVisibilidad == Visibility.Visible
-                ? Visibility.Collapsed
-                : Visibility.Visible;
-            if (panelFiltrosAvanzados != null)
-                panelFiltrosAvanzados.Visibility = _filtrosVisibilidad;
-            CargarSocios();
-        }
-
         private void cmbFiltroAvanzado_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Ocultar todos los controles secundarios
@@ -376,11 +369,65 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             cmbFiltroSexo.Visibility       = Visibility.Collapsed;
             cmbFiltroDias.Visibility       = Visibility.Collapsed;
 
+            // Resetear ordenamiento
+            _ordenamiento = "nombre_asc";
+            if (cmbOrdenarPor != null) cmbOrdenarPor.SelectedIndex = 0;
+
             CargarSocios();
         }
 
         private void AplicarFiltroAvanzado(object sender, SelectionChangedEventArgs e) { }
         private void AplicarFiltroAvanzado(object sender, RoutedEventArgs e) { }
+
+        private void cmbOrdenarPor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbOrdenarPor == null) return;
+
+            var item = cmbOrdenarPor.SelectedItem as ComboBoxItem;
+            if (item != null && item.Tag != null)
+                _ordenamiento = item.Tag.ToString();
+
+            AplicarOrdenamiento();
+        }
+
+        private void AplicarOrdenamiento()
+        {
+            var lista = gridSocios?.ItemsSource as List<SocioConMembresia>;
+            if (lista == null || lista.Count == 0) return;
+
+            List<SocioConMembresia> ordenada;
+
+            switch (_ordenamiento)
+            {
+                case "nombre_desc":
+                    ordenada = new List<SocioConMembresia>(
+                        ((List<SocioConMembresia>)gridSocios.ItemsSource)
+                            .OrderByDescending(x => x.NombreCompleto));
+                    break;
+
+                case "vencimiento_desc":
+                    ordenada = new List<SocioConMembresia>(
+                        ((List<SocioConMembresia>)gridSocios.ItemsSource)
+                            .OrderByDescending(x => x.FechaVencimiento.HasValue)
+                            .ThenByDescending(x => x.FechaVencimiento));
+                    break;
+
+                case "vencimiento_asc":
+                    ordenada = new List<SocioConMembresia>(
+                        ((List<SocioConMembresia>)gridSocios.ItemsSource)
+                            .OrderBy(x => x.FechaVencimiento.HasValue)
+                            .ThenBy(x => x.FechaVencimiento));
+                    break;
+
+                default: // nombre_asc
+                    ordenada = new List<SocioConMembresia>(
+                        ((List<SocioConMembresia>)gridSocios.ItemsSource)
+                            .OrderBy(x => x.NombreCompleto));
+                    break;
+            }
+
+            gridSocios.ItemsSource = ordenada;
+        }
 
         private void ConfigurarColumnasGrid()
         {
