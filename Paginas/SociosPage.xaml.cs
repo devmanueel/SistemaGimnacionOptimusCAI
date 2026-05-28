@@ -429,6 +429,51 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             gridSocios.ItemsSource = ordenada;
         }
 
+        // ─────────────────────────────────────────────────────
+        // EXPORTAR / IMPRIMIR
+        // ─────────────────────────────────────────────────────
+        private void btnExportarPdf_Click(object sender, RoutedEventArgs e)
+        {
+            var socios = gridSocios?.ItemsSource as List<SocioConMembresia>;
+            if (socios == null || socios.Count == 0)
+            {
+                NotificacionWindow.MostrarAdvertencia("No hay socios para exportar.", "Sin datos");
+                return;
+            }
+
+            try
+            {
+                var exp = new Helpers.ReportePdfExportador();
+                string path = exp.ExportarSocios(socios);
+                System.Diagnostics.Process.Start(path);
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError("No se pudo exportar a PDF.\n" + ex.Message, "Error");
+            }
+        }
+
+        private void btnExportarExcel_Click(object sender, RoutedEventArgs e)
+        {
+            var socios = gridSocios?.ItemsSource as List<SocioConMembresia>;
+            if (socios == null || socios.Count == 0)
+            {
+                NotificacionWindow.MostrarAdvertencia("No hay socios para exportar.", "Sin datos");
+                return;
+            }
+
+            try
+            {
+                var exp = new Helpers.ReporteExcelExportador();
+                string path = exp.ExportarSocios(socios);
+                System.Diagnostics.Process.Start(path);
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError("No se pudo exportar a Excel.\n" + ex.Message, "Error");
+            }
+        }
+
         private void ConfigurarColumnasGrid()
         {
             if (gridSocios == null) return;

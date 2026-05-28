@@ -321,8 +321,8 @@
                 BorderBrush="{StaticResource Border1}" 
                 BorderThickness="0.5"
                 CornerRadius="10"
-                Margin="16,12,16,0"
-                Padding="12,26"
+                Margin="16,12,16,4"
+                Padding="12,16"
                 Visibility="Visible">
             <Grid VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
@@ -445,7 +445,7 @@
                         <TextBlock x:Name="lblFiltrosActivos"
                                    Foreground="{StaticResource GreenMain}"
                                    FontSize="12" FontWeight="SemiBold"
-                                   VerticalAlignment="Center" Margin="0,12"/>
+                                   VerticalAlignment="Center" Margin="0,8,0,0"/>
                         <TextBlock x:Name="lblCantidadSocios"
                                    Foreground="{StaticResource TextMuted}"
                                    FontSize="12" Margin="0,4"
@@ -467,6 +467,31 @@
                         <ComboBoxItem Content="Vencimiento más actual"  Tag="vencimiento_desc"/>
                         <ComboBoxItem Content="Vencimiento más antiguo" Tag="vencimiento_asc"/>
                     </ComboBox>
+
+                    <!-- Botón Exportar PDF directo -->
+                    <Button x:Name="btnExportar" Height="32" Margin="10,0,0,15"
+                            VerticalAlignment="Center" ToolTip="Exportar lista de socios a PDF"
+                            Cursor="Hand" Click="btnExportarPdf_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="border" Background="#00CFFF" CornerRadius="6"
+                                        Padding="12,0">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="border" Property="Background" Value="#00B8E0"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <fa:ImageAwesome Icon="FileTextOutline" Height="14" Foreground="White"
+                                             VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="Exportar" Foreground="White" FontSize="11"
+                                       FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
