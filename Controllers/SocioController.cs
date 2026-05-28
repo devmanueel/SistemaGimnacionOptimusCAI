@@ -35,6 +35,28 @@ namespace Controllers
             catch (Exception ex) { throw new Exception("Error en la búsqueda.\n" + ex.Message); }
         }
 
+        public List<SocioConMembresia> ListarSociosConMembresias(
+            string texto              = "",
+            string filtroEstado       = "todos",
+            long?  filtroActividadId  = null,
+            bool?  filtroCuotaVencida = null,
+            long?  filtroInstructorId = null,
+            string filtroSexo         = null,
+            int?   filtroDejaronVenir = null)
+        {
+            try
+            {
+                return _dao.ListarSociosConMembresias(
+                    texto, filtroEstado, filtroActividadId,
+                    filtroCuotaVencida, filtroInstructorId,
+                    filtroSexo, filtroDejaronVenir);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al listar socios.\n" + ex.Message);
+            }
+        }
+
         public Socio ObtenerPorId(long id)
         {
             try { return _dao.ObtenerSocioPorId(id); }

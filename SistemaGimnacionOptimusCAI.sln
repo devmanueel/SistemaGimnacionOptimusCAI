@@ -39,5 +39,6 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EBBCDB8A-C420-40B9-A072-9DD2CC97CA41}
+		StartupItem = SistemaGimnacionOptimusCAI.csproj
 	EndGlobalSection
 EndGlobal

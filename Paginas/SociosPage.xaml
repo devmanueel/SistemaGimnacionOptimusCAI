@@ -103,10 +103,11 @@
         </Grid.RenderTransform>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>   <!-- Header -->
+            <RowDefinition Height="Auto"/>   <!-- Stats -->
+            <RowDefinition Height="Auto"/>   <!-- Chips -->
+            <RowDefinition Height="Auto"/>   <!-- Filtros avanzados -->
+            <RowDefinition Height="*"/>       <!-- Contenido tabla -->
         </Grid.RowDefinitions>
 
         <!-- ══════════════════════════════════════════════════
@@ -313,9 +314,192 @@
         </StackPanel>
 
         <!-- ══════════════════════════════════════════════════
+             FILTROS AVANZADOS
+        ══════════════════════════════════════════════════ -->
+        <Border x:Name="panelFiltrosAvanzados" Grid.Row="3" 
+                Background="{StaticResource Bg1}" 
+                BorderBrush="{StaticResource Border1}" 
+                BorderThickness="0.5"
+                CornerRadius="10"
+                Margin="16,12,16,4"
+                Padding="12,16"
+                Visibility="Visible">
+            <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Columna 0: Filtros -->
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <fa:ImageAwesome Icon="Filter" Height="12" Foreground="{StaticResource GreenMain}"
+                                         VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="FILTRO:" Foreground="{StaticResource TextMuted}" FontSize="11"
+                                   FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                        <ComboBox x:Name="cmbFiltroAvanzado" Width="180" Height="32" Margin="12, 0, 0, 0"
+                                  Style="{StaticResource ComboBoxEstilo}"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="cmbFiltroAvanzado_SelectionChanged">
+                            <ComboBoxItem Content="Todos"              Tag="todos" IsSelected="True"/>
+                            <ComboBoxItem Content="Actividad"          Tag="actividad"/>
+                            <ComboBoxItem Content="Cuota vencida"      Tag="vencimiento"/>
+                            <ComboBoxItem Content="Profesor"           Tag="instructor"/>
+                            <ComboBoxItem Content="Sexo"               Tag="sexo"/>
+                            <ComboBoxItem Content="Dejaron de venir"   Tag="inactividad"/>
+                        </ComboBox>
+
+                        <!-- Filtro: Actividad -->
+                        <ComboBox x:Name="cmbFiltroActividad" Width="220" Height="32"
+                                  Style="{StaticResource ComboBoxEstilo}"
+                                  SelectedValuePath="Id"
+                                  Margin="12,0,0,0" Visibility="Collapsed"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="AplicarFiltroAvanzado">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Nombre}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <!-- Filtro: Cuota vencida -->
+                        <StackPanel x:Name="filtroVencimiento" Orientation="Horizontal" Visibility="Collapsed"
+                                    Margin="12,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Desde:" Foreground="{StaticResource TextMuted}" FontSize="12"
+                                       VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <DatePicker x:Name="dpFiltroDesde" Style="{StaticResource DatePickerEstilo}"
+                                        Width="120" Height="32" Margin="0,0,8,0"
+                                        VerticalAlignment="Center"
+                                        SelectedDateChanged="AplicarFiltroAvanzado"/>
+                            <TextBlock Text="Hasta:" Foreground="{StaticResource TextMuted}" FontSize="12"
+                                       VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <DatePicker x:Name="dpFiltroHasta" Style="{StaticResource DatePickerEstilo}"
+                                        Width="120" Height="32"
+                                        VerticalAlignment="Center"
+                                        SelectedDateChanged="AplicarFiltroAvanzado"/>
+                        </StackPanel>
+
+                        <!-- Filtro: Profesor -->
+                        <ComboBox x:Name="cmbFiltroInstructor" Width="200" Height="32"
+                                  Style="{StaticResource ComboBoxEstilo}"
+                                  SelectedValuePath="Id"
+                                  Margin="12,0,0,0" Visibility="Collapsed"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="AplicarFiltroAvanzado">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding NombreCompleto}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <!-- Filtro: Sexo -->
+                        <ComboBox x:Name="cmbFiltroSexo" Width="140" Height="32"
+                                  Style="{StaticResource ComboBoxEstilo}"
+                                  Margin="12,0,0,0" Visibility="Collapsed"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="AplicarFiltroAvanzado">
+                            <ComboBoxItem Content="Todos"    Tag="" IsSelected="True"/>
+                            <ComboBoxItem Content="Masculino" Tag="M"/>
+                            <ComboBoxItem Content="Femenino"  Tag="F"/>
+                            <ComboBoxItem Content="Otro"      Tag="Otro"/>
+                        </ComboBox>
+
+                        <!-- Filtro: Dejaron de venir -->
+                        <ComboBox x:Name="cmbFiltroDias" Width="150" Height="32"
+                                  Style="{StaticResource ComboBoxEstilo}"
+                                  Margin="12,0,0,0" Visibility="Collapsed"
+                                  VerticalAlignment="Center"
+                                  SelectionChanged="AplicarFiltroAvanzado">
+                            <ComboBoxItem Content="Seleccionar..." Tag="" IsSelected="True"/>
+                            <ComboBoxItem Content="7 días"         Tag="7"/>
+                            <ComboBoxItem Content="15 días"        Tag="15"/>
+                            <ComboBoxItem Content="30 días"        Tag="30"/>
+                            <ComboBoxItem Content="60 días"        Tag="60"/>
+                            <ComboBoxItem Content="90 días"        Tag="90"/>
+                        </ComboBox>
+
+                        <!-- Botón Filtrar -->
+                        <Button x:Name="btnFiltrar"
+                                Content="Filtrar"
+                                Width="80" Height="32"
+                                Margin="16,0,0,0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource BotonNuevoSocioStyle}"
+                                Click="btnFiltrar_Click"/>
+
+                        <!-- Botón Limpiar -->
+                        <Button x:Name="btnLimpiarFiltros"
+                                Content="Limpiar"
+                                Width="80" Height="32"
+                                Margin="8,0,0,0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource BotonChipEstilo}"
+                                Click="btnLimpiarFiltros_Click"/>
+                    </StackPanel>
+
+                    <!-- Resumen de filtros activos -->
+                    <StackPanel x:Name="panelResumenFiltros" Orientation="Vertical">
+                        <TextBlock x:Name="lblFiltrosActivos"
+                                   Foreground="{StaticResource GreenMain}"
+                                   FontSize="12" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Margin="0,8,0,0"/>
+                        <TextBlock x:Name="lblCantidadSocios"
+                                   Foreground="{StaticResource TextMuted}"
+                                   FontSize="12" Margin="0,4"
+                                   VerticalAlignment="Center" FontWeight="Bold"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Columna 1: Ordenar por -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                            VerticalAlignment="Center" Margin="20,0,0,0">
+                    <TextBlock Text="ORDENAR POR:" Foreground="{StaticResource TextMuted}" FontSize="11"
+                               FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,15"/>
+                    <ComboBox x:Name="cmbOrdenarPor" Width="200" Height="32"
+                              Style="{StaticResource ComboBoxEstilo}"
+                              VerticalAlignment="Center"
+                              SelectionChanged="cmbOrdenarPor_SelectionChanged">
+                        <ComboBoxItem Content="Nombre A - Z"            Tag="nombre_asc" IsSelected="True"/>
+                        <ComboBoxItem Content="Nombre Z - A"            Tag="nombre_desc"/>
+                        <ComboBoxItem Content="Vencimiento más actual"  Tag="vencimiento_desc"/>
+                        <ComboBoxItem Content="Vencimiento más antiguo" Tag="vencimiento_asc"/>
+                    </ComboBox>
+
+                    <!-- Botón Exportar PDF directo -->
+                    <Button x:Name="btnExportar" Height="32" Margin="10,0,0,15"
+                            VerticalAlignment="Center" ToolTip="Exportar lista de socios a PDF"
+                            Cursor="Hand" Click="btnExportarPdf_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="border" Background="#00CFFF" CornerRadius="6"
+                                        Padding="12,0">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="border" Property="Background" Value="#00B8E0"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <fa:ImageAwesome Icon="FileTextOutline" Height="14" Foreground="White"
+                                             VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="Exportar" Foreground="White" FontSize="11"
+                                       FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ══════════════════════════════════════════════════
              CONTENIDO: Tabla + Panel formulario lateral
         ══════════════════════════════════════════════════ -->
-        <Grid Grid.Row="3" Margin="16,14,16,16">
+        <Grid Grid.Row="4" Margin="16,10,16,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -418,6 +602,22 @@
                             <!-- Teléfono -->
                             <DataGridTextColumn Header="TELÉFONO" Binding="{Binding Telefono}" Width="1.1*"/>
 
+                            <!-- Actividad badge -->
+                            <DataGridTemplateColumn Header="ACTIVIDAD" Width="1.5*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border HorizontalAlignment="Left" Style="{StaticResource TipoBadgeStyle}">
+                                            <TextBlock Text="{Binding ActividadNombre}" FontSize="12"
+                                                       FontWeight="SemiBold" Foreground="{StaticResource GreenMain}"
+                                                       TextWrapping="Wrap"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Vencimiento -->
+                            <DataGridTextColumn Header="VENCE" Binding="{Binding FechaVencimientoTexto}" Width="100"/>
+
                             <!-- Estado -->
                             <DataGridTemplateColumn Header="ESTADO" Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -430,7 +630,7 @@
                                                     <Style TargetType="Ellipse">
                                                         <Setter Property="Fill" Value="{StaticResource TextMuted}"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Activo}" Value="True">
+                                                            <DataTrigger Binding="{Binding MembresiaEstado}" Value="activa">
                                                                 <Setter Property="Fill" Value="{StaticResource GreenMain}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
@@ -443,7 +643,7 @@
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Activo}" Value="True">
+                                                            <DataTrigger Binding="{Binding MembresiaEstado}" Value="activa">
                                                                 <Setter Property="Foreground" Value="{StaticResource GreenMain}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
@@ -746,6 +946,192 @@
                         <Button x:Name="btnGuardar" Grid.Column="1" Content="GUARDAR"
                                 Style="{StaticResource BotonPrincipalEstilo}"
                                 Margin="8,0,0,0" Click="btnGuardar_Click"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- ══════════════════════════════════════════════
+                 PANEL FORMULARIO MEMBRESÍA (edición)
+            ══════════════════════════════════════════════ -->
+            <Border x:Name="panelFormularioMembresia" Grid.Column="1" Width="400"
+                    Background="{StaticResource Bg1}"
+                    CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}"
+                    BorderThickness="0.5"
+                    Visibility="Collapsed"
+                    ClipToBounds="True">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="{StaticResource GreenMid}"
+                            CornerRadius="12,12,0,0"/>
+
+                    <!-- Header -->
+                    <StackPanel Grid.Row="1" Margin="22,18,22,0">
+                        <TextBlock x:Name="lblTituloFormularioMembresia" Text="EDITAR MEMBRESÍA"
+                                   FontSize="15" FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="2"
+                                  Style="{StaticResource PanelScrollViewerStyle}"
+                                  Padding="0,0,15,0"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Margin="22,14,22,0">
+                        <StackPanel>
+
+                            <!-- SOCIO (solo lectura) -->
+                            <TextBlock Text="SOCIO" Style="{StaticResource LabelCampoEstilo}"/>
+                            <ComboBox x:Name="cmbMembresiaSocio"
+                                      Style="{StaticResource ComboBoxEstilo}"
+                                      IsEnabled="False">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding NombreCompleto}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <!-- ACTIVIDAD -->
+                            <TextBlock Text="ACTIVIDAD *" Style="{StaticResource LabelCampoEstilo}"/>
+                            <ComboBox x:Name="cmbMembresiaActividad"
+                                      Style="{StaticResource ComboBoxEstilo}"
+                                      SelectionChanged="cmbMembresiaActividad_SelectionChanged">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Nombre}" FontSize="13"/>
+                                            <TextBlock Text=" — $" FontSize="13"
+                                                       Foreground="{StaticResource TextMuted}"/>
+                                            <TextBlock Text="{Binding Precio, StringFormat=N0}" FontSize="13"
+                                                       Foreground="{StaticResource TextMuted}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <!-- INSTRUCTOR -->
+                            <TextBlock Text="INSTRUCTOR (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
+                            <ComboBox x:Name="cmbMembresiaInstructor"
+                                      Style="{StaticResource ComboBoxEstilo}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding NombreCompleto}"/>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <!-- FECHAS -->
+                            <Grid Margin="0,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="12"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="INICIO" Style="{StaticResource LabelCampoEstilo}"/>
+                                    <DatePicker x:Name="dpMembresiaInicio"
+                                                Style="{StaticResource DatePickerEstilo}"
+                                                IsEnabled="False"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="VENCIMIENTO" Style="{StaticResource LabelCampoEstilo}"/>
+                                    <DatePicker x:Name="dpMembresiaVencimiento"
+                                                Style="{StaticResource DatePickerEstilo}"
+                                                IsEnabled="False"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- MONTO -->
+                            <TextBlock Text="MONTO PAGADO * ($)" Style="{StaticResource LabelCampoEstilo}"/>
+                            <TextBox x:Name="txtMembresiaMonto"
+                                     Style="{StaticResource InputEstilo}"
+                                     PreviewTextInput="txtMembresiaMonto_PreviewTextInput"
+                                     LostFocus="txtMembresiaMonto_LostFocus"/>
+                            <TextBlock x:Name="errMembresiaMonto"
+                                       Style="{StaticResource LabelErrorEstilo}"/>
+
+                            <!-- PANEL UPGRADE — solo visible al cambiar actividad a plan superior -->
+                            <Border x:Name="panelUpgrade" Background="#0A1F0A" CornerRadius="8"
+                                    BorderBrush="{StaticResource GreenDim}" BorderThickness="1"
+                                    Padding="12,10" Margin="0,0,0,14" Visibility="Collapsed">
+                                <StackPanel>
+                                    <TextBlock Text="UPGRADE DE MEMBRESÍA"
+                                               FontSize="10" FontWeight="Bold"
+                                               Foreground="{StaticResource GreenMain}"
+                                               Margin="0,0,0,8"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock x:Name="lblUpgradeDetalle"
+                                                       Text="Diferencia a cobrar:"
+                                                       FontSize="11" Foreground="{StaticResource TextMuted}"
+                                                       Margin="0,0,0,2"/>
+                                            <TextBlock x:Name="lblUpgradeMonto"
+                                                       Text="$0"
+                                                       FontFamily="Consolas" FontSize="22" FontWeight="Bold"
+                                                       Foreground="{StaticResource GreenMain}"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock x:Name="lblUpgradeNivel"
+                                                       Text="⬆ Nivel"
+                                                       FontSize="11" FontWeight="Bold"
+                                                       Foreground="#00C850"
+                                                       HorizontalAlignment="Right"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- MÉTODO DE PAGO -->
+                            <TextBlock Text="MÉTODO DE PAGO *" Style="{StaticResource LabelCampoEstilo}"/>
+                            <ComboBox x:Name="cmbMembresiaMetodoPago"
+                                      Style="{StaticResource ComboBoxEstilo}">
+                                <ComboBoxItem Content="Efectivo"       Tag="efectivo"    IsSelected="True"/>
+                                <ComboBoxItem Content="Transferencia"  Tag="transferencia"/>
+                                <ComboBoxItem Content="Tarjeta"        Tag="tarjeta"/>
+                                <ComboBoxItem Content="Otro"           Tag="otro"/>
+                            </ComboBox>
+
+                            <!-- OBSERVACIONES -->
+                            <TextBlock Text="OBSERVACIONES" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="{StaticResource Bg2}" CornerRadius="8"
+                                    BorderBrush="{StaticResource Border2}" BorderThickness="1"
+                                    Margin="0,0,0,14">
+                                <TextBox x:Name="txtMembresiaObservaciones"
+                                         Background="Transparent" BorderThickness="0"
+                                         Foreground="{StaticResource TextPrimary}"
+                                         CaretBrush="{StaticResource GreenMain}"
+                                         FontSize="13" Padding="12,10"
+                                         AcceptsReturn="True" TextWrapping="Wrap"
+                                         Height="80" VerticalScrollBarVisibility="Auto"/>
+                            </Border>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Botones Cancelar / Guardar -->
+                    <Grid Grid.Row="3" Margin="22,12,22,18">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Cancelar"
+                                Style="{StaticResource BotonDangerLargoEstilo}"
+                                Margin="0,0,8,0" Click="btnCancelarMembresia_Click"/>
+                        <Button x:Name="btnGuardarMembresia" Grid.Column="1" Content="GUARDAR"
+                                Style="{StaticResource BotonPrincipalEstilo}"
+                                Margin="8,0,0,0" Click="btnGuardarMembresia_Click"/>
                     </Grid>
                 </Grid>
             </Border>

@@ -35,6 +35,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private string _filtroEstado = "todos";
         private DateTime _fechaVencActual = DateTime.Today;
         private Socio _socioPreCargado = null;
+        private long? _membresiaIdPreCargada = null;
         private long _actividadActualId = 0;
         private string _actividadActualCategoria = null;
         private int? _actividadActualNivel = null;
@@ -64,8 +65,31 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
+        public MembresiasPage(long membresiaIdAEditar) : this(null)
+        {
+            _membresiaIdPreCargada = membresiaIdAEditar;
+        }
+
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            if (_membresiaIdPreCargada.HasValue)
+            {
+                try
+                {
+                    var m = _controller.ObtenerPorId(_membresiaIdPreCargada.Value);
+                    if (m != null)
+                    {
+                        CargarMembresiaEnPanel(m);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    NotificacionWindow.MostrarError("No se pudo cargar la membresía.\n" + ex.Message);
+                }
+                _membresiaIdPreCargada = null;
+                return;
+            }
+
             if (_socioPreCargado != null)
             {
                 AbrirPanelNuevaMembresia(_socioPreCargado);
@@ -359,7 +383,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             var m = ObtenerMembresiaDeFila(sender);
             if (m == null) return;
+            CargarMembresiaEnPanel(m);
+        }
 
+        private void CargarMembresiaEnPanel(Membresia m)
+        {
             _esNuevo = false;
 
             LimpiarFormulario();

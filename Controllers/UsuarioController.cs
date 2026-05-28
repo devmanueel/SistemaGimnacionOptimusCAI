@@ -55,6 +55,21 @@ namespace Controllers
         }
 
         // ──────────────────────────────────────────────────────────
+        // OBTENER USUARIOS ACTIVOS POR ROL
+        // ──────────────────────────────────────────────────────────
+        public List<Usuario> ObtenerUsuariosActivosPorRol(int rolId)
+        {
+            try
+            {
+                return _dao.ObtenerUsuariosActivosPorRol(rolId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("No se pudieron cargar los usuarios.\n" + ex.Message);
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────
         // BUSCAR
         // ──────────────────────────────────────────────────────────
         public List<Usuario> BuscarUsuarios(string texto)

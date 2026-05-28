@@ -81,6 +81,27 @@ namespace Models.Dao
         }
 
         // ──────────────────────────────────────────────────────────
+        // OBTENER USUARIOS ACTIVOS POR ROL
+        // ──────────────────────────────────────────────────────────
+        public List<Usuario> ObtenerUsuariosActivosPorRol(int rolId)
+        {
+            var lista = new List<Usuario>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ObtenerUsuariosActivosPorRol", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@RolId", SqlDbType.Int).Value = rolId;
+                    using (var reader = cmd.ExecuteReader())
+                        while (reader.Read())
+                            lista.Add(MapearUsuario(reader));
+                }
+            }
+            return lista;
+        }
+
+        // ──────────────────────────────────────────────────────────
         // OBTENER POR ID
         // ──────────────────────────────────────────────────────────
         public Usuario ObtenerUsuarioPorId(long id)
