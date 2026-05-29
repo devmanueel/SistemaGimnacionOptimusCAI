@@ -6,7 +6,7 @@
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d"
-      d:DesignHeight="768" d:DesignWidth="1280"
+      d:DesignHeight="768" d:DesignWidth="1360"
       Title="Casilleros">
 
     <Page.Background><SolidColorBrush Color="#080A08"/></Page.Background>
@@ -324,7 +324,8 @@
                     </Border>
 
                     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled" Padding="14">
+                                  HorizontalScrollBarVisibility="Disabled" Padding="14"
+                                  Style="{StaticResource PanelScrollViewerStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>

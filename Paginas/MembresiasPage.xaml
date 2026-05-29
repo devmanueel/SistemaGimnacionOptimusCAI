@@ -6,7 +6,7 @@
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       mc:Ignorable="d"
       xmlns:fa="http://schemas.fontawesome.io/icons/"
-      d:DesignHeight="768" d:DesignWidth="1280"
+      d:DesignHeight="768" d:DesignWidth="1360"
        Title="Membresías"
        Background="#080A08"
        Loaded="Page_Loaded">

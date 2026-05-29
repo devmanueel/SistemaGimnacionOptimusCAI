@@ -6,7 +6,7 @@
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       mc:Ignorable="d"
-      d:DesignHeight="768" d:DesignWidth="1280"
+      d:DesignHeight="768" d:DesignWidth="1360"
       Title="Socios">
 
     <Page.Background>

@@ -115,10 +115,10 @@
                             Visibility="Collapsed" Margin="20,0,0,0">
                     <TextBlock Text="Desde:" Foreground="#9FB89F" FontSize="12"
                                VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <DatePicker x:Name="dpDesde" Width="130" FontSize="11"/>
+                    <DatePicker x:Name="dpDesde" Width="130" FontSize="11" Style="{StaticResource DatePickerEstilo}"/>
                     <TextBlock Text="Hasta:" Foreground="#9FB89F" FontSize="12"
                                VerticalAlignment="Center" Margin="16,0,8,0"/>
-                    <DatePicker x:Name="dpHasta" Width="130" FontSize="11"/>
+                    <DatePicker x:Name="dpHasta" Width="130" FontSize="11" Style="{StaticResource DatePickerEstilo}"/>
                     <Border Background="#2E7D32" CornerRadius="4"
                             Padding="16,5" Margin="16,0,0,0" Cursor="Hand"
                             MouseLeftButtonDown="btnMostrar_Click">
@@ -164,7 +164,7 @@
 
             <!-- TAB CAJA -->
             <TabItem Header="Caja">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent" Style="{StaticResource PanelScrollViewerStyle}">
                     <StackPanel Margin="0,16,0,0">
                         <!-- Periodo elegido -->
                         <TextBlock x:Name="lblPeriodoCaja" FontSize="11"
@@ -228,7 +228,7 @@
 
             <!-- TAB ASISTENCIAS -->
             <TabItem Header="Asistencias">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent" Style="{StaticResource PanelScrollViewerStyle}">
                     <Grid Margin="0,16,0,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -280,7 +280,7 @@
 
             <!-- TAB SOCIOS -->
             <TabItem Header="Socios">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent" Style="{StaticResource PanelScrollViewerStyle}">
                     <Grid Margin="0,16,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

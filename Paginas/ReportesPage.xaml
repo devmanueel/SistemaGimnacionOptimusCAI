@@ -4,7 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d"
-      d:DesignHeight="768" d:DesignWidth="1280"
+      d:DesignHeight="768" d:DesignWidth="1360"
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       Title="Reportes">
 
@@ -146,7 +146,7 @@
         </Border>
 
         <!-- Contenido de tabs -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="24,14,24,16">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="24,14,24,16" Style="{StaticResource PanelScrollViewerStyle}">
             <Grid>
 
                 <!-- ═══════════════════════════════════════════════

@@ -29,7 +29,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace SistemaGimnacionOptimusCAI.Paginas
@@ -129,8 +128,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             // UI: modo huella ON
             lblModoHuella.Text    = "DESACTIVAR MODO HUELLA";
             iconModoHuella.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x55, 0x55));
-            panelEsperando.Visibility     = Visibility.Collapsed;
-            panelResultado.Visibility     = Visibility.Collapsed;
             panelHuellaEsperando.Visibility = Visibility.Visible;
             lblHuellaEstado.Text  = "APOYÁ TU DEDO EN EL LECTOR";
             txtDni.IsEnabled      = false;
@@ -212,7 +209,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                         timer.Stop();
                         if (_modoHuellaActivo)
                         {
-                            panelResultado.Visibility       = Visibility.Collapsed;
                             panelHuellaEsperando.Visibility = Visibility.Visible;
                             lblHuellaEstado.Text  = "APOYÁ TU DEDO EN EL LECTOR";
                             lblHuellaDetalle.Text = "Modo huella activo";
@@ -424,137 +420,21 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ─────────────────────────────────────────────────────
-        // MOSTRAR RESULTADO en la tarjeta
+        // MOSTRAR RESULTADO en ventana emergente
         // ─────────────────────────────────────────────────────
         private void MostrarResultado(ResultadoValidacion r)
         {
             if (_timerOcultarResultado != null) _timerOcultarResultado.Stop();
 
-            if (r.EsPermitido)
-                ReproducirSonido("acceso_ok.wav");
-            else
-                ReproducirSonido("acceso_error.wav");
-
-            panelEsperando.Visibility = Visibility.Collapsed;
-
-            // Datos del socio
-            lblSocioNombre.Text = string.IsNullOrEmpty(r.SocioNombre) ? "—" : r.SocioNombre;
-            lblNumeroSocio.Text = r.NumeroSocio.HasValue ? r.NumeroSocioFormateado : "";
-            lblMensaje.Text = r.Mensaje;
-
-            if (r.Foto != null && r.Foto.Length > 0)
-                imgFoto.ImageSource = BytesABitmapImage(r.Foto);
-            else
-                imgFoto.ImageSource = null;
-
-            if (!string.IsNullOrEmpty(r.ActividadNombre))
-            {
-                lblActividad.Text = r.ActividadNombre;
-                lblVencimiento.Text = r.FechaVencimientoTexto;
-                lblAsistenciasRestantes.Text = r.AsistenciasRestantesTexto ?? "—";
-
-                if (r.LimitePorSemana.HasValue)
-                {
-                    int rest = r.AsistenciasRestantesSemana ?? 0;
-                    if (rest > 1)
-                        lblAsistenciasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-                    else if (rest == 1)
-                        lblAsistenciasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(255, 179, 0));
-                    else
-                        lblAsistenciasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
-                }
-                else
-                {
-                    lblAsistenciasRestantes.Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 204));
-                }
-
-                panelInfoMembresia.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                panelInfoMembresia.Visibility = Visibility.Collapsed;
-            }
-
-            if (r.EsPermitido && r.DescuentoAplicado)
-            {
-                // Primera entrada del día — verde
-                lblIcono.Text = "✓";
-                lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-                panelResultado.Background = new SolidColorBrush(Color.FromRgb(10, 26, 16));
-                panelResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-                panelResultado.BorderThickness = new Thickness(2);
-                panelDetalles.Background = new SolidColorBrush(Color.FromArgb(60, 0, 230, 118));
-                lblMensaje.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-            }
-            else if (r.EsPermitido && !r.DescuentoAplicado)
-            {
-                // Ya registró entrada hoy — ámbar
-                lblIcono.Text = "↩";
-                lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(255, 179, 0));
-                panelResultado.Background = new SolidColorBrush(Color.FromRgb(26, 20, 5));
-                panelResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 179, 0));
-                panelResultado.BorderThickness = new Thickness(2);
-                panelDetalles.Background = new SolidColorBrush(Color.FromArgb(60, 255, 179, 0));
-                lblMensaje.Foreground = new SolidColorBrush(Color.FromRgb(255, 200, 80));
-            }
-            else
-            {
-                // Denegado — rojo
-                lblIcono.Text = "✕";
-                lblIcono.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
-                panelResultado.Background = new SolidColorBrush(Color.FromRgb(26, 10, 10));
-                panelResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 85, 85));
-                panelResultado.BorderThickness = new Thickness(2);
-                panelDetalles.Background = new SolidColorBrush(Color.FromArgb(60, 255, 85, 85));
-                lblMensaje.Foreground = new SolidColorBrush(Color.FromRgb(255, 130, 130));
-            }
-
-            panelResultado.Visibility = Visibility.Visible;
-            panelResultado.Opacity = 0;
-            scaleResultado.ScaleX = 0.8;
-            scaleResultado.ScaleY = 0.8;
-
-            var fadeIn = new DoubleAnimation
-            {
-                From = 0,
-                To = 1,
-                Duration = new Duration(TimeSpan.FromMilliseconds(250))
-            };
-            panelResultado.BeginAnimation(OpacityProperty, fadeIn);
-
-            var scaleAnim = new DoubleAnimation
-            {
-                From = 0.8,
-                To = 1.0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(300)),
-                EasingFunction = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.4 }
-            };
-            scaleResultado.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnim);
-            scaleResultado.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnim);
+            var ventana = new ResultadoAccesoWindow();
+            ventana.MostrarResultado(r);
 
             _timerOcultarResultado = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
             _timerOcultarResultado.Tick += (s, e) =>
             {
                 _timerOcultarResultado.Stop();
-                OcultarResultado();
             };
             _timerOcultarResultado.Start();
-        }
-
-        private void OcultarResultado()
-        {
-            var fade = new DoubleAnimation
-            {
-                From = 1,
-                To = 0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(250))
-            };
-            fade.Completed += (s, e) =>
-            {
-                panelResultado.Visibility = Visibility.Collapsed;
-                panelEsperando.Visibility = Visibility.Visible;
-            };
-            panelResultado.BeginAnimation(OpacityProperty, fade);
         }
 
         // ─────────────────────────────────────────────────────
@@ -577,22 +457,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         // ─────────────────────────────────────────────────────
         // HELPER
-        // ─────────────────────────────────────────────────────
-        private static BitmapImage BytesABitmapImage(byte[] bytes)
-        {
-            using (var ms = new MemoryStream(bytes))
-            {
-                var bmp = new BitmapImage();
-                bmp.BeginInit();
-                bmp.CacheOption = BitmapCacheOption.OnLoad;
-                bmp.StreamSource = ms;
-                bmp.EndInit();
-                return bmp;
-            }
-        }
-
-        // ─────────────────────────────────────────────────────
-        // SONIDO DE FEEDBACK (asíncrono, no bloquea UI)
         // ─────────────────────────────────────────────────────
         private void ReproducirSonido(string nombreArchivo)
         {
