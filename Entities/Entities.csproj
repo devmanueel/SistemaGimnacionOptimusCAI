@@ -44,6 +44,7 @@
     <Compile Include="Actividad.cs" />
     <Compile Include="FormatoARS.cs" />
     <Compile Include="OpcionUpgrade.cs" />
+    <Compile Include="EstadisticasKPI.cs" />
     <Compile Include="ReporteFinanciero.cs" />
     <Compile Include="AuditoriaEntry.cs" />
     <Compile Include="CajaMovimiento.cs" />
