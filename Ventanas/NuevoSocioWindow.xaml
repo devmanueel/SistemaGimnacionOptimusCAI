@@ -121,9 +121,8 @@
 
             <!-- Contenido (los dos pasos) -->
             <ScrollViewer Grid.Row="3"
-                          VerticalScrollBarVisibility="Auto"
-                          Padding="0,0,12,0"
-                          Margin="24,16,12,0">
+                          VerticalScrollBarVisibility="Auto" Padding="0,0,12,0"
+                          Margin="24,16,12,0" Style="{StaticResource PanelScrollViewerStyle}">
                 <StackPanel>
 
                     <!-- ══ PASO 1: DATOS DEL SOCIO ══ -->

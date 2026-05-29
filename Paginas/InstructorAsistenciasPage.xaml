@@ -6,7 +6,7 @@
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       xmlns:fa="http://schemas.fontawesome.io/icons/"
       mc:Ignorable="d"
-      d:DesignHeight="768" d:DesignWidth="1280"
+      d:DesignHeight="768" d:DesignWidth="1360"
       Title="Asistencias de Instructores">
 
     <Page.Background><SolidColorBrush Color="#080A08"/></Page.Background>

@@ -6,7 +6,7 @@
       xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       mc:Ignorable="d"
       xmlns:fa="http://schemas.fontawesome.io/icons/"
-      d:DesignHeight="768" d:DesignWidth="1280"
+      d:DesignHeight="768" d:DesignWidth="1360"
       Title="Control de Acceso">
 
     <Page.Background><SolidColorBrush Color="#080A08"/></Page.Background>
@@ -297,112 +297,7 @@
                                    Visibility="Collapsed"/>
                     </StackPanel>
 
-                    <!-- Tarjeta de resultado (cambia según permitido/denegado) -->
-                    <Border Grid.Row="3" x:Name="panelResultado"
-                            Margin="22,4,22,22" CornerRadius="12"
-                            Visibility="Collapsed">
-                        <Border.RenderTransform>
-                            <ScaleTransform x:Name="scaleResultado" ScaleX="1" ScaleY="1"
-                                            CenterX="170" CenterY="180"/>
-                        </Border.RenderTransform>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
 
-                            <!-- Ícono grande estado -->
-                            <TextBlock Grid.Row="0" x:Name="lblIcono" Text="✓"
-                                       FontSize="64" FontWeight="Bold"
-                                       HorizontalAlignment="Center" Margin="0,18,0,4"/>
-
-                            <!-- Foto del socio -->
-                            <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="0,8,0,12">
-                                <Ellipse Width="92" Height="92">
-                                    <Ellipse.Fill><SolidColorBrush Color="#4ADE80"/></Ellipse.Fill>
-                                </Ellipse>
-                                <Ellipse Width="86" Height="86">
-                                    <Ellipse.Fill>
-                                        <ImageBrush x:Name="imgFoto" Stretch="UniformToFill"/>
-                                    </Ellipse.Fill>
-                                </Ellipse>
-                            </Grid>
-
-                            <!-- Nombre del socio -->
-                            <TextBlock Grid.Row="2" x:Name="lblSocioNombre"
-                                       Text="—"
-                                       FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                       FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
-                                       HorizontalAlignment="Center" Margin="0,0,0,2"/>
-
-                            <!-- Número de socio -->
-                            <TextBlock Grid.Row="3" x:Name="lblNumeroSocio"
-                                       Text="#0000"
-                                       FontFamily="Consolas" FontSize="12"
-                                       Foreground="{StaticResource GreenMain}" HorizontalAlignment="Center"
-                                       Margin="0,0,0,12"/>
-
-                            <!-- Mensaje + detalles -->
-                            <Border Grid.Row="4" x:Name="panelDetalles"
-                                    CornerRadius="10" Padding="16,14"
-                                    Margin="20,0,20,20">
-                                <StackPanel>
-                                    <TextBlock x:Name="lblMensaje" Text="—"
-                                               FontSize="14" FontWeight="SemiBold"
-                                               TextWrapping="Wrap"
-                                               HorizontalAlignment="Center"
-                                               TextAlignment="Center"
-                                               Margin="0,0,0,8"/>
-
-                                    <StackPanel x:Name="panelInfoMembresia" Visibility="Collapsed">
-                                        <Border Height="1" Background="#33FFFFFF" Margin="0,4,0,8"/>
-                                        <Grid Margin="0,0,0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Plan: "
-                                                       FontSize="11" Foreground="#AAAACC"/>
-                                            <TextBlock Grid.Column="1" x:Name="lblActividad"
-                                                       Text="—" FontSize="11"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextPrimary}"
-                                                       TextTrimming="CharacterEllipsis"/>
-                                        </Grid>
-                                        <Grid Margin="0,0,0,4">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="Vence: "
-                                                       FontSize="11" Foreground="#AAAACC"/>
-                                            <TextBlock Grid.Column="1" x:Name="lblVencimiento"
-                                                       Text="—" FontSize="11"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{StaticResource TextPrimary}"/>
-                                        </Grid>
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
-                                             <TextBlock Grid.Column="0" Text="Asistencias restantes: "
-                                                        FontSize="11" Foreground="#AAAACC"/>
-                                             <TextBlock Grid.Column="1" x:Name="lblAsistenciasRestantes"
-                                                        Text="—" FontSize="11"
-                                                        FontWeight="SemiBold"
-                                                        Foreground="{StaticResource TextPrimary}"
-                                                        TextWrapping="Wrap"
-                                                        TextTrimming="CharacterEllipsis"/>
-                                        </Grid>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-                    </Border>
 
                     <!-- Estado vacío (cuando no hay nada validado todavía) -->
                     <StackPanel Grid.Row="3" x:Name="panelEsperando"
