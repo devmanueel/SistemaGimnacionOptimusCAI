@@ -47,6 +47,23 @@ namespace Models.Dao
             return lista;
         }
 
+        public List<Actividad> ObtenerActividadesActivas()
+        {
+            var lista = new List<Actividad>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ObtenerActividadesActivas", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (var reader = cmd.ExecuteReader())
+                        while (reader.Read())
+                            lista.Add(MapearActividad(reader));
+                }
+            }
+            return lista;
+        }
+
         public Actividad ObtenerActividadPorId(long id)
         {
             using (var conn = GetConnection())

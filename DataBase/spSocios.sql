@@ -310,14 +310,14 @@ BEGIN
 
     SELECT
         s.id, s.nombre, s.apellido, s.dni, s.numero_socio, s.foto, s.activo,
-        MAX(r.accedido_en)                                        AS ultima_asistencia,
-        ISNULL(DATEDIFF(DAY, MAX(r.accedido_en), GETDATE()), 999) AS dias_inactivo
+        MAX(r.accedido_en)                                                   AS ultima_asistencia,
+        DATEDIFF(DAY, COALESCE(MAX(r.accedido_en), s.creado_en), GETDATE()) AS dias_inactivo
     FROM socios s
     LEFT JOIN registros_acceso r ON r.socio_id = s.id AND r.resultado = 'permitido'
     WHERE s.activo = 1
       AND s.eliminado_en IS NULL
-    GROUP BY s.id, s.nombre, s.apellido, s.dni, s.numero_socio, s.foto, s.activo
-    HAVING MAX(r.accedido_en) < @Limite OR MAX(r.accedido_en) IS NULL
+    GROUP BY s.id, s.nombre, s.apellido, s.dni, s.numero_socio, s.foto, s.activo, s.creado_en
+    HAVING COALESCE(MAX(r.accedido_en), s.creado_en) < @Limite
     ORDER BY dias_inactivo DESC;
 END;
 GO

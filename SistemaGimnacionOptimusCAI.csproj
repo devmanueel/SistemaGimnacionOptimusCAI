@@ -61,6 +61,9 @@
     <Reference Include="itextsharp">
       <HintPath>packages\iTextSharp.5.5.13.3\lib\itextsharp.dll</HintPath>
     </Reference>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>packages\BouncyCastle.1.8.9\lib\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
     <Reference Include="zxing">
       <HintPath>packages\ZXing.Net.0.16.9\lib\net47\zxing.dll</HintPath>
     </Reference>
@@ -227,6 +230,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Ventanas\NuevoSocioWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Paginas\EnrolarHuellaWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -296,6 +303,9 @@
     </Compile>
     <Compile Include="Paginas\ReportesPage.xaml.cs">
       <DependentUpon>ReportesPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\NuevoSocioWindow.xaml.cs">
+      <DependentUpon>Ventanas\NuevoSocioWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\EnrolarHuellaWindow.xaml.cs">
       <DependentUpon>EnrolarHuellaWindow.xaml</DependentUpon>

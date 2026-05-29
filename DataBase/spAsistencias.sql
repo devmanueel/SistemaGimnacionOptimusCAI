@@ -39,6 +39,8 @@ BEGIN
     DECLARE @Lunes         DATE;
     DECLARE @Sabado        DATE;
     DECLARE @MembresiasActivas INT;
+    DECLARE @AsistenciasSemanaPrevio INT = NULL;
+    DECLARE @AsistenciasSemana      INT = NULL;
 
     DECLARE @DiaApp INT;
     SET @DiaApp = CASE @DiaActual
@@ -63,7 +65,8 @@ BEGIN
                CAST(NULL AS NVARCHAR(200)) AS socio_nombre, CAST(NULL AS INT) AS numero_socio,
                CAST(NULL AS VARBINARY(MAX)) AS foto, CAST(NULL AS NVARCHAR(150)) AS actividad_nombre,
                CAST(NULL AS DATE) AS fecha_vencimiento, CAST(NULL AS BIGINT) AS registro_id,
-               CAST(0 AS BIT) AS descuento_aplicado;
+               CAST(0 AS BIT) AS descuento_aplicado,
+               CAST(NULL AS TINYINT) AS limite_por_semana, CAST(NULL AS INT) AS asistencias_restantes;
         RETURN;
     END
 
@@ -77,7 +80,8 @@ BEGIN
         SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                CAST(NULL AS NVARCHAR(150)) AS actividad_nombre, CAST(NULL AS DATE) AS fecha_vencimiento,
-               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado;
+               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+               CAST(NULL AS TINYINT) AS limite_por_semana, CAST(NULL AS INT) AS asistencias_restantes;
         RETURN;
     END
 
@@ -95,7 +99,8 @@ BEGIN
                    'El socio tiene más de una membresía activa. Seleccioná la actividad.' AS mensaje,
                    @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                    CAST(NULL AS NVARCHAR(150)) AS actividad_nombre, CAST(NULL AS DATE) AS fecha_vencimiento,
-                   CAST(NULL AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado;
+                   CAST(NULL AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+                   CAST(NULL AS TINYINT) AS limite_por_semana, CAST(NULL AS INT) AS asistencias_restantes;
             RETURN;
         END
 
@@ -127,8 +132,19 @@ BEGIN
         SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                CAST(NULL AS NVARCHAR(150)) AS actividad_nombre, CAST(NULL AS DATE) AS fecha_vencimiento,
-               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado;
+               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+               CAST(NULL AS TINYINT) AS limite_por_semana, CAST(NULL AS INT) AS asistencias_restantes;
         RETURN;
+    END
+
+    -- Precalcular asistencias usadas esta semana (para mostrar en denegados también)
+    IF @LimiteSemana IS NOT NULL
+    BEGIN
+        SET @Lunes  = DATEADD(DAY, 2 - DATEPART(WEEKDAY, CAST(GETDATE() AS DATE)), CAST(GETDATE() AS DATE));
+        SET @Sabado = DATEADD(DAY, 7 - DATEPART(WEEKDAY, CAST(GETDATE() AS DATE)), CAST(GETDATE() AS DATE));
+        SET @AsistenciasSemanaPrevio = (SELECT COUNT(*) FROM registros_acceso
+                                         WHERE membresia_id = @MembresiaId AND resultado = 'permitido'
+                                           AND CAST(accedido_en AS DATE) BETWEEN @Lunes AND @Sabado);
     END
 
     -- ── 5. ¿Es domingo? ────────────────────────────────────
@@ -141,7 +157,9 @@ BEGIN
         SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado;
+               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+               CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
+               CAST(@LimiteSemana - @AsistenciasSemanaPrevio AS INT) AS asistencias_restantes;
         RETURN;
     END
 
@@ -162,7 +180,9 @@ BEGIN
             SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                    @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                    @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-                   CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado;
+                   CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+                   CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
+                   CAST(@LimiteSemana - @AsistenciasSemanaPrevio AS INT) AS asistencias_restantes;
             RETURN;
         END
     END
@@ -183,7 +203,9 @@ BEGIN
         SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado;
+               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+               CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
+               CAST(@LimiteSemana - @AsistenciasSemanaPrevio AS INT) AS asistencias_restantes;
         RETURN;
     END
 
@@ -200,7 +222,9 @@ BEGIN
             SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                    @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                    @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-                   CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado;
+                   CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+                   CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
+                   CAST(@LimiteSemana - @AsistenciasSemanaPrevio AS INT) AS asistencias_restantes;
             RETURN;
         END
     END
@@ -222,7 +246,9 @@ BEGIN
             SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                    @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                    @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-                   CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado;
+                   CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+                   CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
+                   CAST(@LimiteSemana - @AsistenciasSemanaPrevio AS INT) AS asistencias_restantes;
             RETURN;
         END
     END
@@ -232,10 +258,23 @@ BEGIN
     SET @Mensaje   = '¡Acceso permitido! A entrenar.';
     INSERT INTO registros_acceso (socio_id, membresia_id, metodo_acceso, resultado)
     VALUES (@SocioId, @MembresiaId, @MetodoAcceso, @Resultado);
+
+    -- Calcular asistencias usadas esta semana (incluye la actual recién insertada)
+    IF @LimiteSemana IS NOT NULL
+    BEGIN
+        SET @Lunes  = DATEADD(DAY, 2 - DATEPART(WEEKDAY, CAST(GETDATE() AS DATE)), CAST(GETDATE() AS DATE));
+        SET @Sabado = DATEADD(DAY, 7 - DATEPART(WEEKDAY, CAST(GETDATE() AS DATE)), CAST(GETDATE() AS DATE));
+        SET @AsistenciasSemana = (SELECT COUNT(*) FROM registros_acceso
+                                   WHERE membresia_id = @MembresiaId AND resultado = 'permitido'
+                                     AND CAST(accedido_en AS DATE) BETWEEN @Lunes AND @Sabado);
+    END
+
     SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
            @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
            @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-           CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(1 AS BIT) AS descuento_aplicado;
+           CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(1 AS BIT) AS descuento_aplicado,
+           CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
+           CAST(@LimiteSemana - @AsistenciasSemana AS INT) AS asistencias_restantes;
 END;
 GO
 
@@ -330,9 +369,18 @@ IF NOT EXISTS (
 GO
 
 -- Cargar valores según cada actividad (ajustar nombres si difieren)
+-- Gimnasio
 UPDATE actividades SET limite_por_semana = 2,    limite_total = NULL WHERE nombre = 'Gimnasio 2 Veces Por Semana';
 UPDATE actividades SET limite_por_semana = 3,    limite_total = NULL WHERE nombre = 'Gimnasio 3 Veces Por Semana';
 UPDATE actividades SET limite_por_semana = NULL, limite_total = NULL WHERE nombre = 'Gimnasio Todos Los Dias';
+-- Boxeo
+UPDATE actividades SET limite_por_semana = 2,    limite_total = NULL WHERE nombre = 'Boxeo Cai 2 Vxs';
+UPDATE actividades SET limite_por_semana = 3,    limite_total = NULL WHERE nombre = 'Boxeo Cai 3 Vxs';
+UPDATE actividades SET limite_por_semana = NULL, limite_total = NULL WHERE nombre = 'Boxeo Todos Los Dias';
+-- Deportistas
+UPDATE actividades SET limite_por_semana = 2,    limite_total = NULL WHERE nombre = 'Deportistas Cai';
+UPDATE actividades SET limite_por_semana = 3,    limite_total = NULL WHERE nombre = 'Deportistas Cai 3 Vxs';
+UPDATE actividades SET limite_por_semana = NULL, limite_total = NULL WHERE nombre = 'Deportistas Cai Todos Los Dias';
 GO
 
 -- Eliminar cualquier CHECK constraint existente sobre la columna resultado

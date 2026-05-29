@@ -64,6 +64,52 @@ namespace SistemaGimnacionOptimusCAI.Helpers
             return path;
         }
 
+        // ── REPORTE DE SOCIOS ──────────────────────────────
+        public string ExportarSocios(List<SocioConMembresia> socios)
+        {
+            string path = Path.Combine(Path.GetTempPath(),
+                "Reporte_Socios_" + DateTime.Now.ToString("yyyyMMdd") + "_" + DateTime.Now.Ticks + ".xlsx");
+
+            using (var wb = new XLWorkbook())
+            {
+                var ws = wb.Worksheets.Add("Socios");
+
+                ws.Cell("A1").Value = "OptimusCAI Gym — Listado de Socios";
+                ws.Cell("A1").Style.Font.Bold = true;
+                ws.Cell("A1").Style.Font.FontSize = 14;
+                ws.Cell("A2").Value = "Total: " + socios.Count + " socio(s)";
+                ws.Cell("A3").Value = "Generado: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+
+                int fila = 5;
+                ws.Cell(fila, 1).Value = "N°";
+                ws.Cell(fila, 2).Value = "SOCIO";
+                ws.Cell(fila, 3).Value = "DNI";
+                ws.Cell(fila, 4).Value = "TELÉFONO";
+                ws.Cell(fila, 5).Value = "EDAD";
+                ws.Cell(fila, 6).Value = "ACTIVIDAD";
+                ws.Cell(fila, 7).Value = "VENCIMIENTO";
+                ws.Cell(fila, 8).Value = "ESTADO";
+                ws.Range(fila, 1, fila, 8).Style.Font.Bold = true;
+
+                foreach (var s in socios)
+                {
+                    fila++;
+                    ws.Cell(fila, 1).Value = s.NumeroFormateado;
+                    ws.Cell(fila, 2).Value = s.NombreCompleto;
+                    ws.Cell(fila, 3).Value = s.Dni ?? "-";
+                    ws.Cell(fila, 4).Value = s.Telefono ?? "-";
+                    ws.Cell(fila, 5).Value = s.EdadTexto;
+                    ws.Cell(fila, 6).Value = s.ActividadNombre ?? "-";
+                    ws.Cell(fila, 7).Value = s.FechaVencimientoTexto;
+                    ws.Cell(fila, 8).Value = s.EstadoTexto;
+                }
+
+                ws.Columns().AdjustToContents();
+                wb.SaveAs(path);
+            }
+            return path;
+        }
+
         public string ExportarSueldos(List<ResumenDocente> docentes, DateTime desde, DateTime hasta)
         {
             string path = Path.Combine(Path.GetTempPath(),

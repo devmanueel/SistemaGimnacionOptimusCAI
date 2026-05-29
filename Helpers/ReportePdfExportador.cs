@@ -107,6 +107,44 @@ namespace SistemaGimnacionOptimusCAI.Helpers
             return path;
         }
 
+        // ── REPORTE SOCIOS ────────────────────────────────
+        public string ExportarSocios(List<SocioConMembresia> socios)
+        {
+            string path = Path.Combine(Path.GetTempPath(),
+                "Reporte_Socios_" + DateTime.Now.ToString("yyyyMMdd") + "_" + DateTime.Now.Ticks + ".pdf");
+
+            using (var doc = new Document(PageSize.A4.Rotate(), 36, 36, 60, 36))
+            {
+                PdfWriter.GetInstance(doc, new FileStream(path, FileMode.Create));
+                doc.Open();
+
+                AgregarEncabezado(doc, "LISTADO DE SOCIOS",
+                    "Total: " + socios.Count + " socio(s)  |  Generado el " + DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
+
+                var tabla = new PdfPTable(8) { WidthPercentage = 100 };
+                tabla.SetWidths(new float[] { 1, 2, 4, 2, 1, 2, 2, 2 });
+
+                AgregarFila(tabla, true, "N°", "SOCIO", "DNI", "TELÉFONO", "EDAD", "ACTIVIDAD", "VENCE", "ESTADO");
+
+                foreach (var s in socios)
+                {
+                    AgregarFila(tabla, false,
+                        s.NumeroFormateado,
+                        s.NombreCompleto,
+                        s.Dni ?? "-",
+                        s.Telefono ?? "-",
+                        s.EdadTexto,
+                        s.ActividadNombre ?? "-",
+                        s.FechaVencimientoTexto,
+                        s.EstadoTexto);
+                }
+
+                doc.Add(tabla);
+                doc.Close();
+            }
+            return path;
+        }
+
         // ── REPORTE SOCIOS CON DEUDA ──────────────────────────
         public string ExportarDeudas(
             List<SocioConDeuda> vencidas,
