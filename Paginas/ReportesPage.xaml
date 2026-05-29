@@ -146,7 +146,7 @@
         </Border>
 
         <!-- Contenido de tabs -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="24,14,24,16">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="24,14,24,16" Style="{StaticResource PanelScrollViewerStyle}">
             <Grid>
 
                 <!-- ═══════════════════════════════════════════════

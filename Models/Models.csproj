@@ -58,6 +58,7 @@
     <Compile Include="DAO\TurnoDao.cs" />
     <Compile Include="DAO\UsuarioDao.cs" />
     <Compile Include="DAO\VentaDao.cs" />
+    <Compile Include="DAO\EstadisticasDao.cs" />
     <Compile Include="DAO\WhatsappDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -61,6 +61,7 @@
     <Compile Include="UsuarioController.cs" />
     <Compile Include="Validador.cs" />
     <Compile Include="VentaController.cs" />
+    <Compile Include="EstadisticasController.cs" />
     <Compile Include="WhatsappController.cs" />
   </ItemGroup>
   <ItemGroup>
