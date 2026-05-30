@@ -2,16 +2,16 @@
 using Controllers;
 using Entities;
 using SistemaGimnacionOptimusCAI.Helpers;
+using SistemaGimnacionOptimusCAI.Ventanas;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 
 namespace SistemaGimnacionOptimusCAI.Paginas
@@ -23,19 +23,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private List<Rutina> _todasLasRutinas = new List<Rutina>();
         private Rutina _rutinaActual = null;
 
-        // Estado de los modales
-        private bool _editandoRutina = false;
-        private bool _editandoBloque = false;
-        private long _bloqueIdEditar = 0;
-        private long _ejercicioIdEditar = 0;
-        private long _bloqueIdParaEjercicio = 0;
-        private bool _editandoEjercicio = false;
-
         public RutinasPage()
         {
             InitializeComponent();
             CargarRutinas();
-            CargarComboSocios();
         }
 
         private long UsuarioId => SesionManager.HaySesion ? SesionManager.UsuarioId : 1;
@@ -49,7 +40,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 ActualizarStats();
                 RenderizarLista();
 
-                // Si había una rutina seleccionada, recargarla
                 if (_rutinaActual != null)
                 {
                     long id = _rutinaActual.Id;
@@ -76,15 +66,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 statTotal.Text = statActivas.Text =
                     statEjercicios.Text = statSocios.Text = "-";
             }
-        }
-
-        private void CargarComboSocios()
-        {
-            try
-            {
-                cmbAsignarSocio.ItemsSource = _controller.ListarSociosParaCombo();
-            }
-            catch { }
         }
 
         // ── LISTA ─────────────────────────────────────────────
@@ -147,7 +128,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             var stack = new StackPanel();
 
-            // Header con nombre + estado
             var grid = new Grid();
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -165,7 +145,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             Grid.SetColumn(lblNombre, 0);
             grid.Children.Add(lblNombre);
 
-            // Badge inactivo si corresponde
             if (!r.Activo)
             {
                 var badge = new Border
@@ -187,7 +166,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             stack.Children.Add(grid);
 
-            // Resumen
             stack.Children.Add(new TextBlock
             {
                 Text = r.ResumenTexto,
@@ -196,7 +174,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Margin = new Thickness(0, 6, 0, 0)
             });
 
-            // Asignaciones + duracion
             stack.Children.Add(new TextBlock
             {
                 Text = r.DuracionTexto + "  ·  " + r.AsignacionesTexto,
@@ -216,7 +193,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 _rutinaActual = _controller.ObtenerConDetalle(id);
                 if (_rutinaActual == null) return;
-                RenderizarLista();   // refresca highlight
+                RenderizarLista();
                 RenderizarDetalle();
             }
             catch (Exception ex) { NotificacionWindow.MostrarError(ex.Message); }
@@ -248,7 +225,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             lblDetalleResumen.Text = b1 + " · " + e1;
 
             int asignaciones = _rutinaActual.TotalAsignaciones;
-            // Si vino del SP de detalle, no trae el contador, recalcular
             try
             {
                 var asigs = _controller.AsignacionesDeRutina(_rutinaActual.Id);
@@ -270,7 +246,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 lblDetalleDetalles.Visibility = Visibility.Visible;
             }
 
-            // Renderizar bloques
             panelBloques.Children.Clear();
             if (_rutinaActual.Bloques.Count == 0)
             {
@@ -305,7 +280,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             var stack = new StackPanel();
 
-            // Header bloque
             var headerBorder = new Border
             {
                 Background = new SolidColorBrush(Color.FromRgb(17, 24, 17)),
@@ -337,7 +311,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             headerGrid.Children.Add(headerInfo);
 
             var btnsHeader = new StackPanel { Orientation = Orientation.Horizontal };
-            var btnEditBloque = CrearBotonAccion("✏", "ButtonStyleEditar", () => AbrirPanelBloque(b));
+            var btnEditBloque = CrearBotonAccion("✏", "ButtonStyleEditar", () => AbrirVentanaEditarBloque(b));
             btnEditBloque.ToolTip = "Editar bloque";
             btnsHeader.Children.Add(btnEditBloque);
             var btnDelBloque = CrearBotonAccion("🗑", "ButtonStyleCancelar", Color.FromRgb(255, 85, 85), () => EliminarBloque(b));
@@ -349,19 +323,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             headerBorder.Child = headerGrid;
             stack.Children.Add(headerBorder);
 
-            // Lista de ejercicios
             var ejercStack = new StackPanel { Margin = new Thickness(0, 4, 0, 0) };
             foreach (var e in b.Ejercicios)
                 ejercStack.Children.Add(CrearFilaEjercicio(e));
 
-            // Boton agregar ejercicio
             var btnAgregar = new Button
             {
                 Content = "＋ Agregar ejercicio",
                 Style = (Style)FindResource("BotonAgregarEstilo"),
                 ToolTip = "Agregar ejercicio"
             };
-            btnAgregar.Click += (s, ev) => AbrirPanelEjercicio(b.Id, null);
+            btnAgregar.Click += (s, ev) => AbrirVentanaEjercicio(b.Id, null);
             ejercStack.Children.Add(btnAgregar);
 
             stack.Children.Add(ejercStack);
@@ -379,7 +351,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Margin = new Thickness(0, 0, 0, 0),
                 Cursor = Cursors.Hand
             };
-            fila.MouseLeftButtonUp += (s, ev) => AbrirPanelEjercicio(e.BloqueId, e);
+            fila.MouseLeftButtonUp += (s, ev) => AbrirVentanaEjercicio(e.BloqueId, e);
 
             var grid = new Grid();
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -432,7 +404,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             Grid.SetColumn(info, 0);
             grid.Children.Add(info);
 
-            // Boton ver video (si tiene)
             if (e.TieneVideo)
             {
                 var btnVideo = CrearBotonAccion("▶", "ButtonStyleAccionBase", Color.FromRgb(255, 107, 53), () =>
@@ -445,7 +416,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 grid.Children.Add(btnVideo);
             }
 
-            // Boton eliminar
             var btnDel = CrearBotonAccion("✕", "ButtonStyleCancelar", Color.FromRgb(255, 85, 85), () => EliminarEjercicio(e));
             btnDel.ToolTip = "Eliminar ejercicio";
             Grid.SetColumn(btnDel, 2);
@@ -481,26 +451,28 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ── BUSQUEDA ──────────────────────────────────────────
         private void txtBuscar_TextChanged(object sender, TextChangedEventArgs e) => RenderizarLista();
 
-        // ── BOTONES PRINCIPALES ───────────────────────────────
+        // ── RUTINA ─────────────────────────────────────────────
         private void btnNuevaRutina_Click(object sender, RoutedEventArgs e)
         {
-            _editandoRutina = false;
-            lblTituloPanelRutina.Text = "NUEVA RUTINA";
-            txtRutNombre.Text = string.Empty;
-            txtRutDetalles.Text = string.Empty;
-            txtRutSemanas.Text = "4";
-            AbrirPanel(panelRutina);
+            var win = new RutinaWindow { Owner = Window.GetWindow(this) };
+            win.ModoNuevo();
+            if (win.ShowDialog() == true)
+            {
+                CargarRutinas();
+                if (win.NuevoId > 0) SeleccionarRutina(win.NuevoId);
+            }
         }
 
         private void btnEditarRutina_Click(object sender, RoutedEventArgs e)
         {
             if (_rutinaActual == null) return;
-            _editandoRutina = true;
-            lblTituloPanelRutina.Text = "EDITAR RUTINA";
-            txtRutNombre.Text = _rutinaActual.Nombre;
-            txtRutDetalles.Text = _rutinaActual.Detalles ?? string.Empty;
-            txtRutSemanas.Text = _rutinaActual.DuracionSemanas.ToString();
-            AbrirPanel(panelRutina);
+            var win = new RutinaWindow { Owner = Window.GetWindow(this) };
+            win.ModoEditar(_rutinaActual);
+            if (win.ShowDialog() == true)
+            {
+                CargarRutinas();
+                SeleccionarRutina(_rutinaActual.Id);
+            }
         }
 
         private void btnEliminarRutina_Click(object sender, RoutedEventArgs e)
@@ -528,77 +500,28 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch (Exception ex) { NotificacionWindow.MostrarError(ex.Message); }
         }
 
-        // ── MODAL RUTINA ──────────────────────────────────────
-        private void btnRutGuardar_Click(object sender, RoutedEventArgs e)
-        {
-            byte sem = 4;
-            byte.TryParse(txtRutSemanas.Text, out sem);
-
-            if (_editandoRutina)
-            {
-                var r = _controller.ModificarRutina(_rutinaActual.Id,
-                    txtRutNombre.Text, txtRutDetalles.Text, sem);
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-                NotificacionWindow.MostrarExito(r.mensaje);
-                CerrarPanel(panelRutina);
-                CargarRutinas();
-            }
-            else
-            {
-                var r = _controller.InsertarRutina(
-                    txtRutNombre.Text, txtRutDetalles.Text, sem, UsuarioId);
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-                NotificacionWindow.MostrarExito(r.mensaje);
-                CerrarPanel(panelRutina);
-
-                _todasLasRutinas = _controller.ObtenerRutinas();
-                ActualizarStats();
-                SeleccionarRutina(r.nuevoId);
-            }
-        }
-
-        private void btnRutCancelar_Click(object sender, RoutedEventArgs e) => CerrarPanel(panelRutina);
-
         // ── BLOQUES ───────────────────────────────────────────
         private void btnAgregarBloque_Click(object sender, RoutedEventArgs e)
         {
             if (_rutinaActual == null) return;
-            AbrirPanelBloque(null);
-        }
-
-        private void AbrirPanelBloque(RutinaBloque bloque)
-        {
-            _editandoBloque = bloque != null;
-            _bloqueIdEditar = bloque != null ? bloque.Id : 0;
-
-            lblTituloPanelBloque.Text = _editandoBloque ? "EDITAR BLOQUE" : "NUEVO BLOQUE";
-            txtBlqNombre.Text = bloque != null ? bloque.Nombre : string.Empty;
-            txtBlqOrden.Text = bloque != null ? bloque.Orden.ToString()
-                                               : (_rutinaActual.Bloques.Count + 1).ToString();
-            AbrirPanel(panelBloque);
-        }
-
-        private void btnBlqGuardar_Click(object sender, RoutedEventArgs e)
-        {
-            byte orden = 1;
-            byte.TryParse(txtBlqOrden.Text, out orden);
-
-            if (_editandoBloque)
+            int ordenSug = _rutinaActual.Bloques.Count + 1;
+            var win = new BloqueWindow { Owner = Window.GetWindow(this) };
+            win.ModoNuevo(_rutinaActual.Id, ordenSug);
+            if (win.ShowDialog() == true)
             {
-                var r = _controller.ModificarBloque(_bloqueIdEditar, txtBlqNombre.Text, orden);
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
+                SeleccionarRutina(_rutinaActual.Id);
             }
-            else
-            {
-                var r = _controller.InsertarBloque(_rutinaActual.Id, txtBlqNombre.Text, orden);
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-            }
-
-            CerrarPanel(panelBloque);
-            SeleccionarRutina(_rutinaActual.Id);
         }
 
-        private void btnBlqCancelar_Click(object sender, RoutedEventArgs e) => CerrarPanel(panelBloque);
+        private void AbrirVentanaEditarBloque(RutinaBloque bloque)
+        {
+            var win = new BloqueWindow { Owner = Window.GetWindow(this) };
+            win.ModoEditar(bloque, _rutinaActual.Id);
+            if (win.ShowDialog() == true)
+            {
+                SeleccionarRutina(_rutinaActual.Id);
+            }
+        }
 
         private void EliminarBloque(RutinaBloque b)
         {
@@ -613,69 +536,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ── EJERCICIOS ────────────────────────────────────────
-        private void AbrirPanelEjercicio(long bloqueId, RutinaEjercicio ej)
+        private void AbrirVentanaEjercicio(long bloqueId, RutinaEjercicio ejercicio)
         {
-            _editandoEjercicio = ej != null;
-            _ejercicioIdEditar = ej != null ? ej.Id : 0;
-            _bloqueIdParaEjercicio = bloqueId;
-
-            lblTituloPanelEj.Text = _editandoEjercicio ? "EDITAR EJERCICIO" : "NUEVO EJERCICIO";
-
-            txtEjNombre.Text = ej != null ? ej.Nombre : string.Empty;
-            txtEjSeries.Text = ej != null && ej.Series.HasValue ? ej.Series.Value.ToString() : string.Empty;
-            txtEjReps.Text = ej != null ? (ej.Repeticiones ?? string.Empty) : string.Empty;
-            txtEjPeso.Text = ej != null ? (ej.Peso ?? string.Empty) : string.Empty;
-            txtEjDescanso.Text = ej != null && ej.DescansoSeg.HasValue ? ej.DescansoSeg.Value.ToString() : string.Empty;
-            txtEjVideo.Text = ej != null ? (ej.LinkVideo ?? string.Empty) : string.Empty;
-            txtEjNotas.Text = ej != null ? (ej.Notas ?? string.Empty) : string.Empty;
-            txtEjOrden.Text = ej != null ? ej.Orden.ToString() : "1";
-
-            AbrirPanel(panelEjercicio);
-        }
-
-        private void btnEjGuardar_Click(object sender, RoutedEventArgs e)
-        {
-            byte? series = null;
-            byte sTmp;
-            if (byte.TryParse(txtEjSeries.Text, out sTmp)) series = sTmp;
-
-            short? descanso = null;
-            short dTmp;
-            if (short.TryParse(txtEjDescanso.Text, out dTmp)) descanso = dTmp;
-
-            byte orden = 1;
-            byte.TryParse(txtEjOrden.Text, out orden);
-
-            var ej = new RutinaEjercicio
-            {
-                Id = _ejercicioIdEditar,
-                BloqueId = _bloqueIdParaEjercicio,
-                Nombre = txtEjNombre.Text,
-                Series = series,
-                Repeticiones = txtEjReps.Text,
-                Peso = txtEjPeso.Text,
-                DescansoSeg = descanso,
-                LinkVideo = txtEjVideo.Text,
-                Notas = txtEjNotas.Text,
-                Orden = orden
-            };
-
-            if (_editandoEjercicio)
-            {
-                var r = _controller.ModificarEjercicio(ej);
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-            }
+            var win = new EjercicioWindow { Owner = Window.GetWindow(this) };
+            if (ejercicio != null)
+                win.ModoEditar(ejercicio, bloqueId);
             else
+                win.ModoNuevo(bloqueId);
+
+            if (win.ShowDialog() == true)
             {
-                var r = _controller.InsertarEjercicio(ej);
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
+                SeleccionarRutina(_rutinaActual.Id);
             }
-
-            CerrarPanel(panelEjercicio);
-            SeleccionarRutina(_rutinaActual.Id);
         }
-
-        private void btnEjCancelar_Click(object sender, RoutedEventArgs e) => CerrarPanel(panelEjercicio);
 
         private void EliminarEjercicio(RutinaEjercicio e)
         {
@@ -693,183 +566,16 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private void btnAsignar_Click(object sender, RoutedEventArgs e)
         {
             if (_rutinaActual == null) return;
-            lblAsignarRutina.Text = _rutinaActual.Nombre;
-            cmbAsignarSocio.SelectedIndex = -1;
-            CargarAsignacionesActuales();
-            AbrirPanel(panelAsignar);
-        }
-
-        private void CargarAsignacionesActuales()
-        {
-            panelAsignaciones.Children.Clear();
-            try
+            var win = new AsignarRutinaWindow { Owner = Window.GetWindow(this) };
+            win.Configurar(_rutinaActual.Id, _rutinaActual.Nombre);
+            if (win.ShowDialog() == true)
             {
-                var lista = _controller.AsignacionesDeRutina(_rutinaActual.Id);
-                if (lista.Count == 0)
-                {
-                    panelAsignaciones.Children.Add(new TextBlock
-                    {
-                        Text = "Esta rutina no tiene socios asignados.",
-                        FontSize = 11,
-                        FontStyle = FontStyles.Italic,
-                        Foreground = new SolidColorBrush(Color.FromRgb(61, 92, 61)),
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        Margin = new Thickness(0, 12, 0, 12)
-                    });
-                    return;
-                }
-
-                foreach (var a in lista)
-                    panelAsignaciones.Children.Add(CrearFilaAsignacion(a));
-            }
-            catch (Exception ex) { NotificacionWindow.MostrarError(ex.Message); }
-        }
-
-        private Border CrearFilaAsignacion(RutinaAsignacion a)
-        {
-            var fila = new Border
-            {
-                Background = new SolidColorBrush(Color.FromRgb(17, 24, 17)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(30, 40, 30)),
-                BorderThickness = new Thickness(0, 0, 0, 1),
-                Padding = new Thickness(0, 8, 0, 8)
-            };
-
-            var grid = new Grid();
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-            // Foto
-            var fotoCont = new Grid { Margin = new Thickness(0, 0, 10, 0) };
-            var ringEll = new System.Windows.Shapes.Ellipse
-            {
-                Width = 36,
-                Height = 36,
-                Fill = new LinearGradientBrush(
-                    Color.FromRgb(0, 207, 255),
-                    Color.FromRgb(74, 222, 128),
-                    new Point(0, 0), new Point(1, 1))
-            };
-            fotoCont.Children.Add(ringEll);
-
-            var innerEll = new System.Windows.Shapes.Ellipse { Width = 32, Height = 32 };
-            if (a.SocioFoto != null && a.SocioFoto.Length > 0)
-                innerEll.Fill = new ImageBrush(BytesABitmapImage(a.SocioFoto)) { Stretch = Stretch.UniformToFill };
-            else
-                innerEll.Fill = new SolidColorBrush(Color.FromRgb(40, 50, 40));
-            fotoCont.Children.Add(innerEll);
-            Grid.SetColumn(fotoCont, 0);
-            grid.Children.Add(fotoCont);
-
-            // Nombre + nro
-            var info = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
-            info.Children.Add(new TextBlock
-            {
-                Text = a.SocioNombre,
-                FontSize = 12,
-                FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232))
-            });
-            info.Children.Add(new TextBlock
-            {
-                Text = a.NumeroSocioTexto + "  ·  asignada el " + a.FechaTexto,
-                FontSize = 10,
-                Foreground = new SolidColorBrush(Color.FromRgb(61, 92, 61))
-            });
-            Grid.SetColumn(info, 1);
-            grid.Children.Add(info);
-
-            var btnDel = CrearBotonAccion("✕", "ButtonStyleCancelar", Color.FromRgb(255, 85, 85), () =>
-            {
-                bool ok = NotificacionWindow.MostrarConfirmacion(
-                    "¿Quitar la rutina al socio " + a.SocioNombre + "?",
-                    "Desasignar");
-                if (!ok) return;
-
-                var r = _controller.DesasignarRutina(a.Id);
-                if (r.ok)
-                {
-                    NotificacionWindow.MostrarExito(r.mensaje);
-                    CargarAsignacionesActuales();
-                    CargarRutinas();
-                }
-                else NotificacionWindow.MostrarError(r.mensaje);
-            });
-            Grid.SetColumn(btnDel, 2);
-            grid.Children.Add(btnDel);
-
-            fila.Child = grid;
-            return fila;
-        }
-
-        private void btnConfirmarAsignar_Click(object sender, RoutedEventArgs e)
-        {
-            var socio = cmbAsignarSocio.SelectedItem as SocioComboItem;
-            if (socio == null)
-            { NotificacionWindow.MostrarAdvertencia("Eleg un socio."); return; }
-
-            var r = _controller.AsignarRutina(_rutinaActual.Id, socio.Id, UsuarioId);
-            if (r.ok)
-            {
-                NotificacionWindow.MostrarExito(r.mensaje);
-                cmbAsignarSocio.SelectedIndex = -1;
-                CargarAsignacionesActuales();
                 CargarRutinas();
+                SeleccionarRutina(_rutinaActual.Id);
             }
-            else NotificacionWindow.MostrarError(r.mensaje);
         }
-
-        private void btnCerrarAsignar_Click(object sender, RoutedEventArgs e)
-            => CerrarPanel(panelAsignar);
 
         // ── HELPERS ───────────────────────────────────────────
-        private void txtSoloNumeros_PreviewTextInput(object sender, TextCompositionEventArgs e)
-            => e.Handled = !Regex.IsMatch(e.Text, @"^\d$");
-
-        private void AbrirPanel(Border panel)
-        {
-            panel.Visibility = Visibility.Visible;
-            panel.Opacity = 0;
-
-            var translate = new TranslateTransform { X = 60 };
-            panel.RenderTransform = translate;
-
-            var slide = new DoubleAnimation
-            {
-                From = 60,
-                To = 0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(350)),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-            translate.BeginAnimation(TranslateTransform.XProperty, slide);
-
-            var fade = new DoubleAnimation
-            {
-                From = 0,
-                To = 1,
-                Duration = new Duration(TimeSpan.FromMilliseconds(300))
-            };
-            panel.BeginAnimation(OpacityProperty, fade);
-        }
-
-        private void CerrarPanel(Border panel)
-        {
-            var fade = new DoubleAnimation
-            {
-                From = 1,
-                To = 0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(180)),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
-            };
-            fade.Completed += (s, e) =>
-            {
-                panel.Visibility = Visibility.Collapsed;
-                panel.RenderTransform = null;
-            };
-            panel.BeginAnimation(OpacityProperty, fade);
-        }
-
         private static BitmapImage BytesABitmapImage(byte[] bytes)
         {
             using (var ms = new MemoryStream(bytes))

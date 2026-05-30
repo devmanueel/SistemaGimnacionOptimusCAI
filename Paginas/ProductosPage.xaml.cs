@@ -4,9 +4,7 @@
 //  Catálogo de productos con cards visuales:
 //   · Cada producto es una card de 220×320 con foto, nombre,
 //     precio, stock y badge de estado.
-//   · Click en una card abre el panel lateral con detalle/edición.
-//   · En modo edición aparece el panel de "ajustar stock"
-//     con botones + y − para sumar/restar inventario.
+//   · Click en una card abre ventana emergente para edición.
 //   · Filtros por stock + categoría.
 //
 //  Compatible con C# 7.3.
@@ -14,19 +12,13 @@
 
 using Controllers;
 using Entities;
-using Microsoft.Win32;
 using SistemaGimnacionOptimusCAI.Helpers;
+using SistemaGimnacionOptimusCAI.Ventanas;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace SistemaGimnacionOptimusCAI.Paginas
 {
@@ -34,20 +26,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
     {
         private readonly ProductoController _controller = new ProductoController();
 
-        private bool _esNuevo = true;
-        private long _idEditar = 0;
-        private byte[] _fotoBytes = null;
         private string _filtroStock = "todos";
-        private string _filtroCategoria = null;   // null = todas
-        private Producto _productoActual = null;
-
-        // Cache para no consultar la BD al filtrar
+        private string _filtroCategoria = null;
         private List<Producto> _todosLosProductos = new List<Producto>();
 
         public ProductosPage()
         {
             InitializeComponent();
-
             ResaltarChip(chipTodos);
             CargarCategoriasFiltro();
             CargarProductos();
@@ -96,7 +81,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 {
                     Content = "Todas las categorías",
                     Tag = null,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
+                    Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                     IsSelected = true
                 });
 
@@ -110,7 +95,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     });
                 }
             }
-            catch { /* silencioso */ }
+            catch { }
         }
 
         // ─────────────────────────────────────────────────────
@@ -125,7 +110,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             int mostrados = 0;
             foreach (var p in _todosLosProductos)
             {
-                // Filtro de búsqueda
                 if (buscar.Length > 0)
                 {
                     bool coincide = p.Nombre.ToLower().Contains(buscar)
@@ -133,11 +117,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     if (!coincide) continue;
                 }
 
-                // Filtro de categoría
                 if (_filtroCategoria != null && p.Categoria != _filtroCategoria)
                     continue;
 
-                // Filtro de stock
                 if (_filtroStock == "sin_stock" && !p.SinStock) continue;
                 if (_filtroStock == "bajo_stock" && !p.BajoStock) continue;
                 if (_filtroStock == "con_stock" && !p.ConStock) continue;
@@ -151,9 +133,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 : Visibility.Collapsed;
         }
 
-        /// <summary>
-        /// Construye una card visual para un producto.
-        /// </summary>
         private Border CrearCardProducto(Producto p)
         {
             var card = new Border
@@ -164,12 +143,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 RenderTransform = new ScaleTransform(1, 1)
             };
 
-            // Click en la card abre el formulario en modo edición
-            card.MouseLeftButtonUp += (s, e) => AbrirParaEditar(p);
+            card.MouseLeftButtonUp += (s, e) => AbrirVentanaEditar(p);
 
             var stack = new StackPanel();
 
-            // ── Imagen del producto ──
             var contenedorFoto = new Border
             {
                 Height = 150,
@@ -201,7 +178,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 gridFoto.Children.Add(emoji);
             }
 
-            // Badge de stock arriba a la derecha
             var badgeEstado = new Border
             {
                 CornerRadius = new CornerRadius(4),
@@ -231,7 +207,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             badgeEstado.Child = lblBadge;
             gridFoto.Children.Add(badgeEstado);
 
-            // Badge inactivo (si está desactivado)
             if (!p.Activo)
             {
                 var capaInactivo = new Border
@@ -260,10 +235,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Background = new SolidColorBrush(Color.FromRgb(30, 40, 30))
             });
 
-            // ── Datos abajo ──
             var infoStack = new StackPanel { Margin = new Thickness(14, 12, 14, 12) };
 
-            // Categoría
             if (!string.IsNullOrEmpty(p.Categoria))
             {
                 var lblCat = new TextBlock
@@ -277,7 +250,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 infoStack.Children.Add(lblCat);
             }
 
-            // Nombre
             var lblNombre = new TextBlock
             {
                 Text = p.Nombre,
@@ -292,7 +264,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             };
             infoStack.Children.Add(lblNombre);
 
-            // Precio + stock
             var gridFooter = new Grid();
             gridFooter.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             gridFooter.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -326,7 +297,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             infoStack.Children.Add(gridFooter);
 
-            // Botón toggle activo/inactivo
             var btnToggle = new Button
             {
                 Content = p.Activo ? "DESACTIVAR" : "REACTIVAR",
@@ -375,15 +345,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             Button[] chips = { chipTodos, chipConStock, chipBajoStock, chipSinStock };
             foreach (var c in chips)
             {
-                // Al asignar el estilo completo, recuperás el espaciado y los efectos automáticos
                 if (c == seleccionado)
-                {
                     c.Style = (Style)FindResource("BotonChipActivoEstilo");
-                }
                 else
-                {
                     c.Style = (Style)FindResource("BotonChipEstilo");
-                }
             }
         }
 
@@ -396,11 +361,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ─────────────────────────────────────────────────────
-        // BOTÓN TOGGLE en cada card
+        // TOGGLE en cada card
         // ─────────────────────────────────────────────────────
         private void BtnToggle_Click(object sender, RoutedEventArgs e)
         {
-            e.Handled = true;  // Evita que dispare el click de la card
+            e.Handled = true;
             var btn = sender as Button;
             if (btn == null || btn.Tag == null) return;
 
@@ -418,334 +383,42 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ─────────────────────────────────────────────────────
-        // BOTONES PRINCIPALES
+        // VENTANAS EMERGENTES
         // ─────────────────────────────────────────────────────
         private void btnNuevo_Click(object sender, RoutedEventArgs e)
         {
-            _esNuevo = true;
-            _idEditar = 0;
-            _productoActual = null;
-            LimpiarFormulario();
-            LimpiarErrores();
-
-            lblTituloFormulario.Text = "NUEVO PRODUCTO";
-            txtStock.IsEnabled = true;
-            lblStock.Text = "STOCK INICIAL";
-            panelAjusteStock.Visibility = Visibility.Collapsed;
-
-            AbrirFormulario();
-        }
-
-        private void AbrirParaEditar(Producto p)
-        {
-            _esNuevo = false;
-            _idEditar = p.Id;
-            _productoActual = p;
-            LimpiarErrores();
-
-            lblTituloFormulario.Text = "EDITAR PRODUCTO";
-            txtNombre.Text = p.Nombre;
-            txtDescripcion.Text = p.Descripcion ?? string.Empty;
-            cmbCategoria.Text = p.Categoria ?? string.Empty;
-            txtPrecio.Text = p.Precio.ToString("F0");
-            ActualizarPreviewPrecio();
-
-            // Stock NO editable acá (se ajusta con los botones + / -)
-            txtStock.Text = p.Stock.ToString();
-            txtStock.IsEnabled = false;
-            lblStock.Text = "STOCK ACTUAL";
-            txtStockMin.Text = p.StockMin.ToString();
-
-            _fotoBytes = null;
-            if (p.Foto != null && p.Foto.Length > 0)
+            var win = new ProductoWindow();
+            win.Owner = Window.GetWindow(this);
+            win.ModoNuevo();
+            if (win.ShowDialog() == true)
             {
-                imgFotoFormulario.Source = BytesABitmapImage(p.Foto);
-                lblSinFoto.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                imgFotoFormulario.Source = null;
-                lblSinFoto.Visibility = Visibility.Visible;
-            }
-
-            // Mostrar panel de ajuste de stock
-            panelAjusteStock.Visibility = Visibility.Visible;
-            txtCantidadAjuste.Text = "0";
-            ActualizarLabelStock(p.Stock);
-
-            AbrirFormulario();
-        }
-
-        private void btnSubirFoto_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new OpenFileDialog
-            {
-                Title = "Seleccionar foto del producto",
-                Filter = "Imágenes (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png"
-            };
-            if (dialog.ShowDialog() != true) return;
-
-            try
-            {
-                _fotoBytes = File.ReadAllBytes(dialog.FileName);
-                imgFotoFormulario.Source = BytesABitmapImage(_fotoBytes);
-                lblSinFoto.Visibility = Visibility.Collapsed;
-            }
-            catch (Exception ex)
-            {
-                NotificacionWindow.MostrarError("No se pudo cargar la imagen.\n" + ex.Message);
+                CargarProductos();
+                CargarCategoriasFiltro();
             }
         }
 
-        private void btnGuardar_Click(object sender, RoutedEventArgs e)
+        private void AbrirVentanaEditar(Producto p)
         {
-            if (!ValidarTodo()) return;
-
-            decimal precio = 0; decimal.TryParse(txtPrecio.Text, out precio);
-            int stock = 0; int.TryParse(txtStock.Text, out stock);
-            int stockMin = 0; int.TryParse(txtStockMin.Text, out stockMin);
-
-            string categoria = (cmbCategoria.Text ?? string.Empty).Trim();
-
-            if (_esNuevo)
+            var win = new ProductoWindow();
+            win.Owner = Window.GetWindow(this);
+            win.ModoEditar(p);
+            if (win.ShowDialog() == true)
             {
-                var r = _controller.Insertar(
-                    txtNombre.Text, txtDescripcion.Text, categoria,
-                    precio, stock, stockMin, _fotoBytes);
-
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-                NotificacionWindow.MostrarExito(r.mensaje, "¡Producto creado!");
+                CargarProductos();
+                CargarCategoriasFiltro();
             }
-            else
-            {
-                // Aplicar ajuste de stock si la cantidad es distinta de 0
-                int cantidadAjuste = 0;
-                int.TryParse(txtCantidadAjuste.Text, out cantidadAjuste);
-
-                if (cantidadAjuste != 0)
-                {
-                    string tipo = cantidadAjuste > 0 ? "sumar" : "restar";
-                    int cantidadAbs = cantidadAjuste > 0 ? cantidadAjuste : -cantidadAjuste;
-                    var rStock = _controller.AjustarStock(_idEditar, tipo, cantidadAbs);
-                    if (!rStock.ok)
-                    {
-                        NotificacionWindow.MostrarError(rStock.mensaje);
-                        return;
-                    }
-                }
-
-                var r = _controller.Modificar(
-                    _idEditar, txtNombre.Text, txtDescripcion.Text, categoria,
-                    precio, stockMin, _fotoBytes);
-
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-                NotificacionWindow.MostrarExito(r.mensaje, "¡Producto actualizado!");
-            }
-
-            CerrarFormulario();
-            CargarProductos();
-            CargarCategoriasFiltro();
-        }
-
-        private void btnCancelar_Click(object sender, RoutedEventArgs e) => CerrarFormulario();
-
-        // ─────────────────────────────────────────────────────
-        // AJUSTE DE STOCK
-        // ─────────────────────────────────────────────────────
-        private void btnSumarStock_Click(object sender, RoutedEventArgs e)
-        {
-            int cantidad = 0;
-            int.TryParse(txtCantidadAjuste.Text, out cantidad);
-            cantidad++;
-            txtCantidadAjuste.Text = cantidad.ToString();
-        }
-
-        private void btnRestarStock_Click(object sender, RoutedEventArgs e)
-        {
-            int cantidad = 0;
-            int.TryParse(txtCantidadAjuste.Text, out cantidad);
-            if (cantidad > 0)
-                cantidad--;
-            txtCantidadAjuste.Text = cantidad.ToString();
-        }
-
-        private void ActualizarLabelStock(int stock)
-        {
-            if (stock == 0)
-            {
-                lblStockActual.Text = "Sin stock";
-                lblStockActual.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
-            }
-            else if (stock == 1)
-            {
-                lblStockActual.Text = "1 unidad";
-                lblStockActual.Foreground = new SolidColorBrush(Color.FromRgb(255, 167, 38));
-            }
-            else
-            {
-                lblStockActual.Text = stock + " unidades";
-                lblStockActual.Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232));
-            }
-        }
-
-        // ─────────────────────────────────────────────────────
-        // VALIDACIONES
-        // ─────────────────────────────────────────────────────
-        private void txtNombre_LostFocus(object sender, RoutedEventArgs e)
-        {
-            string err = null;
-            if (string.IsNullOrWhiteSpace(txtNombre.Text)) err = "El nombre es obligatorio.";
-            else if (txtNombre.Text.Trim().Length < 2) err = "Debe tener al menos 2 caracteres.";
-            AplicarEstadoCampo(txtNombre, errNombre, err);
-        }
-
-        private void txtPrecio_LostFocus(object sender, RoutedEventArgs e)
-        {
-            decimal precio = 0;
-            string err = null;
-            if (string.IsNullOrWhiteSpace(txtPrecio.Text))
-                err = "El precio es obligatorio.";
-            else if (!decimal.TryParse(txtPrecio.Text, out precio) || precio <= 0)
-                err = "El precio debe ser mayor a $0.";
-            AplicarEstadoCampo(txtPrecio, errPrecio, err);
-            ActualizarPreviewPrecio();
-        }
-
-        private void ActualizarPreviewPrecio()
-        {
-            decimal precio = 0;
-            if (decimal.TryParse(txtPrecio.Text, out precio) && precio > 0)
-            {
-                lblPreviewPrecio.Text = "$" + precio.ToString("N0");
-                panelPreviewPrecio.Visibility = Visibility.Visible;
-            }
-            else panelPreviewPrecio.Visibility = Visibility.Collapsed;
-        }
-
-        private void txtPrecio_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !Regex.IsMatch(e.Text, @"^[\d]$");
-        }
-
-        private void txtSoloNumeros_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !Regex.IsMatch(e.Text, @"^[\d]$");
-        }
-
-        private bool ValidarTodo()
-        {
-            bool ok = true;
-
-            string e1 = null;
-            if (string.IsNullOrWhiteSpace(txtNombre.Text)) e1 = "El nombre es obligatorio.";
-            else if (txtNombre.Text.Trim().Length < 2) e1 = "Debe tener al menos 2 caracteres.";
-            AplicarEstadoCampo(txtNombre, errNombre, e1);
-            if (e1 != null) ok = false;
-
-            decimal precio = 0;
-            string e2 = null;
-            if (string.IsNullOrWhiteSpace(txtPrecio.Text)) e2 = "El precio es obligatorio.";
-            else if (!decimal.TryParse(txtPrecio.Text, out precio) || precio <= 0)
-                e2 = "El precio debe ser mayor a $0.";
-            AplicarEstadoCampo(txtPrecio, errPrecio, e2);
-            if (e2 != null) ok = false;
-
-            return ok;
-        }
-
-        private void AplicarEstadoCampo(TextBox campo, TextBlock labelError, string mensaje)
-        {
-            if (mensaje != null)
-            {
-                campo.Style = (Style)Resources["InputErrorEstilo"];
-                labelError.Text = mensaje;
-                labelError.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                campo.Style = (Style)Resources["InputEstilo"];
-                labelError.Text = string.Empty;
-                labelError.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        private void LimpiarErrores()
-        {
-            errNombre.Visibility = Visibility.Collapsed;
-            errPrecio.Visibility = Visibility.Collapsed;
-            txtNombre.Style = (Style)Resources["InputEstilo"];
-            txtPrecio.Style = (Style)Resources["InputEstilo"];
-        }
-
-        // ─────────────────────────────────────────────────────
-        // ANIMACIONES
-        // ─────────────────────────────────────────────────────
-        private void AbrirFormulario()
-        {
-            panelFormulario.Visibility = Visibility.Visible;
-            panelFormulario.Opacity = 0;
-
-            var translate = new TranslateTransform { X = 60 };
-            panelFormulario.RenderTransform = translate;
-
-            var slide = new DoubleAnimation
-            {
-                From = 60,
-                To = 0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(350)),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-            translate.BeginAnimation(TranslateTransform.XProperty, slide);
-
-            var fade = new DoubleAnimation { From = 0, To = 1, Duration = new Duration(TimeSpan.FromMilliseconds(300)) };
-            panelFormulario.BeginAnimation(OpacityProperty, fade);
-        }
-
-        private void CerrarFormulario()
-        {
-            var fade = new DoubleAnimation
-            {
-                From = 1,
-                To = 0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(180)),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
-            };
-            fade.Completed += (s, e) =>
-            {
-                panelFormulario.Visibility = Visibility.Collapsed;
-                LimpiarFormulario();
-                LimpiarErrores();
-            };
-            panelFormulario.BeginAnimation(OpacityProperty, fade);
         }
 
         // ─────────────────────────────────────────────────────
         // HELPERS
         // ─────────────────────────────────────────────────────
-        private void LimpiarFormulario()
+        private static System.Windows.Media.Imaging.BitmapImage BytesABitmapImage(byte[] bytes)
         {
-            txtNombre.Text = string.Empty;
-            txtDescripcion.Text = string.Empty;
-            cmbCategoria.Text = string.Empty;
-            txtPrecio.Text = string.Empty;
-            txtStock.Text = "0";
-            txtStockMin.Text = "5";
-            txtCantidadAjuste.Text = "0";
-            imgFotoFormulario.Source = null;
-            lblSinFoto.Visibility = Visibility.Visible;
-            _fotoBytes = null;
-            panelPreviewPrecio.Visibility = Visibility.Collapsed;
-            panelAjusteStock.Visibility = Visibility.Collapsed;
-            _idEditar = 0;
-        }
-
-        private static BitmapImage BytesABitmapImage(byte[] bytes)
-        {
-            using (var ms = new MemoryStream(bytes))
+            using (var ms = new System.IO.MemoryStream(bytes))
             {
-                var bmp = new BitmapImage();
+                var bmp = new System.Windows.Media.Imaging.BitmapImage();
                 bmp.BeginInit();
-                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
                 bmp.StreamSource = ms;
                 bmp.EndInit();
                 return bmp;

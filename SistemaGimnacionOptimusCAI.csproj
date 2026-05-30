@@ -234,6 +234,50 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Ventanas\MovimientoCajaWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\NuevoMensajeWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\GenerarAvisosWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\ProductoWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\ActividadWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\UsuarioWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\RutinaWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\BloqueWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\EjercicioWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\AsignarRutinaWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\MembresiaWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Paginas\EnrolarHuellaWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -310,6 +354,39 @@
     </Compile>
     <Compile Include="Ventanas\NuevoSocioWindow.xaml.cs">
       <DependentUpon>Ventanas\NuevoSocioWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\MovimientoCajaWindow.xaml.cs">
+      <DependentUpon>Ventanas\MovimientoCajaWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\NuevoMensajeWindow.xaml.cs">
+      <DependentUpon>Ventanas\NuevoMensajeWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\GenerarAvisosWindow.xaml.cs">
+      <DependentUpon>Ventanas\GenerarAvisosWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\ProductoWindow.xaml.cs">
+      <DependentUpon>Ventanas\ProductoWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\ActividadWindow.xaml.cs">
+      <DependentUpon>Ventanas\ActividadWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\UsuarioWindow.xaml.cs">
+      <DependentUpon>Ventanas\UsuarioWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\RutinaWindow.xaml.cs">
+      <DependentUpon>Ventanas\RutinaWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\BloqueWindow.xaml.cs">
+      <DependentUpon>Ventanas\BloqueWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\EjercicioWindow.xaml.cs">
+      <DependentUpon>Ventanas\EjercicioWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\AsignarRutinaWindow.xaml.cs">
+      <DependentUpon>Ventanas\AsignarRutinaWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\MembresiaWindow.xaml.cs">
+      <DependentUpon>Ventanas\MembresiaWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\EnrolarHuellaWindow.xaml.cs">
       <DependentUpon>EnrolarHuellaWindow.xaml</DependentUpon>

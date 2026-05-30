@@ -1,0 +1,165 @@
+<Window x:Class="SistemaGimnacionOptimusCAI.Ventanas.MovimientoCajaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        Title="Movimiento de Caja"
+        Width="560" Height="680"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="InputErrorEstilo" TargetType="TextBox" BasedOn="{StaticResource InputEstilo}">
+                <Setter Property="Background" Value="#1E0A0A"/>
+                <Setter Property="BorderBrush" Value="{StaticResource ColorError}"/>
+                <Setter Property="BorderThickness" Value="1.5"/>
+            </Style>
+
+            <Style x:Key="LabelCampoEstilo" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="FontFamily" Value="Segoe UI Semibold, Segoe UI"/>
+                <Setter Property="Margin" Value="2,0,0,6"/>
+            </Style>
+
+            <Style x:Key="LabelErrorEstilo" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="Foreground" Value="#FF5555"/>
+                <Setter Property="Margin" Value="4,-10,0,8"/>
+                <Setter Property="FontStyle" Value="Italic"/>
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Border Background="{StaticResource Bg1}"
+            CornerRadius="14"
+            BorderBrush="{StaticResource Border1}"
+            BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="4"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border x:Name="lineaSuperior" Grid.Row="0" Background="#00E676" CornerRadius="14,14,0,0"/>
+
+            <Grid Grid.Row="1" Margin="24,18,24,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal">
+                        <fa:ImageAwesome x:Name="iconoFormulario"
+                                         Icon="PlusCircle"
+                                         Foreground="#00E676"
+                                         Height="16" Width="16"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,8,0"/>
+                        <TextBlock x:Name="lblTituloFormulario" Text="REGISTRAR INGRESO"
+                                   FontFamily="Bahnschrift SemiBold, Segoe UI"
+                                   FontSize="15" FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="✕"
+                        Width="28" Height="28"
+                        Background="Transparent" BorderThickness="0"
+                        Foreground="{StaticResource TextMuted}"
+                        FontSize="14" Cursor="Hand"
+                        Click="btnCerrar_Click"/>
+            </Grid>
+
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                          Margin="24,14,24,0"
+                          Style="{StaticResource PanelScrollViewerStyle}">
+                <StackPanel>
+                    <TextBlock Text="CONCEPTO *" Style="{StaticResource LabelCampoEstilo}"/>
+                    <ComboBox x:Name="cmbConcepto" BorderThickness="0" Background="Transparent"
+                              Foreground="{StaticResource TextPrimary}" VerticalContentAlignment="Center"
+                              FontSize="13" Padding="10,0" Style="{StaticResource ComboBoxEstilo}">
+                        <ComboBox.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
+                        </ComboBox.Resources>
+                    </ComboBox>
+                    <TextBlock x:Name="errConcepto" Style="{StaticResource LabelErrorEstilo}"/>
+
+                    <TextBlock Text="MONTO * ($)" Style="{StaticResource LabelCampoEstilo}"/>
+                    <TextBox x:Name="txtMonto" Style="{StaticResource InputEstilo}"
+                             PreviewTextInput="txtMonto_PreviewTextInput"
+                             LostFocus="txtMonto_LostFocus"/>
+                    <TextBlock x:Name="errMonto" Style="{StaticResource LabelErrorEstilo}"/>
+
+                    <Border x:Name="panelPreviewMonto" Background="{StaticResource Bg3}" CornerRadius="8"
+                            Padding="12,8" Margin="0,0,0,14" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal">
+                            <fa:ImageAwesome x:Name="iconoPreviewMonto"
+                                             Icon="PlusCircle"
+                                             Foreground="#00E676"
+                                             Height="16" Width="16"
+                                             VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock x:Name="lblPreviewMonto" Text="$0"
+                                       FontFamily="Consolas" FontSize="18" FontWeight="Bold"
+                                       Foreground="#00E676" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="MÉTODO DE PAGO *" Style="{StaticResource LabelCampoEstilo}"/>
+                    <ComboBox x:Name="cmbMetodoPago" BorderThickness="0" Background="Transparent"
+                              Style="{StaticResource ComboBoxEstilo}"
+                              Foreground="{StaticResource TextPrimary}" VerticalContentAlignment="Center"
+                              FontSize="13" Padding="10,0">
+                        <ComboBox.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
+                        </ComboBox.Resources>
+                        <ComboBoxItem Content="Efectivo" Tag="efectivo" Foreground="{StaticResource TextPrimary}" IsSelected="True"/>
+                        <ComboBoxItem Content="Transferencia" Tag="transferencia" Foreground="{StaticResource TextPrimary}"/>
+                        <ComboBoxItem Content="Tarjeta" Tag="tarjeta" Foreground="{StaticResource TextPrimary}"/>
+                        <ComboBoxItem Content="Otro" Tag="otro" Foreground="{StaticResource TextPrimary}"/>
+                    </ComboBox>
+
+                    <TextBlock Text="DETALLE (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
+                    <Border Background="{StaticResource Bg2}" CornerRadius="10"
+                            BorderBrush="{StaticResource Border1}" BorderThickness="1.5"
+                            Margin="0,0,0,14">
+                        <TextBox x:Name="txtDetalle"
+                                 Background="Transparent" BorderThickness="0"
+                                 Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource GreenMid}"
+                                 FontSize="13" Padding="14,10"
+                                 AcceptsReturn="True" TextWrapping="Wrap"
+                                 Height="80" VerticalScrollBarVisibility="Auto"/>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Grid Grid.Row="3" Margin="24,12,24,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="Cancelar"
+                        Style="{StaticResource BotonDangerLargoEstilo}"
+                        Margin="0,0,8,0" Click="btnCancelar_Click"/>
+                <Button x:Name="btnGuardar" Grid.Column="1" Content="REGISTRAR"
+                        Style="{StaticResource BotonPrincipalEstilo}"
+                        Margin="8,0,0,0" Click="btnGuardar_Click"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

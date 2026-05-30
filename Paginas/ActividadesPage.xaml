@@ -201,14 +201,10 @@
 
         <!-- ══════════════════ CONTENIDO ══════════════════ -->
         <Grid Grid.Row="3">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
 
             <!-- DATAGRID -->
-            <Border Grid.Column="0" Background="{StaticResource Bg1}" CornerRadius="12"
-                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Margin="0,0,14,0" ClipToBounds="True">
+            <Border Background="{StaticResource Bg1}" CornerRadius="12"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3"/>
@@ -337,150 +333,6 @@
                 </Grid>
             </Border>
 
-            <!-- ══════════ PANEL FORMULARIO ══════════ -->
-            <Border x:Name="panelFormulario" Grid.Column="1" Width="380"
-                    Background="{StaticResource Bg1}" CornerRadius="12"
-                    BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                    Visibility="Collapsed" ClipToBounds="True">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="4"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Línea superior -->
-                    <Border Grid.Row="0">
-                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
-                    </Border>
-
-                    <StackPanel Grid.Row="1" Margin="22,18,22,0">
-                        <TextBlock x:Name="lblTituloFormulario" Text="NUEVA ACTIVIDAD"
-                                   FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                   FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
-                    </StackPanel>
-
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="22,14,22,0" Style="{StaticResource PanelScrollViewerStyle}">
-                        <StackPanel>
-
-                            <!-- NOMBRE -->
-                            <TextBlock Text="NOMBRE DE LA ACTIVIDAD *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtNombre" Style="{StaticResource InputEstilo}"
-                                     LostFocus="txtNombre_LostFocus"/>
-                            <TextBlock x:Name="errNombre" Style="{StaticResource LabelErrorEstilo}"/>
-
-                            <!-- TIPO -->
-                            <TextBlock Text="TIPO *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <ComboBox x:Name="cmbTipo" Style="{StaticResource ComboBoxEstilo}" 
-                                      Margin="0,0,0,14" SelectionChanged="cmbTipo_SelectionChanged">
-                                    <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
-                                    </ComboBox.Resources>
-                                    <ComboBoxItem Content="Mensual"            Tag="mensual"            Foreground="{StaticResource TextPrimary}"/>
-                                    <ComboBoxItem Content="Mensual con clases" Tag="mensual_con_clases" Foreground="{StaticResource TextPrimary}"/>
-                                </ComboBox>
-
-                            <!-- DÍAS/SESIONES POR SEMANA -->
-                            <TextBlock x:Name="lblDias" Text="DÍAS POR SEMANA *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtDias" Style="{StaticResource InputEstilo}"
-                                     MaxLength="1"
-                                     PreviewTextInput="txtDias_PreviewTextInput"/>
-                            <TextBlock x:Name="errDias" Style="{StaticResource LabelErrorEstilo}"/>
-
-                            <!-- SELECTOR DE DÍAS (checkboxes Lun-Sáb) -->
-                            <TextBlock x:Name="lblSelectorDias" Text="DÍAS HABILITADOS"
-                                       Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border x:Name="panelDias" Background="Transparent" 
-        Margin="0,0,0,14">
-                                <WrapPanel>
-                                    <CheckBox x:Name="chkLun" Content="Lunes"     Tag="1" Style="{DynamicResource DiaCheckEstilo}"/>
-                                    <CheckBox x:Name="chkMar" Content="Martes"    Tag="2" Style="{StaticResource DiaCheckEstilo}"/>
-                                    <CheckBox x:Name="chkMie" Content="Miércoles" Tag="3" Style="{StaticResource DiaCheckEstilo}"/>
-                                    <CheckBox x:Name="chkJue" Content="Jueves"    Tag="4" Style="{StaticResource DiaCheckEstilo}"/>
-                                    <CheckBox x:Name="chkVie" Content="Viernes"   Tag="5" Style="{StaticResource DiaCheckEstilo}"/>
-                                    <CheckBox x:Name="chkSab" Content="Sábado"    Tag="6" Style="{StaticResource DiaCheckEstilo}"/>
-                                </WrapPanel>
-                            </Border>
-
-                            <!-- PRECIO -->
-                            <TextBlock Text="PRECIO * ($)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtPrecio" Style="{StaticResource InputEstilo}"
-                                     PreviewTextInput="txtPrecio_PreviewTextInput"
-                                     LostFocus="txtPrecio_LostFocus"/>
-                            <TextBlock x:Name="errPrecio" Style="{StaticResource LabelErrorEstilo}"/>
-
-                            <!-- Preview del precio -->
-                            <Border x:Name="panelPreviewPrecio" 
-        Background="#0A1A0A" 
-        CornerRadius="8"
-        Padding="12,8" 
-        Margin="0,0,0,14"
-        RenderTransformOrigin="0.5,0.5">
-
-                                <Border.RenderTransform>
-                                    <TranslateTransform Y="10"/>
-                                </Border.RenderTransform>
-
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Opacity" Value="0"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Text, ElementName=lblPreviewPrecio}" Value="$0">
-                                                <DataTrigger.EnterActions>
-                                                    <BeginStoryboard>
-                                                        <Storyboard>
-                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.2"/>
-                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="10" Duration="0:0:0.2"/>
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </DataTrigger.EnterActions>
-
-                                                <DataTrigger.ExitActions>
-                                                    <BeginStoryboard>
-                                                        <Storyboard>
-                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.3"/>
-                                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" To="0" Duration="0:0:0.4">
-                                                                <DoubleAnimation.EasingFunction>
-                                                                    <CircleEase EasingMode="EaseOut"/>
-                                                                </DoubleAnimation.EasingFunction>
-                                                            </DoubleAnimation>
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </DataTrigger.ExitActions>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="💰" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                    <TextBlock x:Name="lblPreviewPrecio" Text="$0"
-                   FontFamily="Consolas" FontSize="18" FontWeight="Bold"
-                   Foreground="#00E676" VerticalAlignment="Center"/>
-                                </StackPanel>
-                            </Border>
-
-                        </StackPanel>
-                    </ScrollViewer>
-
-                    <!-- Botones -->
-                    <Grid Grid.Row="3" Margin="22,12,22,18">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Cancelar"
-                                Style="{StaticResource BotonDangerLargoEstilo}"
-                                Margin="0,0,8,0" Click="btnCancelar_Click"/>
-                        <Button x:Name="btnGuardar" Grid.Column="1" Content="GUARDAR"
-                                Style="{StaticResource BotonPrincipalEstilo}"
-                                Margin="8,0,0,0" Click="btnGuardar_Click"/>
-                    </Grid>
-                </Grid>
-            </Border>
         </Grid>
     </Grid>
 </Page>
