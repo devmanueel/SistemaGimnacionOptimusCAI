@@ -2,453 +2,363 @@
 //  Helpers/BiometricService.cs
 //
 //  Servicio de alto nivel para el lector de huellas digitales.
-//  Usa la Windows Biometric Framework API (winbio.dll) con un
-//  pool privado y base de datos propia para identificar socios
-//  sin depender de cuentas de Windows.
+//  Usa el SDK DigitalPersona One Touch for Windows (.NET):
+//  DPFPDevNET / DPFPEngNET / DPFPShrNET / DPFPVerNET.
+//
+//  El lector se instala con el driver DigitalPersona (servicio
+//  DpHost), NO con Windows Biometric Framework. Cada socio tiene
+//  un GUID lógico (huella_guid) y su template serializado se
+//  guarda en SQL (huella_template). La identificación es 1:N:
+//  se compara la muestra contra cada template con DPFP.Verification.
+//
+//  IMPORTANTE: las DLLs son x86 mixed-mode → la app debe
+//  compilarse con PlatformTarget x86.
 //
 //  Compatible con C# 7.3 / .NET 4.7.2.
 // ============================================================
 
 using System;
-using System.Runtime.InteropServices;
-using System.ServiceProcess;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace SistemaGimnacionOptimusCAI.Helpers
 {
     public sealed class BiometricService : IDisposable
     {
-        // GUID fijo de la base de datos privada del sistema gimnasio.
-        // No cambiar: es el identificador que usa WBF para nuestra DB.
-        private static readonly Guid DB_GUID = new Guid("A9F3B2C1-D4E5-4F78-9ABC-1234567890AB");
+        // Número de capturas que pide el enrolamiento DigitalPersona (por defecto 4).
+        private const int CAPTURAS_OBJETIVO = 4;
 
-        private uint[] _unitIds = new uint[0];
-        private uint   _session;     // handle activo, 0 = cerrado
-        private bool   _disponible;
+        // FAR objetivo de la verificación: 1 en 100.000 (valor recomendado por DigitalPersona).
+        private const int FAR_REQUERIDO = int.MaxValue / 100000;
 
-        public bool   Disponible     => _disponible;
-        public string MensajeEstado  { get; private set; } = "No inicializado";
+        private bool _disponible;
+        private LectorCaptura _activo;   // captura en curso (para poder cancelarla)
+
+        public bool   Disponible    => _disponible;
+        public string MensajeEstado { get; private set; } = "No inicializado";
 
         // ── Inicialización ──────────────────────────────────────
 
         /// <summary>
-        /// Detecta el lector, crea la base de datos privada si no existe,
-        /// y abre la sesión de identificación.  Llamar en hilo secundario.
+        /// Detecta el lector vía el SDK DigitalPersona. Llamar en hilo secundario.
         /// </summary>
         public bool Inicializar()
         {
             try
             {
-                // Asegurar que el servicio Windows Biometric esté corriendo
-                if (!AsegurarServicioWbio())
-                    return false;
-
-                // 1. Detectar unidades biométricas
-                _unitIds = EnumerarUnidades();
-                if (_unitIds.Length == 0)
+                var lectores = new DPFP.Capture.ReadersCollection();
+                if (lectores.Count == 0)
                 {
-                    MensajeEstado = "No se detectó ningún lector de huellas conectado.";
+                    _disponible = false;
+                    MensajeEstado = "No se detectó ningún lector de huellas.\n" +
+                                    "Verificá que esté conectado y que el servicio " +
+                                    "DigitalPersona (DpHost) esté en ejecución.";
                     return false;
                 }
 
-                // 2. Verificar / crear la base de datos privada
-                if (!AsegurarBaseDeDatos())
-                    return false;   // MensajeEstado ya seteado
+                string producto = null;
+                foreach (var kv in lectores)
+                {
+                    producto = kv.Value.ProductName;
+                    break;
+                }
 
-                // 3. Abrir sesión avanzada (permite identificar y enrolar)
-                if (!AbrirSesion())
-                    return false;
-
-                _disponible  = true;
-                MensajeEstado = "Lector de huellas listo (" + _unitIds.Length + " unidad(es)).";
+                _disponible = true;
+                MensajeEstado = "Lector de huellas listo" +
+                                (producto != null ? " (" + producto + ")." : ".");
                 return true;
             }
             catch (Exception ex)
             {
-                MensajeEstado = "Error al inicializar el lector: " + ex.Message;
+                _disponible = false;
+                MensajeEstado = "No se pudo inicializar el lector DigitalPersona.\n" +
+                                "¿Está corriendo el servicio DpHost?\n" + ex.Message;
                 return false;
-            }
-        }
-
-        // ── Servicio Windows Biometric ──────────────────────────
-
-        private bool AsegurarServicioWbio()
-        {
-            try
-            {
-                using (var sc = new ServiceController("WbioSrvc"))
-                {
-                    if (sc.Status == ServiceControllerStatus.Running)
-                        return true;
-
-                    if (sc.Status == ServiceControllerStatus.Stopped)
-                    {
-                        sc.Start();
-                        sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(10));
-                    }
-
-                    return sc.Status == ServiceControllerStatus.Running;
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                MensajeEstado = "El servicio Windows Biometric Framework no está instalado.";
-                return false;
-            }
-            catch (System.ComponentModel.Win32Exception)
-            {
-                MensajeEstado = "No se pudo iniciar el servicio biométrico.\n" +
-                                "Ejecutá el programa como Administrador o iniciá el servicio manualmente.";
-                return false;
-            }
-            catch (System.TimeoutException)
-            {
-                MensajeEstado = "El servicio biométrico tardó demasiado en iniciar.";
-                return false;
-            }
-        }
-
-        // ── Enumeración de unidades ─────────────────────────────
-
-        private uint[] EnumerarUnidades()
-        {
-            IntPtr ptr;
-            IntPtr countPtr;
-            int hr = WinBioNative.WinBioEnumBiometricUnits(
-                WinBioNative.WINBIO_TYPE_FINGERPRINT, out ptr, out countPtr);
-
-            if (hr != WinBioNative.S_OK || ptr == IntPtr.Zero) return new uint[0];
-
-            int count = countPtr.ToInt32();
-            if (count <= 0)
-            {
-                WinBioNative.WinBioFree(ptr);
-                return new uint[0];
-            }
-
-            int sz = Marshal.SizeOf(typeof(WinBioNative.WINBIO_UNIT_SCHEMA));
-            var ids = new uint[count];
-            for (int i = 0; i < count; i++)
-            {
-                var schema = (WinBioNative.WINBIO_UNIT_SCHEMA)
-                    Marshal.PtrToStructure(IntPtr.Add(ptr, i * sz),
-                                           typeof(WinBioNative.WINBIO_UNIT_SCHEMA));
-                ids[i] = schema.UnitId;
-            }
-            WinBioNative.WinBioFree(ptr);
-            return ids;
-        }
-
-        // ── Gestión de la base de datos privada ─────────────────
-
-        private bool AsegurarBaseDeDatos()
-        {
-            // Verificar si ya existe nuestra DB privada
-            if (BaseDeDatosExiste()) return true;
-
-            // Necesita ejecutarse como administrador para crear la DB
-            return CrearBaseDeDatos();
-        }
-
-        private bool BaseDeDatosExiste()
-        {
-            IntPtr ptr;
-            IntPtr countPtr;
-            int hr = WinBioNative.WinBioEnumDatabases(
-                WinBioNative.WINBIO_TYPE_FINGERPRINT, out ptr, out countPtr);
-            if (hr != WinBioNative.S_OK || ptr == IntPtr.Zero) return false;
-
-            int count = countPtr.ToInt32();
-            int sz = Marshal.SizeOf(typeof(WinBioNative.WINBIO_STORAGE_SCHEMA));
-            bool encontrada = false;
-
-            for (int i = 0; i < count && !encontrada; i++)
-            {
-                var schema = (WinBioNative.WINBIO_STORAGE_SCHEMA)
-                    Marshal.PtrToStructure(IntPtr.Add(ptr, i * sz),
-                                           typeof(WinBioNative.WINBIO_STORAGE_SCHEMA));
-                if (schema.DatabaseId == DB_GUID) encontrada = true;
-            }
-            WinBioNative.WinBioFree(ptr);
-            return encontrada;
-        }
-
-        private bool CrearBaseDeDatos()
-        {
-            // Obtener el DataFormat del sistema (de una DB existente del sensor)
-            Guid dataFormat = ObtenerFormatoDato();
-
-            // Obtener el schema de la primera unidad para asociarla
-            IntPtr ptr;
-            IntPtr countPtr;
-            int hr = WinBioNative.WinBioEnumBiometricUnits(
-                WinBioNative.WINBIO_TYPE_FINGERPRINT, out ptr, out countPtr);
-            if (hr != WinBioNative.S_OK || ptr == IntPtr.Zero)
-            {
-                MensajeEstado = "No se pudo obtener información del lector.";
-                return false;
-            }
-
-            var unitSchema = (WinBioNative.WINBIO_UNIT_SCHEMA)
-                Marshal.PtrToStructure(ptr, typeof(WinBioNative.WINBIO_UNIT_SCHEMA));
-            WinBioNative.WinBioFree(ptr);
-
-            Guid dbGuid = DB_GUID;
-            hr = WinBioNative.WinBioCreateDatabase(
-                ref unitSchema, ref dbGuid, ref dataFormat, null, null);
-
-            if (hr == WinBioNative.S_OK || hr == WinBioNative.WINBIO_E_DATABASE_ALREADY_EXISTS)
-                return true;
-
-            MensajeEstado = string.Format(
-                "No se pudo crear la base de datos de huellas (0x{0:X8}).\n" +
-                "Ejecutá el programa como Administrador la primera vez.", hr);
-            return false;
-        }
-
-        private Guid ObtenerFormatoDato()
-        {
-            // Reutiliza el DataFormat de una DB existente del sensor
-            IntPtr ptr;
-            IntPtr countPtr;
-            int hr = WinBioNative.WinBioEnumDatabases(
-                WinBioNative.WINBIO_TYPE_FINGERPRINT, out ptr, out countPtr);
-            if (hr != WinBioNative.S_OK || ptr == IntPtr.Zero || countPtr.ToInt32() == 0)
-                return Guid.Empty;
-
-            var schema = (WinBioNative.WINBIO_STORAGE_SCHEMA)
-                Marshal.PtrToStructure(ptr, typeof(WinBioNative.WINBIO_STORAGE_SCHEMA));
-            WinBioNative.WinBioFree(ptr);
-            return schema.DataFormat;
-        }
-
-        // ── Sesión ──────────────────────────────────────────────
-
-        private bool AbrirSesion()
-        {
-            Guid dbGuid = DB_GUID;
-            var dbHandle = GCHandle.Alloc(dbGuid, GCHandleType.Pinned);
-            try
-            {
-                int hr = WinBioNative.WinBioOpenSession(
-                    WinBioNative.WINBIO_TYPE_FINGERPRINT,
-                    WinBioNative.WINBIO_POOL_PRIVATE,
-                    WinBioNative.WINBIO_FLAG_ADVANCED,
-                    _unitIds,
-                    new IntPtr(_unitIds.Length),
-                    dbHandle.AddrOfPinnedObject(),
-                    out _session);
-
-                if (hr != WinBioNative.S_OK)
-                {
-                    MensajeEstado = string.Format(
-                        "No se pudo abrir la sesión biométrica (0x{0:X8}).", hr);
-                    return false;
-                }
-                return true;
-            }
-            finally
-            {
-                dbHandle.Free();
-            }
-        }
-
-        private void CerrarSesion()
-        {
-            if (_session != 0)
-            {
-                WinBioNative.WinBioCancel(_session);
-                WinBioNative.WinBioCloseSession(_session);
-                _session = 0;
-            }
-        }
-
-        // Interrumpe cualquier operación bloqueante (Identify, EnrollCapture, etc.)
-        public void Cancelar()
-        {
-            if (_session != 0) WinBioNative.WinBioCancel(_session);
-        }
-
-        // ── Identificación continua ─────────────────────────────
-
-        /// <summary>
-        /// Bucle bloqueante que espera huellas y llama a <paramref name="callback"/>
-        /// con el GUID del socio identificado (null si no se reconoce).
-        /// Diseñado para correr en Task.Run; se detiene con el CancellationToken.
-        /// </summary>
-        public void IniciarIdentificacion(CancellationToken token, Action<Guid?> callback)
-        {
-            if (!_disponible || _session == 0) return;
-
-            // Al cancelar: interrumpir la llamada bloqueante a WinBioIdentify
-            using (token.Register(() => WinBioNative.WinBioCancel(_session)))
-            {
-                while (!token.IsCancellationRequested)
-                {
-                    uint unitId;
-                    WinBioNative.WINBIO_IDENTITY identity;
-                    byte subFactor;
-                    uint rejectDetail;
-
-                    int hr = WinBioNative.WinBioIdentify(
-                        _session, out unitId, out identity, out subFactor, out rejectDetail);
-
-                    if (token.IsCancellationRequested) break;
-
-                    if (hr == WinBioNative.S_OK && identity.Type == WinBioNative.WINBIO_ID_TYPE_GUID)
-                    {
-                        callback(identity.Guid);
-                        Thread.Sleep(1500); // pausa para no procesar el mismo dedo dos veces
-                    }
-                    else if (hr == WinBioNative.WINBIO_E_CANCELED)
-                    {
-                        break;
-                    }
-                    else if (hr == WinBioNative.WINBIO_E_UNKNOWN_ID ||
-                             hr == WinBioNative.WINBIO_E_NO_MATCH)
-                    {
-                        callback(null); // huella no registrada en el sistema
-                        Thread.Sleep(800);
-                    }
-                    // WINBIO_E_BAD_CAPTURE y otros: simplemente reintentar
-                }
             }
         }
 
         // ── Enrolamiento ────────────────────────────────────────
 
         /// <summary>
-        /// Enrola la huella de un socio con su GUID.  Requiere 4 capturas correctas.
-        /// <paramref name="onProgreso"/> recibe (capturaActual, mensaje).
-        /// Retorna (true, "") si exitoso, (false, motivo) si falla.
+        /// Captura huellas hasta formar un template y lo devuelve serializado.
+        /// <paramref name="onProgreso"/> recibe (capturasHechas, mensaje).
+        /// Retorna (true, mensaje, template) si exitoso, (false, motivo, null) si falla.
         /// </summary>
-        public (bool exito, string mensaje) Enrollar(
-            Guid huellaGuid,
+        public (bool exito, string mensaje, byte[] template) Enrollar(
             Action<int, string> onProgreso,
             CancellationToken token)
         {
-            if (!_disponible || _session == 0)
-                return (false, "El lector no está disponible.");
+            if (!_disponible)
+                return (false, "El lector no está disponible.", null);
 
-            const int CAPTURAS_REQUERIDAS = 4;
+            var extractor  = new DPFP.Processing.FeatureExtraction();
+            var enrollment = new DPFP.Processing.Enrollment();
 
-            // Iniciar enrolamiento para el primer lector disponible
-            int hrBegin = WinBioNative.WinBioEnrollBegin(
-                _session, WinBioNative.WINBIO_SUBTYPE_ANY, _unitIds[0]);
-
-            if (!WinBioNative.Exitoso(hrBegin))
-                return (false, string.Format("No se pudo iniciar el enrolamiento (0x{0:X8}).", hrBegin));
-
-            int capturas = 0;
-            try
+            using (var lector = new LectorCaptura())
             {
-                while (capturas < CAPTURAS_REQUERIDAS && !token.IsCancellationRequested)
+                _activo = lector;
+                try
                 {
-                    onProgreso(capturas, string.Format(
-                        "Apoyá tu dedo en el lector... ({0}/{1})", capturas + 1, CAPTURAS_REQUERIDAS));
+                    lector.Iniciar();
 
-                    uint rejectDetail;
-                    int hr = WinBioNative.WinBioEnrollCaptureSample(_session, out rejectDetail);
+                    while (!token.IsCancellationRequested)
+                    {
+                        var estado = enrollment.TemplateStatus;
+                        if (estado == DPFP.Processing.Enrollment.Status.Ready ||
+                            estado == DPFP.Processing.Enrollment.Status.Failed)
+                            break;
+
+                        int hechas = Math.Max(0,
+                            CAPTURAS_OBJETIVO - (int)enrollment.FeaturesNeeded);
+
+                        onProgreso(hechas, string.Format(
+                            "Apoyá tu dedo en el lector... ({0}/{1})",
+                            Math.Min(hechas + 1, CAPTURAS_OBJETIVO), CAPTURAS_OBJETIVO));
+
+                        var muestra = lector.EsperarMuestra(token);
+                        if (muestra == null) break; // cancelado
+
+                        var features = ExtraerFeatures(
+                            extractor, muestra, DPFP.Processing.DataPurpose.Enrollment);
+
+                        if (features == null)
+                        {
+                            onProgreso(hechas, "Captura de baja calidad. Levantá el dedo y reintentá.");
+                            continue;
+                        }
+
+                        try { enrollment.AddFeatures(features); }
+                        catch
+                        {
+                            onProgreso(hechas, "Captura no válida. Reintentá apoyando bien el dedo.");
+                            continue;
+                        }
+
+                        if (enrollment.TemplateStatus ==
+                            DPFP.Processing.Enrollment.Status.Failed)
+                        {
+                            enrollment.Clear();
+                            onProgreso(0, "No se logró formar la huella. Empezá de nuevo.");
+                            continue;
+                        }
+
+                        int hechasAhora = Math.Max(0,
+                            CAPTURAS_OBJETIVO - (int)enrollment.FeaturesNeeded);
+                        if (enrollment.TemplateStatus !=
+                            DPFP.Processing.Enrollment.Status.Ready)
+                            onProgreso(hechasAhora, "Levantá el dedo y volvé a apoyar");
+                    }
 
                     if (token.IsCancellationRequested)
+                        return (false, "Enrolamiento cancelado.", null);
+
+                    if (enrollment.TemplateStatus == DPFP.Processing.Enrollment.Status.Ready)
                     {
-                        WinBioNative.WinBioEnrollDiscard(_session);
-                        return (false, "Enrolamiento cancelado.");
+                        onProgreso(CAPTURAS_OBJETIVO, "Procesando template...");
+                        byte[] bytes = enrollment.Template.Bytes;
+                        if (bytes == null || bytes.Length == 0)
+                            return (false, "No se pudo serializar la huella. Intentá de nuevo.", null);
+
+                        return (true, "Huella registrada correctamente.", bytes);
                     }
 
-                    if (hr == WinBioNative.WINBIO_E_CANCELED)
-                    {
-                        WinBioNative.WinBioEnrollDiscard(_session);
-                        return (false, "Enrolamiento cancelado.");
-                    }
-                    else if (hr == WinBioNative.WINBIO_E_BAD_CAPTURE)
-                    {
-                        onProgreso(capturas, WinBioNative.DescribirRechazo(rejectDetail));
-                        Thread.Sleep(600);
-                    }
-                    else if (WinBioNative.Exitoso(hr))
-                    {
-                        capturas++;
-                        if (capturas < CAPTURAS_REQUERIDAS)
-                            onProgreso(capturas, "Levantá el dedo y volvé a apoyar");
-                        else
-                            onProgreso(capturas, "Procesando template...");
-
-                        Thread.Sleep(400);
-                    }
-                    else
-                    {
-                        WinBioNative.WinBioEnrollDiscard(_session);
-                        return (false, string.Format("Error en la captura (0x{0:X8}).", hr));
-                    }
+                    return (false, "No se pudo completar el enrolamiento. Intentá de nuevo.", null);
                 }
-
-                if (token.IsCancellationRequested)
+                catch (Exception ex)
                 {
-                    WinBioNative.WinBioEnrollDiscard(_session);
-                    return (false, "Enrolamiento cancelado.");
+                    return (false, "Error inesperado durante el enrolamiento: " + ex.Message, null);
                 }
-
-                // Intentar completar el enrolamiento
-                var identity = new WinBioNative.WINBIO_IDENTITY
+                finally
                 {
-                    Type = WinBioNative.WINBIO_ID_TYPE_GUID,
-                    Guid = huellaGuid
-                };
-                bool isNew;
-                int hrCommit = WinBioNative.WinBioEnrollCommit(_session, ref identity, out isNew);
-
-                if (hrCommit == WinBioNative.WINBIO_E_ENROLLMENT_INCOMPLETE)
-                {
-                    // Necesita más capturas — pedir una más
-                    WinBioNative.WinBioEnrollDiscard(_session);
-                    return (false, "Calidad insuficiente. Intentá el enrolamiento de nuevo.");
+                    lector.Detener();
+                    _activo = null;
                 }
-
-                if (!WinBioNative.Exitoso(hrCommit))
-                {
-                    WinBioNative.WinBioEnrollDiscard(_session);
-                    return (false, string.Format("No se pudo guardar la huella (0x{0:X8}).", hrCommit));
-                }
-
-                return (true, isNew ? "Huella registrada correctamente." : "Huella actualizada correctamente.");
             }
-            catch (Exception ex)
+        }
+
+        // ── Identificación continua ─────────────────────────────
+
+        /// <summary>
+        /// Bucle bloqueante: espera huellas, las compara 1:N contra
+        /// <paramref name="plantillas"/> y llama a <paramref name="callback"/>
+        /// con el GUID del socio identificado (null si no se reconoce).
+        /// Diseñado para correr en Task.Run; se detiene con el CancellationToken.
+        /// </summary>
+        public void IniciarIdentificacion(
+            IReadOnlyList<(Guid guid, byte[] template)> plantillas,
+            CancellationToken token,
+            Action<Guid?> callback)
+        {
+            if (!_disponible) return;
+
+            var extractor   = new DPFP.Processing.FeatureExtraction();
+            var verificador = new DPFP.Verification.Verification(FAR_REQUERIDO);
+
+            // Reconstruir los templates DPFP una sola vez
+            var lista = new List<(Guid guid, DPFP.Template tpl)>();
+            if (plantillas != null)
             {
-                try { WinBioNative.WinBioEnrollDiscard(_session); } catch { }
-                return (false, "Error inesperado: " + ex.Message);
+                foreach (var p in plantillas)
+                {
+                    if (p.template == null || p.template.Length == 0) continue;
+                    try
+                    {
+                        var t = new DPFP.Template();
+                        t.DeSerialize(p.template);
+                        lista.Add((p.guid, t));
+                    }
+                    catch { /* template corrupto: ignorar */ }
+                }
+            }
+
+            using (var lector = new LectorCaptura())
+            {
+                _activo = lector;
+                try
+                {
+                    lector.Iniciar();
+
+                    while (!token.IsCancellationRequested)
+                    {
+                        var muestra = lector.EsperarMuestra(token);
+                        if (muestra == null) break; // cancelado
+
+                        var features = ExtraerFeatures(
+                            extractor, muestra, DPFP.Processing.DataPurpose.Verification);
+                        if (features == null) continue; // mala captura: reintentar
+
+                        Guid? match = null;
+                        foreach (var item in lista)
+                        {
+                            var result = new DPFP.Verification.Verification.Result();
+                            try { verificador.Verify(features, item.tpl, ref result); }
+                            catch { continue; }
+
+                            if (result.Verified)
+                            {
+                                match = item.guid;
+                                break;
+                            }
+                        }
+
+                        callback(match); // null = huella no registrada
+                        Thread.Sleep(match.HasValue ? 1500 : 800);
+                    }
+                }
+                finally
+                {
+                    lector.Detener();
+                    _activo = null;
+                }
             }
         }
 
         // ── Eliminación de huella ───────────────────────────────
 
-        /// <summary>Elimina el template del socio de la base de datos WBF.</summary>
+        /// <summary>
+        /// Con DigitalPersona el template vive en SQL, no en el lector,
+        /// así que el borrado real lo hace el SP. Se mantiene por
+        /// compatibilidad con el código que la llamaba.
+        /// </summary>
         public (bool exito, string mensaje) EliminarHuella(Guid huellaGuid)
         {
-            if (!_disponible || _session == 0)
-                return (false, "El lector no está disponible.");
+            return (true, "Huella eliminada.");
+        }
 
-            var identity = new WinBioNative.WINBIO_IDENTITY
+        // ── Cancelación ─────────────────────────────────────────
+
+        /// <summary>Interrumpe la captura en curso (enrolamiento o identificación).</summary>
+        public void Cancelar()
+        {
+            try { _activo?.Detener(); } catch { }
+        }
+
+        // ── Helpers ─────────────────────────────────────────────
+
+        private static DPFP.FeatureSet ExtraerFeatures(
+            DPFP.Processing.FeatureExtraction extractor,
+            DPFP.Sample muestra,
+            DPFP.Processing.DataPurpose proposito)
+        {
+            var feedback = DPFP.Capture.CaptureFeedback.None;
+            var features = new DPFP.FeatureSet();
+            try
             {
-                Type = WinBioNative.WINBIO_ID_TYPE_GUID,
-                Guid = huellaGuid
-            };
-
-            int hr = WinBioNative.WinBioDeleteTemplate(
-                _session, _unitIds[0], ref identity, WinBioNative.WINBIO_SUBTYPE_ANY);
-
-            if (WinBioNative.Exitoso(hr))
-                return (true, "Huella eliminada del lector.");
-
-            if (hr == WinBioNative.WINBIO_E_UNKNOWN_ID)
-                return (true, "La huella ya no estaba registrada en el lector.");
-
-            return (false, string.Format("Error al eliminar la huella (0x{0:X8}).", hr));
+                extractor.CreateFeatureSet(muestra, proposito, ref feedback, ref features);
+            }
+            catch
+            {
+                return null;
+            }
+            return feedback == DPFP.Capture.CaptureFeedback.Good ? features : null;
         }
 
         // ── IDisposable ─────────────────────────────────────────
 
-        public void Dispose() => CerrarSesion();
+        public void Dispose()
+        {
+            try { _activo?.Detener(); } catch { }
+            _activo = null;
+        }
+
+        // ════════════════════════════════════════════════════════
+        //  Captura del lector — adapta el modelo por eventos del SDK
+        //  a una espera bloqueante con cancelación.
+        // ════════════════════════════════════════════════════════
+        private sealed class LectorCaptura : DPFP.Capture.EventHandler, IDisposable
+        {
+            private readonly DPFP.Capture.Capture _capture;
+            private readonly BlockingCollection<DPFP.Sample> _muestras =
+                new BlockingCollection<DPFP.Sample>(new ConcurrentQueue<DPFP.Sample>());
+            private volatile bool _activo;
+
+            public LectorCaptura()
+            {
+                _capture = new DPFP.Capture.Capture();
+                _capture.EventHandler = this;
+            }
+
+            public void Iniciar()
+            {
+                _activo = true;
+                _capture.StartCapture();
+            }
+
+            public void Detener()
+            {
+                _activo = false;
+                try { _capture.StopCapture(); } catch { }
+            }
+
+            /// <summary>Bloquea hasta la próxima muestra. Devuelve null si se cancela.</summary>
+            public DPFP.Sample EsperarMuestra(CancellationToken token)
+            {
+                try { return _muestras.Take(token); }
+                catch (OperationCanceledException) { return null; }
+                catch (ObjectDisposedException)    { return null; }
+                catch (InvalidOperationException)  { return null; }
+            }
+
+            // ── Eventos del SDK ──────────────────────────────────
+            public void OnComplete(object capture, string serie, DPFP.Sample muestra)
+            {
+                if (_activo) { try { _muestras.Add(muestra); } catch { } }
+            }
+
+            public void OnFingerTouch(object capture, string serie) { }
+            public void OnFingerGone(object capture, string serie) { }
+            public void OnReaderConnect(object capture, string serie) { }
+            public void OnReaderDisconnect(object capture, string serie) { }
+            public void OnSampleQuality(object capture, string serie,
+                                        DPFP.Capture.CaptureFeedback feedback) { }
+
+            public void Dispose()
+            {
+                Detener();
+                _muestras.Dispose();
+            }
+        }
     }
 
     // ── Singleton estático (igual a SesionManager) ──────────────
@@ -461,7 +371,7 @@ namespace SistemaGimnacionOptimusCAI.Helpers
 
         /// <summary>
         /// Inicializa el servicio en hilo secundario y retorna inmediatamente.
-        /// El resultado se puede leer desde Servicio.Disponible / Servicio.MensajeEstado.
+        /// El resultado se lee desde Servicio.Disponible / Servicio.MensajeEstado.
         /// </summary>
         public static void InicializarAsync()
         {

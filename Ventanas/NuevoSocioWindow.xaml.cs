@@ -30,10 +30,11 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
         private readonly MembresiaController  _membresiaCtrl  = new MembresiaController();
 
         // ── Estado interno ────────────────────────────────────
-        private int    _pasoActual  = 1;
-        private long   _socioId     = 0;
-        private int    _numeroSocio = 0;
-        private byte[] _fotoBytes   = null;
+        private int    _pasoActual   = 1;
+        private long   _socioId      = 0;
+        private int    _numeroSocio  = 0;
+        private byte[] _fotoBytes    = null;
+        private Socio  _socioCreado  = null;
 
         public NuevoSocioWindow()
         {
@@ -124,6 +125,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 return;
             }
 
+            _socioCreado = resultadoSocio.socioCreado;
             _socioId     = resultadoSocio.socioCreado.Id;
             _numeroSocio = resultadoSocio.socioCreado.NumeroSocio;
 
@@ -163,9 +165,19 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
             if (registrarHuella)
             {
-                NotificacionWindow.MostrarAdvertencia(
-                    "El registro de huella digital estará disponible próximamente.",
-                    "Próximamente");
+                var svc = BiometricManager.Servicio;
+                if (svc != null && svc.Disponible && _socioCreado != null)
+                {
+                    var win = new Paginas.EnrolarHuellaWindow(_socioCreado) { Owner = this };
+                    win.ShowDialog();
+                }
+                else
+                {
+                    NotificacionWindow.MostrarAdvertencia(
+                        "El lector de huellas no está disponible en este momento.\n" +
+                        (svc?.MensajeEstado ?? "Podés registrar la huella más tarde desde la ficha del socio."),
+                        "Lector no disponible");
+                }
             }
 
             DialogResult = true;

@@ -412,5 +412,49 @@ namespace Models.Dao
             }
             return null;
         }
+
+        /// <summary>Guarda el GUID lógico y el template biométrico serializado del socio.</summary>
+        public void GuardarHuella(long socioId, Guid guid, byte[] template)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_SocioGuardarHuella", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", socioId);
+                    cmd.Parameters.AddWithValue("@HuellaGuid", guid);
+                    var pTpl = cmd.Parameters.Add("@Template", SqlDbType.VarBinary, -1);
+                    pTpl.Value = (object)template ?? DBNull.Value;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>Devuelve (guid, template) de todos los socios activos con huella registrada.</summary>
+        public List<(Guid guid, byte[] template)> ObtenerHuellas()
+        {
+            var lista = new List<(Guid guid, byte[] template)>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_SociosConHuella", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (var r = cmd.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            if (r["huella_guid"] == DBNull.Value ||
+                                r["huella_template"] == DBNull.Value) continue;
+                            lista.Add((
+                                (Guid)r["huella_guid"],
+                                (byte[])r["huella_template"]));
+                        }
+                    }
+                }
+            }
+            return lista;
+        }
     }
 }

@@ -104,6 +104,26 @@ namespace Entities
             }
         }
 
+        /// <summary>
+        /// Texto del estado para la tabla "Actividades que realiza" de la ficha:
+        /// "AL DÍA" / "POR VENCER" / "VENCIDA" / "CANCELADA" / "SUSPENDIDA".
+        /// </summary>
+        public string EstadoActividadDisplay
+        {
+            get
+            {
+                switch (EstadoVisual)
+                {
+                    case "activa":     return "AL DÍA";
+                    case "por_vencer": return "POR VENCER";
+                    case "vencida":    return "VENCIDA";
+                    case "cancelada":  return "CANCELADA";
+                    case "suspendida": return "SUSPENDIDA";
+                    default:           return EstadoTexto.ToUpper();
+                }
+            }
+        }
+
         /// <summary>Texto del método de pago capitalizado.</summary>
         public string MetodoPagoTexto
         {

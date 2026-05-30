@@ -750,7 +750,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var socio = ObtenerSocioDeFila(sender);
             if (socio == null) return;
 
-            AbrirPanelMembresia(socio.MembresiaId);
+            // Editar los datos personales del socio en un popup (no el plan).
+            var win = new EditarSocioWindow(socio.Id) { Owner = Window.GetWindow(this) };
+            if (win.ShowDialog() == true)
+            {
+                CargarSocios();
+                ActualizarStats();
+            }
         }
 
         private void btnToggleEstado_Click(object sender, RoutedEventArgs e)
