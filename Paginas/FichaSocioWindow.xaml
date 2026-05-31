@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
-        Title="Ficha de Socio"
-        Height="640" Width="900"
+        Title="Ficha del Socio"
+        Height="660" Width="940"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         ShowInTaskbar="False"
@@ -18,6 +18,37 @@
                 <ResourceDictionary Source="/MiDiccionario.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <helpers:ByteToImageConverter x:Key="ByteToImage"/>
+
+            <!-- Estilo de botón del panel derecho de la ficha -->
+            <Style x:Key="BtnFichaPanel" TargetType="Button">
+                <Setter Property="Height" Value="38"/>
+                <Setter Property="Margin" Value="0,0,0,8"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Background" Value="#1565C0"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                    CornerRadius="8" Padding="14,0">
+                                <ContentPresenter VerticalAlignment="Center"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bd" Property="Opacity" Value="0.88"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="bd" Property="Opacity" Value="0.45"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -25,210 +56,444 @@
             BorderBrush="{StaticResource Border2}" BorderThickness="1.5">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>   <!-- Barra título -->
+                <RowDefinition Height="*"/>      <!-- Contenido -->
+                <RowDefinition Height="Auto"/>   <!-- Footer -->
             </Grid.RowDefinitions>
 
-            <!-- HEADER -->
+            <!-- ════════════ BARRA TÍTULO ════════════ -->
             <Border Grid.Row="0" Background="{StaticResource Bg2}" CornerRadius="16,16,0,0"
-                    Padding="24,18">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Foto circular -->
-                    <Border Grid.Column="0" Width="72" Height="72" CornerRadius="36"
-                            Background="{StaticResource Bg3}" Margin="0,0,18,0">
-                        <Border.Clip>
-                            <EllipseGeometry Center="36,36" RadiusX="36" RadiusY="36"/>
-                        </Border.Clip>
-                        <Image x:Name="imgFoto" Stretch="UniformToFill"/>
-                    </Border>
-
-                    <!-- Datos principales -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock x:Name="lblNombre" Text="—" FontSize="22" FontWeight="Bold"
-                                   Foreground="{StaticResource TextPrimary}"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                            <TextBlock x:Name="lblNumeroSocio" Text="#0000" FontSize="13"
-                                       Foreground="{StaticResource GreenMain}" FontWeight="SemiBold"
-                                       Margin="0,0,14,0"/>
-                            <Border x:Name="badgeEstado" CornerRadius="8" Padding="10,2"
-                                    Background="{StaticResource Bg4}" Margin="0,0,14,0">
-                                <TextBlock x:Name="lblEstado" Text="—" FontSize="10" FontWeight="Bold"
-                                           Foreground="{StaticResource GreenMain}"/>
-                            </Border>
-                            <TextBlock x:Name="lblCelular" Text="" FontSize="12"
-                                       Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- Botones header -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
-                        <Button x:Name="btnHuella" Click="btnHuella_Click"
-                                Style="{StaticResource BotonSecundarioEstilo}"
-                                Height="40" Padding="14,0" FontSize="12" Margin="0,0,8,0" Cursor="Hand"
-                                ToolTip="Registrar huella dactilar del socio">
-                            <StackPanel Orientation="Horizontal">
-                                <fa:ImageAwesome x:Name="iconBtnHuella"
-                                                 Icon="HandPaperOutline"
-                                                 Foreground="{StaticResource TextPrimary}"
-                                                 Height="14" Width="14" Margin="0,0,6,0"/>
-                                <TextBlock x:Name="lblBtnHuella" Text="HUELLA"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                        <Button Content="GENERAR CARNET" Click="btnGenerarCarnet_Click"
-                                Style="{StaticResource BotonPrincipalEstilo}"
-                                Height="40" Padding="20,0" FontSize="12" Margin="0,0,8,0" Cursor="Hand"/>
-                        <Button Content="X" Click="btnCerrar_Click"
-                                Width="36" Height="36" FontSize="16" FontWeight="Bold"
-                                Foreground="{StaticResource TextMuted}" Background="Transparent"
-                                BorderThickness="0" Cursor="Hand"/>
-                    </StackPanel>
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0,0,0,1"
+                    MouseLeftButtonDown="Barra_MouseLeftButtonDown">
+                <Grid Height="48">
+                    <TextBlock Text="FICHA DEL SOCIO"
+                               FontSize="16" FontWeight="Bold"
+                               Foreground="{StaticResource ColorNaranja}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Button Content="✕" Click="btnCerrar_Click"
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Margin="0,0,12,0" Width="32" Height="32"
+                            FontSize="13" FontWeight="Bold"
+                            Foreground="#FF7777" Background="Transparent"
+                            BorderThickness="0" Cursor="Hand"/>
                 </Grid>
             </Border>
 
-            <!-- CONTENIDO CON TABS -->
-            <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0"
-                        Margin="0" Padding="0">
-                <TabControl.Resources>
-                    <Style TargetType="TabItem">
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
-                        <Setter Property="FontSize" Value="12"/>
-                        <Setter Property="FontWeight" Value="SemiBold"/>
-                        <Setter Property="Padding" Value="16,8"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="TabItem">
-                                    <Border x:Name="bd" Background="Transparent"
-                                            BorderThickness="0,0,0,2" BorderBrush="Transparent"
-                                            Padding="{TemplateBinding Padding}" Cursor="Hand">
-                                        <ContentPresenter ContentSource="Header"
-                                                          HorizontalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="bd" Property="BorderBrush"
-                                                    Value="{StaticResource GreenMain}"/>
-                                            <Setter Property="Foreground"
-                                                    Value="{StaticResource TextPrimary}"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </TabControl.Resources>
+            <!-- ════════════ CONTENIDO ════════════ -->
+            <Grid Grid.Row="1" Margin="24,18,24,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>  <!-- Cabecera: foto + datos + botones -->
+                    <RowDefinition Height="*"/>     <!-- Tabs -->
+                </Grid.RowDefinitions>
 
-                <!-- TAB MEMBRESÍAS -->
-                <TabItem Header="MEMBRESÍAS">
-                    <Grid Margin="20,12">
-                        <DataGrid x:Name="gridMembresias" IsReadOnly="True"
-                                  AutoGenerateColumns="False" CanUserAddRows="False"
-                                  Background="Transparent" BorderThickness="0"
-                                  RowHeaderWidth="0" RowHeight="44"
-                                  GridLinesVisibility="Horizontal"
-                                  HorizontalGridLinesBrush="#111811">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="ACTIVIDAD"    Binding="{Binding ActividadNombre}" Width="2*"/>
-                                <DataGridTextColumn Header="PLAN"         Binding="{Binding TipoPlanTexto}"   Width="1*"/>
-                                <DataGridTextColumn Header="ESTADO"       Binding="{Binding EstadoTexto}"     Width="1*"/>
-                                <DataGridTextColumn Header="VENCIMIENTO"  Binding="{Binding FechaVencimientoTexto}" Width="1.2*"/>
-                                <DataGridTextColumn Header="MONTO"        Binding="{Binding MontoTexto}"      Width="1*"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </TabItem>
+                <!-- ── Cabecera ── -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>  <!-- Foto -->
+                        <ColumnDefinition Width="*"/>     <!-- Datos -->
+                        <ColumnDefinition Width="210"/>   <!-- Panel botones -->
+                    </Grid.ColumnDefinitions>
 
-                <!-- TAB ASISTENCIAS -->
-                <TabItem Header="ASISTENCIAS">
-                    <Grid Margin="20,12">
-                        <DataGrid x:Name="gridAsistencias" IsReadOnly="True"
-                                  AutoGenerateColumns="False" CanUserAddRows="False"
-                                  Background="Transparent" BorderThickness="0"
-                                  RowHeaderWidth="0" RowHeight="40"
-                                  GridLinesVisibility="Horizontal"
-                                  HorizontalGridLinesBrush="#111811">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="FECHA Y HORA"  Binding="{Binding HoraAcceso}" Width="2*"/>
-                                <DataGridTextColumn Header="ACTIVIDAD"     Binding="{Binding ActividadNombre}" Width="2*"/>
-                                <DataGridTextColumn Header="RESULTADO"     Binding="{Binding ResultadoTexto}" Width="1.5*"/>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
-                </TabItem>
+                    <!-- Foto circular -->
+                    <Border Grid.Column="0" Width="84" Height="84" CornerRadius="42"
+                            Background="{StaticResource Bg3}" Margin="0,0,18,0"
+                            VerticalAlignment="Top">
+                        <Border.Clip>
+                            <EllipseGeometry Center="42,42" RadiusX="42" RadiusY="42"/>
+                        </Border.Clip>
+                        <Grid>
+                            <TextBlock Text="📷" FontSize="26" Opacity="0.45"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Image x:Name="imgFoto" Stretch="UniformToFill"/>
+                        </Grid>
+                    </Border>
 
-                <!-- TAB FICHA MÉDICA -->
-                <TabItem Header="FICHA MÉDICA">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="20,12"
-                                  Style="{StaticResource PanelScrollViewerStyle}">
-                        <StackPanel>
-                            <Grid Margin="0,0,0,16">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                    <TextBlock Text="PESO (KG)" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                                    <TextBox x:Name="txtPeso" Style="{StaticResource InputEstilo}" MaxLength="6"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Margin="4,0,4,0">
-                                    <TextBlock Text="ALTURA (CM)" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                                    <TextBox x:Name="txtAltura" Style="{StaticResource InputEstilo}" MaxLength="3"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="2" Margin="8,0,0,0">
-                                    <TextBlock Text="GRUPO SANGUÍNEO" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                                    <TextBox x:Name="txtGrupo" Style="{StaticResource InputEstilo}" MaxLength="5"/>
-                                </StackPanel>
-                            </Grid>
-                            <TextBlock Text="ENFERMEDADES" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                            <TextBox x:Name="txtEnfermedades" Style="{StaticResource InputEstilo}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
-                            <TextBlock Text="MEDICAMENTOS" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,16,0,6"/>
-                            <TextBox x:Name="txtMedicamentos" Style="{StaticResource InputEstilo}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
-                            <TextBlock Text="RESTRICCIONES FÍSICAS" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,16,0,6"/>
-                            <TextBox x:Name="txtRestricciones" Style="{StaticResource InputEstilo}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
-                            <Grid Margin="0,16,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                    <TextBlock Text="CONTACTO EMERGENCIA" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                                    <TextBox x:Name="txtContactoEmergencia" Style="{StaticResource InputEstilo}" MaxLength="150"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                    <TextBlock Text="TEL. EMERGENCIA" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                                    <TextBox x:Name="txtTelEmergencia" Style="{StaticResource InputEstilo}" MaxLength="20"/>
-                                </StackPanel>
-                            </Grid>
-                            <Grid Margin="0,16,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <CheckBox x:Name="chkApto" Content="APTO FÍSICO" Grid.Column="0"
-                                          Foreground="{StaticResource TextPrimary}" FontSize="12"
-                                          Margin="0,0,20,0" VerticalAlignment="Center"/>
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Text="FECHA APTO" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
-                                    <DatePicker x:Name="dpFechaApto" Style="{StaticResource DatePickerEstilo}" Width="160" HorizontalAlignment="Left"/>
-                                </StackPanel>
-                            </Grid>
-                            <TextBlock Text="OBSERVACIONES" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,16,0,6"/>
-                            <TextBox x:Name="txtObsMedicas" Style="{StaticResource InputEstilo}" Height="50" TextWrapping="Wrap" AcceptsReturn="True"/>
-                            <Button Content="GUARDAR FICHA MÉDICA" Click="btnGuardarFicha_Click"
-                                    Style="{StaticResource BotonPrincipalEstilo}"
-                                    Height="44" Width="Auto" Padding="28,0" Margin="0,20,0,0" HorizontalAlignment="Left"/>
+                    <!-- Datos del socio -->
+                    <StackPanel Grid.Column="1" Margin="0,0,16,0">
+                        <!-- Nombre + número + estado -->
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="lblNombre" Text="—" FontSize="22" FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock x:Name="lblNumeroSocio" Text="#0000" FontSize="13"
+                                       Foreground="{StaticResource ColorNaranja}" FontWeight="SemiBold"
+                                       VerticalAlignment="Bottom" Margin="12,0,0,3"/>
+                            <Border x:Name="badgeEstado" CornerRadius="8" Padding="10,2"
+                                    Background="{StaticResource Bg4}" Margin="12,0,0,2"
+                                    VerticalAlignment="Center">
+                                <TextBlock x:Name="lblEstado" Text="—" FontSize="10" FontWeight="Bold"
+                                           Foreground="{StaticResource GreenMain}"/>
+                            </Border>
                         </StackPanel>
-                    </ScrollViewer>
-                </TabItem>
-            </TabControl>
+
+                        <!-- Grilla de datos en 2 columnas -->
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Columna izquierda -->
+                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="DNI/ID: " Foreground="{StaticResource ColorNaranja}"
+                                               FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="lblDni" Foreground="{StaticResource TextPrimary}"
+                                               FontFamily="Consolas" FontSize="11"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Fecha nac.: " Foreground="{StaticResource ColorNaranja}"
+                                               FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="lblFechaNac" Foreground="{StaticResource TextPrimary}"
+                                               FontSize="11"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Domicilio: " Foreground="{StaticResource ColorNaranja}"
+                                               FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="lblDomicilio" Foreground="{StaticResource TextPrimary}"
+                                               FontSize="11" TextWrapping="Wrap" MaxWidth="220"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Teléfono: " Foreground="{StaticResource ColorNaranja}"
+                                               FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="lblCelular" Foreground="{StaticResource TextPrimary}"
+                                               FontFamily="Consolas" FontSize="11"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Columna derecha -->
+                            <StackPanel Grid.Column="1">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Sexo: " Foreground="{StaticResource ColorNaranja}"
+                                               FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="lblSexo" Foreground="{StaticResource TextPrimary}"
+                                               FontSize="11"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Edad: " Foreground="{StaticResource ColorNaranja}"
+                                               FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="lblEdad" Foreground="{StaticResource TextPrimary}"
+                                               FontSize="11"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                                    <TextBlock Text="Mail: " Foreground="{StaticResource ColorNaranja}"
+                                               FontSize="11" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="lblMail" Foreground="{StaticResource TextPrimary}"
+                                               FontSize="11" TextWrapping="Wrap" MaxWidth="220"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                    <Border x:Name="badgeApto" Background="#0A2A14" CornerRadius="6"
+                                            Padding="8,3" Margin="0,0,6,0" Visibility="Collapsed">
+                                        <TextBlock Text="Apto F." FontSize="10" FontWeight="Bold"
+                                                   Foreground="#4ADE80"/>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Observaciones -->
+                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                            <TextBlock Text="Observaciones: " Foreground="{StaticResource ColorNaranja}"
+                                       FontSize="11" FontWeight="SemiBold" VerticalAlignment="Top"/>
+                            <TextBlock x:Name="lblObservaciones" Foreground="{StaticResource TextMuted}"
+                                       FontSize="11" FontStyle="Italic" TextWrapping="Wrap" MaxWidth="380"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Panel de botones derecho -->
+                    <StackPanel Grid.Column="2" VerticalAlignment="Top">
+                        <Button x:Name="btnEditarDatos" Content="👤  Editar Datos"
+                                Style="{StaticResource BtnFichaPanel}" Background="#1565C0"
+                                Click="btnEditarDatos_Click"/>
+
+                        <Button x:Name="btnHuella" Click="btnHuella_Click"
+                                Style="{StaticResource BtnFichaPanel}" Background="#1565C0"
+                                ToolTip="Registrar / actualizar huella dactilar del socio">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:ImageAwesome x:Name="iconBtnHuella" Icon="HandPaperOutline"
+                                                 Foreground="White" Height="13" Width="13" Margin="0,0,8,0"/>
+                                <TextBlock x:Name="lblBtnHuella" Text="Registrar Huella" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button x:Name="btnNuevaMembresia" Content="🎫  Nueva Membresía"
+                                Style="{StaticResource BtnFichaPanel}" Background="#1565C0"
+                                Click="btnNuevaMembresia_Click"/>
+
+                        <Button x:Name="btnRutinas" Content="📋  Rutinas"
+                                Style="{StaticResource BtnFichaPanel}" Background="#1565C0"
+                                Click="btnRutinas_Click"/>
+
+                        <Button x:Name="btnGenerarCarnet" Content="🪪  Generar Carnet"
+                                Style="{StaticResource BtnFichaPanel}" Background="#1B5E20"
+                                Click="btnGenerarCarnet_Click"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- ── Tabs (Actividades / Asistencias / Ficha médica) ── -->
+                <TabControl Grid.Row="1" Background="Transparent" BorderThickness="0"
+                            Margin="0,16,0,0" Padding="0">
+                    <TabControl.Resources>
+                        <Style TargetType="TabItem">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="16,8"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TabItem">
+                                        <Border x:Name="bd" Background="Transparent"
+                                                BorderThickness="0,0,0,2" BorderBrush="Transparent"
+                                                Padding="{TemplateBinding Padding}" Cursor="Hand">
+                                            <ContentPresenter ContentSource="Header"
+                                                              HorizontalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="bd" Property="BorderBrush"
+                                                        Value="{StaticResource ColorNaranja}"/>
+                                                <Setter Property="Foreground"
+                                                        Value="{StaticResource TextPrimary}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TabControl.Resources>
+
+                    <!-- TAB ACTIVIDADES -->
+                    <TabItem x:Name="tabActividades" Header="ACTIVIDADES QUE REALIZA">
+                        <Grid Margin="20,14">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Header de tabla -->
+                            <Grid Grid.Row="0" Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="150"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Actividad" FontSize="10" FontWeight="Bold"
+                                           Foreground="{StaticResource TextMuted}"/>
+                                <TextBlock Grid.Column="1" Text="Vencimiento" FontSize="10" FontWeight="Bold"
+                                           Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="Estado" FontSize="10" FontWeight="Bold"
+                                           Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center"/>
+                            </Grid>
+                            <Border Grid.Row="1" Height="1" Background="{StaticResource Border1}" Margin="0,0,0,6"/>
+
+                            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                                          Style="{StaticResource PanelScrollViewerStyle}">
+                                <StackPanel>
+                                    <ItemsControl x:Name="listaActividades">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,0,0,8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="140"/>
+                                                        <ColumnDefinition Width="150"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding ActividadNombre}"
+                                                               FontSize="12" Foreground="{StaticResource TextSecondary}"
+                                                               VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding FechaVencimientoTexto}"
+                                                               FontSize="12" Foreground="{StaticResource TextMuted}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <Ellipse Width="9" Height="9" VerticalAlignment="Center"
+                                                                 Margin="0,0,6,0">
+                                                            <Ellipse.Style>
+                                                                <Style TargetType="Ellipse">
+                                                                    <Setter Property="Fill" Value="#4ADE80"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="por_vencer">
+                                                                            <Setter Property="Fill" Value="#FBBF24"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="vencida">
+                                                                            <Setter Property="Fill" Value="#F87171"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="cancelada">
+                                                                            <Setter Property="Fill" Value="#6A6A9A"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="suspendida">
+                                                                            <Setter Property="Fill" Value="#6A6A9A"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Ellipse.Style>
+                                                        </Ellipse>
+                                                        <TextBlock Text="{Binding EstadoActividadDisplay}"
+                                                                   FontSize="10" FontWeight="Bold">
+                                                            <TextBlock.Style>
+                                                                <Style TargetType="TextBlock">
+                                                                    <Setter Property="Foreground" Value="#4ADE80"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="por_vencer">
+                                                                            <Setter Property="Foreground" Value="#FBBF24"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="vencida">
+                                                                            <Setter Property="Foreground" Value="#F87171"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="cancelada">
+                                                                            <Setter Property="Foreground" Value="#6A6A9A"/>
+                                                                        </DataTrigger>
+                                                                        <DataTrigger Binding="{Binding EstadoVisual}" Value="suspendida">
+                                                                            <Setter Property="Foreground" Value="#6A6A9A"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </TextBlock.Style>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock x:Name="lblSinActividades" Text="Este socio no tiene actividades registradas."
+                                               FontSize="11" Foreground="{StaticResource TextMuted}" FontStyle="Italic"
+                                               Visibility="Collapsed" Margin="0,8,0,0"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- TAB ASISTENCIAS -->
+                    <TabItem Header="ASISTENCIAS">
+                        <Grid Margin="20,12">
+                            <DataGrid x:Name="gridAsistencias" IsReadOnly="True"
+                                      AutoGenerateColumns="False" CanUserAddRows="False"
+                                      Background="Transparent" BorderThickness="0"
+                                      RowHeaderWidth="0" RowHeight="40"
+                                      GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="#111811">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="FECHA Y HORA"  Binding="{Binding HoraAcceso}" Width="2*"/>
+                                    <DataGridTextColumn Header="ACTIVIDAD"     Binding="{Binding ActividadNombre}" Width="2*"/>
+                                    <DataGridTextColumn Header="RESULTADO"     Binding="{Binding ResultadoTexto}" Width="1.5*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- TAB FICHA MÉDICA -->
+                    <TabItem Header="FICHA MÉDICA">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="20,12"
+                                      Style="{StaticResource PanelScrollViewerStyle}">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="PESO (KG)" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <TextBox x:Name="txtPeso" Style="{StaticResource InputEstilo}" MaxLength="6"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="4,0,4,0">
+                                        <TextBlock Text="ALTURA (CM)" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <TextBox x:Name="txtAltura" Style="{StaticResource InputEstilo}" MaxLength="3"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Margin="8,0,0,0">
+                                        <TextBlock Text="GRUPO SANGUÍNEO" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <TextBox x:Name="txtGrupo" Style="{StaticResource InputEstilo}" MaxLength="5"/>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Text="ENFERMEDADES" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                                <TextBox x:Name="txtEnfermedades" Style="{StaticResource InputEstilo}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                <TextBlock Text="MEDICAMENTOS" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,16,0,6"/>
+                                <TextBox x:Name="txtMedicamentos" Style="{StaticResource InputEstilo}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                <TextBlock Text="RESTRICCIONES FÍSICAS" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,16,0,6"/>
+                                <TextBox x:Name="txtRestricciones" Style="{StaticResource InputEstilo}" Height="60" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                <Grid Margin="0,16,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="CONTACTO EMERGENCIA" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <TextBox x:Name="txtContactoEmergencia" Style="{StaticResource InputEstilo}" MaxLength="150"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                        <TextBlock Text="TEL. EMERGENCIA" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <TextBox x:Name="txtTelEmergencia" Style="{StaticResource InputEstilo}" MaxLength="20"/>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Margin="0,16,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox x:Name="chkApto" Content="APTO FÍSICO" Grid.Column="0"
+                                              Foreground="{StaticResource TextPrimary}" FontSize="12"
+                                              Margin="0,0,20,0" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="FECHA APTO" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <DatePicker x:Name="dpFechaApto" Style="{StaticResource DatePickerEstilo}" Width="160" HorizontalAlignment="Left"/>
+                                    </StackPanel>
+                                </Grid>
+                                <TextBlock Text="OBSERVACIONES" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="0,16,0,6"/>
+                                <TextBox x:Name="txtObsMedicas" Style="{StaticResource InputEstilo}" Height="50" TextWrapping="Wrap" AcceptsReturn="True"/>
+                                <Button Content="GUARDAR FICHA MÉDICA" Click="btnGuardarFicha_Click"
+                                        Style="{StaticResource BotonPrincipalEstilo}"
+                                        Height="44" Width="Auto" Padding="28,0" Margin="0,20,0,0" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+
+            <!-- ════════════ FOOTER ════════════ -->
+            <Border Grid.Row="2" Background="{StaticResource Bg2}" CornerRadius="0,0,16,16"
+                    BorderBrush="{StaticResource Border1}" BorderThickness="0,1,0,0"
+                    Padding="24,12">
+                <Grid>
+                    <Button x:Name="btnDarDeBaja" Content="🗑  Dar de baja"
+                            Height="38" Width="150" HorizontalAlignment="Left"
+                            Background="#C62828" Foreground="White"
+                            FontSize="12" FontWeight="SemiBold" Cursor="Hand"
+                            Visibility="Collapsed" Click="btnDarDeBaja_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="bd" Property="Opacity" Value="0.88"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <Button x:Name="btnRestaurarSocio" Content="✅  Restaurar Socio"
+                            Height="38" Width="170" HorizontalAlignment="Left"
+                            Background="#2E7D32" Foreground="White"
+                            FontSize="12" FontWeight="SemiBold" Cursor="Hand"
+                            Visibility="Collapsed" Click="btnRestaurarSocio_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="8">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="bd" Property="Opacity" Value="0.88"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
         </Grid>
     </Border>
 </Window>

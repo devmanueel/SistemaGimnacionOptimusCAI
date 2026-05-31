@@ -36,6 +36,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
     public partial class AsistenciasPage : Page
     {
         private readonly AsistenciaController _controller = new AsistenciaController();
+        private readonly SocioController _socioCtrl = new SocioController();
 
         private string _filtroResultado = "todos";
         private string _dniPendiente = null;
@@ -91,6 +92,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                         btnModoHuella.Visibility = Visibility.Visible;
                         lblEstadoLector.Visibility = Visibility.Visible;
                         lblEstadoLector.Text = "Lector de huellas listo";
+
+                        // Doble validación: el lector está disponible Y hay huellas
+                        // registradas → activar automáticamente el modo huella para
+                        // que el socio apoye el dedo y valide al instante, sin que el
+                        // operador tenga que tocar el botón.
+                        if (!_modoHuellaActivo && _socioCtrl.ObtenerHuellas().Count > 0)
+                            ActivarModoHuella();
                     }
                     else
                     {
@@ -133,11 +141,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             txtDni.IsEnabled      = false;
             btnValidar.IsEnabled  = false;
 
+            // Cargar las huellas registradas (para comparar 1:N)
+            var plantillas = _socioCtrl.ObtenerHuellas();
+
             // Empezar loop de identificación en hilo secundario
             _huellaIdCts  = new CancellationTokenSource();
             var token     = _huellaIdCts.Token;
             _huellaIdTask = Task.Run(() =>
-                svc.IniciarIdentificacion(token, OnHuellaIdentificada));
+                svc.IniciarIdentificacion(plantillas, token, OnHuellaIdentificada));
         }
 
         private void DetenerModoHuella()
