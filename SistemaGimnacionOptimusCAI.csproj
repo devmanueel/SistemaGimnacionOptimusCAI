@@ -36,7 +36,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -46,7 +46,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -54,9 +54,46 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="FontAwesome.WPF, Version=4.7.0.37774, Culture=neutral, PublicKeyToken=0758b07a11a4f466, processorArchitecture=MSIL">
       <HintPath>packages\FontAwesome.WPF.4.7.0.9\lib\net40\FontAwesome.WPF.dll</HintPath>
+    </Reference>
+    <!-- DigitalPersona One Touch SDK (.NET). DLLs x86 mixed-mode → requiere PlatformTarget x86. -->
+    <Reference Include="DPFPDevNET">
+      <HintPath>libs\DigitalPersona\DPFPDevNET.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="DPFPEngNET">
+      <HintPath>libs\DigitalPersona\DPFPEngNET.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="DPFPShrNET">
+      <HintPath>libs\DigitalPersona\DPFPShrNET.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="DPFPVerNET">
+      <HintPath>libs\DigitalPersona\DPFPVerNET.dll</HintPath>
+      <Private>true</Private>
     </Reference>
     <Reference Include="itextsharp">
       <HintPath>packages\iTextSharp.5.5.13.3\lib\itextsharp.dll</HintPath>
@@ -137,7 +174,6 @@
     <Compile Include="Helpers\ReporteExcelExportador.cs" />
     <Compile Include="Helpers\InicialesConverter.cs" />
     <Compile Include="Helpers\WidthHeightToRectConverter.cs" />
-    <Compile Include="Helpers\WinBioNative.cs" />
     <Compile Include="Helpers\BiometricService.cs" />
     <Compile Include="LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
@@ -275,6 +311,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Ventanas\MembresiaWindow.xaml">
+		<SubType>Designer</SubType>
+		<Generator>MSBuild:Compile</Generator>
+	</Page>
+    <Page Include="Ventanas\EditarSocioWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ventanas\NuevaMembresiaWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -283,9 +327,9 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Paginas\ResultadoAccesoWindow.xaml">
-		<SubType>Designer</SubType>
-		<Generator>MSBuild:Compile</Generator>
-	</Page>
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Paginas\EstadisticasPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -387,15 +431,20 @@
     </Compile>
     <Compile Include="Ventanas\MembresiaWindow.xaml.cs">
       <DependentUpon>Ventanas\MembresiaWindow.xaml</DependentUpon>
+	</Compile>
+    <Compile Include="Ventanas\EditarSocioWindow.xaml.cs">
+      <DependentUpon>Ventanas\EditarSocioWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ventanas\NuevaMembresiaWindow.xaml.cs">
+      <DependentUpon>Ventanas\NuevaMembresiaWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\EnrolarHuellaWindow.xaml.cs">
       <DependentUpon>EnrolarHuellaWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Paginas\ResultadoAccesoWindow.xaml.cs">
       <DependentUpon>ResultadoAccesoWindow.xaml</DependentUpon>
-	</Compile>
-
-	<Compile Include="Paginas\EstadisticasPage.xaml.cs">
+    </Compile>
+    <Compile Include="Paginas\EstadisticasPage.xaml.cs">
       <DependentUpon>EstadisticasPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">

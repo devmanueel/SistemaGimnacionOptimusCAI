@@ -295,6 +295,30 @@ namespace Controllers
             catch { return null; }
         }
 
+        /// <summary>Guarda el GUID lógico + el template biométrico del socio.</summary>
+        public (bool ok, string mensaje) GuardarHuella(long socioId, Guid guid, byte[] template)
+        {
+            try
+            {
+                if (template == null || template.Length == 0)
+                    return (false, "El template de la huella está vacío.");
+
+                _dao.GuardarHuella(socioId, guid, template);
+                return (true, "Huella registrada correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return (false, "Error al guardar la huella.\n" + ex.Message);
+            }
+        }
+
+        /// <summary>Devuelve (guid, template) de todos los socios activos con huella, para identificar 1:N.</summary>
+        public List<(Guid guid, byte[] template)> ObtenerHuellas()
+        {
+            try { return _dao.ObtenerHuellas(); }
+            catch { return new List<(Guid guid, byte[] template)>(); }
+        }
+
         // ──────────────────────────────────────────────────────
         // VALIDACIONES CENTRALIZADAS
         // ──────────────────────────────────────────────────────

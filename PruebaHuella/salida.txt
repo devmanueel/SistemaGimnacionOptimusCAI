@@ -1,0 +1,11 @@
+=========================================
+ PRUEBA LECTOR DIGITALPERSONA U.are.U
+=========================================
+
+Lectores detectados por el SDK: 0
+
+[X] El SDK NO ve ningun lector.
+    - Verifica el driver 'DigitalPersona ... Non-WBF'
+    - Verifica el servicio 'DpHost' (Servicio de autenticacion biometrica)
+
+Presiona ENTER para cerrar...

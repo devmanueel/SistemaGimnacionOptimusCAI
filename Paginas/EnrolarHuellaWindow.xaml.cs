@@ -48,11 +48,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 return;
             }
 
-            // Si ya tiene huella registrada, eliminar el template anterior del lector
-            if (_socio.HuellaGuid.HasValue)
-                servicio.EliminarHuella(_socio.HuellaGuid.Value);
-
-            // Asignar un GUID nuevo para este enrolamiento
+            // Asignar un GUID nuevo para este enrolamiento (identidad lógica del socio)
             Guid nuevoGuid = Guid.NewGuid();
             _cts = new CancellationTokenSource();
 
@@ -60,12 +56,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var token = _cts.Token;
             System.Threading.Tasks.Task.Run(() =>
             {
-                var (exito, mensaje) = servicio.Enrollar(
-                    nuevoGuid,
+                var (exito, mensaje, template) = servicio.Enrollar(
                     (capturas, msg) => Dispatcher.Invoke(() => ActualizarProgreso(capturas, msg)),
                     token);
 
-                Dispatcher.Invoke(() => OnEnrolamientoTerminado(exito, mensaje, nuevoGuid));
+                Dispatcher.Invoke(() => OnEnrolamientoTerminado(exito, mensaje, nuevoGuid, template));
             });
         }
 
@@ -101,18 +96,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        private void OnEnrolamientoTerminado(bool exito, string mensaje, Guid guid)
+        private void OnEnrolamientoTerminado(bool exito, string mensaje, Guid guid, byte[] template)
         {
             if (exito)
             {
-                // Guardar el GUID en la BD
-                var res = _socioController.ActualizarHuellaGuid(_socio.Id, guid);
+                // Guardar el GUID lógico + el template biométrico en la BD
+                var res = _socioController.GuardarHuella(_socio.Id, guid, template);
                 if (!res.ok)
                 {
                     MostrarError("Huella capturada pero no se pudo guardar: " + res.mensaje);
                     return;
                 }
 
+                _socio.HuellaGuid = guid;
                 Exito = true;
                 iconHuella.Foreground = new SolidColorBrush(Color.FromRgb(0x4A, 0xDE, 0x80));
                 iconHuella.Icon = FontAwesome.WPF.FontAwesomeIcon.CheckCircle;

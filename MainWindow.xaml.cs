@@ -388,40 +388,123 @@ namespace SistemaGimnacionOptimusCAI
             }
         }
 
-        // ── BUSCADOR GLOBAL ───────────────────────────────────
+        // ── BUSCADOR GLOBAL (popup con resultados múltiples) ──
         private readonly SocioController _socioController = new SocioController();
+        private System.Windows.Threading.DispatcherTimer _timerBusqueda;
 
-        private void txtBuscadorGlobal_KeyDown(object sender, KeyEventArgs e)
+        private void InicializarBuscador()
         {
-            if (e.Key != Key.Enter) return;
-
-            string texto = txtBuscadorGlobal.Text.Trim();
-            if (string.IsNullOrWhiteSpace(texto)) return;
-
-            try
+            if (_timerBusqueda != null) return;
+            _timerBusqueda = new System.Windows.Threading.DispatcherTimer
             {
-                var resultados = _socioController.BuscarSocios(texto, "todos");
-                if (resultados == null || resultados.Count == 0)
-                {
-                    NotificacionWindow.MostrarAdvertencia("No se encontró ningún socio con '" + texto + "'.");
-                    return;
-                }
-
-                var socio = resultados[0];
-                var ficha = new FichaSocioWindow(socio);
-                ficha.Owner = this;
-                ficha.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                NotificacionWindow.MostrarError("Error en la búsqueda.\n" + ex.Message);
-            }
-
-            txtBuscadorGlobal.Text = string.Empty;
+                Interval = TimeSpan.FromMilliseconds(300) // debounce
+            };
+            _timerBusqueda.Tick += TimerBusqueda_Tick;
         }
 
         private void txtBuscadorGlobal_TextChanged(object sender, TextChangedEventArgs e)
         {
+            InicializarBuscador();
+            string texto = txtBuscadorGlobal.Text?.Trim() ?? string.Empty;
+
+            if (texto.Length < 2)
+            {
+                popupResultados.IsOpen = false;
+                _timerBusqueda.Stop();
+                return;
+            }
+
+            _timerBusqueda.Stop();
+            _timerBusqueda.Start();
+        }
+
+        private void TimerBusqueda_Tick(object sender, EventArgs e)
+        {
+            _timerBusqueda.Stop();
+            EjecutarBusqueda(txtBuscadorGlobal.Text?.Trim());
+        }
+
+        private void EjecutarBusqueda(string termino)
+        {
+            if (string.IsNullOrEmpty(termino) || termino.Length < 2) return;
+
+            try
+            {
+                var resultados = _socioController.BuscarSocios(termino, "todos");
+                listResultados.ItemsSource = resultados;
+
+                if (resultados == null || resultados.Count == 0)
+                {
+                    lblContadorResultados.Text = "Sin resultados para \"" + termino + "\"";
+                }
+                else
+                {
+                    lblContadorResultados.Text = resultados.Count == 1
+                        ? "1 socio encontrado"
+                        : resultados.Count + " socios encontrados";
+                }
+
+                popupResultados.IsOpen = true;
+            }
+            catch
+            {
+                popupResultados.IsOpen = false;
+            }
+        }
+
+        private void listResultados_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var socio = listResultados.SelectedItem as Socio;
+            if (socio == null) return;
+
+            popupResultados.IsOpen = false;
+            listResultados.ItemsSource = null;
+            txtBuscadorGlobal.Text = string.Empty;
+
+            AbrirFichaSocio(socio);
+        }
+
+        private void AbrirFichaSocio(Socio socio)
+        {
+            try
+            {
+                var ficha = new FichaSocioWindow(socio) { Owner = this };
+                ficha.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError("Error al abrir la ficha.\n" + ex.Message);
+            }
+        }
+
+        private void txtBuscadorGlobal_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                popupResultados.IsOpen = false;
+                txtBuscadorGlobal.Text = string.Empty;
+            }
+            else if (e.Key == Key.Enter)
+            {
+                if (listResultados.Items.Count > 0)
+                    listResultados.SelectedIndex = 0;
+            }
+            else if (e.Key == Key.Down && listResultados.Items.Count > 0)
+            {
+                listResultados.Focus();
+                listResultados.SelectedIndex = 0;
+            }
+        }
+
+        private void txtBuscadorGlobal_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Pequeño delay para permitir el click sobre un resultado del popup
+            System.Threading.Tasks.Task.Delay(200).ContinueWith(_ =>
+                Dispatcher.Invoke(() =>
+                {
+                    if (!listResultados.IsMouseOver && !listResultados.IsKeyboardFocusWithin)
+                        popupResultados.IsOpen = false;
+                }));
         }
 
         // ── DRAG WINDOW ───────────────────────────────────────
