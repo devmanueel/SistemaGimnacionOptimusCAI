@@ -119,18 +119,25 @@ namespace Models.Dao
         }
 
         // ──────────────────────────────────────────────────────
-        // LISTAR SOCIOS CON MEMBRESÍAS (una fila por membresía)
+        // LISTAR SOCIOS CON MEMBRESÍAS (una fila por membresía) — PAGINADO
         // ──────────────────────────────────────────────────────
-        public List<SocioConMembresia> ListarSociosConMembresias(
+        public ResultadoPaginado<SocioConMembresia> ListarSociosConMembresias(
             string texto              = "",
             string filtroEstado       = "todos",
             long?  filtroActividadId  = null,
             bool?  filtroCuotaVencida = null,
             long?  filtroInstructorId = null,
             string filtroSexo         = null,
-            int?   filtroDejaronVenir = null)
+            int?   filtroDejaronVenir = null,
+            int    pagina             = 1,
+            int    tamPagina          = 8)
         {
-            var lista = new List<SocioConMembresia>();
+            var resultado = new ResultadoPaginado<SocioConMembresia>
+            {
+                Pagina    = pagina,
+                TamPagina = tamPagina
+            };
+
             using (var conn = GetConnection())
             {
                 conn.Open();
@@ -144,13 +151,25 @@ namespace Models.Dao
                     cmd.Parameters.AddWithValue("@FiltroInstructorId",  (object)filtroInstructorId ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@FiltroSexo",          (object)filtroSexo         ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@FiltroDejaronVenir",  (object)filtroDejaronVenir ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Pagina",              pagina);
+                    cmd.Parameters.AddWithValue("@TamPagina",           tamPagina);
 
                     using (var reader = cmd.ExecuteReader())
+                    {
+                        // ── Result set 1: total ──
+                        if (reader.Read())
+                            resultado.Total = Convert.ToInt32(reader["total"]);
+
+                        // ── Result set 2: datos paginados ──
+                        reader.NextResult();
                         while (reader.Read())
-                            lista.Add(MapearSocioConMembresia(reader));
+                            resultado.Items.Add(MapearSocioConMembresia(reader));
+                    }
                 }
             }
-            return lista;
+
+            resultado.HayMas = (pagina * tamPagina) < resultado.Total;
+            return resultado;
         }
 
         private static SocioConMembresia MapearSocioConMembresia(SqlDataReader r)

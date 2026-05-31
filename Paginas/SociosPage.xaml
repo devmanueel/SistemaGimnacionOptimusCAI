@@ -351,7 +351,7 @@
                         </ComboBox>
 
                         <!-- Filtro: Actividad -->
-                        <ComboBox x:Name="cmbFiltroActividad" Width="220" Height="32"
+                        <ComboBox x:Name="cmbFiltroActividad" Width="200" Height="32"
                                   Style="{StaticResource ComboBoxEstilo}"
                                   SelectedValuePath="Id"
                                   Margin="12,0,0,0" Visibility="Collapsed"
@@ -455,7 +455,7 @@
 
                 <!-- Columna 1: Ordenar por -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal"
-                            VerticalAlignment="Center" Margin="20,0,0,0">
+                            VerticalAlignment="Center" Margin="20,0,0,25">
                     <TextBlock Text="ORDENAR POR:" Foreground="{StaticResource TextMuted}" FontSize="11"
                                FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,15"/>
                     <ComboBox x:Name="cmbOrdenarPor" Width="200" Height="32"
@@ -517,6 +517,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Background="{StaticResource GreenMid}"
@@ -707,6 +708,16 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
+
+                    <!-- Indicador de carga para infinite scroll -->
+                    <Border x:Name="panelCargando" Grid.Row="2"
+                            Visibility="Collapsed"
+                            Padding="0,10">
+                        <TextBlock Text="Cargando más socios..."
+                                   Foreground="{StaticResource TextMuted}"
+                                   FontSize="15" FontStyle="Italic"
+                                   HorizontalAlignment="Center"/>
+                    </Border>
                 </Grid>
             </Border>
 

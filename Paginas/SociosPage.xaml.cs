@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -55,6 +56,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // Ordenamiento
         private string _ordenamiento = "nombre_asc";
 
+        // Paginación
+        private int  _paginaActual = 1;
+        private bool _hayMas       = true;
+        private bool _cargando     = false;
+        private bool _ignorarScroll = false;
+        private bool _primeraCargaCompleta = false;
+        private const int TAM_PAGINA = 8;
+
         public SociosPage()
         {
             InitializeComponent();
@@ -68,6 +77,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 SesionManager.AbrirPanelAlNavegar = false;
                 btnNuevo_Click(null, null);
             }
+            Loaded += (s, e) => SuscribirScrollDataGrid();
         }
 
         // ─────────────────────────────────────────────────────
@@ -91,41 +101,154 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─────────────────────────────────────────────────────
         private void CargarSocios()
         {
+            _paginaActual = 1;
+            _hayMas       = true;
+            _primeraCargaCompleta = false;
+            CargarSociosPagina(1, agregar: false);
+        }
+
+        private async void CargarSociosPagina(int pagina, bool agregar)
+        {
+            if (_cargando) return;
+            _cargando = true;
+
+            if (panelCargando != null)
+                panelCargando.Visibility = Visibility.Visible;
+
+            // Si es paginación infinita, mostrar delay antes de cargar
+            if (agregar)
+            {
+                await Task.Delay(1200);
+            }
+
             try
             {
-                // 1. Traer TODOS los datos con filtros avanzados aplicados (SIN filtro de chip)
-                var listaCompleta = _controller.ListarSociosConMembresias(
+                var resultado = _controller.ListarSociosConMembresias(
                     texto:              txtBuscar != null ? txtBuscar.Text.Trim() : "",
-                    filtroEstado:       "todos",  // siempre traer todos para contar correctamente
+                    filtroEstado:       _filtroEstado,
                     filtroActividadId:  _filtroActividadId,
                     filtroCuotaVencida: _filtroCuotaVencida,
                     filtroInstructorId: _filtroInstructorId,
                     filtroSexo:         _filtroSexo,
-                    filtroDejaronVenir: _filtroDejaronVenir);
+                    filtroDejaronVenir: _filtroDejaronVenir,
+                    pagina:             pagina,
+                    tamPagina:          TAM_PAGINA);
 
-                // 2. Actualizar chips con la lista completa (sin filtro de chip)
-                ActualizarContadoresChips(listaCompleta);
+                _hayMas = resultado.HayMas;
 
-                // 3. Filtrar por estado del chip para mostrar en la tabla
-                List<SocioConMembresia> listaFiltrada;
-                if (_filtroEstado == "todos")
-                    listaFiltrada = listaCompleta;
-                else if (_filtroEstado == "activos")
-                    listaFiltrada = listaCompleta.FindAll(s => s.MembresiaEstado == "activa");
-                else if (_filtroEstado == "inactivos")
-                    listaFiltrada = listaCompleta.FindAll(s => s.MembresiaEstado != "activa");
+                // Ignorar disparos automáticos de ScrollChanged durante el re-renderizado
+                _ignorarScroll = true;
+
+                // Guardar posición del scroll antes de agregar items
+                double scrollOffset = 0;
+                if (agregar)
+                {
+                    var sv = ObtenerScrollViewer(gridSocios);
+                    if (sv != null)
+                        scrollOffset = sv.VerticalOffset;
+                }
+
+                if (agregar)
+                {
+                    var listaActual = gridSocios.ItemsSource as List<SocioConMembresia>
+                                      ?? new List<SocioConMembresia>();
+                    listaActual.AddRange(resultado.Items);
+
+                    gridSocios.ItemsSource = null;
+                    gridSocios.ItemsSource = listaActual;
+
+                    // Restaurar posición del scroll después de agregar
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        var sv = ObtenerScrollViewer(gridSocios);
+                        if (sv != null)
+                            sv.ScrollToVerticalOffset(scrollOffset);
+                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }
                 else
-                    listaFiltrada = listaCompleta;
+                {
+                    gridSocios.ItemsSource = resultado.Items;
+                    ActualizarContadoresChipsConTotal(resultado.Total, resultado.Items);
+                }
 
-                if (gridSocios != null)
-                    gridSocios.ItemsSource = listaFiltrada;
-
-                ActualizarResumenFiltros(listaFiltrada);
+                ActualizarResumenFiltros(resultado.Items);
                 AplicarOrdenamiento();
             }
             catch (Exception ex)
             {
                 NotificacionWindow.MostrarError(ex.Message, "Error al cargar socios");
+            }
+            finally
+            {
+                // Si es la primera carga, marcar como completa
+                if (!agregar)
+                    _primeraCargaCompleta = true;
+
+                _ignorarScroll = false;
+                _cargando = false;
+                if (panelCargando != null)
+                    panelCargando.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void SuscribirScrollDataGrid()
+        {
+            // Esperar a que el DataGrid termine de renderizar su template
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var scrollViewer = ObtenerScrollViewer(gridSocios);
+                if (scrollViewer != null)
+                {
+                    scrollViewer.ScrollChanged += OnScrollChanged;
+                }
+                else
+                {
+                    // Fallback: intentar nuevamente en el LayoutUpdated
+                    EventHandler handler = null;
+                    handler = (s, e) =>
+                    {
+                        scrollViewer = ObtenerScrollViewer(gridSocios);
+                        if (scrollViewer != null)
+                        {
+                            gridSocios.LayoutUpdated -= handler;
+                            scrollViewer.ScrollChanged += OnScrollChanged;
+                        }
+                    };
+                    gridSocios.LayoutUpdated += handler;
+                }
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private static ScrollViewer ObtenerScrollViewer(DependencyObject obj)
+        {
+            if (obj is ScrollViewer) return (ScrollViewer)obj;
+
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(obj, i);
+                var result = ObtenerScrollViewer(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private void OnScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            // Ignorar hasta que la primera carga termine completamente
+            if (!_primeraCargaCompleta) return;
+
+            // Ignorar si estamos cargando o si el scroll fue automático (re-renderizado)
+            if (_ignorarScroll || _cargando) return;
+
+            // Solo responder a scroll manual del usuario (VerticalChange != 0)
+            if (e.VerticalChange == 0) return;
+
+            bool llegoAlFinal = e.VerticalOffset >= e.ExtentHeight - e.ViewportHeight - 50;
+
+            if (llegoAlFinal && _hayMas)
+            {
+                _paginaActual++;
+                CargarSociosPagina(_paginaActual, agregar: true);
             }
         }
 
@@ -157,32 +280,36 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        private void ActualizarContadoresChips(List<SocioConMembresia> lista)
+        private void ActualizarContadoresChipsConTotal(int total, List<SocioConMembresia> itemsPagina)
         {
             try
             {
-                int total = lista != null ? lista.Count : 0;
-                int activos = 0;
-                int inactivos = 0;
+                var todosParaContar = _controller.ListarSociosConMembresias(
+                    texto:              txtBuscar != null ? txtBuscar.Text.Trim() : "",
+                    filtroEstado:       "todos",
+                    filtroActividadId:  _filtroActividadId,
+                    filtroCuotaVencida: _filtroCuotaVencida,
+                    filtroInstructorId: _filtroInstructorId,
+                    filtroSexo:         _filtroSexo,
+                    filtroDejaronVenir: _filtroDejaronVenir,
+                    pagina:             1,
+                    tamPagina:          99999);
 
-                if (lista != null)
+                int totalActivos   = 0;
+                int totalInactivos = 0;
+                foreach (var s in todosParaContar.Items)
                 {
-                    foreach (var s in lista)
-                    {
-                        if (s.MembresiaEstado == "activa") activos++;
-                        else inactivos++;
-                    }
+                    if (s.MembresiaEstado == "activa") totalActivos++;
+                    else totalInactivos++;
                 }
 
-                chipTodosNum.Text = $"({total})";
-                chipActivosNum.Text = $"({activos})";
-                chipInactivosNum.Text = $"({inactivos})";
+                chipTodosNum.Text     = "(" + todosParaContar.Total + ")";
+                chipActivosNum.Text   = "(" + totalActivos + ")";
+                chipInactivosNum.Text = "(" + totalInactivos + ")";
             }
             catch
             {
-                chipTodosNum.Text = "(0)";
-                chipActivosNum.Text = "(0)";
-                chipInactivosNum.Text = "(0)";
+                chipTodosNum.Text = chipActivosNum.Text = chipInactivosNum.Text = "(0)";
             }
         }
 

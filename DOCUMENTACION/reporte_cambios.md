@@ -158,3 +158,43 @@ if (actividad != null && actividad.Id != _actividadActualId)
 | Upgrade (nivel mayor) | ✅ Permitido dentro de la misma categoría |
 | Downgrade (nivel menor) | ❌ No permitido |
 | Cambio de categoría | ❌ No permitido |
+
+---
+
+## 🔧 4. Paginación Infinita (Infinite Scroll) en Socios (`31/05/2026`)
+
+### Problema
+`sp_ListarSociosConMembresias` devolvía **todos** los registros de una vez. Con muchos socios, la carga era lenta y el DataGrid renderizaba miles de filas.
+
+### Solución aplicada
+Se implementó carga paginada de **8 en 8**, activada al llegar al final del scroll.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\sp_ListarSociosConMembresias.sql` | SP modificado: 2 result sets (total + datos paginados), parámetros `@Pagina` y `@TamPagina` |
+| `Entities\ResultadoPaginado.cs` | **NUEVO** — Clase genérica `ResultadoPaginado<T>` |
+| `Entities\Entities.csproj` | Agregada referencia al nuevo `.cs` |
+| `Models\DAO\SocioDao.cs` | `ListarSociosConMembresias` ahora lee 2 result sets, devuelve `ResultadoPaginado<SocioConMembresia>` |
+| `Controllers\SocioController.cs` | Firma actualizada con `pagina` y `tamPagina` |
+| `Paginas\SociosPage.xaml` | Agregado `panelCargando` con fila extra en el Grid |
+| `Paginas\SociosPage.xaml.cs` | Infinite scroll: `CargarSociosPagina`, `OnScrollChanged`, `ObtenerScrollViewer`, contadores con totales reales |
+
+### SP a ejecutar
+
+**1 solo archivo:** `DataBase\sp_ListarSociosConMembresias.sql`
+
+```
+sqlcmd -S "(LocalDB)\MSSQLLocalDB" -d "DB_CAI_Optimus" -i "DataBase\sp_ListarSociosConMembresias.sql"
+```
+
+O ejecutarlo directamente desde SQL Server Object Explorer sobre `DB_CAI_Optimus.mdf`.
+
+### Comportamiento
+| Escenario | Resultado |
+|-----------|-----------|
+| Al abrir sección | Carga los primeros **8** socios |
+| Scroll hasta el último | Muestra "Cargando más socios..." (1.2s de delay) y agrega los siguientes 8 |
+| Sin más socios | No hace más requests |
+| Filtros / búsqueda | Resetea a página 1 y recarga |
