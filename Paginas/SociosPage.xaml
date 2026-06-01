@@ -542,15 +542,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid Width="40" Height="40" HorizontalAlignment="Center">
-                                            <Ellipse Width="36" Height="36">
-                                                <Ellipse.Fill>
-                                                    <SolidColorBrush Color="#1C2A1C"/>
-                                                </Ellipse.Fill>
-                                                <Ellipse.Stroke>
-                                                    <SolidColorBrush Color="#263326"/>
-                                                </Ellipse.Stroke>
-                                                <Ellipse.StrokeThickness>1</Ellipse.StrokeThickness>
-                                            </Ellipse>
+                                            <Ellipse Width="36" Height="36" Fill="{StaticResource GreenMid}" Stroke="{StaticResource GreenDim}" StrokeThickness="1"/>
                                             <Ellipse Width="28" Height="28">
                                                 <Ellipse.Fill>
                                                     <ImageBrush ImageSource="{Binding Foto, Converter={StaticResource BytesAImagen}}"
@@ -563,7 +555,7 @@
                             </DataGridTemplateColumn>
 
                             <!-- N° -->
-                            <DataGridTemplateColumn Header="N°" Width="80">
+                            <DataGridTemplateColumn Header="N°" Width="60">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource NumeroSocioBadgeStyle}">
@@ -575,20 +567,21 @@
                             </DataGridTemplateColumn>
 
                             <!-- Nombre + Email -->
-                            <DataGridTemplateColumn Header="NOMBRE COMPLETO" Width="1.6*"
+                            <DataGridTemplateColumn Header="NOMBRE COMPLETO" Width="155"
                                                     SortMemberPath="NombreCompleto">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel VerticalAlignment="Center">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,2">
                                             <TextBlock Text="{Binding NombreCompleto}"
                                                        FontSize="13"
                                                        Foreground="{StaticResource TextPrimary}"
-                                                       TextTrimming="CharacterEllipsis"/>
+                                                       TextTrimming="CharacterEllipsis"
+                                                       FontWeight="SemiBold"/>
                                             <TextBlock Text="{Binding Email}"
-                                                       FontSize="12"
+                                                       FontSize="11"
                                                        Foreground="{StaticResource TextMuted}"
                                                        TextTrimming="CharacterEllipsis"
-                                                       Margin="0,1,0,0"/>
+                                                       Margin="0,2,0,0"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -667,8 +660,8 @@
                                                     Margin="0,0,4,0"
                                                     ToolTip="Modificar membresía"
                                                     Click="btnEditarMembresia_Click">
-                                                <fa:ImageAwesome Icon="Calendar"
-                                                                   Foreground="{StaticResource GreenMain}"
+                                                <fa:ImageAwesome Icon="Edit"
+                                                                   Foreground="{StaticResource ColorEditarCyan}"
                                                                    Height="14"/>
                                             </Button>
                                             <Button Style="{StaticResource ButtonStyleCancelar}"

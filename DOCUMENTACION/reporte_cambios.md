@@ -490,3 +490,23 @@ Esto es consistente con como otras ventanas del proyecto (`EditarSocioWindow.xam
 
 ### Nota
 `MembresiaPage.xaml` eventualmente se eliminara porque toda la gestion de membresias se hara desde la seccion de Socios. `MembresiaWindow.xaml` (el popup) seguira siendo necesario y funcional.
+
+---
+
+## 🔧 11. Mejoras en Socios y simplificacion de Asistencias (`01/06/2026`)
+
+### Cambios realizados
+
+| Cambio | Descripcion |
+|--------|-------------|
+| Avatar con fondo verde | El circulo del avatar del socio ahora usa `GreenMid` de `MiDiccionario.xaml` |
+| Columna NOMBRE COMPLETO | Se muestra nombre completo y email debajo, con mejor jerarquia visual (negrita + tamanos diferenciados) |
+| Asistencias simplificada | Se elimino el panel de "Registrar Ingreso" (DNI, validacion, modo huella). Solo queda la lista de "Accesos del dia" con filtros y auto-refresh |
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `Paginas\SociosPage.xaml` | Avatar `GreenMid`, columna nombre/email ajustada |
+| `Paginas\AsistenciasPage.xaml` | Eliminado panel de validacion (solo queda lista) |
+| `Paginas\AsistenciasPage.xaml.cs` | Eliminados ~200 lineas (validacion, DNI, huella) |
