@@ -37,6 +37,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private readonly SocioController _controller = new SocioController();
         private readonly ActividadController _actividadController = new ActividadController();
         private readonly UsuarioController _usuarioController = new UsuarioController();
+        private readonly MembresiaController _membresiaController = new MembresiaController();
 
         private bool _esNuevo = true;
         private long _idEditar = 0;
@@ -864,12 +865,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        private void btnEditar_Click(object sender, RoutedEventArgs e)
+        private void btnEditarMembresia_Click(object sender, RoutedEventArgs e)
         {
             var socio = ObtenerSocioDeFila(sender);
             if (socio == null) return;
-            // Editar los datos personales del socio en un popup (no el plan).
-            var win = new EditarSocioWindow(socio.Id) { Owner = Window.GetWindow(this) };
+            if (socio.MembresiaId <= 0)
+            {
+                NotificacionWindow.MostrarAdvertencia("Este socio no tiene una membresia asignada.");
+                return;
+            }
+            var win = new Ventanas.MembresiaWindow { Owner = Window.GetWindow(this) };
+            win.Configurar(socio.MembresiaId);
             if (win.ShowDialog() == true)
             {
                 CargarSocios();
@@ -877,23 +883,32 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        private void btnToggleEstado_Click(object sender, RoutedEventArgs e)
+        private void btnCancelarMembresia_Click(object sender, RoutedEventArgs e)
         {
             var socio = ObtenerSocioDeFila(sender);
             if (socio == null) return;
-
-            bool nuevoEstado = !socio.Activo;
-            string accion = nuevoEstado ? "activar" : "desactivar";
+            if (socio.MembresiaId <= 0)
+            {
+                NotificacionWindow.MostrarAdvertencia("Este socio no tiene una membresia asignada.");
+                return;
+            }
+            if (socio.MembresiaEstado == "cancelada")
+            {
+                NotificacionWindow.MostrarAdvertencia("Esta membresia ya esta cancelada.");
+                return;
+            }
 
             bool confirmo = NotificacionWindow.MostrarConfirmacion(
-                "¿Querés " + accion + " al socio " + socio.NombreCompleto + "?",
-                "Confirmar cambio de estado");
+                "¿Queres cancelar la membresia de " + socio.NombreCompleto +
+                " — " + socio.ActividadNombre + "?\n\n" +
+                "El registro se conserva pero queda en estado 'cancelada'.",
+                "Cancelar membresia");
 
             if (!confirmo) return;
 
             try
             {
-                var r = _controller.CambiarEstado(socio.Id, nuevoEstado);
+                var r = _membresiaController.Cancelar(socio.MembresiaId, SesionManager.UsuarioId);
                 if (r.ok) { NotificacionWindow.MostrarExito(r.mensaje); CargarSocios(); }
                 else { NotificacionWindow.MostrarError(r.mensaje); }
             }

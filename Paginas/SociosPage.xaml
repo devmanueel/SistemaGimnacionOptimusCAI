@@ -665,42 +665,18 @@
                                                     VerticalAlignment="Center">
                                             <Button Style="{StaticResource ButtonStyleEditar}"
                                                     Margin="0,0,4,0"
-                                                    ToolTip="Editar socio"
-                                                    Click="btnEditar_Click">
-                                                <fa:ImageAwesome Icon="Edit"
-                                                                   Foreground="{StaticResource ColorEditarCyan}"
+                                                    ToolTip="Modificar membresía"
+                                                    Click="btnEditarMembresia_Click">
+                                                <fa:ImageAwesome Icon="Calendar"
+                                                                   Foreground="{StaticResource GreenMain}"
                                                                    Height="14"/>
                                             </Button>
-                                            <Button Style="{StaticResource ButtonStyleEstado}"
-                                                    Click="btnToggleEstado_Click">
-                                                <Button.ToolTip>
-                                                    <TextBlock>
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Text" Value="Dar de baja"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Activo}" Value="False">
-                                                                        <Setter Property="Text" Value="Dar de alta"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                </Button.ToolTip>
-                                                <fa:ImageAwesome Height="14">
-                                                    <fa:ImageAwesome.Style>
-                                                        <Style TargetType="fa:ImageAwesome">
-                                                            <Setter Property="Icon" Value="Times"/>
-                                                            <Setter Property="Foreground" Value="#FF5555"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Activo}" Value="False">
-                                                                    <Setter Property="Icon" Value="Undo"/>
-                                                                    <Setter Property="Foreground" Value="#00E676"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </fa:ImageAwesome.Style>
-                                                </fa:ImageAwesome>
+                                            <Button Style="{StaticResource ButtonStyleCancelar}"
+                                                    Click="btnCancelarMembresia_Click"
+                                                    ToolTip="Cancelar membresía">
+                                                <fa:ImageAwesome Icon="Times"
+                                                                   Foreground="#FF5555"
+                                                                   Height="14"/>
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>

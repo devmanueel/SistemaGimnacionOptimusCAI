@@ -198,5 +198,39 @@ namespace Controllers
             try { return _dao.ObtenerReporteSemanal(desde, hasta); }
             catch (Exception ex) { throw new Exception("Error al generar reporte semanal.\n" + ex.Message); }
         }
+
+        public (bool ok, string mensaje, FichajeResultado resultado) FicharInstructorDashboard(string dni)
+        {
+            if (string.IsNullOrWhiteSpace(dni))
+                return (false, "DNI invalido.", null);
+
+            if (!SesionManager.HaySesion)
+                return (false, "No hay sesion activa.", null);
+
+            try
+            {
+                var r = _dao.FicharInstructorDashboard(dni.Trim(), SesionManager.UsuarioId);
+                if (r == null || r.Operacion == "no_encontrado")
+                    return (false, r != null ? r.Mensaje : "Instructor no encontrado.", null);
+
+                Auditor.Registrar(
+                    r.Operacion == "entrada" ? "crear" : "editar",
+                    "asistencia_dashboard",
+                    r.Id,
+                    new Dictionary<string, object> {
+                        { "instructor_id", r.InstructorId },
+                        { "operacion", r.Operacion },
+                        { "registrado_por", SesionManager.UsuarioId }
+                    }
+                );
+
+                string msg = r.Operacion == "entrada"
+                    ? $"Entrada registrada — {r.HoraEntradaTexto}"
+                    : $"Salida registrada — {r.HorasTrabajadasTexto} trabajados";
+
+                return (true, msg, r);
+            }
+            catch (Exception ex) { return (false, ex.Message, null); }
+        }
     }
 }

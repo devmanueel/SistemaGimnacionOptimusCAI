@@ -9,6 +9,14 @@
         AllowsTransparency="True"
         Background="Transparent">
 
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
     <Border Background="{StaticResource Bg1}"
             CornerRadius="14"
             BorderBrush="{StaticResource Border1}"
@@ -43,7 +51,8 @@
                         Click="btnCerrar_Click"/>
             </Grid>
 
-            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="22,14,22,0">
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" 
+                          Margin="22,14,22,0" Style="{StaticResource DataGridScrollViewerStyle}">
                 <StackPanel>
                     <TextBlock Text="SOCIO" Foreground="{StaticResource TextMuted}"
                                FontSize="10" FontWeight="Bold" Margin="2,0,0,6"/>

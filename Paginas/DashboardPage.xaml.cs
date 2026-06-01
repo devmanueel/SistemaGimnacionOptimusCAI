@@ -1,37 +1,28 @@
 ﻿using Controllers;
+using Entities;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace SistemaGimnacionOptimusCAI.Paginas
 {
-    /// <summary>
-    /// Lógica de interacción para DashboardPage.xaml
-    /// </summary>
     public partial class DashboardPage : Page
     {
-        private readonly SocioController _controller = new SocioController();
-        private readonly MembresiaController _controllerM = new MembresiaController();
-        private readonly CajaController _controllerC = new CajaController();
-        private readonly AsistenciaController _controllerA = new AsistenciaController();
-        private DateTime _mesActual;
+        private readonly AsistenciaController _asistenciaCtrl = new AsistenciaController();
+        private readonly InstructorAsistenciaController _instructorCtrl = new InstructorAsistenciaController();
+
+        private DispatcherTimer _timerOcultar;
+        private int _versionResultado;
 
         public DashboardPage()
         {
             InitializeComponent();
-            _mesActual = DateTime.Today;
             Loaded += DashboardPage_Loaded;
         }
 
@@ -39,12 +30,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             CargarDatosUsuario();
             CargarFecha();
-            GenerarCalendario(_mesActual);
-            CargarStats();
-            CargarVencimientos();
+            txtDni.Focus();
         }
 
-        // ── DATOS DEL USUARIO ──────────────────────────────────
         private void CargarDatosUsuario()
         {
             if (!SesionManager.HaySesion) return;
@@ -62,7 +50,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             lblSaludo.Text = saludo + ", " + (partes.Length > 0 ? partes[0] : nombre);
         }
 
-        // ── FECHA ──────────────────────────────────────────────
         private void CargarFecha()
         {
             CultureInfo cultura = new CultureInfo("es-AR");
@@ -70,222 +57,250 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             lblFechaHoy.Text = char.ToUpper(fecha[0]) + fecha.Substring(1);
         }
 
-        // ── CALENDARIO ────────────────────────────────────────
-        private void GenerarCalendario(DateTime mes)
+        private void txtDni_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            CultureInfo cultura = new CultureInfo("es-AR");
-            lblMesAnio.Text = mes.ToString("MMMM yyyy", cultura).ToUpper();
-
-            gridCalendario.Children.Clear();
-
-            // Primer dia del mes y dia de la semana (lunes=0)
-            DateTime primerDia = new DateTime(mes.Year, mes.Month, 1);
-            int diasOffset = ((int)primerDia.DayOfWeek + 6) % 7; // Lunes como primer dia
-            int diasEnMes = DateTime.DaysInMonth(mes.Year, mes.Month);
-
-            DateTime hoy = DateTime.Today;
-
-            // Celdas vacias antes del primer dia
-            for (int i = 0; i < diasOffset; i++)
-                gridCalendario.Children.Add(CrearCeldaVacia());
-
-            // Dias del mes
-            for (int dia = 1; dia <= diasEnMes; dia++)
+            if (e.Key == Key.Enter)
             {
-                bool esHoy = (mes.Year == hoy.Year && mes.Month == hoy.Month && dia == hoy.Day);
-                bool esDomingo = ((diasOffset + dia - 1) % 7 == 6);
-                gridCalendario.Children.Add(CrearCeldaDia(dia, esHoy, esDomingo));
+                e.Handled = true;
+                ProcesarAsistencia();
             }
-
-            // Celdas vacias al final para completar la grilla
-            int totalCeldas = diasOffset + diasEnMes;
-            int celdasRestantes = (6 * 7) - totalCeldas;
-            for (int i = 0; i < celdasRestantes; i++)
-                gridCalendario.Children.Add(CrearCeldaVacia());
         }
 
-        private Border CrearCeldaDia(int dia, bool esHoy, bool esDomingo)
+        private void btnValidar_Click(object sender, RoutedEventArgs e)
         {
-            var borde = new Border
-            {
-                Margin = new Thickness(2),
-                CornerRadius = new CornerRadius(8),
-                Cursor = Cursors.Hand
-            };
+            ProcesarAsistencia();
+        }
 
-            if (esHoy)
+        private void ProcesarAsistencia()
+        {
+            string dni = txtDni.Text.Trim();
+            if (string.IsNullOrEmpty(dni)) return;
+
+            var (tipo, id, nombre, apellido, foto) = _asistenciaCtrl.BuscarPersonaPorDni(dni);
+
+            if (tipo == "no_encontrado" || id == 0)
             {
-                borde.Background = new SolidColorBrush(Color.FromArgb(30, 45, 212, 191));
-                borde.BorderBrush = new SolidColorBrush(Color.FromRgb(45, 212, 191));
-                borde.BorderThickness = new Thickness(1.5);
+                MostrarError("No se encontro ninguna persona con DNI " + dni);
+                return;
+            }
+
+            if (tipo == "socio")
+            {
+                ProcesarSocio(dni);
+            }
+            else if (tipo == "instructor")
+            {
+                ProcesarInstructor(dni, nombre, apellido, foto);
+            }
+        }
+
+        private void ProcesarSocio(string dni)
+        {
+            ResultadoValidacion resultado = _asistenciaCtrl.ValidarAcceso(dni);
+            MostrarResultadoSocio(resultado);
+        }
+
+        private void ProcesarInstructor(string dni, string nombre, string apellido, byte[] foto)
+        {
+            var (ok, mensaje, resultado) = _instructorCtrl.FicharInstructorDashboard(dni);
+
+            if (!ok || resultado == null)
+            {
+                MostrarError(mensaje);
+                return;
+            }
+
+            MostrarResultadoInstructor(resultado);
+        }
+
+        private void MostrarResultadoSocio(ResultadoValidacion r)
+        {
+            _versionResultado++;
+            panelResultado.BeginAnimation(UIElement.OpacityProperty, null);
+            panelResultado.Opacity = 1;
+            panelResultado.Visibility = Visibility.Visible;
+            lblPlaceholder.Visibility = Visibility.Collapsed;
+
+            imgFotoResultado.ImageSource = BytesAImagen(r.Foto);
+
+            lblResultadoNombre.Text = string.IsNullOrEmpty(r.SocioNombre) ? "—" : r.SocioNombre;
+            lblResultadoTipo.Text = "SOCIO";
+
+            if (r.EsPermitido)
+            {
+                lblResultadoMensaje.Text = r.Mensaje;
+                lblResultadoMensaje.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                borderResultado.Background = new SolidColorBrush(Color.FromRgb(10, 26, 16));
+                borderResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 230, 118));
             }
             else
             {
-                borde.Background = Brushes.Transparent;
-                borde.BorderBrush = Brushes.Transparent;
-                borde.BorderThickness = new Thickness(1);
-
-                borde.MouseEnter += (s, e) =>
-                {
-                    borde.Background = new SolidColorBrush(Color.FromRgb(30, 58, 47));
-                    borde.BorderBrush = new SolidColorBrush(Color.FromRgb(74, 222, 128));
-                };
-                borde.MouseLeave += (s, e) =>
-                {
-                    borde.Background = Brushes.Transparent;
-                    borde.BorderBrush = Brushes.Transparent;
-                };
+                lblResultadoMensaje.Text = r.Mensaje;
+                lblResultadoMensaje.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+                borderResultado.Background = new SolidColorBrush(Color.FromRgb(26, 10, 10));
+                borderResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 85, 85));
             }
 
-            var txt = new TextBlock
+            if (!string.IsNullOrEmpty(r.ActividadNombre))
             {
-                Text = dia.ToString(),
-                FontSize = 13,
-                FontWeight = esHoy ? FontWeights.Bold : FontWeights.Normal,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(0, 6, 0, 6)
-            };
+                lblResultadoActividad.Text = r.ActividadNombre;
+                lblResultadoVencimiento.Text = r.FechaVencimientoTexto;
+                lblResultadoAsistencias.Text = r.AsistenciasRestantesTexto ?? "—";
 
-            if (esHoy)
-                txt.Foreground = new SolidColorBrush(Color.FromRgb(0, 207, 255));
-            else if (esDomingo)
-                txt.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+                if (r.LimitePorSemana.HasValue)
+                {
+                    int rest = r.AsistenciasRestantesSemana ?? 0;
+                    if (rest > 1)
+                        lblResultadoAsistencias.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                    else if (rest == 1)
+                        lblResultadoAsistencias.Foreground = new SolidColorBrush(Color.FromRgb(255, 179, 0));
+                    else
+                        lblResultadoAsistencias.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+                }
+                else
+                {
+                    lblResultadoAsistencias.Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 204));
+                }
+
+                panelInfoMembresia.Visibility = Visibility.Visible;
+                panelInfoFichaje.Visibility = Visibility.Collapsed;
+            }
             else
-                txt.Foreground = new SolidColorBrush(Color.FromRgb(180, 180, 210));
-
-            borde.Child = txt;
-            return borde;
-        }
-
-        private Border CrearCeldaVacia()
-        {
-            return new Border
             {
-                Margin = new Thickness(2),
-                Background = Brushes.Transparent
-            };
-        }
-
-        // ── STATS ─────────────────────────────────────────────
-        private void CargarStats()
-        {
-            var listaSocios = _controller.ObtenerSocios();
-            var listaMembresias = _controllerM.ObtenerMembresias();
-            var resumenMes = _controllerC.ResumenDelMes();
-            var stats = _controllerA.ObtenerAccesosDelDia();
-            int membresiasActivas = 0;
-            int activos = 0;
-
-            foreach (var s in listaSocios)
-            {
-                if (s.Activo) activos++;
+                panelInfoMembresia.Visibility = Visibility.Collapsed;
+                panelInfoFichaje.Visibility = Visibility.Collapsed;
             }
 
-            foreach (var m in listaMembresias)
+            IniciarTimerOcultar();
+        }
+
+        private void MostrarResultadoInstructor(FichajeResultado r)
+        {
+            _versionResultado++;
+            panelResultado.BeginAnimation(UIElement.OpacityProperty, null);
+            panelResultado.Opacity = 1;
+            panelResultado.Visibility = Visibility.Visible;
+            lblPlaceholder.Visibility = Visibility.Collapsed;
+
+            imgFotoResultado.ImageSource = BytesAImagen(r.Foto);
+
+            lblResultadoNombre.Text = string.IsNullOrEmpty(r.NombreCompleto) ? "—" : r.NombreCompleto;
+            lblResultadoTipo.Text = "INSTRUCTOR";
+
+            bool esEntrada = r.Operacion == "entrada";
+
+            if (esEntrada)
             {
-                if (m.Estado == "activa") membresiasActivas++; 
+                lblResultadoMensaje.Text = r.Mensaje;
+                lblResultadoMensaje.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+                borderResultado.Background = new SolidColorBrush(Color.FromRgb(10, 26, 16));
+                borderResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(0, 230, 118));
+            }
+            else
+            {
+                lblResultadoMensaje.Text = r.Mensaje;
+                lblResultadoMensaje.Foreground = new SolidColorBrush(Color.FromRgb(212, 131, 10));
+                borderResultado.Background = new SolidColorBrush(Color.FromRgb(30, 22, 0));
+                borderResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(212, 131, 10));
             }
 
-            statSociosActivos.Text = activos.ToString();
-            statMembresiasActivas.Text = membresiasActivas.ToString();
-            statIngresosMes.Text = resumenMes.TotalIngresosTexto;
-            statBalanceMes.Text = "Balance: " + resumenMes.BalanceTexto;
-            statBalanceMes.Foreground = resumenMes.Balance >= 0
-                ? new SolidColorBrush(Color.FromRgb(160, 192, 112))
-                : new SolidColorBrush(Color.FromRgb(255, 85, 85));
-            statAsistenciasHoy.Text = stats.Count().ToString();
-            // TODO: reemplazar con llamadas reales a tus DAOs
-            // Ejemplo:
-            // statSociosActivos.Text = SocioDao.ContarActivos().ToString();
-            // statMembresiasActivas.Text = MembresiaDao.ContarActivas().ToString();
-            // statIngresosMes.Text = "$" + CajaDao.IngresosMes().ToString("N0");
-            // statAsistenciasHoy.Text = AsistenciaDao.ContarHoy().ToString();
+            panelInfoMembresia.Visibility = Visibility.Collapsed;
+            panelInfoFichaje.Visibility = Visibility.Visible;
+
+            lblResultadoOperacion.Text = esEntrada ? "Entrada" : "Salida";
+            lblResultadoOperacion.Foreground = esEntrada
+                ? new SolidColorBrush(Color.FromRgb(0, 230, 118))
+                : new SolidColorBrush(Color.FromRgb(212, 131, 10));
+
+            lblResultadoHora.Text = esEntrada ? r.HoraEntradaTexto : r.HoraSalidaTexto;
+            lblResultadoHoras.Text = r.HorasTrabajadasTexto;
+
+            IniciarTimerOcultar();
         }
 
-        // ── PROXIMOS VENCIMIENTOS ─────────────────────────────
-        private void CargarVencimientos()
+        private void MostrarError(string mensaje)
         {
-            panelVencimientos.Children.Clear();
+            _versionResultado++;
+            panelResultado.BeginAnimation(UIElement.OpacityProperty, null);
+            panelResultado.Opacity = 1;
+            panelResultado.Visibility = Visibility.Visible;
+            lblPlaceholder.Visibility = Visibility.Collapsed;
 
-            // TODO: reemplazar con llamada real a tu DAO
-            // var vencimientos = MembresiaDao.GetProximosVencimientos(7);
+            imgFotoResultado.ImageSource = null;
+            lblResultadoNombre.Text = "Error";
+            lblResultadoTipo.Text = "";
+            lblResultadoMensaje.Text = mensaje;
+            lblResultadoMensaje.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+            borderResultado.Background = new SolidColorBrush(Color.FromRgb(26, 10, 10));
+            borderResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 85, 85));
 
-            // Por ahora muestra placeholder
-            var placeholder = new TextBlock
-            {
-                Text = "No hay vencimientos proximos",
-                FontSize = 12,
-                Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154)),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 12, 0, 12)
-            };
-            panelVencimientos.Children.Add(placeholder);
+            panelInfoMembresia.Visibility = Visibility.Collapsed;
+            panelInfoFichaje.Visibility = Visibility.Collapsed;
 
-            // Cuando tengas datos, usa este metodo para agregar cada fila:
-            // AgregarFilaVencimiento("Juan Perez", "Boxeo", 3);
+            IniciarTimerOcultar();
         }
 
-        // Metodo auxiliar para agregar una fila de vencimiento
-        private void AgregarFilaVencimiento(string nombre, string actividad, int diasRestantes)
+        private void IniciarTimerOcultar()
         {
-            string colorHex = diasRestantes <= 3 ? "#FF5555" :
-                              diasRestantes <= 7 ? "#FFA726" : "#6A6A9A";
-            var color = (Color)ColorConverter.ConvertFromString(colorHex);
-
-            var fila = new Border
+            if (_timerOcultar != null)
             {
-                Background = new SolidColorBrush(Color.FromRgb(22, 22, 42)),
-                CornerRadius = new CornerRadius(8),
-                Margin = new Thickness(0, 3, 0, 3),
-                Padding = new Thickness(10, 8, 10, 8)
+                _timerOcultar.Stop();
+                _timerOcultar = null;
+            }
+
+            _timerOcultar = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            _timerOcultar.Tick += (s, e) =>
+            {
+                _timerOcultar.Stop();
+                _timerOcultar = null;
+                OcultarResultado();
             };
-
-            var grid = new Grid();
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-            var stack = new StackPanel();
-            stack.Children.Add(new TextBlock
-            {
-                Text = nombre,
-                FontSize = 12,
-                FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(232, 232, 255))
-            });
-            stack.Children.Add(new TextBlock
-            {
-                Text = actividad,
-                FontSize = 11,
-                Foreground = new SolidColorBrush(Color.FromRgb(106, 106, 154)),
-                Margin = new Thickness(0, 1, 0, 0)
-            });
-
-            var badge = new Border
-            {
-                Background = new SolidColorBrush(Color.FromArgb(30, color.R, color.G, color.B)),
-                CornerRadius = new CornerRadius(6),
-                Padding = new Thickness(8, 4, 8, 4),
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            badge.Child = new TextBlock
-            {
-                Text = diasRestantes == 0 ? "Hoy" : diasRestantes + "d",
-                FontSize = 11,
-                FontWeight = FontWeights.Bold,
-                Foreground = new SolidColorBrush(color)
-            };
-
-            Grid.SetColumn(stack, 0);
-            Grid.SetColumn(badge, 1);
-            grid.Children.Add(stack);
-            grid.Children.Add(badge);
-
-            fila.Child = grid;
-            panelVencimientos.Children.Add(fila);
+            _timerOcultar.Start();
         }
 
-        // ── NAVEGACION ACCESOS RAPIDOS ─────────────────────────
+        private void OcultarResultado()
+        {
+            int versionActual = _versionResultado;
+            var fadeOut = new DoubleAnimation
+            {
+                From = 1,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromMilliseconds(300))
+            };
+            fadeOut.Completed += (s, e) =>
+            {
+                if (_versionResultado != versionActual) return;
+                panelResultado.Visibility = Visibility.Collapsed;
+                lblPlaceholder.Visibility = Visibility.Visible;
+                panelResultado.Opacity = 1;
+                txtDni.Text = string.Empty;
+                txtDni.Focus();
+            };
+            panelResultado.BeginAnimation(UIElement.OpacityProperty, fadeOut);
+        }
+
+        private System.Windows.Media.ImageSource BytesAImagen(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0) return null;
+            try
+            {
+                using (var ms = new MemoryStream(bytes))
+                {
+                    var bmp = new System.Windows.Media.Imaging.BitmapImage();
+                    bmp.BeginInit();
+                    bmp.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bmp.StreamSource = ms;
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    return bmp;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private void NavegarConSidebar(Type tipo, bool abrirPanel = false)
         {
             if (abrirPanel) SesionManager.AbrirPanelAlNavegar = true;
