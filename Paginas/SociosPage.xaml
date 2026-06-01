@@ -588,13 +588,13 @@
                             </DataGridTemplateColumn>
 
                             <!-- DNI -->
-                            <DataGridTextColumn Header="DNI" Binding="{Binding Dni}" Width="0.8*"/>
+                            <DataGridTextColumn Header="DNI" Binding="{Binding Dni}" Width="90"/>
 
                             <!-- Edad -->
-                            <DataGridTextColumn Header="EDAD" Binding="{Binding EdadTexto}" Width="0.6*"/>
+                            <DataGridTextColumn Header="EDAD" Binding="{Binding EdadTexto}" Width="70"/>
 
                             <!-- Teléfono -->
-                            <DataGridTextColumn Header="TELÉFONO" Binding="{Binding Telefono}" Width="1.1*"/>
+                            <DataGridTextColumn Header="TELÉFONO" Binding="{Binding Telefono}" Width="100"/>
 
                             <!-- Actividad badge -->
                             <DataGridTemplateColumn Header="ACTIVIDAD" Width="1.5*">
