@@ -104,8 +104,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             var (ok, mensaje, resultado) = _instructorCtrl.FicharInstructorDashboard(dni);
 
-            if (!ok || resultado == null)
+            if (!ok)
             {
+                if (resultado != null && resultado.Operacion == "espera_minima")
+                {
+                    MostrarResultadoInstructor(resultado);
+                    return;
+                }
                 MostrarError(mensaje);
                 return;
             }
@@ -186,6 +191,25 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             lblResultadoNombre.Text = string.IsNullOrEmpty(r.NombreCompleto) ? "—" : r.NombreCompleto;
             lblResultadoTipo.Text = "INSTRUCTOR";
+
+            if (r.Operacion == "espera_minima")
+            {
+                lblResultadoMensaje.Text = r.Mensaje;
+                lblResultadoMensaje.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+                borderResultado.Background = new SolidColorBrush(Color.FromRgb(26, 10, 10));
+                borderResultado.BorderBrush = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+
+                panelInfoMembresia.Visibility = Visibility.Collapsed;
+                panelInfoFichaje.Visibility = Visibility.Visible;
+
+                lblResultadoOperacion.Text = "Espera";
+                lblResultadoOperacion.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
+                lblResultadoHora.Text = "—";
+                lblResultadoHoras.Text = "—";
+
+                IniciarTimerOcultar();
+                return;
+            }
 
             bool esEntrada = r.Operacion == "entrada";
 

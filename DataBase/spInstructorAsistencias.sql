@@ -597,14 +597,31 @@ BEGIN
     END
     ELSE
     BEGIN
-        -- Registrar salida
+        -- Validar mínimo 10 minutos desde la entrada
         DECLARE @HoraEntrada TIME;
         SELECT @HoraEntrada = hora_entrada
         FROM instructor_asistencias
         WHERE id = @AsistenciaId;
 
         DECLARE @HoraSalida TIME = CAST(GETDATE() AS TIME);
-        DECLARE @Horas DECIMAL(5,2) = DATEDIFF(MINUTE, @HoraEntrada, @HoraSalida) / 60.0;
+        DECLARE @MinutosDesdeEntrada INT = DATEDIFF(MINUTE, @HoraEntrada, @HoraSalida);
+
+        IF @MinutosDesdeEntrada < 10
+        BEGIN
+            DECLARE @Restantes INT = 10 - @MinutosDesdeEntrada;
+            SELECT @AsistenciaId AS id,
+                   @InstructorId AS instructor_id,
+                   @Nombre + ' ' + @Apellido AS nombre_completo,
+                   @Foto AS foto,
+                   CAST(NULL AS TIME) AS hora,
+                   CAST(NULL AS DECIMAL(5,2)) AS horas_trabajadas,
+                   'espera_minima' AS operacion,
+                   N'Debés esperar al menos ' + CAST(@Restantes AS NVARCHAR) +
+                   N' minuto(s) antes de registrar la salida.' AS mensaje;
+            RETURN;
+        END
+
+        DECLARE @Horas DECIMAL(5,2) = @MinutosDesdeEntrada / 60.0;
 
         UPDATE instructor_asistencias
         SET hora_salida = @HoraSalida,

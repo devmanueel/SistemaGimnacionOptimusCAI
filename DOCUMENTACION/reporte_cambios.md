@@ -510,3 +510,144 @@ Esto es consistente con como otras ventanas del proyecto (`EditarSocioWindow.xam
 | `Paginas\SociosPage.xaml` | Avatar `GreenMid`, columna nombre/email ajustada |
 | `Paginas\AsistenciasPage.xaml` | Eliminado panel de validacion (solo queda lista) |
 | `Paginas\AsistenciasPage.xaml.cs` | Eliminados ~200 lineas (validacion, DNI, huella) |
+
+---
+
+## 🔧 12. Rediseno del LoginWindow — layout horizontal (`01/06/2026`)
+
+### Cambio
+Se reemplazo el layout vertical (logo arriba, formulario abajo) por un layout horizontal con dos paneles:
+
+| Elemento | Antes | Despues |
+|----------|-------|---------|
+| Tamano ventana | 420x620 | 780x440 |
+| Logo | Centrado arriba, 250px | Izquierda centrado vertical, 200px |
+| Titulo | "Sistema de Gestion" debajo del logo | "Sistema de Gestion" + "OptimusCAI Gym" en verde |
+| Formulario | Abajo del logo, con margen 40px | Derecha, panel separado con margen propio |
+| Footer | Fila centrada con copyright + Salir | Una sola fila: copyright a la izquierda, Salir a la derecha |
+| Barra verde | Franja horizontal de 4px arriba | Franja vertical de 4px a la izquierda |
+
+### Estructura del layout
+
+```
+┌─────────────────────────────────────────────────────┐
+│ ██  [LOGO]          │  DNI                         │
+│ ██  Sistema de      │  ┌────────────────────────┐  │
+│ ██  Gestion         │  │ 👤 12345678            │  │
+│ ██                   │  └────────────────────────┘  │
+│ ██  OptimusCAI Gym  │  CONTRASENA                   │
+│ ██                   │  ┌────────────────────────┐  │
+│ ██                   │  │ 🔒 ●●●●●●       👁   │  │
+│ ██                   │  └────────────────────────┘  │
+│ ██                   │  [  ERROR  ]                 │
+│ ██                   │  ┌────────────────────────┐  │
+│ ██                   │  │       INGRESAR         │  │
+│ ██                   │  └────────────────────────┘  │
+├─────────────────────────────────────────────────────┤
+│ OptimusCAI — Gestion de Gimnasio          ✕ Salir   │
+└─────────────────────────────────────────────────────┘
+```
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `LoginWindow.xaml` | Layout completo redisenado a split horizontal, agregado `txtPasswordVisible` (TextBox overlay) para toggle |
+| `LoginWindow.xaml.cs` | Implementada funcionalidad mostrar/ocultar contrasena con swap PasswordBox ↔ TextBox, iconos FontAwesome |
+
+---
+
+## 🔧 13. Fix mostrar/ocultar contrasena en LoginWindow (`01/06/2026`)
+
+### Problema
+El boton "👁" para mostrar/ocultar la contrasena en el login no tenia funcionalidad real: solo cambiaba el icono pero no mostraba el texto de la contrasena.
+
+### Causa raiz
+En WPF, `PasswordBox` no permite mostrar el texto en claro. El codigo anterior solo alternaba el icono visual (`"👁" ↔ "🔒"`) sin cambiar el control subyacente.
+
+### Solucion aplicada
+
+Se implemento un swap real entre `PasswordBox` y `TextBox`:
+
+**XAML:** Se agrego un `TextBox` (`txtPasswordVisible`) superpuesto en la misma celda del Grid que el `PasswordBox`, inicialmente oculto (`Visibility="Collapsed"`). Se reemplazo el icono emoji por `fa:ImageAwesome` con iconos FontAwesome (`Eye` / `EyeSlash`).
+
+**Code-behind:** Se implemento la logica de sincronizacion:
+
+```cs
+if (_mostrandoPassword)
+{
+    // PasswordBox → TextBox visible
+    txtPasswordVisible.Text = txtPassword.Password;
+    txtPassword.Visibility = Visibility.Collapsed;
+    txtPasswordVisible.Visibility = Visibility.Visible;
+    iconTogglePass.Icon = "EyeSlash";
+}
+else
+{
+    // TextBox → PasswordBox oculto
+    txtPassword.Password = txtPasswordVisible.Text;
+    txtPasswordVisible.Visibility = Visibility.Collapsed;
+    txtPassword.Visibility = Visibility.Visible;
+    iconTogglePass.Icon = "Eye";
+}
+```
+
+`IntentarLogin()` lee del control activo segun `_mostrandoPassword`.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `LoginWindow.xaml` | Agregado `txtPasswordVisible`, iconos FontAwesome `Eye`/`EyeSlash` |
+| `LoginWindow.xaml.cs` | Swap real PasswordBox/TextBox + sincronizacion |
+
+---
+
+## 🔧 14. Validacion de 10 minutos para salida de instructores en Dashboard (`01/06/2026`)
+
+### Problema
+Un instructor podia marcar entrada y salida casi al mismo tiempo desde el Dashboard, registrando asistencias con duracion minima o nula.
+
+### Solucion aplicada
+Se agrego una validacion en `sp_FicharInstructorDashboard` que impide registrar la salida si no pasaron al menos 10 minutos desde la entrada.
+
+**SP:** Si se intenta registrar salida antes de los 10 minutos, retorna `operacion = "espera_minima"` con un mensaje indicando cuantos minutos faltan.
+
+**Controller:** `FicharInstructorDashboard()` ahora trata `espera_minima` como error (`ok = false`), mostrando el mensaje en el Dashboard.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\spInstructorAsistencias.sql` | Validacion de 10 min en `sp_FicharInstructorDashboard` |
+| `Controllers\InstructorAsistenciaController.cs` | `espera_minima` tratado como error |
+
+### SP a ejecutar
+```
+DataBase\spInstructorAsistencias.sql
+```
+
+---
+
+## 🔧 15. Dashboard: mostrar datos del instructor en error de espera mínima + simplificación de Asistencias de Instructores (`01/06/2026`)
+
+### Cambios realizados
+
+| Cambio | Descripción |
+|--------|-------------|
+| Dashboard muestra datos en error | Cuando un instructor intenta registrar salida antes de 10 min, el Dashboard ahora muestra foto, nombre y mensaje de error (antes solo mostraba error genérico) |
+| Asistencias de Instructores simplificada | Se eliminó el panel "Fichaje Rápido" (DNI + botones entrada/salida). Solo queda la lista de asistencias con historial y reportes |
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `Controllers\InstructorAsistenciaController.cs` | Retornar `resultado` cuando sea `espera_minima` (para mostrar datos del instructor) |
+| `Paginas\DashboardPage.xaml.cs` | Manejar `espera_minima` mostrando foto/nombre + mensaje de error |
+| `Paginas\InstructorAsistenciasPage.xaml` | Eliminado panel "Fichaje Rápido", solo lista de asistencias |
+| `Paginas\InstructorAsistenciasPage.xaml.cs` | Eliminados handlers de fichaje y lógica de panel admin/no-admin |
+
+### SPs a ejecutar
+```
+DataBase\spInstructorAsistencias.sql
+```

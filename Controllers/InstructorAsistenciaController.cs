@@ -213,6 +213,9 @@ namespace Controllers
                 if (r == null || r.Operacion == "no_encontrado")
                     return (false, r != null ? r.Mensaje : "Instructor no encontrado.", null);
 
+                if (r.Operacion == "espera_minima")
+                    return (false, r.Mensaje, r);
+
                 Auditor.Registrar(
                     r.Operacion == "entrada" ? "crear" : "editar",
                     "asistencia_dashboard",
