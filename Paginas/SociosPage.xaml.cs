@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -56,18 +57,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // Ordenamiento
         private string _ordenamiento = "nombre_asc";
 
-        // Edición de membresía
-        private long _membresiaIdEditar = 0;
-        private long _membresiaActividadActualId = 0;
-        private string _membresiaActividadActualCategoria = null;
-        private int? _membresiaActividadActualNivel = null;
+        // Paginación
+        private int  _paginaActual = 1;
+        private bool _hayMas       = true;
+        private bool _cargando     = false;
+        private bool _ignorarScroll = false;
+        private bool _primeraCargaCompleta = false;
+        private const int TAM_PAGINA = 8;
 
         public SociosPage()
         {
             InitializeComponent();
             ActualizarStats();
             CargarInstructores();
-            CargarCombosMembresia();
             CargarSocios();
             ResaltarChip(chipTodos);
             CambiarTab("datos");
@@ -76,6 +78,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 SesionManager.AbrirPanelAlNavegar = false;
                 btnNuevo_Click(null, null);
             }
+            Loaded += (s, e) => SuscribirScrollDataGrid();
         }
 
         // ─────────────────────────────────────────────────────
@@ -99,41 +102,154 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─────────────────────────────────────────────────────
         private void CargarSocios()
         {
+            _paginaActual = 1;
+            _hayMas       = true;
+            _primeraCargaCompleta = false;
+            CargarSociosPagina(1, agregar: false);
+        }
+
+        private async void CargarSociosPagina(int pagina, bool agregar)
+        {
+            if (_cargando) return;
+            _cargando = true;
+
+            if (panelCargando != null)
+                panelCargando.Visibility = Visibility.Visible;
+
+            // Si es paginación infinita, mostrar delay antes de cargar
+            if (agregar)
+            {
+                await Task.Delay(1200);
+            }
+
             try
             {
-                // 1. Traer TODOS los datos con filtros avanzados aplicados (SIN filtro de chip)
-                var listaCompleta = _controller.ListarSociosConMembresias(
+                var resultado = _controller.ListarSociosConMembresias(
                     texto:              txtBuscar != null ? txtBuscar.Text.Trim() : "",
-                    filtroEstado:       "todos",  // siempre traer todos para contar correctamente
+                    filtroEstado:       _filtroEstado,
                     filtroActividadId:  _filtroActividadId,
                     filtroCuotaVencida: _filtroCuotaVencida,
                     filtroInstructorId: _filtroInstructorId,
                     filtroSexo:         _filtroSexo,
-                    filtroDejaronVenir: _filtroDejaronVenir);
+                    filtroDejaronVenir: _filtroDejaronVenir,
+                    pagina:             pagina,
+                    tamPagina:          TAM_PAGINA);
 
-                // 2. Actualizar chips con la lista completa (sin filtro de chip)
-                ActualizarContadoresChips(listaCompleta);
+                _hayMas = resultado.HayMas;
 
-                // 3. Filtrar por estado del chip para mostrar en la tabla
-                List<SocioConMembresia> listaFiltrada;
-                if (_filtroEstado == "todos")
-                    listaFiltrada = listaCompleta;
-                else if (_filtroEstado == "activos")
-                    listaFiltrada = listaCompleta.FindAll(s => s.MembresiaEstado == "activa");
-                else if (_filtroEstado == "inactivos")
-                    listaFiltrada = listaCompleta.FindAll(s => s.MembresiaEstado != "activa");
+                // Ignorar disparos automáticos de ScrollChanged durante el re-renderizado
+                _ignorarScroll = true;
+
+                // Guardar posición del scroll antes de agregar items
+                double scrollOffset = 0;
+                if (agregar)
+                {
+                    var sv = ObtenerScrollViewer(gridSocios);
+                    if (sv != null)
+                        scrollOffset = sv.VerticalOffset;
+                }
+
+                if (agregar)
+                {
+                    var listaActual = gridSocios.ItemsSource as List<SocioConMembresia>
+                                      ?? new List<SocioConMembresia>();
+                    listaActual.AddRange(resultado.Items);
+
+                    gridSocios.ItemsSource = null;
+                    gridSocios.ItemsSource = listaActual;
+
+                    // Restaurar posición del scroll después de agregar
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        var sv = ObtenerScrollViewer(gridSocios);
+                        if (sv != null)
+                            sv.ScrollToVerticalOffset(scrollOffset);
+                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }
                 else
-                    listaFiltrada = listaCompleta;
+                {
+                    gridSocios.ItemsSource = resultado.Items;
+                    ActualizarContadoresChipsConTotal(resultado.Total, resultado.Items);
+                }
 
-                if (gridSocios != null)
-                    gridSocios.ItemsSource = listaFiltrada;
-
-                ActualizarResumenFiltros(listaFiltrada);
+                ActualizarResumenFiltros(resultado.Items);
                 AplicarOrdenamiento();
             }
             catch (Exception ex)
             {
                 NotificacionWindow.MostrarError(ex.Message, "Error al cargar socios");
+            }
+            finally
+            {
+                // Si es la primera carga, marcar como completa
+                if (!agregar)
+                    _primeraCargaCompleta = true;
+
+                _ignorarScroll = false;
+                _cargando = false;
+                if (panelCargando != null)
+                    panelCargando.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void SuscribirScrollDataGrid()
+        {
+            // Esperar a que el DataGrid termine de renderizar su template
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                var scrollViewer = ObtenerScrollViewer(gridSocios);
+                if (scrollViewer != null)
+                {
+                    scrollViewer.ScrollChanged += OnScrollChanged;
+                }
+                else
+                {
+                    // Fallback: intentar nuevamente en el LayoutUpdated
+                    EventHandler handler = null;
+                    handler = (s, e) =>
+                    {
+                        scrollViewer = ObtenerScrollViewer(gridSocios);
+                        if (scrollViewer != null)
+                        {
+                            gridSocios.LayoutUpdated -= handler;
+                            scrollViewer.ScrollChanged += OnScrollChanged;
+                        }
+                    };
+                    gridSocios.LayoutUpdated += handler;
+                }
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private static ScrollViewer ObtenerScrollViewer(DependencyObject obj)
+        {
+            if (obj is ScrollViewer) return (ScrollViewer)obj;
+
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(obj, i);
+                var result = ObtenerScrollViewer(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private void OnScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            // Ignorar hasta que la primera carga termine completamente
+            if (!_primeraCargaCompleta) return;
+
+            // Ignorar si estamos cargando o si el scroll fue automático (re-renderizado)
+            if (_ignorarScroll || _cargando) return;
+
+            // Solo responder a scroll manual del usuario (VerticalChange != 0)
+            if (e.VerticalChange == 0) return;
+
+            bool llegoAlFinal = e.VerticalOffset >= e.ExtentHeight - e.ViewportHeight - 50;
+
+            if (llegoAlFinal && _hayMas)
+            {
+                _paginaActual++;
+                CargarSociosPagina(_paginaActual, agregar: true);
             }
         }
 
@@ -165,32 +281,36 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        private void ActualizarContadoresChips(List<SocioConMembresia> lista)
+        private void ActualizarContadoresChipsConTotal(int total, List<SocioConMembresia> itemsPagina)
         {
             try
             {
-                int total = lista != null ? lista.Count : 0;
-                int activos = 0;
-                int inactivos = 0;
+                var todosParaContar = _controller.ListarSociosConMembresias(
+                    texto:              txtBuscar != null ? txtBuscar.Text.Trim() : "",
+                    filtroEstado:       "todos",
+                    filtroActividadId:  _filtroActividadId,
+                    filtroCuotaVencida: _filtroCuotaVencida,
+                    filtroInstructorId: _filtroInstructorId,
+                    filtroSexo:         _filtroSexo,
+                    filtroDejaronVenir: _filtroDejaronVenir,
+                    pagina:             1,
+                    tamPagina:          99999);
 
-                if (lista != null)
+                int totalActivos   = 0;
+                int totalInactivos = 0;
+                foreach (var s in todosParaContar.Items)
                 {
-                    foreach (var s in lista)
-                    {
-                        if (s.MembresiaEstado == "activa") activos++;
-                        else inactivos++;
-                    }
+                    if (s.MembresiaEstado == "activa") totalActivos++;
+                    else totalInactivos++;
                 }
 
-                chipTodosNum.Text = $"({total})";
-                chipActivosNum.Text = $"({activos})";
-                chipInactivosNum.Text = $"({inactivos})";
+                chipTodosNum.Text     = "(" + todosParaContar.Total + ")";
+                chipActivosNum.Text   = "(" + totalActivos + ")";
+                chipInactivosNum.Text = "(" + totalInactivos + ")";
             }
             catch
             {
-                chipTodosNum.Text = "(0)";
-                chipActivosNum.Text = "(0)";
-                chipInactivosNum.Text = "(0)";
+                chipTodosNum.Text = chipActivosNum.Text = chipInactivosNum.Text = "(0)";
             }
         }
 
@@ -745,13 +865,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        private void btnEditar_Click(object sender, RoutedEventArgs e)
+        private void btnEditarMembresia_Click(object sender, RoutedEventArgs e)
         {
             var socio = ObtenerSocioDeFila(sender);
             if (socio == null) return;
-
-            // Editar los datos personales del socio en un popup (no el plan).
-            var win = new EditarSocioWindow(socio.Id) { Owner = Window.GetWindow(this) };
+            if (socio.MembresiaId <= 0)
+            {
+                NotificacionWindow.MostrarAdvertencia("Este socio no tiene una membresia asignada.");
+                return;
+            }
+            var win = new Ventanas.MembresiaWindow { Owner = Window.GetWindow(this) };
+            win.Configurar(socio.MembresiaId);
             if (win.ShowDialog() == true)
             {
                 CargarSocios();
@@ -759,23 +883,32 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        private void btnToggleEstado_Click(object sender, RoutedEventArgs e)
+        private void btnCancelarMembresia_Click(object sender, RoutedEventArgs e)
         {
             var socio = ObtenerSocioDeFila(sender);
             if (socio == null) return;
-
-            bool nuevoEstado = !socio.Activo;
-            string accion = nuevoEstado ? "activar" : "desactivar";
+            if (socio.MembresiaId <= 0)
+            {
+                NotificacionWindow.MostrarAdvertencia("Este socio no tiene una membresia asignada.");
+                return;
+            }
+            if (socio.MembresiaEstado == "cancelada")
+            {
+                NotificacionWindow.MostrarAdvertencia("Esta membresia ya esta cancelada.");
+                return;
+            }
 
             bool confirmo = NotificacionWindow.MostrarConfirmacion(
-                "¿Querés " + accion + " al socio " + socio.NombreCompleto + "?",
-                "Confirmar cambio de estado");
+                "¿Queres cancelar la membresia de " + socio.NombreCompleto +
+                " — " + socio.ActividadNombre + "?\n\n" +
+                "El registro se conserva pero queda en estado 'cancelada'.",
+                "Cancelar membresia");
 
             if (!confirmo) return;
 
             try
             {
-                var r = _controller.CambiarEstado(socio.Id, nuevoEstado);
+                var r = _membresiaController.Cancelar(socio.MembresiaId, SesionManager.UsuarioId);
                 if (r.ok) { NotificacionWindow.MostrarExito(r.mensaje); CargarSocios(); }
                 else { NotificacionWindow.MostrarError(r.mensaje); }
             }
@@ -1110,393 +1243,5 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        // ═════════════════════════════════════════════════════
-        //  PANEL LATERAL — EDICIÓN DE MEMBRESÍA
-        // ═════════════════════════════════════════════════════
-
-        private void CargarCombosMembresia()
-        {
-            try
-            {
-                var actividades = _membresiaController.ListarActividadesParaCombo();
-                cmbMembresiaActividad.ItemsSource = actividades;
-
-                var instructores = _usuarioController.ObtenerUsuariosActivosPorRol(2);
-                var listaInstructores = new List<object>();
-                listaInstructores.Add(new { NombreCompleto = "Ninguno", Id = (long?)null });
-                foreach (var inst in instructores)
-                    listaInstructores.Add(inst);
-                cmbMembresiaInstructor.ItemsSource = listaInstructores;
-            }
-            catch { /* silencioso */ }
-        }
-
-        private void AbrirPanelMembresia(long membresiaId)
-        {
-            try
-            {
-                var m = _membresiaController.ObtenerPorId(membresiaId);
-                if (m == null)
-                {
-                    NotificacionWindow.MostrarError("No se encontró la membresía.");
-                    return;
-                }
-
-                // Precargar controles
-                LimpiarFormularioMembresia();
-                LimpiarErroresMembresia();
-
-                _membresiaIdEditar = m.Id;
-                _membresiaActividadActualId = m.ActividadId;
-                _membresiaActividadActualCategoria = m.ActividadCategoria;
-                _membresiaActividadActualNivel = m.ActividadNivel;
-
-                // Socio (solo lectura)
-                var listaSocio = new List<object>();
-                listaSocio.Add(new { NombreCompleto = m.SocioNombre, Id = m.SocioId });
-                cmbMembresiaSocio.ItemsSource = listaSocio;
-                cmbMembresiaSocio.SelectedIndex = 0;
-
-                // Actividad
-                foreach (var item in cmbMembresiaActividad.Items)
-                {
-                    var act = item as ActividadComboItem;
-                    if (act != null && act.Id == m.ActividadId)
-                    { cmbMembresiaActividad.SelectedItem = item; break; }
-                }
-
-                // Instructor
-                if (m.InstructorId.HasValue)
-                {
-                    for (int i = 0; i < cmbMembresiaInstructor.Items.Count; i++)
-                    {
-                        var inst = cmbMembresiaInstructor.Items[i] as Usuario;
-                        if (inst != null && inst.Id == m.InstructorId.Value)
-                        { cmbMembresiaInstructor.SelectedIndex = i; break; }
-                    }
-                }
-                else
-                {
-                    cmbMembresiaInstructor.SelectedIndex = 0;
-                }
-
-                // Fechas (no editables)
-                dpMembresiaInicio.SelectedDate = m.FechaInicio;
-                dpMembresiaVencimiento.SelectedDate = m.FechaVencimiento;
-
-                // Monto
-                txtMembresiaMonto.Text = m.MontoPagado.ToString("F0");
-
-                // Método de pago
-                foreach (ComboBoxItem mp in cmbMembresiaMetodoPago.Items)
-                {
-                    if (mp.Tag != null && mp.Tag.ToString() == m.MetodoPago)
-                    { cmbMembresiaMetodoPago.SelectedItem = mp; break; }
-                }
-
-                // Observaciones
-                txtMembresiaObservaciones.Text = m.Observaciones ?? string.Empty;
-
-                // Abrir panel
-                panelFormularioMembresia.Visibility = Visibility.Visible;
-                panelFormularioMembresia.Opacity = 0;
-
-                var translate = new TranslateTransform { X = 60 };
-                panelFormularioMembresia.RenderTransform = translate;
-
-                var slide = new DoubleAnimation
-                {
-                    From = 60,
-                    To = 0,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(350)),
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-                };
-                translate.BeginAnimation(TranslateTransform.XProperty, slide);
-
-                var fade = new DoubleAnimation
-                {
-                    From = 0,
-                    To = 1,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(300))
-                };
-                panelFormularioMembresia.BeginAnimation(OpacityProperty, fade);
-            }
-            catch (Exception ex)
-            {
-                NotificacionWindow.MostrarError("Error al cargar la membresía.\n" + ex.Message);
-            }
-        }
-
-        private void CerrarPanelMembresia()
-        {
-            var fade = new DoubleAnimation
-            {
-                From = 1,
-                To = 0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(180)),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
-            };
-            fade.Completed += (s, e) =>
-            {
-                panelFormularioMembresia.Visibility = Visibility.Collapsed;
-                LimpiarFormularioMembresia();
-                LimpiarErroresMembresia();
-                _membresiaIdEditar = 0;
-            };
-            panelFormularioMembresia.BeginAnimation(OpacityProperty, fade);
-        }
-
-        private void btnCancelarMembresia_Click(object sender, RoutedEventArgs e)
-        {
-            CerrarPanelMembresia();
-        }
-
-        private void btnGuardarMembresia_Click(object sender, RoutedEventArgs e)
-        {
-            if (_membresiaIdEditar <= 0) return;
-
-            // Validar actividad
-            var actividad = cmbMembresiaActividad.SelectedItem as ActividadComboItem;
-            if (actividad == null)
-            {
-                NotificacionWindow.MostrarAdvertencia("Seleccioná una actividad.");
-                return;
-            }
-
-            // Validar monto
-            if (!decimal.TryParse(txtMembresiaMonto.Text.Trim(), out decimal monto) || monto <= 0)
-            {
-                errMembresiaMonto.Text = "El monto debe ser mayor a $0.";
-                errMembresiaMonto.Visibility = Visibility.Visible;
-                txtMembresiaMonto.BorderBrush = System.Windows.Media.Brushes.Red;
-                txtMembresiaMonto.BorderThickness = new Thickness(1.5);
-                return;
-            }
-
-            // Instructor
-            long? instructorId = null;
-            if (cmbMembresiaInstructor.SelectedIndex > 0)
-            {
-                var inst = cmbMembresiaInstructor.SelectedItem as Usuario;
-                if (inst != null) instructorId = inst.Id;
-            }
-
-            // Método de pago
-            var metodoItem = cmbMembresiaMetodoPago.SelectedItem as ComboBoxItem;
-            string metodoPago = metodoItem?.Tag?.ToString() ?? "efectivo";
-
-            // Verificar si es upgrade
-            bool esUpgrade = actividad.Id != _membresiaActividadActualId
-                && !string.IsNullOrEmpty(_membresiaActividadActualCategoria)
-                && actividad.Categoria == _membresiaActividadActualCategoria
-                && _membresiaActividadActualNivel.HasValue
-                && actividad.Nivel.HasValue
-                && actividad.Nivel.Value > _membresiaActividadActualNivel.Value;
-
-            if (esUpgrade)
-            {
-                decimal diferencia = Math.Abs(actividad.Precio - ObtenerPrecioActividadCombo(_membresiaActividadActualId));
-
-                bool confirmo = NotificacionWindow.MostrarConfirmacion(
-                    "Vas a hacer un upgrade de membresía:\n\n" +
-                    "📋 " + ObtenerNombreActividadCombo(_membresiaActividadActualId) + " → " + actividad.Nombre + "\n" +
-                    "💰 Diferencia a cobrar: $" + diferencia.ToString("N0") + "\n" +
-                    "💳 Método: " + metodoPago + "\n\n" +
-                    "⚠️ Solo se permite un upgrade por membresía.\n\n" +
-                    "¿Confirmás el upgrade y el cobro?",
-                    "Confirmar upgrade");
-
-                if (!confirmo) return;
-
-                try
-                {
-                    var r = _membresiaController.EjecutarUpgrade(
-                        _membresiaIdEditar, actividad.Id, metodoPago,
-                        SesionManager.HaySesion ? SesionManager.UsuarioId : 0);
-
-                    if (r == null)
-                    {
-                        NotificacionWindow.MostrarError("No se pudo ejecutar el upgrade.");
-                        return;
-                    }
-
-                    NotificacionWindow.MostrarExito(
-                        "Upgrade realizado correctamente.\nMonto cobrado: $" + r.MontoCobrado.ToString("N0"),
-                        "¡Upgrade exitoso!");
-                }
-                catch (Exception ex)
-                {
-                    NotificacionWindow.MostrarError(ex.Message);
-                    return;
-                }
-            }
-            else
-            {
-                // Validación de cambio de plan no permitido
-                if (actividad.Id != _membresiaActividadActualId)
-                {
-                    if (!string.IsNullOrEmpty(_membresiaActividadActualCategoria) &&
-                        !string.IsNullOrEmpty(actividad.Categoria) &&
-                        _membresiaActividadActualCategoria != actividad.Categoria)
-                    {
-                        NotificacionWindow.MostrarError(
-                            "No se puede cambiar a otra categoría. El cambio de plan solo está permitido dentro de la misma categoría.");
-                        return;
-                    }
-
-                    if (_membresiaActividadActualNivel.HasValue && actividad.Nivel.HasValue &&
-                        actividad.Nivel.Value <= _membresiaActividadActualNivel.Value)
-                    {
-                        NotificacionWindow.MostrarError(
-                            "Solo se permite cambiar a un plan superior (upgrade). El downgrade no está permitido.");
-                        return;
-                    }
-                }
-
-                // Modificación normal
-                long? actividadEditada = actividad.Id;
-                decimal? montoParam = monto > 0 ? (decimal?)monto : null;
-                DateTime fechaVenc = dpMembresiaVencimiento.SelectedDate ?? DateTime.Today.AddDays(31);
-
-                var r = _membresiaController.Modificar(
-                    _membresiaIdEditar, instructorId, fechaVenc,
-                    txtMembresiaObservaciones.Text.Trim(),
-                    SesionManager.HaySesion ? SesionManager.UsuarioId : 0,
-                    actividadEditada, montoParam, "mensual", metodoPago);
-
-                if (!r.ok)
-                {
-                    NotificacionWindow.MostrarError(r.mensaje);
-                    return;
-                }
-
-                NotificacionWindow.MostrarExito(r.mensaje, "¡Actualizado!");
-            }
-
-            CerrarPanelMembresia();
-            CargarSocios();
-            ActualizarStats();
-        }
-
-        private void cmbMembresiaActividad_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var act = cmbMembresiaActividad.SelectedItem as ActividadComboItem;
-            if (act == null) return;
-
-            if (_membresiaIdEditar <= 0)
-            {
-                // Modo nuevo (no debería ocurrir en este panel, pero por seguridad)
-                panelUpgrade.Visibility = Visibility.Collapsed;
-                return;
-            }
-
-            // Modo editar: verificar si es upgrade
-            if (act.Id != _membresiaActividadActualId
-                && !string.IsNullOrEmpty(_membresiaActividadActualCategoria)
-                && act.Categoria == _membresiaActividadActualCategoria
-                && _membresiaActividadActualNivel.HasValue
-                && act.Nivel.HasValue
-                && act.Nivel.Value > _membresiaActividadActualNivel.Value)
-            {
-                // Es un upgrade — calcular diferencia
-                decimal precioActual = 0;
-                foreach (var item in cmbMembresiaActividad.Items)
-                {
-                    var a = item as ActividadComboItem;
-                    if (a != null && a.Id == _membresiaActividadActualId)
-                    {
-                        precioActual = a.Precio;
-                        break;
-                    }
-                }
-
-                decimal diferencia = Math.Abs(act.Precio - precioActual);
-
-                // Mostrar panel upgrade
-                lblUpgradeDetalle.Text = "Diferencia a cobrar (" +
-                    ObtenerNombreActividadCombo(_membresiaActividadActualId) + " → " + act.Nombre + "):";
-                lblUpgradeMonto.Text = "$" + diferencia.ToString("N0");
-                lblUpgradeNivel.Text = "⬆ Nivel " + _membresiaActividadActualNivel.Value +
-                                         " → " + act.Nivel.Value;
-                panelUpgrade.Visibility = Visibility.Visible;
-
-                // Poner la diferencia en el campo monto
-                txtMembresiaMonto.Text = diferencia.ToString("F0");
-            }
-            else if (act.Id == _membresiaActividadActualId)
-            {
-                // Volvió a la actividad original — ocultar upgrade
-                panelUpgrade.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                panelUpgrade.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        private string ObtenerNombreActividadCombo(long actividadId)
-        {
-            foreach (var item in cmbMembresiaActividad.Items)
-            {
-                var a = item as ActividadComboItem;
-                if (a != null && a.Id == actividadId) return a.Nombre;
-            }
-            return "actividad actual";
-        }
-
-        private decimal ObtenerPrecioActividadCombo(long actividadId)
-        {
-            foreach (var item in cmbMembresiaActividad.Items)
-            {
-                var a = item as ActividadComboItem;
-                if (a != null && a.Id == actividadId) return a.Precio;
-            }
-            return 0;
-        }
-
-        private void txtMembresiaMonto_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !Regex.IsMatch(e.Text, @"^[\d,\.]$");
-        }
-
-        private void txtMembresiaMonto_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (!decimal.TryParse(txtMembresiaMonto.Text.Trim(), out decimal monto) || monto <= 0)
-            {
-                errMembresiaMonto.Text = "El monto debe ser mayor a $0.";
-                errMembresiaMonto.Visibility = Visibility.Visible;
-                txtMembresiaMonto.BorderBrush = System.Windows.Media.Brushes.Red;
-                txtMembresiaMonto.BorderThickness = new Thickness(1.5);
-            }
-            else
-            {
-                LimpiarErroresMembresia();
-            }
-        }
-
-        private void LimpiarFormularioMembresia()
-        {
-            cmbMembresiaSocio.ItemsSource = null;
-            cmbMembresiaActividad.SelectedIndex = -1;
-            cmbMembresiaInstructor.SelectedIndex = 0;
-            dpMembresiaInicio.SelectedDate = null;
-            dpMembresiaVencimiento.SelectedDate = null;
-            txtMembresiaMonto.Text = string.Empty;
-            cmbMembresiaMetodoPago.SelectedIndex = 0;
-            txtMembresiaObservaciones.Text = string.Empty;
-            panelUpgrade.Visibility = Visibility.Collapsed;
-            _membresiaIdEditar = 0;
-            _membresiaActividadActualId = 0;
-            _membresiaActividadActualCategoria = null;
-            _membresiaActividadActualNivel = null;
-        }
-
-        private void LimpiarErroresMembresia()
-        {
-            errMembresiaMonto.Text = string.Empty;
-            errMembresiaMonto.Visibility = Visibility.Collapsed;
-            txtMembresiaMonto.ClearValue(TextBox.BorderBrushProperty);
-            txtMembresiaMonto.ClearValue(TextBox.BorderThicknessProperty);
-        }
     }
 }

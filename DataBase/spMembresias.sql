@@ -20,6 +20,20 @@ IF NOT EXISTS (
     ALTER TABLE membresias ADD tipo_plan VARCHAR(20) NOT NULL DEFAULT 'mensual';
 GO
 
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('membresias') AND name = 'upgrade_realizado'
+)
+    ALTER TABLE membresias ADD upgrade_realizado BIT NOT NULL DEFAULT 0;
+GO
+
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('membresias') AND name = 'actividad_original'
+)
+    ALTER TABLE membresias ADD actividad_original BIGINT NULL;
+GO
+
 -- Agregar columnas categoria y nivel a actividades (para regla de cambio de plan)
 IF NOT EXISTS (
     SELECT 1 FROM sys.columns

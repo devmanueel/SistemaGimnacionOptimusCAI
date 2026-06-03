@@ -159,9 +159,12 @@ namespace Entities
         public long     Id             { get; set; }
         public long     InstructorId   { get; set; }
         public string   NombreCompleto { get; set; }
+        public byte[]   Foto           { get; set; }
         public TimeSpan HoraEntrada    { get; set; }
         public TimeSpan HoraSalida     { get; set; }
         public decimal  HorasTrabajadas { get; set; }
+        public string   Operacion      { get; set; }
+        public string   Mensaje        { get; set; }
 
         public string HoraEntradaTexto  => HoraEntrada  != default(TimeSpan) ? HoraEntrada.ToString(@"hh\:mm")  : "-";
         public string HoraSalidaTexto   => HoraSalida   != default(TimeSpan) ? HoraSalida.ToString(@"hh\:mm")   : "-";

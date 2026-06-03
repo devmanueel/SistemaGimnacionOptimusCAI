@@ -23,6 +23,7 @@ IF OBJECT_ID('sp_FicharSalidaInstructor',           'P') IS NOT NULL DROP PROCED
 IF OBJECT_ID('sp_BuscarMisAsistencias',             'P') IS NOT NULL DROP PROCEDURE sp_BuscarMisAsistencias;
 IF OBJECT_ID('sp_ReporteMensualInstructores',       'P') IS NOT NULL DROP PROCEDURE sp_ReporteMensualInstructores;
 IF OBJECT_ID('sp_ReporteSemanalInstructores',       'P') IS NOT NULL DROP PROCEDURE sp_ReporteSemanalInstructores;
+IF OBJECT_ID('sp_FicharInstructorDashboard',         'P') IS NOT NULL DROP PROCEDURE sp_FicharInstructorDashboard;
 GO
 
 -- ─────────────────────────────────────────────────────────────
@@ -534,5 +535,107 @@ BEGIN
       AND u.activo = 1
       AND u.eliminado_en IS NULL
     ORDER BY ia.fecha DESC, u.apellido ASC;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 14. FICHAR INSTRUCTOR DESDE DASHBOARD (por DNI, auto toggle)
+-- ─────────────────────────────────────────────────────────────
+CREATE PROCEDURE sp_FicharInstructorDashboard
+    @Dni            CHAR(8),
+    @RegistradoPor  BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @InstructorId   BIGINT;
+    DECLARE @Nombre         NVARCHAR(100);
+    DECLARE @Apellido       NVARCHAR(100);
+    DECLARE @Foto           VARBINARY(MAX);
+
+    SELECT @InstructorId = id, @Nombre = nombre, @Apellido = apellido, @Foto = foto
+    FROM usuarios
+    WHERE dni = @Dni AND rol_id = 2 AND activo = 1 AND eliminado_en IS NULL;
+
+    IF @InstructorId IS NULL
+    BEGIN
+        SELECT CAST(NULL AS BIGINT) AS id,
+               CAST(NULL AS BIGINT) AS instructor_id,
+               CAST(NULL AS NVARCHAR(200)) AS nombre_completo,
+               CAST(NULL AS VARBINARY(MAX)) AS foto,
+               CAST(NULL AS TIME) AS hora,
+               CAST(NULL AS DECIMAL(5,2)) AS horas_trabajadas,
+               'no_encontrado' AS operacion,
+               'Instructor no encontrado o inactivo.' AS mensaje;
+        RETURN;
+    END
+
+    DECLARE @AsistenciaId BIGINT;
+    SELECT TOP 1 @AsistenciaId = id
+    FROM instructor_asistencias
+    WHERE instructor_id = @InstructorId
+      AND fecha = CAST(GETDATE() AS DATE)
+      AND hora_salida IS NULL
+    ORDER BY id DESC;
+
+    IF @AsistenciaId IS NULL
+    BEGIN
+        -- Registrar entrada
+        INSERT INTO instructor_asistencias
+            (instructor_id, fecha, hora_entrada, registrado_por)
+        VALUES
+            (@InstructorId, CAST(GETDATE() AS DATE), CAST(GETDATE() AS TIME), @RegistradoPor);
+
+        SELECT SCOPE_IDENTITY() AS id,
+               @InstructorId AS instructor_id,
+               @Nombre + ' ' + @Apellido AS nombre_completo,
+               @Foto AS foto,
+               CAST(GETDATE() AS TIME) AS hora,
+               CAST(NULL AS DECIMAL(5,2)) AS horas_trabajadas,
+               'entrada' AS operacion,
+               'Entrada registrada correctamente.' AS mensaje;
+    END
+    ELSE
+    BEGIN
+        -- Validar mínimo 10 minutos desde la entrada
+        DECLARE @HoraEntrada TIME;
+        SELECT @HoraEntrada = hora_entrada
+        FROM instructor_asistencias
+        WHERE id = @AsistenciaId;
+
+        DECLARE @HoraSalida TIME = CAST(GETDATE() AS TIME);
+        DECLARE @MinutosDesdeEntrada INT = DATEDIFF(MINUTE, @HoraEntrada, @HoraSalida);
+
+        IF @MinutosDesdeEntrada < 10
+        BEGIN
+            DECLARE @Restantes INT = 10 - @MinutosDesdeEntrada;
+            SELECT @AsistenciaId AS id,
+                   @InstructorId AS instructor_id,
+                   @Nombre + ' ' + @Apellido AS nombre_completo,
+                   @Foto AS foto,
+                   CAST(NULL AS TIME) AS hora,
+                   CAST(NULL AS DECIMAL(5,2)) AS horas_trabajadas,
+                   'espera_minima' AS operacion,
+                   N'Debés esperar al menos ' + CAST(@Restantes AS NVARCHAR) +
+                   N' minuto(s) antes de registrar la salida.' AS mensaje;
+            RETURN;
+        END
+
+        DECLARE @Horas DECIMAL(5,2) = @MinutosDesdeEntrada / 60.0;
+
+        UPDATE instructor_asistencias
+        SET hora_salida = @HoraSalida,
+            horas_trabajadas = @Horas
+        WHERE id = @AsistenciaId;
+
+        SELECT @AsistenciaId AS id,
+               @InstructorId AS instructor_id,
+               @Nombre + ' ' + @Apellido AS nombre_completo,
+               @Foto AS foto,
+               @HoraSalida AS hora,
+               @Horas AS horas_trabajadas,
+               'salida' AS operacion,
+               'Salida registrada correctamente.' AS mensaje;
+    END
 END;
 GO

@@ -351,7 +351,7 @@
                         </ComboBox>
 
                         <!-- Filtro: Actividad -->
-                        <ComboBox x:Name="cmbFiltroActividad" Width="220" Height="32"
+                        <ComboBox x:Name="cmbFiltroActividad" Width="200" Height="32"
                                   Style="{StaticResource ComboBoxEstilo}"
                                   SelectedValuePath="Id"
                                   Margin="12,0,0,0" Visibility="Collapsed"
@@ -455,7 +455,7 @@
 
                 <!-- Columna 1: Ordenar por -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal"
-                            VerticalAlignment="Center" Margin="20,0,0,0">
+                            VerticalAlignment="Center" Margin="20,0,0,25">
                     <TextBlock Text="ORDENAR POR:" Foreground="{StaticResource TextMuted}" FontSize="11"
                                FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,15"/>
                     <ComboBox x:Name="cmbOrdenarPor" Width="200" Height="32"
@@ -517,6 +517,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="3"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <Border Grid.Row="0" Background="{StaticResource GreenMid}"
@@ -541,15 +542,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid Width="40" Height="40" HorizontalAlignment="Center">
-                                            <Ellipse Width="36" Height="36">
-                                                <Ellipse.Fill>
-                                                    <SolidColorBrush Color="#1C2A1C"/>
-                                                </Ellipse.Fill>
-                                                <Ellipse.Stroke>
-                                                    <SolidColorBrush Color="#263326"/>
-                                                </Ellipse.Stroke>
-                                                <Ellipse.StrokeThickness>1</Ellipse.StrokeThickness>
-                                            </Ellipse>
+                                            <Ellipse Width="36" Height="36" Fill="{StaticResource GreenMid}" Stroke="{StaticResource GreenDim}" StrokeThickness="1"/>
                                             <Ellipse Width="28" Height="28">
                                                 <Ellipse.Fill>
                                                     <ImageBrush ImageSource="{Binding Foto, Converter={StaticResource BytesAImagen}}"
@@ -562,7 +555,7 @@
                             </DataGridTemplateColumn>
 
                             <!-- N° -->
-                            <DataGridTemplateColumn Header="N°" Width="80">
+                            <DataGridTemplateColumn Header="N°" Width="60">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource NumeroSocioBadgeStyle}">
@@ -574,33 +567,34 @@
                             </DataGridTemplateColumn>
 
                             <!-- Nombre + Email -->
-                            <DataGridTemplateColumn Header="NOMBRE COMPLETO" Width="1.6*"
+                            <DataGridTemplateColumn Header="NOMBRE COMPLETO" Width="155"
                                                     SortMemberPath="NombreCompleto">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel VerticalAlignment="Center">
+                                        <StackPanel VerticalAlignment="Center" Margin="0,2">
                                             <TextBlock Text="{Binding NombreCompleto}"
                                                        FontSize="13"
                                                        Foreground="{StaticResource TextPrimary}"
-                                                       TextTrimming="CharacterEllipsis"/>
+                                                       TextTrimming="CharacterEllipsis"
+                                                       FontWeight="SemiBold"/>
                                             <TextBlock Text="{Binding Email}"
-                                                       FontSize="12"
+                                                       FontSize="11"
                                                        Foreground="{StaticResource TextMuted}"
                                                        TextTrimming="CharacterEllipsis"
-                                                       Margin="0,1,0,0"/>
+                                                       Margin="0,2,0,0"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
                             <!-- DNI -->
-                            <DataGridTextColumn Header="DNI" Binding="{Binding Dni}" Width="0.8*"/>
+                            <DataGridTextColumn Header="DNI" Binding="{Binding Dni}" Width="90"/>
 
                             <!-- Edad -->
-                            <DataGridTextColumn Header="EDAD" Binding="{Binding EdadTexto}" Width="0.6*"/>
+                            <DataGridTextColumn Header="EDAD" Binding="{Binding EdadTexto}" Width="70"/>
 
                             <!-- Teléfono -->
-                            <DataGridTextColumn Header="TELÉFONO" Binding="{Binding Telefono}" Width="1.1*"/>
+                            <DataGridTextColumn Header="TELÉFONO" Binding="{Binding Telefono}" Width="100"/>
 
                             <!-- Actividad badge -->
                             <DataGridTemplateColumn Header="ACTIVIDAD" Width="1.5*">
@@ -664,42 +658,18 @@
                                                     VerticalAlignment="Center">
                                             <Button Style="{StaticResource ButtonStyleEditar}"
                                                     Margin="0,0,4,0"
-                                                    ToolTip="Editar socio"
-                                                    Click="btnEditar_Click">
+                                                    ToolTip="Modificar membresía"
+                                                    Click="btnEditarMembresia_Click">
                                                 <fa:ImageAwesome Icon="Edit"
                                                                    Foreground="{StaticResource ColorEditarCyan}"
                                                                    Height="14"/>
                                             </Button>
-                                            <Button Style="{StaticResource ButtonStyleEstado}"
-                                                    Click="btnToggleEstado_Click">
-                                                <Button.ToolTip>
-                                                    <TextBlock>
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Text" Value="Dar de baja"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Activo}" Value="False">
-                                                                        <Setter Property="Text" Value="Dar de alta"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                </Button.ToolTip>
-                                                <fa:ImageAwesome Height="14">
-                                                    <fa:ImageAwesome.Style>
-                                                        <Style TargetType="fa:ImageAwesome">
-                                                            <Setter Property="Icon" Value="Times"/>
-                                                            <Setter Property="Foreground" Value="#FF5555"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Activo}" Value="False">
-                                                                    <Setter Property="Icon" Value="Undo"/>
-                                                                    <Setter Property="Foreground" Value="#00E676"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </fa:ImageAwesome.Style>
-                                                </fa:ImageAwesome>
+                                            <Button Style="{StaticResource ButtonStyleCancelar}"
+                                                    Click="btnCancelarMembresia_Click"
+                                                    ToolTip="Cancelar membresía">
+                                                <fa:ImageAwesome Icon="Times"
+                                                                   Foreground="#FF5555"
+                                                                   Height="14"/>
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -707,6 +677,16 @@
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
+
+                    <!-- Indicador de carga para infinite scroll -->
+                    <Border x:Name="panelCargando" Grid.Row="2"
+                            Visibility="Collapsed"
+                            Padding="0,10">
+                        <TextBlock Text="Cargando más socios..."
+                                   Foreground="{StaticResource TextMuted}"
+                                   FontSize="15" FontStyle="Italic"
+                                   HorizontalAlignment="Center"/>
+                    </Border>
                 </Grid>
             </Border>
 
@@ -946,192 +926,6 @@
                         <Button x:Name="btnGuardar" Grid.Column="1" Content="GUARDAR"
                                 Style="{StaticResource BotonPrincipalEstilo}"
                                 Margin="8,0,0,0" Click="btnGuardar_Click"/>
-                    </Grid>
-                </Grid>
-            </Border>
-
-            <!-- ══════════════════════════════════════════════
-                 PANEL FORMULARIO MEMBRESÍA (edición)
-            ══════════════════════════════════════════════ -->
-            <Border x:Name="panelFormularioMembresia" Grid.Column="1" Width="400"
-                    Background="{StaticResource Bg1}"
-                    CornerRadius="12"
-                    BorderBrush="{StaticResource Border1}"
-                    BorderThickness="0.5"
-                    Visibility="Collapsed"
-                    ClipToBounds="True">
-
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="3"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <Border Grid.Row="0" Background="{StaticResource GreenMid}"
-                            CornerRadius="12,12,0,0"/>
-
-                    <!-- Header -->
-                    <StackPanel Grid.Row="1" Margin="22,18,22,0">
-                        <TextBlock x:Name="lblTituloFormularioMembresia" Text="EDITAR MEMBRESÍA"
-                                   FontSize="15" FontWeight="Bold"
-                                   Foreground="{StaticResource TextPrimary}"/>
-                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
-                    </StackPanel>
-
-                    <ScrollViewer Grid.Row="2"
-                                  Style="{StaticResource PanelScrollViewerStyle}"
-                                  Padding="0,0,15,0"
-                                  VerticalScrollBarVisibility="Auto"
-                                  Margin="22,14,22,0">
-                        <StackPanel>
-
-                            <!-- SOCIO (solo lectura) -->
-                            <TextBlock Text="SOCIO" Style="{StaticResource LabelCampoEstilo}"/>
-                            <ComboBox x:Name="cmbMembresiaSocio"
-                                      Style="{StaticResource ComboBoxEstilo}"
-                                      IsEnabled="False">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding NombreCompleto}"/>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-
-                            <!-- ACTIVIDAD -->
-                            <TextBlock Text="ACTIVIDAD *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <ComboBox x:Name="cmbMembresiaActividad"
-                                      Style="{StaticResource ComboBoxEstilo}"
-                                      SelectionChanged="cmbMembresiaActividad_SelectionChanged">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Nombre}" FontSize="13"/>
-                                            <TextBlock Text=" — $" FontSize="13"
-                                                       Foreground="{StaticResource TextMuted}"/>
-                                            <TextBlock Text="{Binding Precio, StringFormat=N0}" FontSize="13"
-                                                       Foreground="{StaticResource TextMuted}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-
-                            <!-- INSTRUCTOR -->
-                            <TextBlock Text="INSTRUCTOR (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <ComboBox x:Name="cmbMembresiaInstructor"
-                                      Style="{StaticResource ComboBoxEstilo}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding NombreCompleto}"/>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-
-                            <!-- FECHAS -->
-                            <Grid Margin="0,0,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="12"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="INICIO" Style="{StaticResource LabelCampoEstilo}"/>
-                                    <DatePicker x:Name="dpMembresiaInicio"
-                                                Style="{StaticResource DatePickerEstilo}"
-                                                IsEnabled="False"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="VENCIMIENTO" Style="{StaticResource LabelCampoEstilo}"/>
-                                    <DatePicker x:Name="dpMembresiaVencimiento"
-                                                Style="{StaticResource DatePickerEstilo}"
-                                                IsEnabled="False"/>
-                                </StackPanel>
-                            </Grid>
-
-                            <!-- MONTO -->
-                            <TextBlock Text="MONTO PAGADO * ($)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtMembresiaMonto"
-                                     Style="{StaticResource InputEstilo}"
-                                     PreviewTextInput="txtMembresiaMonto_PreviewTextInput"
-                                     LostFocus="txtMembresiaMonto_LostFocus"/>
-                            <TextBlock x:Name="errMembresiaMonto"
-                                       Style="{StaticResource LabelErrorEstilo}"/>
-
-                            <!-- PANEL UPGRADE — solo visible al cambiar actividad a plan superior -->
-                            <Border x:Name="panelUpgrade" Background="#0A1F0A" CornerRadius="8"
-                                    BorderBrush="{StaticResource GreenDim}" BorderThickness="1"
-                                    Padding="12,10" Margin="0,0,0,14" Visibility="Collapsed">
-                                <StackPanel>
-                                    <TextBlock Text="UPGRADE DE MEMBRESÍA"
-                                               FontSize="10" FontWeight="Bold"
-                                               Foreground="{StaticResource GreenMain}"
-                                               Margin="0,0,0,8"/>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock x:Name="lblUpgradeDetalle"
-                                                       Text="Diferencia a cobrar:"
-                                                       FontSize="11" Foreground="{StaticResource TextMuted}"
-                                                       Margin="0,0,0,2"/>
-                                            <TextBlock x:Name="lblUpgradeMonto"
-                                                       Text="$0"
-                                                       FontFamily="Consolas" FontSize="22" FontWeight="Bold"
-                                                       Foreground="{StaticResource GreenMain}"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <TextBlock x:Name="lblUpgradeNivel"
-                                                       Text="⬆ Nivel"
-                                                       FontSize="11" FontWeight="Bold"
-                                                       Foreground="#00C850"
-                                                       HorizontalAlignment="Right"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- MÉTODO DE PAGO -->
-                            <TextBlock Text="MÉTODO DE PAGO *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <ComboBox x:Name="cmbMembresiaMetodoPago"
-                                      Style="{StaticResource ComboBoxEstilo}">
-                                <ComboBoxItem Content="Efectivo"       Tag="efectivo"    IsSelected="True"/>
-                                <ComboBoxItem Content="Transferencia"  Tag="transferencia"/>
-                                <ComboBoxItem Content="Tarjeta"        Tag="tarjeta"/>
-                                <ComboBoxItem Content="Otro"           Tag="otro"/>
-                            </ComboBox>
-
-                            <!-- OBSERVACIONES -->
-                            <TextBlock Text="OBSERVACIONES" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="{StaticResource Bg2}" CornerRadius="8"
-                                    BorderBrush="{StaticResource Border2}" BorderThickness="1"
-                                    Margin="0,0,0,14">
-                                <TextBox x:Name="txtMembresiaObservaciones"
-                                         Background="Transparent" BorderThickness="0"
-                                         Foreground="{StaticResource TextPrimary}"
-                                         CaretBrush="{StaticResource GreenMain}"
-                                         FontSize="13" Padding="12,10"
-                                         AcceptsReturn="True" TextWrapping="Wrap"
-                                         Height="80" VerticalScrollBarVisibility="Auto"/>
-                            </Border>
-
-                        </StackPanel>
-                    </ScrollViewer>
-
-                    <!-- Botones Cancelar / Guardar -->
-                    <Grid Grid.Row="3" Margin="22,12,22,18">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Cancelar"
-                                Style="{StaticResource BotonDangerLargoEstilo}"
-                                Margin="0,0,8,0" Click="btnCancelarMembresia_Click"/>
-                        <Button x:Name="btnGuardarMembresia" Grid.Column="1" Content="GUARDAR"
-                                Style="{StaticResource BotonPrincipalEstilo}"
-                                Margin="8,0,0,0" Click="btnGuardarMembresia_Click"/>
                     </Grid>
                 </Grid>
             </Border>

@@ -29,18 +29,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             CargarCombosReporteMensual();
             IniciarReloj();
-            ConfigurarPanelAdmin();
-
-            if (SesionManager.EsAdmin)
-            {
-                SetTab("historial");
-                CargarHistorial();
-            }
-            else
-            {
-                CargarMisAsistencias();
-            }
-
+            SetTab("historial");
+            CargarHistorial();
             ActualizarStats();
         }
 
@@ -62,21 +52,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" };
             lblFecha.Text = dias[(int)ahora.DayOfWeek] + ", " +
                             ahora.Day + " de " + meses[ahora.Month - 1] + " " + ahora.Year;
-        }
-
-        // ── PANEL ADMIN ───────────────────────────────────────
-        private void ConfigurarPanelAdmin()
-        {
-            if (SesionManager.EsAdmin)
-            {
-                borderAdmin.Visibility   = Visibility.Visible;
-                borderNoAdmin.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                borderAdmin.Visibility   = Visibility.Collapsed;
-                borderNoAdmin.Visibility = Visibility.Visible;
-            }
         }
 
         private void SetTab(string tab)
@@ -114,77 +89,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        // ── FICHAJE RÁPIDO ────────────────────────────────────
-        private void btnFicharEntrada_Click(object sender, RoutedEventArgs e)
-        {
-            string dni = txtFichajeDni.Text.Trim();
-
-            var (ok, mensaje, resultado) = _controller.FicharEntrada(dni);
-
-            if (ok)
-            {
-                MostrarResultadoFichaje(resultado, esSalida: false);
-                LimpiarFormFichaje();
-                ActualizarStats();
-                if (SesionManager.EsAdmin) CargarHistorial();
-                else CargarMisAsistencias();
-            }
-            else
-            {
-                NotificacionWindow.MostrarError(mensaje);
-            }
-        }
-
-        private void btnFicharSalida_Click(object sender, RoutedEventArgs e)
-        {
-            string dni = txtFichajeDni.Text.Trim();
-
-            var (ok, mensaje, resultado) = _controller.FicharSalida(dni);
-
-            if (ok)
-            {
-                MostrarResultadoFichaje(resultado, esSalida: true);
-                LimpiarFormFichaje();
-                ActualizarStats();
-                if (SesionManager.EsAdmin) CargarHistorial();
-                else CargarMisAsistencias();
-            }
-            else
-            {
-                NotificacionWindow.MostrarError(mensaje);
-            }
-        }
-
-        private void MostrarResultadoFichaje(FichajeResultado r, bool esSalida)
-        {
-            panelResultadoFichaje.Visibility = Visibility.Visible;
-
-            lblResultadoNombre.Text = r.NombreCompleto;
-
-            if (esSalida)
-            {
-                panelResultadoFichaje.BorderBrush = new SolidColorBrush(Color.FromRgb(212, 131, 10));
-                panelResultadoFichaje.Background  = new SolidColorBrush(Color.FromRgb(30, 22, 0));
-                lblResultadoDetalle.Foreground    = new SolidColorBrush(Color.FromRgb(212, 131, 10));
-                lblResultadoDetalle.Text = $"■  Salida: {r.HoraSalidaTexto}";
-                lblResultadoHoras.Text   = $"Total trabajado: {r.HorasTrabajadasTexto}";
-                lblResultadoHoras.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                panelResultadoFichaje.BorderBrush = new SolidColorBrush(Color.FromRgb(74, 222, 128));
-                panelResultadoFichaje.Background  = new SolidColorBrush(Color.FromRgb(10, 26, 10));
-                lblResultadoDetalle.Foreground    = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-                lblResultadoDetalle.Text = $"▶  Entrada: {r.HoraEntradaTexto}";
-                lblResultadoHoras.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        private void LimpiarFormFichaje()
-        {
-            txtFichajeDni.Text = string.Empty;
-        }
-
         // ── HISTORIAL (solo admin) ────────────────────────────
         private void CargarHistorial()
         {
@@ -194,21 +98,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     txtBuscar.Text, null,
                     dpDesde.SelectedDate, dpHasta.SelectedDate);
                 gridHistorial.ItemsSource = lista;
-            }
-            catch (Exception ex)
-            {
-                NotificacionWindow.MostrarError(ex.Message);
-            }
-        }
-
-        // ── MIS ASISTENCIAS (usuario no-admin) ────────────────
-        private void CargarMisAsistencias()
-        {
-            try
-            {
-                var lista = _controller.BuscarPropias(
-                    DateTime.Today.AddDays(-30), DateTime.Today);
-                gridMisAsistencias.ItemsSource = lista;
             }
             catch (Exception ex)
             {

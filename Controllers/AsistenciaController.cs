@@ -111,5 +111,20 @@ namespace Controllers
         {
             return _dao.ObtenerMembresiasActivasPorDni(dni);
         }
+
+        public (string tipo, long id, string nombre, string apellido, byte[] foto) BuscarPersonaPorDni(string dni)
+        {
+            string err = Validador.ValidarDni(dni);
+            if (err != null)
+                return ("no_encontrado", 0, null, null, null);
+            try
+            {
+                return _dao.BuscarPersonaPorDni(dni.Trim());
+            }
+            catch
+            {
+                return ("no_encontrado", 0, null, null, null);
+            }
+        }
     }
 }

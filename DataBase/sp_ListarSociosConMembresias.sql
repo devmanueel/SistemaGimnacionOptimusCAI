@@ -1,8 +1,11 @@
 -- ============================================================
---  STORED PROCEDURE — Listar socios con membresías (filtros avanzados)
+--  STORED PROCEDURE — Listar socios con membresías (filtros avanzados + paginación)
 --  Sistema Gimnasio OptimusCAI · SQL Server / LocalDB
 --
---  Retorna UNA FILA POR CADA MEMBRESÍA del socio.
+--  Retorna DOS result sets:
+--    1) COUNT(*) AS total  (para saber si hay más páginas)
+--    2) Datos paginados con OFFSET/FETCH
+--
 --  Filtros: texto, estado membresía, actividad, cuota vencida,
 --           instructor, sexo, días sin asistir.
 -- ============================================================
@@ -18,7 +21,9 @@ CREATE PROCEDURE sp_ListarSociosConMembresias
     @FiltroCuotaVencida  BIT           = NULL,
     @FiltroInstructorId  BIGINT        = NULL,
     @FiltroSexo          VARCHAR(10)   = NULL,
-    @FiltroDejaronVenir  INT           = NULL
+    @FiltroDejaronVenir  INT           = NULL,
+    @Pagina              INT           = 1,
+    @TamPagina           INT           = 8
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -28,6 +33,37 @@ BEGIN
     SET estado = 'vencida'
     WHERE estado = 'activa' AND fecha_vencimiento < CAST(GETDATE() AS DATE);
 
+    -- ── Result set 1: total de registros ──
+    SELECT COUNT(*) AS total
+    FROM socios s
+    INNER JOIN membresias  m ON m.socio_id = s.id
+    INNER JOIN actividades a ON a.id       = m.actividad_id
+    WHERE s.eliminado_en IS NULL
+      AND (
+            @FiltroEstado = 'todos'
+         OR (@FiltroEstado = 'activos'   AND m.estado = 'activa')
+         OR (@FiltroEstado = 'inactivos' AND m.estado IN ('vencida', 'cancelada'))
+          )
+      AND (
+            @Texto = ''
+         OR s.nombre   LIKE '%' + @Texto + '%'
+         OR s.apellido LIKE '%' + @Texto + '%'
+         OR s.dni      LIKE '%' + @Texto + '%'
+         OR CAST(s.numero_socio AS VARCHAR(20)) LIKE '%' + @Texto + '%'
+          )
+      AND (@FiltroActividadId  IS NULL OR m.actividad_id    = @FiltroActividadId)
+      AND (@FiltroCuotaVencida IS NULL OR (@FiltroCuotaVencida = 1 AND m.estado = 'vencida'))
+      AND (@FiltroInstructorId IS NULL OR m.instructor_id   = @FiltroInstructorId)
+      AND (@FiltroSexo         IS NULL OR s.sexo            = @FiltroSexo)
+      AND (@FiltroDejaronVenir IS NULL
+           OR NOT EXISTS (
+               SELECT 1 FROM registros_acceso ra
+               WHERE ra.socio_id  = s.id
+                 AND ra.resultado = 'permitido'
+                 AND ra.accedido_en >= DATEADD(DAY, -@FiltroDejaronVenir, GETDATE())
+           ));
+
+    -- ── Result set 2: datos paginados ──
     SELECT
         s.id                                        AS socio_id,
         s.numero_socio,
@@ -72,13 +108,11 @@ BEGIN
     INNER JOIN actividades a ON a.id       = m.actividad_id
     LEFT  JOIN usuarios    u ON u.id       = m.instructor_id
     WHERE s.eliminado_en IS NULL
-      -- Chip Todos/Activos/Inactivos
       AND (
             @FiltroEstado = 'todos'
          OR (@FiltroEstado = 'activos'   AND m.estado = 'activa')
          OR (@FiltroEstado = 'inactivos' AND m.estado IN ('vencida', 'cancelada'))
           )
-      -- Búsqueda por texto
       AND (
             @Texto = ''
          OR s.nombre   LIKE '%' + @Texto + '%'
@@ -86,16 +120,10 @@ BEGIN
          OR s.dni      LIKE '%' + @Texto + '%'
          OR CAST(s.numero_socio AS VARCHAR(20)) LIKE '%' + @Texto + '%'
           )
-      -- Filtro actividad
-      AND (@FiltroActividadId IS NULL OR m.actividad_id = @FiltroActividadId)
-      -- Filtro cuota vencida
-      AND (@FiltroCuotaVencida IS NULL
-           OR (@FiltroCuotaVencida = 1 AND m.estado = 'vencida'))
-      -- Filtro instructor
-      AND (@FiltroInstructorId IS NULL OR m.instructor_id = @FiltroInstructorId)
-      -- Filtro sexo
-      AND (@FiltroSexo IS NULL OR s.sexo = @FiltroSexo)
-      -- Filtro dejaron de venir
+      AND (@FiltroActividadId  IS NULL OR m.actividad_id    = @FiltroActividadId)
+      AND (@FiltroCuotaVencida IS NULL OR (@FiltroCuotaVencida = 1 AND m.estado = 'vencida'))
+      AND (@FiltroInstructorId IS NULL OR m.instructor_id   = @FiltroInstructorId)
+      AND (@FiltroSexo         IS NULL OR s.sexo            = @FiltroSexo)
       AND (@FiltroDejaronVenir IS NULL
            OR NOT EXISTS (
                SELECT 1 FROM registros_acceso ra
@@ -103,6 +131,8 @@ BEGIN
                  AND ra.resultado = 'permitido'
                  AND ra.accedido_en >= DATEADD(DAY, -@FiltroDejaronVenir, GETDATE())
            ))
-    ORDER BY s.apellido, s.nombre, m.fecha_vencimiento DESC;
+    ORDER BY s.apellido, s.nombre, m.fecha_vencimiento DESC
+    OFFSET (@Pagina - 1) * @TamPagina ROWS
+    FETCH NEXT @TamPagina ROWS ONLY;
 END;
 GO

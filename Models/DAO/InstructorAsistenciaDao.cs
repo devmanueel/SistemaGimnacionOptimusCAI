@@ -322,5 +322,47 @@ namespace Models.Dao
             }
             return lista;
         }
+
+        public FichajeResultado FicharInstructorDashboard(string dni, long registradoPor)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_FicharInstructorDashboard", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Dni", dni);
+                    cmd.Parameters.AddWithValue("@RegistradoPor", registradoPor);
+                    using (var r = cmd.ExecuteReader())
+                        if (r.Read())
+                        {
+                            var res = new FichajeResultado
+                            {
+                                Id             = r["id"] != DBNull.Value ? Convert.ToInt64(r["id"]) : 0,
+                                InstructorId   = r["instructor_id"] != DBNull.Value ? Convert.ToInt64(r["instructor_id"]) : 0,
+                                NombreCompleto = r["nombre_completo"] as string,
+                                Foto           = r["foto"] != DBNull.Value ? (byte[])r["foto"] : null,
+                                Operacion      = r["operacion"] as string,
+                                Mensaje        = r["mensaje"] as string
+                            };
+
+                            if (r["hora"] != DBNull.Value)
+                            {
+                                var hora = (TimeSpan)r["hora"];
+                                if (res.Operacion == "entrada")
+                                    res.HoraEntrada = hora;
+                                else
+                                    res.HoraSalida = hora;
+                            }
+
+                            if (r["horas_trabajadas"] != DBNull.Value)
+                                res.HorasTrabajadas = Convert.ToDecimal(r["horas_trabajadas"]);
+
+                            return res;
+                        }
+                }
+            }
+            return null;
+        }
     }
 }

@@ -4,16 +4,18 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:fa="http://schemas.fontawesome.io/icons/"
+      xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
       mc:Ignorable="d"
       d:DesignHeight="768" d:DesignWidth="1360"
-       Title="Dashboard"
-       Background="#080A08">
+      Title="Tablero Principal"
+      Background="#080A08">
 
     <Page.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/MiDiccionario.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
         </ResourceDictionary>
     </Page.Resources>
 
@@ -80,136 +82,49 @@
             </StackPanel>
         </Grid>
 
-        <!-- ══════════════════ CARDS KPI ══════════════════ -->
-        <Grid Grid.Row="1" Margin="0,0,0,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+        <!-- ══════════════════ INPUT ASISTENCIA ══════════════════ -->
+        <Border Grid.Row="1" Margin="0,0,0,20"
+                Style="{StaticResource DashboardCardStyle}">
+            <Grid>
+                <Border VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                        Height="2" CornerRadius="2,2,0,0" Margin="-18,-16,-18,0"
+                        Background="{StaticResource GreenMain}"/>
+                <Grid Margin="0,12,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-            <!-- Card 1: Socios Activos -->
-            <Border Grid.Column="0" Style="{StaticResource DashboardCardStyle}">
-                <Grid>
-                    <Border VerticalAlignment="Top" HorizontalAlignment="Stretch"
-                            Height="2" CornerRadius="2,2,0,0" Margin="-18,-16,-18,0"
-                            Background="{StaticResource GreenMain}"/>
-                    <Grid Margin="0,8,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock x:Name="statSociosActivos" Text="0"
-                                       Style="{StaticResource DashboardKpiNumeroStyle}"/>
-                            <TextBlock Text="SOCIOS ACTIVOS"
-                                       Style="{StaticResource DashboardKpiEtiquetaStyle}"/>
-                        </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource DashboardIconCircleStyle}"
-                                Background="#0A1A2A">
-                            <fa:ImageAwesome Icon="Users" Foreground="{StaticResource GreenMain}"
-                                             Height="20" Width="20"
-                                             HorizontalAlignment="Center"
-                                             VerticalAlignment="Center"/>
-                        </Border>
-                    </Grid>
-                </Grid>
-            </Border>
+                    <!-- Icono -->
+                    <Border Grid.Column="0" Style="{StaticResource DashboardIconCircleStyle}"
+                            Background="#0A1A2A" Margin="0,0,16,0">
+                        <fa:ImageAwesome Icon="IdCard" Foreground="{StaticResource GreenMain}"
+                                         Height="22" Width="22"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"/>
+                    </Border>
 
-            <!-- Card 2: Membresias Activas -->
-            <Border Grid.Column="2" Style="{StaticResource DashboardCardStyle}">
-                <Grid>
-                    <Border VerticalAlignment="Top" HorizontalAlignment="Stretch"
-                            Height="2" CornerRadius="2,2,0,0" Margin="-18,-16,-18,0"
-                            Background="#3A8FD4"/>
-                    <Grid Margin="0,8,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock x:Name="statMembresiasActivas" Text="0"
-                                       Style="{StaticResource DashboardKpiNumeroStyle}"/>
-                            <TextBlock Text="MEMBRESIAS ACTIVAS"
-                                       Style="{StaticResource DashboardKpiEtiquetaStyle}"/>
-                        </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource DashboardIconCircleStyle}"
-                                Background="#1E1840">
-                            <fa:ImageAwesome Icon="IdCardOutline" Foreground="{StaticResource GreenMain}"
-                                             Height="20" Width="20"
-                                             HorizontalAlignment="Center"
-                                             VerticalAlignment="Center"/>
-                        </Border>
-                    </Grid>
-                </Grid>
-            </Border>
+                    <!-- TextBox DNI -->
+                    <TextBox x:Name="txtDni" Grid.Column="1"
+                             Style="{StaticResource InputEstilo}"
+                             Height="48" FontSize="18"
+                             FontFamily="Consolas, Courier New"
+                             VerticalContentAlignment="Center"
+                             MaxLength="8"
+                             PreviewKeyDown="txtDni_PreviewKeyDown"/>
 
-            <!-- Card 3: Ingresos del Mes -->
-            <Border Grid.Column="4" Style="{StaticResource DashboardCardStyle}">
-                <Grid>
-                    <Border VerticalAlignment="Top" HorizontalAlignment="Stretch"
-                            Height="2" CornerRadius="2,2,0,0" Margin="-18,-16,-18,0"
-                            Background="#D4830A"/>
-                    <Grid Margin="0,8,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock x:Name="statIngresosMes" Text="$0"
-                                       FontSize="24" FontWeight="ExtraBold"
-                                       Foreground="#00E676"/>
-                            <TextBlock Text="INGRESOS DEL MES"
-                                       Style="{StaticResource DashboardKpiEtiquetaStyle}"/>
-                            <TextBlock x:Name="statBalanceMes" Text="Balance: $0"
-                                       FontSize="11" FontWeight="SemiBold"
-                                       Foreground="#A0C070"
-                                       Margin="0,4,0,0"/>
-                        </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource DashboardIconCircleStyle}"
-                                Background="#0A2A14">
-                            <fa:ImageAwesome Icon="Money" Foreground="#00E676"
-                                             Height="20" Width="20"
-                                             HorizontalAlignment="Center"
-                                             VerticalAlignment="Center"/>
-                        </Border>
-                    </Grid>
+                    <!-- Boton Validar -->
+                    <Button x:Name="btnValidar" Grid.Column="2"
+                            Style="{StaticResource BotonPrincipalEstilo}"
+                            Height="48" Width="140"
+                            FontSize="13" FontWeight="Bold"
+                            Content="► VALIDAR"
+                            Margin="12,0,0,12"
+                            Click="btnValidar_Click"/>
                 </Grid>
-            </Border>
-
-            <!-- Card 4: Asistencias Hoy -->
-            <Border Grid.Column="6" Style="{StaticResource DashboardCardStyle}">
-                <Grid>
-                    <Border VerticalAlignment="Top" HorizontalAlignment="Stretch"
-                            Height="2" CornerRadius="2,2,0,0" Margin="-18,-16,-18,0"
-                            Background="{StaticResource ColorError}"/>
-                    <Grid Margin="0,8,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock x:Name="statAsistenciasHoy" Text="0"
-                                       Style="{StaticResource DashboardKpiNumeroStyle}"
-                                       Foreground="#D4830A"/>
-                            <TextBlock Text="ASISTENCIAS HOY"
-                                       Style="{StaticResource DashboardKpiEtiquetaStyle}"/>
-                        </StackPanel>
-                        <Border Grid.Column="1" Style="{StaticResource DashboardIconCircleStyle}"
-                                Background="#1E1600">
-                            <fa:ImageAwesome Icon="CheckSquareOutline" Foreground="#D4830A"
-                                             Height="20" Width="20"
-                                             HorizontalAlignment="Center"
-                                             VerticalAlignment="Center"/>
-                        </Border>
-                    </Grid>
-                </Grid>
-            </Border>
-        </Grid>
+            </Grid>
+        </Border>
 
         <!-- ══════════════════ CONTENIDO PRINCIPAL ══════════════════ -->
         <Grid Grid.Row="2">
@@ -218,7 +133,7 @@
                 <ColumnDefinition Width="300"/>
             </Grid.ColumnDefinitions>
 
-            <!-- ── CALENDARIO ── -->
+            <!-- ── PANEL RESULTADO ASISTENCIA (reemplaza calendario) ── -->
             <Border Grid.Column="0" Margin="0,0,14,0"
                     Style="{StaticResource DashboardPanelStyle}">
                 <Grid>
@@ -230,59 +145,154 @@
 
                     <Border Grid.Row="0" Background="{StaticResource GreenMain}"/>
 
-                    <Grid Grid.Row="1" Margin="20,16,20,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Border Grid.Column="0" Width="32" Height="32"
-                                CornerRadius="8" Background="{StaticResource Bg2}"
-                                BorderBrush="{StaticResource Border1}" BorderThickness="1"
-                                Cursor="Hand">
-                            <TextBlock Text="❮" FontSize="12" Foreground="{StaticResource TextSecondary}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Row="1" Margin="20,14,20,10"
+                                Orientation="Horizontal">
+                        <Border Style="{StaticResource DashboardPanelHeaderIconStyle}"
+                                Background="#0A1A2A">
+                            <fa:ImageAwesome Icon="CheckCircle" Foreground="{StaticResource GreenMain}"
+                                             Height="14" Width="14"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
                         </Border>
+                        <TextBlock Text="RESULTADO DE ASISTENCIA"
+                                   Style="{StaticResource DashboardPanelHeaderTextStyle}"/>
+                    </StackPanel>
 
-                        <TextBlock x:Name="lblMesAnio" Grid.Column="1"
-                                   FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <!-- Panel de resultado -->
+                    <Grid Grid.Row="2" Margin="16,0,16,16" VerticalAlignment="Top">
+                        <Grid x:Name="panelResultado" Visibility="Collapsed">
+                            <Border x:Name="borderResultado"
+                                    CornerRadius="12" Padding="24,20"
+                                    BorderThickness="1">
+                                <StackPanel>
+                                    <!-- Foto + Nombre -->
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                        <Grid Margin="0,0,16,0">
+                                            <Ellipse Width="64" Height="64">
+                                                <Ellipse.Fill>
+                                                    <SolidColorBrush Color="#4ADE80"/>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                            <Ellipse Width="58" Height="58">
+                                                <Ellipse.Fill>
+                                                    <ImageBrush x:Name="imgFotoResultado"
+                                                                Stretch="UniformToFill"/>
+                                                </Ellipse.Fill>
+                                            </Ellipse>
+                                        </Grid>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock x:Name="lblResultadoNombre"
+                                                       Text="—"
+                                                       FontSize="18" FontWeight="Bold"
+                                                       Foreground="{StaticResource TextPrimary}"/>
+                                            <TextBlock x:Name="lblResultadoTipo"
+                                                       Text="—"
+                                                       FontSize="12" Foreground="{StaticResource GreenMain}"
+                                                       Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel>
 
-                        <Border Grid.Column="2" Width="32" Height="32"
-                                CornerRadius="8" Background="{StaticResource Bg2}"
-                                BorderBrush="{StaticResource Border1}" BorderThickness="1"
-                                Cursor="Hand">
-                            <TextBlock Text="❯" FontSize="12" Foreground="{StaticResource TextSecondary}"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </Grid>
+                                    <!-- Mensaje principal -->
+                                    <TextBlock x:Name="lblResultadoMensaje"
+                                               Text="—"
+                                               FontSize="14" FontWeight="SemiBold"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,12"/>
 
-                    <Grid Grid.Row="2" Margin="16,0,16,16">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
+                                    <!-- Info de membresia (socio) -->
+                                    <StackPanel x:Name="panelInfoMembresia" Visibility="Collapsed">
+                                        <Border Height="1" Background="#33FFFFFF" Margin="0,4,0,8"/>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Plan: "
+                                                       FontSize="11" Foreground="#AAAACC"/>
+                                            <TextBlock Grid.Column="1" x:Name="lblResultadoActividad"
+                                                       Text="—" FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimary}"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </Grid>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Vence: "
+                                                       FontSize="11" Foreground="#AAAACC"/>
+                                            <TextBlock Grid.Column="1" x:Name="lblResultadoVencimiento"
+                                                       Text="—" FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimary}"/>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Asistencias restantes: "
+                                                       FontSize="11" Foreground="#AAAACC"/>
+                                            <TextBlock Grid.Column="1" x:Name="lblResultadoAsistencias"
+                                                       Text="—" FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimary}"
+                                                       TextWrapping="Wrap"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </Grid>
+                                    </StackPanel>
 
-                        <UniformGrid Grid.Row="0" Rows="1" Columns="7" Margin="0,0,0,8">
-                            <TextBlock Text="LUN" FontSize="11" FontWeight="Bold"
-                                       Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Padding="0,4"/>
-                            <TextBlock Text="MAR" FontSize="11" FontWeight="Bold"
-                                       Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Padding="0,4"/>
-                            <TextBlock Text="MIE" FontSize="11" FontWeight="Bold"
-                                       Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Padding="0,4"/>
-                            <TextBlock Text="JUE" FontSize="11" FontWeight="Bold"
-                                       Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Padding="0,4"/>
-                            <TextBlock Text="VIE" FontSize="11" FontWeight="Bold"
-                                       Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Padding="0,4"/>
-                            <TextBlock Text="SAB" FontSize="11" FontWeight="Bold"
-                                       Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center" Padding="0,4"/>
-                            <TextBlock Text="DOM" FontSize="11" FontWeight="Bold"
-                                       Foreground="{StaticResource ColorError}" HorizontalAlignment="Center" Padding="0,4"/>
-                        </UniformGrid>
+                                    <!-- Info de fichaje (instructor) -->
+                                    <StackPanel x:Name="panelInfoFichaje" Visibility="Collapsed">
+                                        <Border Height="1" Background="#33FFFFFF" Margin="0,4,0,8"/>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Operacion: "
+                                                       FontSize="11" Foreground="#AAAACC"/>
+                                            <TextBlock Grid.Column="1" x:Name="lblResultadoOperacion"
+                                                       Text="—" FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimary}"/>
+                                        </Grid>
+                                        <Grid Margin="0,0,0,4">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Hora: "
+                                                       FontSize="11" Foreground="#AAAACC"/>
+                                            <TextBlock Grid.Column="1" x:Name="lblResultadoHora"
+                                                       Text="—" FontSize="11"
+                                                       FontFamily="Consolas" FontWeight="Bold"
+                                                       Foreground="{StaticResource TextPrimary}"/>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="Horas trabajadas: "
+                                                       FontSize="11" Foreground="#AAAACC"/>
+                                            <TextBlock Grid.Column="1" x:Name="lblResultadoHoras"
+                                                       Text="—" FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimary}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
 
-                        <UniformGrid x:Name="gridCalendario" Grid.Row="1"
-                                     Rows="6" Columns="7"/>
+                        <!-- Placeholder cuando no hay resultado -->
+                        <TextBlock x:Name="lblPlaceholder"
+                                   Text="Ingrese un DNI para registrar asistencia"
+                                   FontSize="14" Foreground="{StaticResource TextSecondary}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   TextWrapping="Wrap" TextAlignment="Center"/>
                     </Grid>
                 </Grid>
             </Border>
@@ -295,7 +305,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- ── PRÓXIMOS VENCIMIENTOS ── -->
+                <!-- ── PROXIMOS VENCIMIENTOS ── -->
                 <Border Grid.Row="0" Style="{StaticResource DashboardPanelStyle}">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -374,21 +384,7 @@
                                                HorizontalAlignment="Center" Margin="0,4,0,0"/>
                                 </StackPanel>
                             </Button>
-
-                            <Button Style="{StaticResource DashboardAccesoStyle}"
-                                    x:Name="btnRapidoCuota"
-                                    Click="btnRapidoCuota_Click">
-                                <StackPanel HorizontalAlignment="Center"
-                                            VerticalAlignment="Center">
-                                    <fa:ImageAwesome Icon="Money" Foreground="#00E676"
-                                                     Height="16" Width="16"
-                                                     HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Cobrar Cuota" FontSize="10"
-                                               FontWeight="Bold" Foreground="{StaticResource TextSecondary}"
-                                               HorizontalAlignment="Center" Margin="0,4,0,0"/>
-                                </StackPanel>
-                            </Button>
-
+                            
                             <Button Style="{StaticResource DashboardAccesoStyle}"
                                     x:Name="btnRapidoAsistencia"
                                     Click="btnRapidoAsistencia_Click">

@@ -2,6 +2,7 @@
 // Compatible con C# 7.3.
 
 using Controllers;
+using FontAwesome.WPF;
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -41,7 +42,7 @@ namespace SistemaGimnacionOptimusCAI
             LimpiarErrores();
 
             string dni = txtDni.Text.Trim();
-            string password = txtPassword.Password;
+            string password = _mostrandoPassword ? txtPasswordVisible.Text : txtPassword.Password;
 
             bool hayError = false;
 
@@ -69,7 +70,10 @@ namespace SistemaGimnacionOptimusCAI
                 if (!resultado.ok)
                 {
                     MostrarError(resultado.mensaje);
-                    txtPassword.Password = string.Empty;
+                    if (_mostrandoPassword)
+                        txtPasswordVisible.Text = string.Empty;
+                    else
+                        txtPassword.Password = string.Empty;
                     txtPassword.Focus();
                     return;
                 }
@@ -98,14 +102,26 @@ namespace SistemaGimnacionOptimusCAI
         // ── MOSTRAR/OCULTAR CONTRASEÑA ────────────────────────
         private void btnTogglePass_Click(object sender, RoutedEventArgs e)
         {
-            // En WPF, PasswordBox no soporta mostrar texto directamente.
-            // Alternativa: swapear PasswordBox con un TextBox.
-            // Por simplicidad cambiamos solo el ícono y guardamos la pass.
             _mostrandoPassword = !_mostrandoPassword;
-            lblTogglePass.Text = _mostrandoPassword ? "🔒" : "👁";
-            // Nota: para mostrar el texto real habría que agregar un TextBox
-            // con Visibility="Collapsed" y swapearlos. Dejamos el ícono
-            // como UX mínima para no complicar el XAML.
+
+            if (_mostrandoPassword)
+            {
+                // Sincronizar texto del PasswordBox al TextBox visible
+                txtPasswordVisible.Text = txtPassword.Password;
+                txtPassword.Visibility = Visibility.Collapsed;
+                txtPasswordVisible.Visibility = Visibility.Visible;
+                txtPasswordVisible.Focus();
+                iconTogglePass.Icon = FontAwesomeIcon.EyeSlash;
+            }
+            else
+            {
+                // Sincronizar texto del TextBox al PasswordBox
+                txtPassword.Password = txtPasswordVisible.Text;
+                txtPasswordVisible.Visibility = Visibility.Collapsed;
+                txtPassword.Visibility = Visibility.Visible;
+                txtPassword.Focus();
+                iconTogglePass.Icon = FontAwesomeIcon.Eye;
+            }
         }
 
         // ── CERRAR ────────────────────────────────────────────

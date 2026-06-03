@@ -74,13 +74,11 @@ BEGIN
     IF @SocioActivo = 0
     BEGIN
         SET @Resultado = 'denegado_socio_inactivo';
-        SET @Mensaje   = 'El socio está dado de baja.';
-        INSERT INTO registros_acceso (socio_id, metodo_acceso, resultado)
-        VALUES (@SocioId, @MetodoAcceso, @Resultado);
+        SET @Mensaje   = 'El socio esta dado de baja.';
         SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                CAST(NULL AS NVARCHAR(150)) AS actividad_nombre, CAST(NULL AS DATE) AS fecha_vencimiento,
-               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+               CAST(NULL AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
                CAST(NULL AS TINYINT) AS limite_por_semana, CAST(NULL AS INT) AS asistencias_restantes;
         RETURN;
     END
@@ -126,13 +124,11 @@ BEGIN
     IF @ActividadId IS NULL
     BEGIN
         SET @Resultado = 'denegado_vencimiento';
-        SET @Mensaje   = 'La membresía seleccionada no está activa o no pertenece a este socio.';
-        INSERT INTO registros_acceso (socio_id, metodo_acceso, resultado)
-        VALUES (@SocioId, @MetodoAcceso, @Resultado);
+        SET @Mensaje   = 'La membresia seleccionada no esta activa o no pertenece a este socio.';
         SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                CAST(NULL AS NVARCHAR(150)) AS actividad_nombre, CAST(NULL AS DATE) AS fecha_vencimiento,
-               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+               CAST(NULL AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
                CAST(NULL AS TINYINT) AS limite_por_semana, CAST(NULL AS INT) AS asistencias_restantes;
         RETURN;
     END
@@ -152,12 +148,10 @@ BEGIN
     BEGIN
         SET @Resultado = 'denegado_dia';
         SET @Mensaje   = 'El gimnasio no abre los domingos.';
-        INSERT INTO registros_acceso (socio_id, membresia_id, metodo_acceso, resultado)
-        VALUES (@SocioId, @MembresiaId, @MetodoAcceso, @Resultado);
         SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+               CAST(NULL AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
                CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
                CAST(@LimiteSemana - @AsistenciasSemanaPrevio AS INT) AS asistencias_restantes;
         RETURN;
@@ -174,13 +168,11 @@ BEGIN
         )
         BEGIN
             SET @Resultado = 'denegado_dia';
-            SET @Mensaje   = 'Hoy no es un día permitido para esta actividad.';
-            INSERT INTO registros_acceso (socio_id, membresia_id, metodo_acceso, resultado)
-            VALUES (@SocioId, @MembresiaId, @MetodoAcceso, @Resultado);
+            SET @Mensaje   = 'Hoy no es un dia permitido para esta actividad.';
             SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                    @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                    @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-                   CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+                   CAST(NULL AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
                    CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
                    CAST(@LimiteSemana - @AsistenciasSemanaPrevio AS INT) AS asistencias_restantes;
             RETURN;
@@ -198,12 +190,10 @@ BEGIN
     BEGIN
         SET @Resultado = 'denegado_limite';
         SET @Mensaje   = 'El socio ya registró su ingreso hoy para esta actividad.';
-        INSERT INTO registros_acceso (socio_id, membresia_id, metodo_acceso, resultado)
-        VALUES (@SocioId, @MembresiaId, @MetodoAcceso, @Resultado);
         SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-               CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+               CAST(NULL AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
                CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
                CAST(@LimiteSemana - @AsistenciasSemanaPrevio AS INT) AS asistencias_restantes;
         RETURN;
@@ -217,12 +207,10 @@ BEGIN
         BEGIN
             SET @Resultado = 'denegado_limite';
             SET @Mensaje   = 'Ya usaste tu única asistencia permitida para esta membresía.';
-            INSERT INTO registros_acceso (socio_id, membresia_id, metodo_acceso, resultado)
-            VALUES (@SocioId, @MembresiaId, @MetodoAcceso, @Resultado);
             SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                    @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                    @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-                   CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+                   CAST(NULL AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
                    CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
                    CAST(@LimiteSemana - @AsistenciasSemanaPrevio AS INT) AS asistencias_restantes;
             RETURN;
@@ -240,13 +228,11 @@ BEGIN
               AND CAST(accedido_en AS DATE) BETWEEN @Lunes AND @Sabado) >= @LimiteSemana
         BEGIN
             SET @Resultado = 'denegado_limite';
-            SET @Mensaje   = 'Ya alcanzaste el límite de asistencias para esta semana.';
-            INSERT INTO registros_acceso (socio_id, membresia_id, metodo_acceso, resultado)
-            VALUES (@SocioId, @MembresiaId, @MetodoAcceso, @Resultado);
+            SET @Mensaje   = 'Ya alcanzaste el limite de asistencias para esta semana.';
             SELECT @SocioId AS socio_id, @Resultado AS resultado, @Mensaje AS mensaje,
                    @SocioNombre AS socio_nombre, @NumeroSocio AS numero_socio, @Foto AS foto,
                    @ActividadNom AS actividad_nombre, @VencActual AS fecha_vencimiento,
-                   CAST(SCOPE_IDENTITY() AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
+                   CAST(NULL AS BIGINT) AS registro_id, CAST(0 AS BIT) AS descuento_aplicado,
                    CAST(@LimiteSemana AS TINYINT) AS limite_por_semana,
                    CAST(@LimiteSemana - @AsistenciasSemanaPrevio AS INT) AS asistencias_restantes;
             RETURN;
@@ -348,6 +334,56 @@ BEGIN
          OR (@FiltroResultado = 'denegado'  AND r.resultado LIKE 'denegado%')
           )
     ORDER BY r.accedido_en DESC;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 4. BUSCAR PERSONA POR DNI (socio o instructor)
+-- ─────────────────────────────────────────────────────────────
+IF OBJECT_ID('sp_BuscarPersonaPorDni', 'P') IS NOT NULL
+    DROP PROCEDURE sp_BuscarPersonaPorDni;
+GO
+CREATE PROCEDURE sp_BuscarPersonaPorDni
+    @Dni CHAR(8)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 1. Buscar en socios
+    IF EXISTS (SELECT 1 FROM socios WHERE dni = @Dni AND eliminado_en IS NULL)
+    BEGIN
+        SELECT 'socio' AS tipo,
+               id,
+               nombre,
+               apellido,
+               foto,
+               dni
+        FROM socios
+        WHERE dni = @Dni AND eliminado_en IS NULL;
+        RETURN;
+    END
+
+    -- 2. Buscar en usuarios (instructor = rol_id = 2)
+    IF EXISTS (SELECT 1 FROM usuarios WHERE dni = @Dni AND rol_id = 2 AND activo = 1 AND eliminado_en IS NULL)
+    BEGIN
+        SELECT 'instructor' AS tipo,
+               id,
+               nombre,
+               apellido,
+               foto,
+               dni
+        FROM usuarios
+        WHERE dni = @Dni AND activo = 1 AND eliminado_en IS NULL;
+        RETURN;
+    END
+
+    -- 3. No encontrado
+    SELECT 'no_encontrado' AS tipo,
+           CAST(NULL AS BIGINT) AS id,
+           CAST(NULL AS NVARCHAR(100)) AS nombre,
+           CAST(NULL AS NVARCHAR(100)) AS apellido,
+           CAST(NULL AS VARBINARY(MAX)) AS foto,
+           @Dni AS dni;
 END;
 GO
 

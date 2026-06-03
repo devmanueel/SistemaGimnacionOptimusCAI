@@ -2,16 +2,15 @@
 using Controllers;
 using Entities;
 using SistemaGimnacionOptimusCAI.Helpers;
+using SistemaGimnacionOptimusCAI.Ventanas;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 
 namespace SistemaGimnacionOptimusCAI.Paginas
@@ -29,7 +28,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             InitializeComponent();
             ResaltarChip(chipTodos);
             CargarMensajes();
-            CargarComboSocios();
         }
 
         private long UsuarioId => SesionManager.HaySesion ? SesionManager.UsuarioId : 1;
@@ -43,7 +41,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 ActualizarStats();
                 RenderizarLista();
 
-                // Si tenia uno seleccionado, refrescarlo
                 if (_mensajeActual != null)
                 {
                     _mensajeActual = _controller.ObtenerPorId(_mensajeActual.Id);
@@ -71,12 +68,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        private void CargarComboSocios()
-        {
-            try { cmbSocio.ItemsSource = _controller.ListarSociosParaCombo(); }
-            catch { }
-        }
-
         // ── LISTA ─────────────────────────────────────────────
         private void RenderizarLista()
         {
@@ -96,7 +87,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             bool seleccionado = _mensajeActual != null && _mensajeActual.Id == m.Id;
 
-            // Color del borde lateral segun estado
             Color colorEstado = m.EsEnviado ? Color.FromRgb(37, 211, 102)
                               : m.EsError ? Color.FromRgb(255, 85, 85)
                               : Color.FromRgb(255, 167, 38);
@@ -121,7 +111,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(4) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            // Barra lateral de color
             var bar = new Border
             {
                 Background = new SolidColorBrush(colorEstado),
@@ -130,13 +119,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             Grid.SetColumn(bar, 0);
             grid.Children.Add(bar);
 
-            // Contenido
-            var contenido = new StackPanel
-            {
-                Margin = new Thickness(12, 10, 12, 10)
-            };
+            var contenido = new StackPanel { Margin = new Thickness(12, 10, 12, 10) };
 
-            // Linea 1: socio + estado + hora
             var linea1 = new Grid();
             linea1.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             linea1.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -166,7 +150,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             linea1.Children.Add(lblHora);
             contenido.Children.Add(linea1);
 
-            // Telefono
             contenido.Children.Add(new TextBlock
             {
                 Text = "📞 " + m.Telefono,
@@ -176,7 +159,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Margin = new Thickness(0, 3, 0, 0)
             });
 
-            // Preview del mensaje
             contenido.Children.Add(new TextBlock
             {
                 Text = m.MensajePreview,
@@ -187,7 +169,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Margin = new Thickness(0, 5, 0, 0)
             });
 
-            // Badge de estado abajo
             var badge = new Border
             {
                 Background = new SolidColorBrush(Color.FromRgb(
@@ -252,13 +233,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (_mensajeActual.EsEnviado)
                 lblDetalleFechaCreado.Text += "  ·  Enviado: " + _mensajeActual.FechaEnviado;
 
-            // Foto
             if (_mensajeActual.SocioFoto != null && _mensajeActual.SocioFoto.Length > 0)
                 imgDetalleFoto.ImageSource = BytesABitmapImage(_mensajeActual.SocioFoto);
             else
                 imgDetalleFoto.ImageSource = null;
 
-            // Badge estado
             Color colorBadge;
             Color colorBadgeBg;
             if (_mensajeActual.EsEnviado)
@@ -281,7 +260,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             lblBadgeEstado.Text = _mensajeActual.EstadoTexto.ToUpper();
             lblBadgeEstado.Foreground = new SolidColorBrush(colorBadge);
 
-            // Habilitar/deshabilitar botones segun estado
             btnMarcarEnviado.IsEnabled = !_mensajeActual.EsEnviado;
             btnMarcarEnviado.Opacity = _mensajeActual.EsEnviado ? 0.4 : 1.0;
         }
@@ -303,7 +281,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             Button[] chips = { chipTodos, chipPendientes, chipEnviados, chipErrores };
             foreach (var c in chips)
             {
-                // Al asignar el estilo completo, recuperás el espaciado y los efectos automáticos
                 if (c == sel)
                 {
                     c.Style = (Style)FindResource("BotonChipActivoEstilo");
@@ -367,176 +344,30 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch (Exception ex) { NotificacionWindow.MostrarError(ex.Message); }
         }
 
-        // ── PANEL NUEVO MENSAJE ───────────────────────────────
+        // ── VENTANAS EMERGENTES ──────────────────────────────
         private void btnNuevoMensaje_Click(object sender, RoutedEventArgs e)
         {
-            cmbSocio.SelectedIndex = -1;
-            txtTelefono.Text = string.Empty;
-            txtMensaje.Text = string.Empty;
-            AbrirPanel(panelFormulario);
-        }
-
-        private Border _panelAbierto;
-
-        private void AbrirPanel(Border panel)
-        {
-            if (_panelAbierto != null && _panelAbierto != panel)
-                CerrarPanel(_panelAbierto, cerrarInstantaneo: true);
-            _panelAbierto = panel;
-
-            panel.Visibility = Visibility.Visible;
-            panel.Opacity = 0;
-
-            var translate = new TranslateTransform { X = 60 };
-            panel.RenderTransform = translate;
-
-            var slide = new DoubleAnimation
+            var win = new NuevoMensajeWindow();
+            win.Owner = Window.GetWindow(this);
+            if (win.ShowDialog() == true)
             {
-                From = 60,
-                To = 0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(350)),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-            translate.BeginAnimation(TranslateTransform.XProperty, slide);
-
-            var fade = new DoubleAnimation
-            {
-                From = 0,
-                To = 1,
-                Duration = new Duration(TimeSpan.FromMilliseconds(300))
-            };
-            panel.BeginAnimation(OpacityProperty, fade);
-        }
-
-        private void CerrarPanel(Border panel, bool cerrarInstantaneo = false)
-        {
-            if (cerrarInstantaneo)
-            {
-                panel.Visibility = Visibility.Collapsed;
-                panel.Opacity = 1;
-                panel.RenderTransform = null;
-                _panelAbierto = null;
-                return;
-            }
-
-            var fade = new DoubleAnimation
-            {
-                From = 1,
-                To = 0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(180)),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
-            };
-            fade.Completed += (s, e) =>
-            {
-                panel.Visibility = Visibility.Collapsed;
-                panel.RenderTransform = null;
-                _panelAbierto = null;
-            };
-            panel.BeginAnimation(OpacityProperty, fade);
-        }
-
-        private void cmbSocio_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // Si seleccionan un socio, autocompletar el telefono si lo tiene
-            var socio = cmbSocio.SelectedItem as SocioComboItem;
-            if (socio == null) return;
-
-            // El SocioComboItem no tiene telefono, asi que cargamos al socio completo
-            // Por simplicidad, dejamos que el usuario lo tipee a mano si quiere.
-            // Esto es deliberado para no crear otro DAO call aqui.
-        }
-
-        private void btnPlantilla_Click(object sender, RoutedEventArgs e)
-        {
-            var btn = sender as Button;
-            if (btn == null) return;
-            string tag = btn.Tag.ToString();
-
-            string nombreSocio = "";
-            var socio = cmbSocio.SelectedItem as SocioComboItem;
-            if (socio != null) nombreSocio = socio.TextoCombo;
-
-            switch (tag)
-            {
-                case "bienvenida":
-                    txtMensaje.Text = _controller.PlantillaBienvenida(nombreSocio);
-                    break;
-                case "cumple":
-                    txtMensaje.Text = _controller.PlantillaCumpleanios(nombreSocio);
-                    break;
-                case "limpiar":
-                    txtMensaje.Text = string.Empty;
-                    break;
+                CargarMensajes();
             }
         }
 
-        private void btnNuevoGuardar_Click(object sender, RoutedEventArgs e)
-        {
-            var socio = cmbSocio.SelectedItem as SocioComboItem;
-            long? socioId = socio != null ? (long?)socio.Id : null;
-
-            var r = _controller.Insertar("masivo", socioId, txtTelefono.Text, txtMensaje.Text, UsuarioId);
-            if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-
-            NotificacionWindow.MostrarExito(r.mensaje);
-            CerrarPanel(panelFormulario);
-            CargarMensajes();
-        }
-
-        private void btnNuevoCancelar_Click(object sender, RoutedEventArgs e)
-            => CerrarPanel(panelFormulario);
-
-        // ── GENERAR AVISOS ────────────────────────────────────
         private void btnGenerarAvisos_Click(object sender, RoutedEventArgs e)
         {
-            txtDiasAntes.Text = "3";
-            AbrirPanel(panelAvisos);
-        }
-
-        private void btnAvisosConfirmar_Click(object sender, RoutedEventArgs e)
-        {
-            int dias = 3;
-            int.TryParse(txtDiasAntes.Text, out dias);
-
-            var r = _controller.GenerarAvisosVencimiento(dias, UsuarioId);
-            if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-
-            CerrarPanel(panelAvisos);
-
-            if (r.generados > 0) NotificacionWindow.MostrarExito(r.mensaje);
-            else NotificacionWindow.MostrarAdvertencia(r.mensaje);
-
-            // Cambiar al filtro de pendientes para ver lo recien generado
-            if (r.generados > 0)
+            var win = new GenerarAvisosWindow();
+            win.Owner = Window.GetWindow(this);
+            if (win.ShowDialog() == true && win.MensajesGenerados > 0)
             {
                 _filtroEstado = "pendiente";
                 ResaltarChip(chipPendientes);
+                CargarMensajes();
             }
-            CargarMensajes();
         }
-
-        private void btnAvisosCancelar_Click(object sender, RoutedEventArgs e)
-            => CerrarPanel(panelAvisos);
 
         // ── HELPERS ───────────────────────────────────────────
-        private void txtSoloNumeros_PreviewTextInput(object sender, TextCompositionEventArgs e)
-            => e.Handled = !Regex.IsMatch(e.Text, @"^\d$");
-
-        private void AbrirModal(Border modal)
-        {
-            modal.Visibility = Visibility.Visible;
-            modal.Opacity = 0;
-            var fade = new DoubleAnimation { From = 0, To = 1, Duration = new Duration(TimeSpan.FromMilliseconds(180)) };
-            modal.BeginAnimation(OpacityProperty, fade);
-        }
-
-        private void CerrarModal(Border modal)
-        {
-            var fade = new DoubleAnimation { From = 1, To = 0, Duration = new Duration(TimeSpan.FromMilliseconds(150)) };
-            fade.Completed += (s, e) => modal.Visibility = Visibility.Collapsed;
-            modal.BeginAnimation(OpacityProperty, fade);
-        }
-
         private static BitmapImage BytesABitmapImage(byte[] bytes)
         {
             using (var ms = new MemoryStream(bytes))

@@ -177,5 +177,32 @@ namespace Models.Dao
             }
             return lista;
         }
+
+        public (string tipo, long id, string nombre, string apellido, byte[] foto) BuscarPersonaPorDni(string dni)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_BuscarPersonaPorDni", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Dni", dni);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return (
+                                reader["tipo"].ToString(),
+                                reader["id"] != DBNull.Value ? Convert.ToInt64(reader["id"]) : 0,
+                                reader["nombre"] as string,
+                                reader["apellido"] as string,
+                                reader["foto"] != DBNull.Value ? (byte[])reader["foto"] : null
+                            );
+                        }
+                    }
+                }
+            }
+            return ("no_encontrado", 0, null, null, null);
+        }
     }
 }

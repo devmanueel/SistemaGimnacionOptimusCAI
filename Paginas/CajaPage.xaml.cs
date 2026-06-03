@@ -5,8 +5,7 @@
 //   · Dashboard del balance del día (ingresos / gastos / total)
 //   · Gráfico de barras dinámico con los últimos 7 días
 //   · Filtros por tipo (Todos / Ingresos / Gastos) y rango fechas
-//   · Formulario que cambia entre INGRESO y GASTO según el botón
-//   · Conceptos sugeridos según el tipo
+//   · Apertura de ventana emergente para Ingreso/Egreso
 //
 //  Compatible con C# 7.3.
 // ============================================================
@@ -14,14 +13,12 @@
 using Controllers;
 using Entities;
 using SistemaGimnacionOptimusCAI.Helpers;
+using SistemaGimnacionOptimusCAI.Ventanas;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 
 namespace SistemaGimnacionOptimusCAI.Paginas
 {
@@ -30,24 +27,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private readonly CajaController _controller = new CajaController();
 
         private string _filtroTipo = "todos";
-        private string _modoForm = "ingreso";   // "ingreso" o "gasto"
 
         private long USUARIO_ACTUAL_ID => SesionManager.UsuarioId;
-
-        // Conceptos sugeridos para los autocompletes
-        private static readonly string[] ConceptosIngreso = {
-            "Clase suelta", "Pase diario", "Inscripción", "Otro ingreso"
-        };
-        private static readonly string[] ConceptosGasto = {
-            "Alquiler", "Sueldos", "Servicios (luz/gas)", "Internet", "Limpieza",
-            "Mantenimiento", "Equipamiento", "Insumos", "Marketing", "Impuestos", "Otro"
-        };
 
         public CajaPage()
         {
             InitializeComponent();
 
-            // Default: últimos 30 días
             dpDesde.SelectedDate = DateTime.Today.AddDays(-30);
             dpHasta.SelectedDate = DateTime.Today;
 
@@ -87,24 +73,21 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             try
             {
-                // Resumen del día
                 var resumenDia = _controller.ResumenDelDia();
                 lblIngresosDia.Text = "$" + resumenDia.TotalIngresos.ToString("N0");
                 lblGastosDia.Text = "$" + resumenDia.TotalGastos.ToString("N0");
                 lblBalanceDia.Text = resumenDia.BalanceTexto;
 
-                // Color del balance: verde si positivo, rojo si negativo
                 lblBalanceDia.Foreground = resumenDia.Balance >= 0
-                    ? new SolidColorBrush(Color.FromRgb(0, 230, 118))     // #00E676
-                    : new SolidColorBrush(Color.FromRgb(255, 85, 85));    // #FF5555
+                    ? new SolidColorBrush(Color.FromRgb(0, 230, 118))
+                    : new SolidColorBrush(Color.FromRgb(255, 85, 85));
 
-                // Resumen del mes
                 var resumenMes = _controller.ResumenDelMes();
                 lblBalanceMes.Text = resumenMes.BalanceTexto;
                 lblMovimientosMes.Text = resumenMes.CantidadMovimientos + " movim.";
 
                 lblBalanceMes.Foreground = resumenMes.Balance >= 0
-                    ? new SolidColorBrush(Color.FromRgb(0, 207, 255))     // #00CFFF
+                    ? new SolidColorBrush(Color.FromRgb(0, 207, 255))
                     : new SolidColorBrush(Color.FromRgb(255, 85, 85));
             }
             catch
@@ -127,7 +110,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 var datos = _controller.ObtenerUltimos7Dias();
                 if (datos.Count == 0) return;
 
-                // Encontrar el máximo para normalizar las alturas
                 decimal maxValor = 1;
                 foreach (var d in datos)
                 {
@@ -138,7 +120,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 int columna = 0;
                 foreach (var d in datos)
                 {
-                    // Contenedor de la columna del gráfico
                     var stack = new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -147,7 +128,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                         Margin = new Thickness(2, 0, 2, 0)
                     };
 
-                    // Barra de ingresos (verde)
                     double altIng = d.Ingresos > 0
                         ? (double)(d.Ingresos / maxValor) * 70 + 4
                         : 2;
@@ -162,7 +142,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                         ToolTip = "Ingresos: $" + d.Ingresos.ToString("N0")
                     };
 
-                    // Barra de gastos (rojo)
                     double altGas = d.Gastos > 0
                         ? (double)(d.Gastos / maxValor) * 70 + 4
                         : 2;
@@ -182,7 +161,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     Grid.SetColumn(stack, columna);
                     gridChart.Children.Add(stack);
 
-                    // Label del día
                     var lbl = new TextBlock
                     {
                         Text = d.DiaSemana,
@@ -199,7 +177,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             catch
             {
-                // Silencioso: el gráfico es decorativo, no crítico
             }
         }
 
@@ -228,7 +205,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             Button[] chips = { chipTodos, chipIngresos, chipGastos };
             foreach (var c in chips)
             {
-                // Al asignar el estilo completo, recuperás el espaciado y los efectos automáticos
                 if (c == seleccionado)
                 {
                     c.Style = (Style)FindResource("BotonChipActivoEstilo");
@@ -241,51 +217,25 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ─────────────────────────────────────────────────────
-        // BOTONES PRINCIPALES
+        // BOTONES PRINCIPALES — ABREN VENTANA EMERGENTE
         // ─────────────────────────────────────────────────────
         private void btnIngreso_Click(object sender, RoutedEventArgs e)
         {
-            _modoForm = "ingreso";
-            ConfigurarFormulario();
-            AbrirFormulario();
+            var win = new MovimientoCajaWindow("ingreso");
+            win.Owner = Window.GetWindow(this);
+            if (win.ShowDialog() == true)
+            {
+                CargarTodo();
+            }
         }
 
         private void btnGasto_Click(object sender, RoutedEventArgs e)
         {
-            _modoForm = "gasto";
-            ConfigurarFormulario();
-            AbrirFormulario();
-        }
-
-        /// <summary>Configura el formulario según el modo (ingreso o gasto).</summary>
-        private void ConfigurarFormulario()
-        {
-            LimpiarFormulario();
-            LimpiarErrores();
-
-            if (_modoForm == "ingreso")
+            var win = new MovimientoCajaWindow("gasto");
+            win.Owner = Window.GetWindow(this);
+            if (win.ShowDialog() == true)
             {
-                lblTituloFormulario.Text = "REGISTRAR INGRESO";
-                btnGuardar.Content = "REGISTRAR INGRESO";
-                lineaSuperior.Background = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-
-                // ← Resetear ícono a verde
-                iconoFormulario.Icon = FontAwesome.WPF.FontAwesomeIcon.PlusCircle;
-                iconoFormulario.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-
-                cmbConcepto.ItemsSource = ConceptosIngreso;
-            }
-            else
-            {
-                lblTituloFormulario.Text = "REGISTRAR GASTO";
-                btnGuardar.Content = "REGISTRAR GASTO";
-                lineaSuperior.Background = new SolidColorBrush(Color.FromRgb(255, 85, 85));
-
-                // ← Ícono rojo (ya lo tenías, sacá el duplicado)
-                iconoFormulario.Icon = FontAwesome.WPF.FontAwesomeIcon.MinusCircle;
-                iconoFormulario.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
-
-                cmbConcepto.ItemsSource = ConceptosGasto;
+                CargarTodo();
             }
         }
 
@@ -294,7 +244,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var mov = ObtenerMovimientoDeFila(sender);
             if (mov == null) return;
 
-            // Validación rápida en cliente — el SP también lo valida
             if (mov.Tipo == "ingreso_cuota" || mov.Tipo == "ingreso_venta")
             {
                 NotificacionWindow.MostrarAdvertencia(
@@ -324,209 +273,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch (Exception ex) { NotificacionWindow.MostrarError(ex.Message); }
         }
 
-        private void btnGuardar_Click(object sender, RoutedEventArgs e)
-        {
-            string concepto = (cmbConcepto.Text ?? string.Empty).Trim();
-            decimal monto = 0;
-
-            // Validar concepto
-            if (string.IsNullOrWhiteSpace(concepto) || concepto.Length < 3)
-            {
-                AplicarEstadoCampo(null, errConcepto, "El concepto debe tener al menos 3 caracteres.");
-                NotificacionWindow.MostrarAdvertencia("Faltan datos en el formulario.");
-                return;
-            }
-            else
-            {
-                AplicarEstadoCampo(null, errConcepto, null);
-            }
-
-            // Validar monto
-            string errM = null;
-            if (string.IsNullOrWhiteSpace(txtMonto.Text))
-                errM = "El monto es obligatorio.";
-            else if (!decimal.TryParse(txtMonto.Text, out monto) || monto <= 0)
-                errM = "El monto debe ser un número mayor a 0.";
-
-            AplicarEstadoCampo(txtMonto, errMonto, errM);
-            if (errM != null)
-            {
-                NotificacionWindow.MostrarAdvertencia(errM);
-                return;
-            }
-
-            // Método de pago
-            var metodoItem = cmbMetodoPago.SelectedItem as ComboBoxItem;
-            string metodoPago = metodoItem != null && metodoItem.Tag != null
-                ? metodoItem.Tag.ToString() : "efectivo";
-
-            // Llamar al controller según el modo
-            if (_modoForm == "ingreso")
-            {
-                var r = _controller.RegistrarIngresoManual(
-                    USUARIO_ACTUAL_ID,
-                    "ingreso_clase",   // Por defecto los manuales son clases sueltas
-                    concepto,
-                    null,
-                    txtDetalle.Text,
-                    monto,
-                    metodoPago);
-
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-                NotificacionWindow.MostrarExito(r.mensaje, "¡Ingreso registrado!");
-            }
-            else
-            {
-                var r = _controller.RegistrarGasto(
-                    USUARIO_ACTUAL_ID,
-                    concepto,
-                    txtDetalle.Text,
-                    monto,
-                    metodoPago);
-
-                if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
-                NotificacionWindow.MostrarExito(r.mensaje, "¡Gasto registrado!");
-            }
-
-            CerrarFormulario();
-            CargarTodo();
-        }
-
-        private void btnCancelarFormulario_Click(object sender, RoutedEventArgs e) => CerrarFormulario();
-
-        // ─────────────────────────────────────────────────────
-        // VALIDACIONES INLINE
-        // ─────────────────────────────────────────────────────
-        private void txtMonto_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            e.Handled = !Regex.IsMatch(e.Text, @"^[\d]$");
-        }
-
-        private void txtMonto_LostFocus(object sender, RoutedEventArgs e)
-        {
-            decimal monto = 0;
-            string err = null;
-
-            if (string.IsNullOrWhiteSpace(txtMonto.Text))
-                err = "El monto es obligatorio.";
-            else if (!decimal.TryParse(txtMonto.Text, out monto) || monto <= 0)
-                err = "El monto debe ser mayor a $0.";
-
-            AplicarEstadoCampo(txtMonto, errMonto, err);
-            ActualizarPreviewMonto();
-        }
-
-        private void ActualizarPreviewMonto()
-        {
-            decimal monto = 0;
-            if (decimal.TryParse(txtMonto.Text, out monto) && monto > 0)
-            {
-                if (_modoForm == "ingreso")
-                {
-                    lblPreviewMonto.Text = "+$" + monto.ToString("N0");
-                    lblPreviewMonto.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-                    iconoPreviewMonto.Icon = FontAwesome.WPF.FontAwesomeIcon.PlusCircle;
-                    iconoPreviewMonto.Foreground = new SolidColorBrush(Color.FromRgb(0, 230, 118));
-                    panelPreviewMonto.Background = new SolidColorBrush(Color.FromArgb(255, 10, 26, 10));
-                }
-                else
-                {
-                    lblPreviewMonto.Text = "-$" + monto.ToString("N0");
-                    lblPreviewMonto.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
-                    iconoPreviewMonto.Icon = FontAwesome.WPF.FontAwesomeIcon.MinusCircle;
-                    iconoPreviewMonto.Foreground = new SolidColorBrush(Color.FromRgb(255, 85, 85));
-                    panelPreviewMonto.Background = new SolidColorBrush(Color.FromArgb(255, 42, 10, 10));
-                }
-
-                panelPreviewMonto.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                panelPreviewMonto.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        private void AplicarEstadoCampo(TextBox campo, TextBlock labelError, string mensajeError)
-        {
-            if (mensajeError != null)
-            {
-                if (campo != null) campo.Style = (Style)Resources["InputErrorEstilo"];
-                labelError.Text = mensajeError;
-                labelError.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                if (campo != null) campo.Style = (Style)Resources["InputEstilo"];
-                labelError.Text = string.Empty;
-                labelError.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        private void LimpiarErrores()
-        {
-            errMonto.Text = string.Empty;
-            errMonto.Visibility = Visibility.Collapsed;
-            errConcepto.Text = string.Empty;
-            errConcepto.Visibility = Visibility.Collapsed;
-            txtMonto.Style = (Style)Resources["InputEstilo"];
-        }
-
-        // ─────────────────────────────────────────────────────
-        // ANIMACIONES
-        // ─────────────────────────────────────────────────────
-        private void AbrirFormulario()
-        {
-            panelFormulario.Visibility = Visibility.Visible;
-            panelFormulario.Opacity = 0;
-
-            var translate = new TranslateTransform { X = 60 };
-            panelFormulario.RenderTransform = translate;
-
-            var slide = new DoubleAnimation
-            {
-                From = 60,
-                To = 0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(350)),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-            };
-            translate.BeginAnimation(TranslateTransform.XProperty, slide);
-
-            var fade = new DoubleAnimation
-            { From = 0, To = 1, Duration = new Duration(TimeSpan.FromMilliseconds(300)) };
-            panelFormulario.BeginAnimation(OpacityProperty, fade);
-        }
-
-        private void CerrarFormulario()
-        {
-            var fade = new DoubleAnimation
-            {
-                From = 1,
-                To = 0,
-                Duration = new Duration(TimeSpan.FromMilliseconds(180)),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
-            };
-            fade.Completed += (s, ev) =>
-            {
-                panelFormulario.Visibility = Visibility.Collapsed;
-                LimpiarFormulario();
-                LimpiarErrores();
-            };
-            panelFormulario.BeginAnimation(OpacityProperty, fade);
-        }
-
         // ─────────────────────────────────────────────────────
         // HELPERS
         // ─────────────────────────────────────────────────────
-        private void LimpiarFormulario()
-        {
-            cmbConcepto.Text = string.Empty;
-            cmbConcepto.SelectedIndex = -1;
-            txtMonto.Text = string.Empty;
-            cmbMetodoPago.SelectedIndex = 0;
-            txtDetalle.Text = string.Empty;
-            panelPreviewMonto.Visibility = Visibility.Collapsed;
-        }
-
         private CajaMovimiento ObtenerMovimientoDeFila(object sender)
         {
             var btn = sender as Button;
@@ -539,11 +288,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             dpDesde.SelectedDate = DateTime.Today;
             dpHasta.SelectedDate = DateTime.Today;
         }
+
         private void btnRangoSemana_Click(object sender, RoutedEventArgs e)
         {
             dpDesde.SelectedDate = DateTime.Today.AddDays(-6);
             dpHasta.SelectedDate = DateTime.Today;
         }
+
         private void btnRangoMes_Click(object sender, RoutedEventArgs e)
         {
             dpDesde.SelectedDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);

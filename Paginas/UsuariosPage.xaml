@@ -188,18 +188,14 @@
         </Grid>
 
         <!-- ══════════════════════════════════════════════════════
-             CONTENIDO: DataGrid + Panel Formulario
+             CONTENIDO: DataGrid
         ══════════════════════════════════════════════════════ -->
         <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
 
             <!-- DATAGRID -->
-            <Border Grid.Column="0" Background="{StaticResource Bg1}"
+            <Border Background="{StaticResource Bg1}"
                     CornerRadius="12" BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                    Margin="0,0,14,0" ClipToBounds="True">
+                    ClipToBounds="True">
 
                 <Grid>
                     <Grid.RowDefinitions>
@@ -348,188 +344,6 @@ Style="{StaticResource ButtonStyleEstado}">
 
                         </DataGrid.Columns>
                     </DataGrid>
-                </Grid>
-            </Border>
-
-            <!-- ══════════════════════════════════
-                 PANEL FORMULARIO LATERAL
-            ══════════════════════════════════ -->
-            <Border x:Name="panelFormulario"
-                    Grid.Column="1" Width="370"
-                    Background="{StaticResource Bg1}"
-                    CornerRadius="12"
-                    BorderBrush="{StaticResource Border1}"
-                    BorderThickness="0.5"
-                    Visibility="Collapsed"
-                    ClipToBounds="True">
-
-                <Border.RenderTransform>
-                    <TranslateTransform x:Name="panelTranslate"/>
-                </Border.RenderTransform>
-
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="4"/>
-                        <!-- Línea top degradada -->
-                        <RowDefinition Height="Auto"/>
-                        <!-- Título -->
-                        <RowDefinition Height="*"/>
-                        <!-- Campos scroll -->
-                        <RowDefinition Height="Auto"/>
-                        <!-- Botones -->
-                    </Grid.RowDefinitions>
-
-                    <!-- Línea superior tricolor -->
-                    <Border Grid.Row="0">
-                        <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
-                    </Border>
-
-                    <!-- Título del formulario -->
-                    <StackPanel Grid.Row="1" Margin="22,18,22,0">
-                        <TextBlock x:Name="lblTituloFormulario" Text="NUEVO USUARIO"
-                                   FontFamily="Bahnschrift SemiBold, Segoe UI"
-                                   FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-                        <Border Height="1" Background="{StaticResource Border1}" Margin="0,12,0,0"/>
-                    </StackPanel>
-
-                    <!-- Campos -->
-                    <ScrollViewer Grid.Row="2"
-                                  VerticalScrollBarVisibility="Auto"
-                                  Margin="22,14,22,0"
-                                  Style="{StaticResource PanelScrollViewerStyle}">
-                        <StackPanel Margin="8, 0">
-
-                            <!-- Foto circular con anillo degradado -->
-                            <StackPanel HorizontalAlignment="Center" Margin="0,0,0,20">
-                                <Grid>
-                                    <Ellipse Width="106" Height="106" Margin="0, 4, 0, 0" >
-                                        <Ellipse.Fill><SolidColorBrush Color="#4ADE80"/></Ellipse.Fill>
-                                    </Ellipse>
-                                    <Ellipse Width="100" Height="100" HorizontalAlignment="Center">
-                                        <Ellipse.Fill>
-                                            <ImageBrush x:Name="imgFotoFormulario" Stretch="UniformToFill"/>
-                                        </Ellipse.Fill>
-                                    </Ellipse>
-                                    <Button Width="28" Height="28"
-                                            VerticalAlignment="Bottom"
-                                            HorizontalAlignment="Right"
-                                            Cursor="Hand" ToolTip="Cambiar foto"
-                                            Click="btnSubirFoto_Click">
-                                        <Button.Template>
-                                            <ControlTemplate TargetType="Button">
-                                                <Border CornerRadius="14">
-                                                    <Border.Background><SolidColorBrush Color="#4ADE80"/></Border.Background>
-                                                    <ContentPresenter HorizontalAlignment="Center"
-                                                                      VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Button.Template>
-                                        <TextBlock Text="📷" FontSize="12" Margin="0,0,0,1"/>
-                                    </Button>
-                                </Grid>
-                            </StackPanel>
-
-                            <!-- Macro para etiqueta de campo: caps pequeñas -->
-                            <TextBlock Text="NOMBRE *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtNombre" Style="{StaticResource InputEstilo}"
-                                     LostFocus="txtNombre_LostFocus"/>
-                            <TextBlock x:Name="errNombre" Style="{StaticResource LabelErrorEstilo}"/>
-
-                            <TextBlock Text="APELLIDO *" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtApellido" Style="{StaticResource InputEstilo}"
-                                     LostFocus="txtApellido_LostFocus"/>
-                            <TextBlock x:Name="errApellido" Style="{StaticResource LabelErrorEstilo}"/>
-
-                            <TextBlock Text="DNI *  (7 u 8 dígitos)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtDni" Style="{StaticResource InputEstilo}"
-                                     MaxLength="8"
-                                     PreviewTextInput="txtDni_PreviewTextInput"
-                                     DataObject.Pasting="txtDni_Pasting"
-                                     LostFocus="txtDni_LostFocus"/>
-                            <TextBlock x:Name="errDni" Style="{StaticResource LabelErrorEstilo}"/>
-
-                            <TextBlock Text="EMAIL  (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtEmail" Style="{StaticResource InputEstilo}"
-                                     LostFocus="txtEmail_LostFocus"/>
-                            <TextBlock x:Name="errEmail" Style="{StaticResource LabelErrorEstilo}"/>
-
-                            <TextBlock Text="TELÉFONO  (opcional, 10 dígitos sin 0 inicial)" Style="{StaticResource LabelCampoEstilo}"/>
-
-                            <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"
-                                     MaxLength="10"
-                                     PreviewTextInput="txtTelefono_PreviewTextInput"
-                                     DataObject.Pasting="txtTelefono_Pasting"
-                                     LostFocus="txtTelefono_LostFocus"
-                                     ToolTip="Ingresá 10 dígitos sin el 0 inicial. Ejemplo: 3884123456"/>
-                            <TextBlock x:Name="errTelefono" Style="{StaticResource LabelErrorEstilo}"/>
-
-                            <TextBlock Text="DOMICILIO  (opcional)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtDomicilio" Style="{StaticResource InputEstilo}"
-                                     MaxLength="200"/>
-
-                            <TextBlock x:Name="lblClave" Text="CONTRASEÑA *"
-                                       Style="{StaticResource LabelCampoEstilo}"/>
-                            <PasswordBox x:Name="txtClave" Style="{StaticResource PasswordEstilo}"
-                                         PasswordChanged="txtClave_PasswordChanged"/>
-                            <TextBlock x:Name="errClave" Style="{StaticResource LabelErrorEstilo}"/>
-                            
-                            <TextBlock x:Name="lblClaveAclaracion"
-                                       Text="Dejá vacío para no cambiar la contraseña."
-                                       FontSize="11" Foreground="{StaticResource TextMuted}" FontStyle="Italic"
-                                       Margin="0,-8,0,12" Visibility="Collapsed"/>
-
-                            <TextBlock Text="TARIFA POR HORA  (solo instructores)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <TextBox x:Name="txtTarifaHora" Style="{StaticResource InputEstilo}"
-                                     MaxLength="10"
-                                     PreviewTextInput="txtTarifaHora_PreviewTextInput"/>
-                            <TextBlock Text="Dejá en 0 si es administrador. Ej: 5000 = $5.000/h"
-                                       FontSize="11" Foreground="{StaticResource TextMuted}"
-                                       FontStyle="Italic" Margin="0,-8,0,12"/>
-
-                            <TextBlock Text="ROL *" Style="{StaticResource LabelCampoEstilo}"/>
-
-                                <ComboBox x:Name="cmbRol"
-                                          Style="{StaticResource ComboBoxEstilo}">
-                                    <ComboBox.Resources>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}"
-                                                         Color="#111811"/>
-                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}"
-                                                         Color="#E8F5E8"/>
-                                    </ComboBox.Resources>
-                                <ComboBoxItem Tag="1">
-                                    <StackPanel Orientation="Horizontal">
-                                        <!-- Icono de Seguridad -->
-                                        <fa:ImageAwesome Icon="Shield" Foreground="#FF9F43" Height="14" Width="18" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Administrador" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </ComboBoxItem>
-                                <ComboBoxItem Tag="2">
-                                    <StackPanel Orientation="Horizontal">
-                                        <!-- Icono de Usuario -->
-                                        <fa:ImageAwesome Icon="User" Foreground="#6C5DD3" Height="12" Width="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Empleado / Instructor" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </ComboBoxItem>
-                            </ComboBox>
-                            <TextBlock x:Name="errRol" Style="{StaticResource LabelErrorEstilo}"/>
-
-                            <Border Height="1" Background="{StaticResource Bg4}" Margin="0,10,0,0"/>
-                        </StackPanel>
-                    </ScrollViewer>
-
-                    <!-- Botones Cancelar / Guardar -->
-                    <Grid Grid.Row="3" Margin="22,12,22,18">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Cancelar"
-                                Style="{StaticResource BotonDangerLargoEstilo}"
-                                Margin="0,0,8,0" Click="btnCancelar_Click"/>
-                        <Button x:Name="btnGuardar" Grid.Column="1" Content="GUARDAR"
-                                Style="{StaticResource BotonPrincipalEstilo}"
-                                Margin="8,0,0,0" Click="btnGuardar_Click"/>
-                    </Grid>
                 </Grid>
             </Border>
 
