@@ -34,6 +34,12 @@ namespace Controllers
         public List<SocioComboItem> ListarSociosParaCombo()
             => _membreCtrl.ListarSociosParaCombo();
 
+        public List<SocioMasivoItem> ListarSociosParaMasivo()
+        {
+            try { return _dao.ListarSociosParaMasivo(); }
+            catch (Exception ex) { throw new Exception("Error al cargar socios.\n" + ex.Message); }
+        }
+
         public EstadisticasWhatsapp ObtenerEstadisticas()
         {
             try { return _dao.ObtenerEstadisticas(); }
@@ -53,6 +59,38 @@ namespace Controllers
                     LimpiarTelefono(telefono), mensaje.Trim(), enviadoPor);
                 if (id <= 0) return (false, "No se pudo crear el mensaje.", 0);
                 return (true, "Mensaje creado.", id);
+            }
+            catch (Exception ex) { return (false, ex.Message, 0); }
+        }
+
+        public (bool ok, string mensaje, int insertados) InsertarMasivo(
+            List<SocioMasivoItem> sociosSeleccionados, string mensaje, long? enviadoPor)
+        {
+            if (sociosSeleccionados == null || sociosSeleccionados.Count == 0)
+                return (false, "Debe seleccionar al menos un socio.", 0);
+
+            if (string.IsNullOrWhiteSpace(mensaje))
+                return (false, "El mensaje no puede estar vacio.", 0);
+
+            if (mensaje.Trim().Length < 5)
+                return (false, "El mensaje es muy corto.", 0);
+
+            try
+            {
+                var ids = new List<string>();
+                foreach (var s in sociosSeleccionados)
+                    ids.Add(s.Id.ToString());
+
+                string socioIds = string.Join(",", ids);
+                int insertados = _dao.InsertarMasivo(socioIds, mensaje.Trim(), enviadoPor);
+
+                if (insertados == 0)
+                    return (false, "No se pudo crear ningun mensaje.", 0);
+
+                string msg = insertados == 1
+                    ? "1 mensaje creado."
+                    : insertados + " mensajes creados.";
+                return (true, msg, insertados);
             }
             catch (Exception ex) { return (false, ex.Message, 0); }
         }

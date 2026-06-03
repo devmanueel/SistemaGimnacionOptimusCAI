@@ -2396,6 +2396,110 @@ Usando la paleta oficial de Optimus CAI
         </Setter>
     </Style>
 
+    <!-- ═══════════════════════════════════════════════════════════
+         ESTILOS — WhatsApp Masivo
+    ═══════════════════════════════════════════════════════════ -->
+
+    <Style x:Key="ToggleButtonStyle" TargetType="RadioButton">
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Padding" Value="16,0"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="borde"
+                            Background="Transparent"
+                            BorderBrush="{StaticResource Border2}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="borde" Property="Background" Value="{StaticResource Bg2}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="borde" Property="Background" Value="{StaticResource Bg3}"/>
+                            <Setter TargetName="borde" Property="BorderBrush" Value="{StaticResource GreenMain}"/>
+                            <Setter Property="Foreground" Value="{StaticResource GreenMain}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="BotonVerdeStyle" TargetType="Button">
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Background" Value="{StaticResource BrushActivaFondo}"/>
+        <Setter Property="Foreground" Value="{StaticResource GreenMain}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{StaticResource GreenDim}"/>
+        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="borde"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="borde" Property="Background" Value="#1E3A2F"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="borde" Property="Opacity" Value="0.85"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="BotonRojoStyle" TargetType="Button">
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="Background" Value="{StaticResource BrushVencidaFondo}"/>
+        <Setter Property="Foreground" Value="{StaticResource ColorError}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="#3A1515"/>
+        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="borde"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="borde" Property="Background" Value="#2A1010"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="borde" Property="Opacity" Value="0.85"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>
 
     

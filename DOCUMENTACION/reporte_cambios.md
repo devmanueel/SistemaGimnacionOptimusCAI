@@ -651,3 +651,64 @@ DataBase\spInstructorAsistencias.sql
 ```
 DataBase\spInstructorAsistencias.sql
 ```
+
+---
+
+## 🔧 16. Envio Masivo de WhatsApp — Integracion Individual/Masivo (`03/06/2026`)
+
+### Problema
+La ventana de "Nuevo Mensaje" solo permitia crear mensajes individuales (un socio a la vez). No existia forma de enviar un mismo mensaje a multiples socios de forma masiva.
+
+### Solucion aplicada
+Se transformo la ventana `NuevoMensajeWindow` en un formulario unificado con selector de modo (Individual / Masivo):
+
+| Modo | Comportamiento |
+|------|---------------|
+| **Individual** | Muestra selector de socio, campo de telefono, plantillas rapidas. Comportamiento original intacto. |
+| **Masivo** | Muestra lista de socios con checkboxes, buscador interno, botones "Seleccionar Activos" y "Desmarcar Todos". |
+
+### Caracteristicas del modo Masivo
+
+| Feature | Detalle |
+|---------|---------|
+| Lista con header fijo | Columnas alineadas: Check, Socio, Telefono, Estado |
+| Scroll con rueda del mouse | `PreviewMouseWheel` handler en el ScrollViewer |
+| Buscador en tiempo real | Filtra por nombre o telefono |
+| Seleccionar Activos | Marca solo socios con membresia activa |
+| Desmarcar Todos | Limpia todas las selecciones sin re-renderizar |
+| Plantillas compartidas | 👋 Bienvenida y 🎂 Cumpleaños visibles en ambos modos (genericas en masivo) |
+| Solo socios activos | El SP filtra socios con `activo = 1` y `membresia.estado = 'activa'` |
+
+### Archivos modificados/creados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\spWhatsapp.sql` | **2 SPs nuevos**: `sp_ListarSociosParaWhatsappMasivo`, `sp_InsertarWhatsappMensajeMasivo` |
+| `Entities\WhatsappMensaje.cs` | **Nueva clase**: `SocioMasivoItem` (con `INotifyPropertyChanged` para binding de checkboxes) |
+| `Models\DAO\WhatsappDao.cs` | Nuevos metodos: `ListarSociosParaMasivo()`, `InsertarMasivo()` |
+| `Controllers\WhatsappController.cs` | Nuevos metodos: `ListarSociosParaMasivo()`, `InsertarMasivo()` (con validaciones) |
+| `Ventanas\NuevoMensajeWindow.xaml` | Selector de modo (RadioButtons), paneles GridIndividual/GridMasivo, lista con SharedSizeGroup |
+| `Ventanas\NuevoMensajeWindow.xaml.cs` | Logica de intercambio de modos, `GuardarMasivo()`, busqueda, scroll fix |
+| `MiDiccionario.xaml` | **3 estilos nuevos**: `ToggleButtonStyle`, `BotonVerdeStyle`, `BotonRojoStyle` |
+| `packages.config` | Agregado `BouncyCastle` 1.8.9 (dependencia de iTextSharp faltante) |
+
+### SPs a ejecutar
+
+```
+DataBase\spWhatsapp.sql
+```
+
+Este archivo agrega los 2 nuevos SPs sin afectar los existentes. Ejecutar desde SQL Server Object Explorer sobre `DB_CAI_Optimus.mdf`.
+
+### Nota sobre BouncyCastle
+
+Se agrego `BouncyCastle` 1.8.9 al `packages.config` para que `nuget restore` descargue la dependencia de iTextSharp que faltaba. Sin esto, la exportacion a PDF crashea en maquinas que no tienen la carpeta `packages\BouncyCastle.1.8.9\` preexistente.
+
+```xml
+<package id="BouncyCastle" version="1.8.9" targetFramework="net472" />
+```
+
+Despues de agregarlo, ejecutar:
+```
+nuget restore SistemaGimnacionOptimusCAI.sln
+```

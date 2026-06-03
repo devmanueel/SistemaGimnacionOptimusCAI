@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         Title="Nuevo Mensaje"
-        Width="500" Height="620"
+        Width="500" Height="700"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -63,27 +63,129 @@
                           VerticalScrollBarVisibility="Auto"
                           Style="{StaticResource PanelScrollViewerStyle}">
                 <StackPanel>
-                    <TextBlock Text="SOCIO (opcional, pone numero externo si esta vacio)"
-                               Style="{StaticResource LabelCampoEstilo}"/>
-                    <ComboBox x:Name="cmbSocio" BorderThickness="0"
-                              Background="Transparent" Foreground="{StaticResource TextPrimary}"
-                              VerticalContentAlignment="Center"
-                              FontSize="13" Padding="10,0"
-                              IsTextSearchEnabled="True"
-                              DisplayMemberPath="TextoCombo"
-                              SelectionChanged="cmbSocio_SelectionChanged"
-                              Style="{StaticResource ComboBoxEstilo}">
-                        <ComboBox.Resources>
-                            <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
-                            <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
-                        </ComboBox.Resources>
-                    </ComboBox>
+                    <StackPanel Margin="0,0,0,15">
+                        <TextBlock Text="TIPO DE ENVIO" Foreground="{StaticResource TextMuted}" FontSize="10" FontWeight="Bold" Margin="2,0,0,6"/>
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="RbIndividual" Content="Individual" IsChecked="True"
+                                         Style="{StaticResource ToggleButtonStyle}" Checked="Mode_Checked" Margin="0,0,10,0"/>
+                            <RadioButton x:Name="RbMasivo" Content="Masivo (En Bloque)"
+                                         Style="{StaticResource ToggleButtonStyle}" Checked="Mode_Checked"/>
+                        </StackPanel>
+                    </StackPanel>
 
-                    <TextBlock Text="TELEFONO * (con codigo de pais, ej: 5491155555555)"
-                               Style="{StaticResource LabelCampoEstilo}"/>
-                    <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"/>
+                    <StackPanel x:Name="GridIndividual" Visibility="Visible">
+                        <TextBlock Text="SOCIO (opcional, pone numero externo si esta vacio)"
+                                   Style="{StaticResource LabelCampoEstilo}"/>
+                        <ComboBox x:Name="cmbSocio" BorderThickness="0"
+                                  Background="Transparent" Foreground="{StaticResource TextPrimary}"
+                                  VerticalContentAlignment="Center"
+                                  FontSize="13" Padding="10,0"
+                                  IsTextSearchEnabled="True"
+                                  DisplayMemberPath="TextoCombo"
+                                  SelectionChanged="cmbSocio_SelectionChanged"
+                                  Style="{StaticResource ComboBoxEstilo}">
+                            <ComboBox.Resources>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
+                            </ComboBox.Resources>
+                        </ComboBox>
 
-                    <TextBlock Text="PLANTILLA RAPIDA" Style="{StaticResource LabelCampoEstilo}"/>
+                        <TextBlock Text="TELEFONO * (con codigo de pais, ej: 5491155555555)"
+                                   Style="{StaticResource LabelCampoEstilo}"/>
+                        <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="GridMasivo" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <Button x:Name="BtnMarcarActivos" Content="SELECCIONAR ACTIVOS" Style="{StaticResource BotonVerdeStyle}" Click="BtnMarcarActivos_Click" Margin="0,0,10,0" Width="140"/>
+                            <Button x:Name="BtnDesmarcarTodos" Content="DESMARCAR TODOS" Style="{StaticResource BotonRojoStyle}" Click="BtnDesmarcarTodos_Click" Width="140"/>
+                        </StackPanel>
+
+                        <Border Background="{StaticResource Bg2}" CornerRadius="5" BorderBrush="{StaticResource Border2}" BorderThickness="1" Margin="0,15" Padding="8,5" Height="40">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="🔍" Foreground="{StaticResource TextMuted}" Margin="5,0,10,0" VerticalAlignment="Center"/>
+                                <TextBox x:Name="TxtBuscarSocioMasivo" Grid.Column="1" Background="Transparent" 
+                                         BorderThickness="0" Foreground="{StaticResource TextPrimary}" 
+                                         CaretBrush="{StaticResource GreenMain}" TextChanged="TxtBuscarSocioMasivo_TextChanged" Height="auto" Padding="0, 5"/>
+                            </Grid>
+                        </Border>
+
+                        <Border Background="{StaticResource Bg2}" BorderBrush="{StaticResource Border2}" BorderThickness="1" CornerRadius="8" Height="260">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <Border Grid.Row="0" Background="{StaticResource Bg3}" CornerRadius="8,8,0,0" BorderBrush="{StaticResource Border2}" BorderThickness="0,0,0,1">
+                                    <Grid Margin="14,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="30" SharedSizeGroup="ColCheck"/>
+                                            <ColumnDefinition Width="*" SharedSizeGroup="ColNombre"/>
+                                            <ColumnDefinition Width="120" SharedSizeGroup="ColTelefono"/>
+                                            <ColumnDefinition Width="100" SharedSizeGroup="ColEstado"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="SOCIO" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="TELEFONO" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="3" Text="ESTADO" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+
+                                <ScrollViewer x:Name="ScrollSociosMasivo" Grid.Row="1" VerticalScrollBarVisibility="Auto" PreviewMouseWheel="ScrollSociosMasivo_PreviewMouseWheel" Style="{StaticResource PanelScrollViewerStyle}">
+                                    <ListView x:Name="ListViewSociosMasivo" Background="Transparent" BorderThickness="0" Foreground="{StaticResource TextPrimary}" Grid.IsSharedSizeScope="True" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem">
+                                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                <Setter Property="Padding" Value="0"/>
+                                                <Setter Property="Margin" Value="0"/>
+                                                <Setter Property="BorderBrush" Value="{StaticResource Border1}"/>
+                                                <Setter Property="BorderThickness" Value="0,0,0,0.5"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="ListViewItem">
+                                                            <Border x:Name="bg" Background="Transparent" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                                                <ContentPresenter Margin="14,0" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter TargetName="bg" Property="Background" Value="{StaticResource Bg3}"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Height="38">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="30" SharedSizeGroup="ColCheck"/>
+                                                        <ColumnDefinition Width="150" SharedSizeGroup="ColNombre"/>
+                                                        <ColumnDefinition Width="125" SharedSizeGroup="ColTelefono"/>
+                                                        <ColumnDefinition Width="100" SharedSizeGroup="ColEstado"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected, Mode=TwoWay}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding NombreCompleto}" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding Telefono}" Foreground="{StaticResource TextMuted}" FontSize="12" VerticalAlignment="Center"/>
+                                                    <Border Grid.Column="3" Background="{StaticResource Bg4}" CornerRadius="4" Padding="8,3" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                        <TextBlock Text="{Binding EstadoMembresiaTexto}" Foreground="{StaticResource GreenMain}" FontSize="9" FontWeight="Bold"/>
+                                                    </Border>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock Text="PLANTILLA RAPIDA" Style="{StaticResource LabelCampoEstilo}" Margin="0, 10"/>
                     <WrapPanel Orientation="Horizontal" Margin="0,0,0,14">
                         <Button Content="👋 Bienvenida" Click="btnPlantilla_Click" Tag="bienvenida"
                                 Background="{StaticResource Bg4}" Foreground="{StaticResource TextMuted}"
@@ -118,7 +220,7 @@
                         <Button Content="🧹 Limpiar" Click="btnPlantilla_Click" Tag="limpiar"
                                 Background="{StaticResource Bg4}" Foreground="{StaticResource TextMuted}"
                                 BorderBrush="{StaticResource Border1}" BorderThickness="0.5"
-                                FontSize="11" Cursor="Hand" Padding="10,5">
+                                FontSize="11" Cursor="Hand" Padding="10,5" Height="25" Margin="0, 0, 6, 6">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}"
@@ -132,7 +234,7 @@
                         </Button>
                     </WrapPanel>
 
-                    <TextBlock Text="MENSAJE *" Style="{StaticResource LabelCampoEstilo}"/>
+                    <TextBlock Text="MENSAJE *" Style="{StaticResource LabelCampoEstilo}" Margin="0, 15"/>
                     <Border Background="{StaticResource Bg2}" CornerRadius="10"
                             BorderBrush="{StaticResource Border1}" BorderThickness="1.5" Margin="0,0,0,14">
                         <TextBox x:Name="txtMensaje" Background="Transparent"

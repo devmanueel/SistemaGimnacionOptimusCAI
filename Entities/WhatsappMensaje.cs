@@ -1,5 +1,7 @@
 ﻿// Entities/WhatsappMensaje.cs — C# 7.3
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Entities
 {
@@ -92,5 +94,50 @@ namespace Entities
         public int Errores { get; set; }
         public int EnviadosHoy { get; set; }
         public int EnviadosMes { get; set; }
+    }
+
+    public class SocioMasivoItem : INotifyPropertyChanged
+    {
+        public long Id { get; set; }
+        public string NombreCompleto { get; set; }
+        public string Telefono { get; set; }
+        public string EstadoMembresia { get; set; }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get { return _isSelected; }
+            set
+            {
+                if (_isSelected != value)
+                {
+                    _isSelected = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string EstadoMembresiaTexto
+        {
+            get
+            {
+                switch (EstadoMembresia)
+                {
+                    case "activa": return "ACTIVA";
+                    case "vencida": return "VENCIDA";
+                    case "cancelada": return "CANCELADA";
+                    case "suspendida": return "SUSPENDIDA";
+                    case "sin_membresia": return "SIN MEMBRESIA";
+                    default: return EstadoMembresia;
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

@@ -189,5 +189,45 @@ namespace Models.Dao
             }
             return new EstadisticasWhatsapp();
         }
+
+        public List<SocioMasivoItem> ListarSociosParaMasivo()
+        {
+            var lista = new List<SocioMasivoItem>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_ListarSociosParaWhatsappMasivo", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (var r = cmd.ExecuteReader())
+                        while (r.Read())
+                            lista.Add(new SocioMasivoItem
+                            {
+                                Id = Convert.ToInt64(r["id"]),
+                                NombreCompleto = r["nombre_completo"].ToString(),
+                                Telefono = r["telefono"].ToString(),
+                                EstadoMembresia = r["estado_membresia"].ToString()
+                            });
+                }
+            }
+            return lista;
+        }
+
+        public int InsertarMasivo(string socioIds, string mensaje, long? enviadoPor)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_InsertarWhatsappMensajeMasivo", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@SocioIds", socioIds);
+                    cmd.Parameters.AddWithValue("@Mensaje", mensaje);
+                    cmd.Parameters.AddWithValue("@EnviadoPor", (object)enviadoPor ?? DBNull.Value);
+                    var res = cmd.ExecuteScalar();
+                    return res != null ? Convert.ToInt32(res) : 0;
+                }
+            }
+        }
     }
 }
