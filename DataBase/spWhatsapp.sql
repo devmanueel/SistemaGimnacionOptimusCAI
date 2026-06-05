@@ -12,6 +12,8 @@ IF OBJECT_ID('sp_MarcarComoError',             'P') IS NOT NULL DROP PROCEDURE s
 IF OBJECT_ID('sp_EliminarWhatsappMensaje',     'P') IS NOT NULL DROP PROCEDURE sp_EliminarWhatsappMensaje;
 IF OBJECT_ID('sp_GenerarAvisosVencimiento',    'P') IS NOT NULL DROP PROCEDURE sp_GenerarAvisosVencimiento;
 IF OBJECT_ID('sp_EstadisticasWhatsapp',        'P') IS NOT NULL DROP PROCEDURE sp_EstadisticasWhatsapp;
+IF OBJECT_ID('sp_InsertarWhatsappMensajeMasivo','P') IS NOT NULL DROP PROCEDURE sp_InsertarWhatsappMensajeMasivo;
+IF OBJECT_ID('sp_ListarSociosParaWhatsappMasivo','P') IS NOT NULL DROP PROCEDURE sp_ListarSociosParaWhatsappMasivo;
 GO
 
 -- ─────────────────────────────────────────────────────────────
@@ -281,7 +283,81 @@ BEGIN
         (SELECT COUNT(*) FROM whatsapp_mensajes WHERE estado = 'error')                     AS errores,
         (SELECT COUNT(*) FROM whatsapp_mensajes
          WHERE estado = 'enviado' AND CAST(enviado_en AS DATE) = @Hoy)                       AS enviados_hoy,
-        (SELECT COUNT(*) FROM whatsapp_mensajes
+         (SELECT COUNT(*) FROM whatsapp_mensajes
          WHERE estado = 'enviado' AND CAST(enviado_en AS DATE) >= @PrimerDiaMes)             AS enviados_mes;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 10. LISTAR SOCIOS PARA WHATSAPP MASIVO
+--     Devuelve socios activos con membresia activa y telefono valido
+-- ─────────────────────────────────────────────────────────────
+CREATE PROCEDURE sp_ListarSociosParaWhatsappMasivo
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT DISTINCT
+        s.id,
+        s.nombre + ' ' + s.apellido AS nombre_completo,
+        s.telefono,
+        'activa' AS estado_membresia
+    FROM socios s
+    INNER JOIN membresias m ON m.socio_id = s.id
+    WHERE s.activo = 1
+      AND m.estado = 'activa'
+      AND s.telefono IS NOT NULL
+      AND LEN(s.telefono) >= 8
+    ORDER BY s.nombre + ' ' + s.apellido;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
+-- 11. INSERTAR WHATSAPP MENSAJE MASIVO
+--     Inserta un mensaje para cada socio en la lista (separado por comas)
+-- ─────────────────────────────────────────────────────────────
+CREATE PROCEDURE sp_InsertarWhatsappMensajeMasivo
+    @SocioIds    VARCHAR(MAX),
+    @Mensaje     NVARCHAR(MAX),
+    @EnviadoPor  BIGINT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF LEN(@Mensaje) < 1
+    BEGIN
+        RAISERROR('El mensaje no puede estar vacio.', 16, 1);
+        RETURN;
+    END
+
+    DECLARE @Insertados INT = 0;
+    DECLARE @SocioId BIGINT;
+    DECLARE @Telefono VARCHAR(20);
+
+    DECLARE cur CURSOR LOCAL FAST_FORWARD FOR
+        SELECT s.id, s.telefono
+        FROM socios s
+        WHERE s.id IN (SELECT value FROM STRING_SPLIT(@SocioIds, ','))
+          AND s.activo = 1
+          AND s.telefono IS NOT NULL
+          AND LEN(s.telefono) >= 8;
+
+    OPEN cur;
+    FETCH NEXT FROM cur INTO @SocioId, @Telefono;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        INSERT INTO whatsapp_mensajes
+            (tipo, disparador, socio_id, telefono, mensaje, estado, enviado_por)
+        VALUES
+            ('masivo', 'manual', @SocioId, @Telefono, @Mensaje, 'pendiente', @EnviadoPor);
+
+        SET @Insertados = @Insertados + 1;
+        FETCH NEXT FROM cur INTO @SocioId, @Telefono;
+    END
+
+    CLOSE cur; DEALLOCATE cur;
+
+    SELECT @Insertados AS insertados;
 END;
 GO

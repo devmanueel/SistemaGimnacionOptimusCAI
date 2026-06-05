@@ -651,3 +651,131 @@ DataBase\spInstructorAsistencias.sql
 ```
 DataBase\spInstructorAsistencias.sql
 ```
+
+---
+
+## 🔧 16. Envio Masivo de WhatsApp — Integracion Individual/Masivo (`03/06/2026`)
+
+### Problema
+La ventana de "Nuevo Mensaje" solo permitia crear mensajes individuales (un socio a la vez). No existia forma de enviar un mismo mensaje a multiples socios de forma masiva.
+
+### Solucion aplicada
+Se transformo la ventana `NuevoMensajeWindow` en un formulario unificado con selector de modo (Individual / Masivo):
+
+| Modo | Comportamiento |
+|------|---------------|
+| **Individual** | Muestra selector de socio, campo de telefono, plantillas rapidas. Comportamiento original intacto. |
+| **Masivo** | Muestra lista de socios con checkboxes, buscador interno, botones "Seleccionar Activos" y "Desmarcar Todos". |
+
+### Caracteristicas del modo Masivo
+
+| Feature | Detalle |
+|---------|---------|
+| Lista con header fijo | Columnas alineadas: Check, Socio, Telefono, Estado |
+| Scroll con rueda del mouse | `PreviewMouseWheel` handler en el ScrollViewer |
+| Buscador en tiempo real | Filtra por nombre o telefono |
+| Seleccionar Activos | Marca solo socios con membresia activa |
+| Desmarcar Todos | Limpia todas las selecciones sin re-renderizar |
+| Plantillas compartidas | 👋 Bienvenida y 🎂 Cumpleaños visibles en ambos modos (genericas en masivo) |
+| Solo socios activos | El SP filtra socios con `activo = 1` y `membresia.estado = 'activa'` |
+
+### Archivos modificados/creados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\spWhatsapp.sql` | **2 SPs nuevos**: `sp_ListarSociosParaWhatsappMasivo`, `sp_InsertarWhatsappMensajeMasivo` |
+| `Entities\WhatsappMensaje.cs` | **Nueva clase**: `SocioMasivoItem` (con `INotifyPropertyChanged` para binding de checkboxes) |
+| `Models\DAO\WhatsappDao.cs` | Nuevos metodos: `ListarSociosParaMasivo()`, `InsertarMasivo()` |
+| `Controllers\WhatsappController.cs` | Nuevos metodos: `ListarSociosParaMasivo()`, `InsertarMasivo()` (con validaciones) |
+| `Ventanas\NuevoMensajeWindow.xaml` | Selector de modo (RadioButtons), paneles GridIndividual/GridMasivo, lista con SharedSizeGroup |
+| `Ventanas\NuevoMensajeWindow.xaml.cs` | Logica de intercambio de modos, `GuardarMasivo()`, busqueda, scroll fix |
+| `MiDiccionario.xaml` | **3 estilos nuevos**: `ToggleButtonStyle`, `BotonVerdeStyle`, `BotonRojoStyle` |
+| `packages.config` | Agregado `BouncyCastle` 1.8.9 (dependencia de iTextSharp faltante) |
+
+### SPs a ejecutar
+
+```
+DataBase\spWhatsapp.sql
+```
+
+Este archivo agrega los 2 nuevos SPs sin afectar los existentes. Ejecutar desde SQL Server Object Explorer sobre `DB_CAI_Optimus.mdf`.
+
+### Nota sobre BouncyCastle
+
+Se agrego `BouncyCastle` 1.8.9 al `packages.config` para que `nuget restore` descargue la dependencia de iTextSharp que faltaba. Sin esto, la exportacion a PDF crashea en maquinas que no tienen la carpeta `packages\BouncyCastle.1.8.9\` preexistente.
+
+```xml
+<package id="BouncyCastle" version="1.8.9" targetFramework="net472" />
+```
+
+Despues de agregarlo, ejecutar:
+```
+nuget restore SistemaGimnacionOptimusCAI.sln
+```
+
+---
+
+## 17. Notificaciones de membresias por vencer en Dashboard (`05/06/2026`)
+
+### Objetivo
+Agregar un aviso operativo al iniciar sesion para detectar socios con membresias proximas a vencer y permitir contacto rapido por WhatsApp Web.
+
+### Solucion aplicada
+Se agrego un modulo liviano de notificaciones de membresias por vencer, respetando la arquitectura del sistema:
+
+| Capa | Implementacion |
+|------|----------------|
+| SP | `sp_ObtenerNotificacionesMembresiasPorVencer` en `DataBase\spMembresias.sql` |
+| Entity | `Entities\NotificacionMembresia.cs` |
+| DAO | `Models\DAO\NotificacionMembresiaDao.cs` |
+| Controller | `Controllers\NotificacionMembresiaController.cs` |
+| UI | `Paginas\DashboardPage.xaml` y `Paginas\DashboardPage.xaml.cs` |
+
+### Comportamiento
+- Al cargar el Dashboard despues del login, se consultan membresias activas que vencen entre hoy y los proximos 7 dias.
+- Las alertas se muestran en el panel derecho `PROXIMOS VENCIMIENTOS`.
+- Cada alerta muestra socio, numero de socio, actividad, fecha de vencimiento y estado del vencimiento.
+- El boton `Abrir en WhatsApp` abre WhatsApp Web con un mensaje personalizado usando:
+  - nombre del socio
+  - numero de socio
+  - actividad
+  - fecha de vencimiento
+- El panel de vencimientos quedo con alto fijo y scroll interno para no achicar la seccion `ACCESOS RAPIDOS`.
+- El boton usa el estilo existente `BotonVerdeStyle` definido en `MiDiccionario.xaml`.
+
+### Archivos modificados/creados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\spMembresias.sql` | Nuevo SP `sp_ObtenerNotificacionesMembresiasPorVencer` |
+| `Entities\NotificacionMembresia.cs` | Nueva entidad para representar la alerta |
+| `Entities\Entities.csproj` | Inclusion de la nueva entidad |
+| `Models\DAO\NotificacionMembresiaDao.cs` | Nuevo DAO que consume el SP |
+| `Models\Models.csproj` | Inclusion del nuevo DAO |
+| `Controllers\NotificacionMembresiaController.cs` | Nuevo controller con logica de consulta y armado de URL WhatsApp |
+| `Controllers\Controllers.csproj` | Inclusion del nuevo controller |
+| `Paginas\DashboardPage.xaml` | Ajuste del panel derecho: vencimientos con alto fijo y scroll interno |
+| `Paginas\DashboardPage.xaml.cs` | Carga de alertas, render de cards y apertura de WhatsApp Web |
+
+### SPs a ejecutar
+
+Para evitar errores de base de datos, ejecutar:
+
+```
+DataBase\spMembresias.sql
+```
+
+Ese script crea/actualiza el SP:
+
+```
+sp_ObtenerNotificacionesMembresiasPorVencer
+```
+
+### Importante
+Si la base ya tiene los scripts anteriores aplicados, no hace falta recrear tablas. Solo ejecutar `DataBase\spMembresias.sql` sobre la base `DB_CAI_Optimus.mdf` en `(LocalDB)\MSSQLLocalDB`.
+
+Si tambien se va a usar el modulo completo de WhatsApp, verificar que ya este ejecutado:
+
+```
+DataBase\spWhatsapp.sql
+```

@@ -70,6 +70,7 @@
     <Compile Include="FichaMedicaController.cs" />
     <Compile Include="InstructorAsistenciaController.cs" />
     <Compile Include="MembresiaController.cs" />
+    <Compile Include="NotificacionMembresiaController.cs" />
     <Compile Include="ProductoController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RutinaController.cs" />

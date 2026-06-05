@@ -82,6 +82,47 @@ BEGIN
 END;
 GO
 
+IF OBJECT_ID('sp_ObtenerNotificacionesMembresiasPorVencer', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ObtenerNotificacionesMembresiasPorVencer;
+GO
+CREATE PROCEDURE sp_ObtenerNotificacionesMembresiasPorVencer
+    @DiasAntes INT = 7
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @DiasAntes < 0 SET @DiasAntes = 0;
+    IF @DiasAntes > 30 SET @DiasAntes = 30;
+
+    DECLARE @Hoy DATE = CAST(GETDATE() AS DATE);
+    DECLARE @Limite DATE = DATEADD(DAY, @DiasAntes, @Hoy);
+
+    UPDATE membresias
+    SET estado = 'vencida',
+        actualizado_en = GETDATE()
+    WHERE estado = 'activa'
+      AND fecha_vencimiento < @Hoy;
+
+    SELECT
+        m.id AS membresia_id,
+        s.id AS socio_id,
+        s.numero_socio,
+        s.nombre + ' ' + s.apellido AS socio_nombre,
+        s.telefono,
+        a.nombre AS actividad_nombre,
+        m.fecha_vencimiento,
+        DATEDIFF(DAY, @Hoy, m.fecha_vencimiento) AS dias_para_vencer
+    FROM membresias m
+    INNER JOIN socios s ON s.id = m.socio_id
+    INNER JOIN actividades a ON a.id = m.actividad_id
+    WHERE m.estado = 'activa'
+      AND m.fecha_vencimiento BETWEEN @Hoy AND @Limite
+      AND s.activo = 1
+      AND s.eliminado_en IS NULL
+    ORDER BY m.fecha_vencimiento ASC, s.apellido ASC, s.nombre ASC;
+END;
+GO
+
 -- ─────────────────────────────────────────────────────────────
 -- 2. OBTENER TODAS
 -- ─────────────────────────────────────────────────────────────
