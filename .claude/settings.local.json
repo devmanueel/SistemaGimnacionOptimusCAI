@@ -67,7 +67,8 @@
       "PowerShell('====== NuevaMembresiaWindow.xaml.cs ======')",
       "PowerShell('====== RenovarMembresiaWindow.xaml.cs ======')",
       "PowerShell(\\(Get-Content 'C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI\\\\Paginas\\\\AsistenciasPage.xaml.cs' -Encoding UTF8\\).Count)",
-      "PowerShell(\"probe build status\")"
+      "PowerShell(\"probe build status\")",
+      "PowerShell(& \"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\MSBuild.exe\" \"C:\\\\Users\\\\USUARIO\\\\Desktop\\\\lpoo2\\\\Proyectos\\\\SistemaGimnacionOptimusCAI\\\\SistemaGimnacionOptimusCAI.sln\" /t:Build /p:Configuration=Debug /p:Platform=x86 /v:minimal /nologo /m)"
     ]
   }
 }

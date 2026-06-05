@@ -166,6 +166,7 @@ namespace Entities
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public string Dni { get; set; }
+        public string Telefono { get; set; }
 
         /// <summary>"#0042 — Pérez, Juan (DNI 12345678)" — para mostrar en el combo.</summary>
         public string TextoCombo

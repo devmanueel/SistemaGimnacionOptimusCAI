@@ -290,7 +290,8 @@ namespace Models.Dao
                                 NumeroSocio = Convert.ToInt32(reader["numero_socio"]),
                                 Nombre = reader["nombre"].ToString(),
                                 Apellido = reader["apellido"].ToString(),
-                                Dni = reader["dni"].ToString()
+                                Dni = reader["dni"].ToString(),
+                                Telefono = reader["telefono"] != DBNull.Value ? reader["telefono"].ToString() : string.Empty
                             });
                 }
             }
