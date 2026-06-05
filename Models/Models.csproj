@@ -70,6 +70,7 @@
     <Compile Include="DAO\FichaMedicaDao.cs" />
     <Compile Include="DAO\InstructorAsistenciaDao.cs" />
     <Compile Include="DAO\MembresiaDao.cs" />
+    <Compile Include="DAO\NotificacionMembresiaDao.cs" />
     <Compile Include="DAO\ProductoDao.cs" />
     <Compile Include="DAO\RutinaDao.cs" />
     <Compile Include="DAO\SocioDao.cs" />

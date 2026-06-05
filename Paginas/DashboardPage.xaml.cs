@@ -1,6 +1,9 @@
 ﻿using Controllers;
 using Entities;
+using SistemaGimnacionOptimusCAI.Helpers;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Windows;
@@ -16,6 +19,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
     {
         private readonly AsistenciaController _asistenciaCtrl = new AsistenciaController();
         private readonly InstructorAsistenciaController _instructorCtrl = new InstructorAsistenciaController();
+        private readonly NotificacionMembresiaController _notificacionCtrl = new NotificacionMembresiaController();
 
         private DispatcherTimer _timerOcultar;
         private int _versionResultado;
@@ -30,6 +34,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             CargarDatosUsuario();
             CargarFecha();
+            CargarAlertasMembresias();
             txtDni.Focus();
         }
 
@@ -55,6 +60,136 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CultureInfo cultura = new CultureInfo("es-AR");
             string fecha = DateTime.Today.ToString("dddd, d 'de' MMMM 'de' yyyy", cultura);
             lblFechaHoy.Text = char.ToUpper(fecha[0]) + fecha.Substring(1);
+        }
+
+        private void CargarAlertasMembresias()
+        {
+            panelVencimientos.Children.Clear();
+
+            try
+            {
+                List<NotificacionMembresia> alertas = _notificacionCtrl.ObtenerMembresiasPorVencer(7);
+
+                if (alertas.Count == 0)
+                {
+                    panelVencimientos.Children.Add(CrearTextoPanel("No hay membresias por vencer.", 12, true));
+                    return;
+                }
+
+                foreach (NotificacionMembresia alerta in alertas)
+                {
+                    panelVencimientos.Children.Add(CrearCardAlerta(alerta));
+                }
+            }
+            catch (Exception ex)
+            {
+                panelVencimientos.Children.Add(CrearTextoPanel("No se pudieron cargar alertas.", 12, true));
+                panelVencimientos.Children.Add(CrearTextoPanel(ex.Message, 10, false));
+            }
+        }
+
+        private TextBlock CrearTextoPanel(string texto, double fontSize, bool centrado)
+        {
+            return new TextBlock
+            {
+                Text = texto,
+                FontSize = fontSize,
+                Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 204)),
+                TextWrapping = TextWrapping.Wrap,
+                TextAlignment = centrado ? TextAlignment.Center : TextAlignment.Left,
+                HorizontalAlignment = centrado ? HorizontalAlignment.Center : HorizontalAlignment.Stretch,
+                Margin = new Thickness(4, 8, 4, 4)
+            };
+        }
+
+        private Border CrearCardAlerta(NotificacionMembresia alerta)
+        {
+            var card = new Border
+            {
+                Background = new SolidColorBrush(Color.FromRgb(18, 24, 22)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(52, 64, 58)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(10, 8, 10, 8),
+                Margin = new Thickness(0, 0, 0, 6)
+            };
+
+            var stack = new StackPanel();
+            var header = new DockPanel { LastChildFill = true };
+            var estado = new TextBlock
+            {
+                Text = alerta.EstadoVencimientoTexto,
+                FontSize = 10,
+                FontWeight = FontWeights.Bold,
+                Foreground = alerta.DiasParaVencer <= 1
+                    ? new SolidColorBrush(Color.FromRgb(255, 179, 0))
+                    : new SolidColorBrush(Color.FromRgb(212, 131, 10)),
+                Margin = new Thickness(0, 0, 0, 2)
+            };
+
+            DockPanel.SetDock(estado, Dock.Right);
+            header.Children.Add(estado);
+            header.Children.Add(new TextBlock
+            {
+                Text = alerta.SocioNombre,
+                FontSize = 12,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Color.FromRgb(245, 245, 250)),
+                TextTrimming = TextTrimming.CharacterEllipsis
+            });
+            stack.Children.Add(header);
+
+            stack.Children.Add(new TextBlock
+            {
+                Text = alerta.NumeroSocioTexto + " - " + alerta.ActividadNombre,
+                FontSize = 10,
+                Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 204)),
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                Margin = new Thickness(0, 2, 0, 0)
+            });
+
+            stack.Children.Add(new TextBlock
+            {
+                Text = "Vencimiento: " + alerta.FechaVencimientoTexto,
+                FontSize = 10,
+                Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 204)),
+                Margin = new Thickness(0, 2, 0, 8)
+            });
+
+            var boton = new Button
+            {
+                Content = "Abrir en WhatsApp",
+                Style = TryFindResource("BotonVerdeStyle") as Style,
+                Height = 28,
+                FontSize = 11,
+                Tag = alerta,
+                IsEnabled = !string.IsNullOrWhiteSpace(alerta.Telefono),
+                ToolTip = string.IsNullOrWhiteSpace(alerta.Telefono)
+                    ? "El socio no tiene telefono cargado"
+                    : "Abrir WhatsApp Web con mensaje personalizado"
+            };
+            boton.Click += btnWhatsappAlerta_Click;
+            stack.Children.Add(boton);
+
+            card.Child = stack;
+            return card;
+        }
+
+        private void btnWhatsappAlerta_Click(object sender, RoutedEventArgs e)
+        {
+            var boton = sender as Button;
+            var alerta = boton != null ? boton.Tag as NotificacionMembresia : null;
+            if (alerta == null) return;
+
+            try
+            {
+                string url = _notificacionCtrl.ConstruirUrlWhatsapp(alerta);
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError("No se pudo abrir WhatsApp Web.\n" + ex.Message);
+            }
         }
 
         private void txtDni_PreviewKeyDown(object sender, KeyEventArgs e)

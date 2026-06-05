@@ -712,3 +712,70 @@ Despues de agregarlo, ejecutar:
 ```
 nuget restore SistemaGimnacionOptimusCAI.sln
 ```
+
+---
+
+## 17. Notificaciones de membresias por vencer en Dashboard (`05/06/2026`)
+
+### Objetivo
+Agregar un aviso operativo al iniciar sesion para detectar socios con membresias proximas a vencer y permitir contacto rapido por WhatsApp Web.
+
+### Solucion aplicada
+Se agrego un modulo liviano de notificaciones de membresias por vencer, respetando la arquitectura del sistema:
+
+| Capa | Implementacion |
+|------|----------------|
+| SP | `sp_ObtenerNotificacionesMembresiasPorVencer` en `DataBase\spMembresias.sql` |
+| Entity | `Entities\NotificacionMembresia.cs` |
+| DAO | `Models\DAO\NotificacionMembresiaDao.cs` |
+| Controller | `Controllers\NotificacionMembresiaController.cs` |
+| UI | `Paginas\DashboardPage.xaml` y `Paginas\DashboardPage.xaml.cs` |
+
+### Comportamiento
+- Al cargar el Dashboard despues del login, se consultan membresias activas que vencen entre hoy y los proximos 7 dias.
+- Las alertas se muestran en el panel derecho `PROXIMOS VENCIMIENTOS`.
+- Cada alerta muestra socio, numero de socio, actividad, fecha de vencimiento y estado del vencimiento.
+- El boton `Abrir en WhatsApp` abre WhatsApp Web con un mensaje personalizado usando:
+  - nombre del socio
+  - numero de socio
+  - actividad
+  - fecha de vencimiento
+- El panel de vencimientos quedo con alto fijo y scroll interno para no achicar la seccion `ACCESOS RAPIDOS`.
+- El boton usa el estilo existente `BotonVerdeStyle` definido en `MiDiccionario.xaml`.
+
+### Archivos modificados/creados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\spMembresias.sql` | Nuevo SP `sp_ObtenerNotificacionesMembresiasPorVencer` |
+| `Entities\NotificacionMembresia.cs` | Nueva entidad para representar la alerta |
+| `Entities\Entities.csproj` | Inclusion de la nueva entidad |
+| `Models\DAO\NotificacionMembresiaDao.cs` | Nuevo DAO que consume el SP |
+| `Models\Models.csproj` | Inclusion del nuevo DAO |
+| `Controllers\NotificacionMembresiaController.cs` | Nuevo controller con logica de consulta y armado de URL WhatsApp |
+| `Controllers\Controllers.csproj` | Inclusion del nuevo controller |
+| `Paginas\DashboardPage.xaml` | Ajuste del panel derecho: vencimientos con alto fijo y scroll interno |
+| `Paginas\DashboardPage.xaml.cs` | Carga de alertas, render de cards y apertura de WhatsApp Web |
+
+### SPs a ejecutar
+
+Para evitar errores de base de datos, ejecutar:
+
+```
+DataBase\spMembresias.sql
+```
+
+Ese script crea/actualiza el SP:
+
+```
+sp_ObtenerNotificacionesMembresiasPorVencer
+```
+
+### Importante
+Si la base ya tiene los scripts anteriores aplicados, no hace falta recrear tablas. Solo ejecutar `DataBase\spMembresias.sql` sobre la base `DB_CAI_Optimus.mdf` en `(LocalDB)\MSSQLLocalDB`.
+
+Si tambien se va a usar el modulo completo de WhatsApp, verificar que ya este ejecutado:
+
+```
+DataBase\spWhatsapp.sql
+```
