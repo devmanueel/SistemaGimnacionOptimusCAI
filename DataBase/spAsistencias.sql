@@ -349,7 +349,24 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- 1. Buscar en socios
+    -- 1. Buscar PRIMERO en usuarios (instructor = rol_id = 2).
+    --    Regla de negocio: un docente no puede ser socio. Si el DNI
+    --    pertenece a un instructor activo, siempre registra asistencia
+    --    como docente, aunque exista un socio con el mismo DNI.
+    IF EXISTS (SELECT 1 FROM usuarios WHERE dni = @Dni AND rol_id = 2 AND activo = 1 AND eliminado_en IS NULL)
+    BEGIN
+        SELECT 'instructor' AS tipo,
+               id,
+               nombre,
+               apellido,
+               foto,
+               dni
+        FROM usuarios
+        WHERE dni = @Dni AND rol_id = 2 AND activo = 1 AND eliminado_en IS NULL;
+        RETURN;
+    END
+
+    -- 2. Buscar en socios
     IF EXISTS (SELECT 1 FROM socios WHERE dni = @Dni AND eliminado_en IS NULL)
     BEGIN
         SELECT 'socio' AS tipo,
@@ -360,20 +377,6 @@ BEGIN
                dni
         FROM socios
         WHERE dni = @Dni AND eliminado_en IS NULL;
-        RETURN;
-    END
-
-    -- 2. Buscar en usuarios (instructor = rol_id = 2)
-    IF EXISTS (SELECT 1 FROM usuarios WHERE dni = @Dni AND rol_id = 2 AND activo = 1 AND eliminado_en IS NULL)
-    BEGIN
-        SELECT 'instructor' AS tipo,
-               id,
-               nombre,
-               apellido,
-               foto,
-               dni
-        FROM usuarios
-        WHERE dni = @Dni AND activo = 1 AND eliminado_en IS NULL;
         RETURN;
     END
 
