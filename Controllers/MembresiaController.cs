@@ -328,8 +328,8 @@ namespace Controllers
                     throw new Exception("Esta membresía ya tuvo un upgrade. Solo se permite uno por membresía.");
                 if (ex.Message.Contains("categoría"))
                     throw new Exception("Solo se puede hacer upgrade dentro de la misma categoría.");
-                if (ex.Message.Contains("nivel superior"))
-                    throw new Exception("Solo se permite upgrade a una actividad de nivel superior.");
+                if (ex.Message.Contains("plan superior"))
+                    throw new Exception("Solo se permite upgrade a una actividad de plan superior.");
                 throw new Exception("Error al ejecutar el upgrade.\n" + ex.Message);
             }
         }

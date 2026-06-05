@@ -1,13 +1,16 @@
-﻿-- ============================================================
---  STORED PROCEDURES — TABLA actividades
---  Sistema Gimnasio OptimusCAI · SQL Server / LocalDB
+-- ============================================================
+--  STORED PROCEDURES - TABLA actividades
+--  Sistema Gimnasio OptimusCAI - SQL Server / LocalDB
 -- ============================================================
 
--- 1. OBTENER TODAS (con cantidad de socios activos en cada una)
-CREATE OR ALTER PROCEDURE sp_ObtenerActividades
+IF OBJECT_ID('sp_ObtenerActividades', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ObtenerActividades;
+GO
+CREATE PROCEDURE sp_ObtenerActividades
 AS
 BEGIN
     SET NOCOUNT ON;
+
     SELECT a.id, a.nombre, a.tipo, a.dias_sesiones, a.dias_semana,
            a.precio, a.activo, a.creado_en,
            (SELECT COUNT(DISTINCT m.socio_id) FROM membresias m
@@ -17,11 +20,14 @@ BEGIN
 END;
 GO
 
--- 1b. OBTENER SOLO ACTIVAS (para combos/filtros)
-CREATE OR ALTER PROCEDURE sp_ObtenerActividadesActivas
+IF OBJECT_ID('sp_ObtenerActividadesActivas', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ObtenerActividadesActivas;
+GO
+CREATE PROCEDURE sp_ObtenerActividadesActivas
 AS
 BEGIN
     SET NOCOUNT ON;
+
     SELECT a.id, a.nombre, a.tipo, a.dias_sesiones, a.dias_semana,
            a.precio, a.activo, a.creado_en,
            (SELECT COUNT(DISTINCT m.socio_id) FROM membresias m
@@ -32,12 +38,15 @@ BEGIN
 END;
 GO
 
--- 2. OBTENER POR ID
-CREATE OR ALTER PROCEDURE sp_ObtenerActividadPorId
+IF OBJECT_ID('sp_ObtenerActividadPorId', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ObtenerActividadPorId;
+GO
+CREATE PROCEDURE sp_ObtenerActividadPorId
     @Id BIGINT
 AS
 BEGIN
     SET NOCOUNT ON;
+
     SELECT a.id, a.nombre, a.tipo, a.dias_sesiones, a.dias_semana,
            a.precio, a.activo, a.creado_en,
            (SELECT COUNT(DISTINCT m.socio_id) FROM membresias m
@@ -47,13 +56,16 @@ BEGIN
 END;
 GO
 
--- 3. BUSCAR (texto + filtro estado)
-CREATE OR ALTER PROCEDURE sp_BuscarActividades
+IF OBJECT_ID('sp_BuscarActividades', 'P') IS NOT NULL
+    DROP PROCEDURE sp_BuscarActividades;
+GO
+CREATE PROCEDURE sp_BuscarActividades
     @Texto        NVARCHAR(100) = '',
     @FiltroEstado VARCHAR(20)   = 'todos'
 AS
 BEGIN
     SET NOCOUNT ON;
+
     SELECT a.id, a.nombre, a.tipo, a.dias_sesiones, a.dias_semana,
            a.precio, a.activo, a.creado_en,
            (SELECT COUNT(DISTINCT m.socio_id) FROM membresias m
@@ -67,8 +79,10 @@ BEGIN
 END;
 GO
 
--- 4. INSERTAR (retorna ID o -1 si nombre duplicado)
-CREATE OR ALTER PROCEDURE sp_InsertarActividad
+IF OBJECT_ID('sp_InsertarActividad', 'P') IS NOT NULL
+    DROP PROCEDURE sp_InsertarActividad;
+GO
+CREATE PROCEDURE sp_InsertarActividad
     @Nombre       NVARCHAR(150),
     @Tipo         VARCHAR(30),
     @DiasSesiones TINYINT,
@@ -77,17 +91,26 @@ CREATE OR ALTER PROCEDURE sp_InsertarActividad
 AS
 BEGIN
     SET NOCOUNT ON;
-    IF EXISTS (SELECT 1 FROM actividades WHERE nombre = @Nombre)
-    BEGIN SELECT -1 AS id; RETURN; END
 
-    INSERT INTO actividades (nombre, tipo, dias_sesiones, dias_semana, precio, activo)
-    VALUES (@Nombre, @Tipo, @DiasSesiones, @DiasSemana, @Precio, 1);
+    IF EXISTS (SELECT 1 FROM actividades WHERE nombre = @Nombre)
+    BEGIN
+        SELECT -1 AS id;
+        RETURN;
+    END
+
+    INSERT INTO actividades
+        (nombre, tipo, dias_sesiones, dias_semana, precio, activo)
+    VALUES
+        (@Nombre, @Tipo, @DiasSesiones, @DiasSemana, @Precio, 1);
+
     SELECT SCOPE_IDENTITY() AS id;
 END;
 GO
 
--- 5. MODIFICAR
-CREATE OR ALTER PROCEDURE sp_ModificarActividad
+IF OBJECT_ID('sp_ModificarActividad', 'P') IS NOT NULL
+    DROP PROCEDURE sp_ModificarActividad;
+GO
+CREATE PROCEDURE sp_ModificarActividad
     @Id           BIGINT,
     @Nombre       NVARCHAR(150),
     @Tipo         VARCHAR(30),
@@ -97,42 +120,56 @@ CREATE OR ALTER PROCEDURE sp_ModificarActividad
 AS
 BEGIN
     SET NOCOUNT ON;
-    IF EXISTS (SELECT 1 FROM actividades WHERE nombre = @Nombre AND id <> @Id)
-    BEGIN RAISERROR('Ya existe otra actividad con ese nombre.', 16, 1); RETURN; END
 
-    UPDATE actividades SET nombre = @Nombre, tipo = @Tipo,
-        dias_sesiones = @DiasSesiones, dias_semana = @DiasSemana, precio = @Precio
+    IF EXISTS (SELECT 1 FROM actividades WHERE nombre = @Nombre AND id <> @Id)
+    BEGIN
+        RAISERROR('Ya existe otra actividad con ese nombre.', 16, 1);
+        RETURN;
+    END
+
+    UPDATE actividades
+    SET nombre = @Nombre,
+        tipo = @Tipo,
+        dias_sesiones = @DiasSesiones,
+        dias_semana = @DiasSemana,
+        precio = @Precio
     WHERE id = @Id;
+
     SELECT @@ROWCOUNT AS filas_afectadas;
 END;
 GO
 
--- 6. CAMBIAR ESTADO
-CREATE OR ALTER PROCEDURE sp_CambiarEstadoActividad
-    @Id BIGINT, @Activo BIT
+IF OBJECT_ID('sp_CambiarEstadoActividad', 'P') IS NOT NULL
+    DROP PROCEDURE sp_CambiarEstadoActividad;
+GO
+CREATE PROCEDURE sp_CambiarEstadoActividad
+    @Id BIGINT,
+    @Activo BIT
 AS
 BEGIN
     SET NOCOUNT ON;
+
     UPDATE actividades SET activo = @Activo WHERE id = @Id;
     SELECT @@ROWCOUNT AS filas_afectadas;
 END;
 GO
 
--- 7. ELIMINAR (solo si no tiene membresías)
-CREATE OR ALTER PROCEDURE sp_EliminarActividad
+IF OBJECT_ID('sp_EliminarActividad', 'P') IS NOT NULL
+    DROP PROCEDURE sp_EliminarActividad;
+GO
+CREATE PROCEDURE sp_EliminarActividad
     @Id BIGINT
 AS
 BEGIN
     SET NOCOUNT ON;
+
     IF EXISTS (SELECT 1 FROM membresias WHERE actividad_id = @Id)
     BEGIN
-        RAISERROR('No se puede eliminar: tiene membresías asociadas. Desactivala en su lugar.', 16, 1);
+        RAISERROR('No se puede eliminar: tiene membresias asociadas. Desactivala en su lugar.', 16, 1);
         RETURN;
     END
+
     DELETE FROM actividades WHERE id = @Id;
     SELECT @@ROWCOUNT AS filas_afectadas;
 END;
-GO
-
-EXEC sp_ObtenerActividades;
 GO
