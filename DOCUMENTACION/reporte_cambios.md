@@ -779,3 +779,40 @@ Si tambien se va a usar el modulo completo de WhatsApp, verificar que ya este ej
 ```
 DataBase\spWhatsapp.sql
 ```
+
+---
+
+## 18. Resumen final de cambios recientes
+
+### Mini resumen
+- Se agregaron notificaciones de membresias por vencer en el Dashboard.
+- Se incorporo el boton para abrir WhatsApp Web con mensaje personalizado.
+- Se dejo la asistencia usando `dias_sesiones` como base del limite semanal.
+- Se adapto el upgrade para que use `categoria` + `dias_sesiones` y ya no dependa de `nivel`.
+
+### SPs que se deben ejecutar
+Ejecutar estos scripts sobre la base `DB_CAI_Optimus.mdf` para dejar el sistema alineado con los cambios actuales:
+
+```
+DataBase\script tablas.sql
+DataBase\spSocios.sql
+DataBase\spActividades.sql
+DataBase\spAsistencias.sql
+DataBase\spMembresias.sql
+DataBase\sp_ListarSociosConMembresias.sql
+DataBase\spInstructorAsistencias.sql
+DataBase\spWhatsapp.sql
+DataBase\spActualizarActividadesCategoriaNivel.sql
+```
+
+Si ya tenes la base creada y solo queres aplicar las ultimas correcciones, al menos ejecuta:
+
+```
+DataBase\spActividades.sql
+DataBase\spAsistencias.sql
+DataBase\spMembresias.sql
+DataBase\sp_ListarSociosConMembresias.sql
+DataBase\spInstructorAsistencias.sql
+DataBase\spWhatsapp.sql
+DataBase\spActualizarActividadesCategoriaNivel.sql
+```

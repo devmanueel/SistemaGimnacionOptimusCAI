@@ -89,7 +89,7 @@ BEGIN
         m.upgrade_realizado,
         a.nombre                                    AS actividad_nombre,
         a.categoria                                 AS actividad_categoria,
-        a.nivel                                     AS actividad_nivel,
+        a.dias_sesiones                             AS actividad_nivel,
         ISNULL(u.nombre + ' ' + u.apellido, 'Sin asignar') AS instructor_nombre,
         DATEDIFF(DAY, CAST(GETDATE() AS DATE), m.fecha_vencimiento) AS dias_para_vencer,
         (SELECT MAX(ra.accedido_en)

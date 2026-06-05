@@ -115,8 +115,8 @@ BEGIN
         @ActividadNom = a.nombre,
         @DiasSemana   = a.dias_semana,
         @VencActual   = m.fecha_vencimiento,
-        @LimiteTotal  = a.limite_total,
-        @LimiteSemana = a.limite_por_semana
+        @LimiteTotal  = CASE WHEN a.tipo = 'mensual_con_clases' THEN a.dias_sesiones ELSE NULL END,
+        @LimiteSemana = CASE WHEN a.tipo = 'mensual' THEN a.dias_sesiones ELSE NULL END
     FROM membresias m
     INNER JOIN actividades a ON a.id = m.actividad_id
     WHERE m.id = @MembresiaId AND m.socio_id = @SocioId AND m.estado = 'activa';
@@ -391,37 +391,8 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
--- 4. COLUMNAS DE LÍMITES (si no existen)
+-- 4. AJUSTE DE CHECK CONSTRAINT DE RESULTADO
 -- ─────────────────────────────────────────────────────────────
-IF NOT EXISTS (
-    SELECT 1 FROM sys.columns
-    WHERE object_id = OBJECT_ID('actividades') AND name = 'limite_por_semana'
-)
-    ALTER TABLE actividades ADD limite_por_semana TINYINT NULL;
-GO
-
-IF NOT EXISTS (
-    SELECT 1 FROM sys.columns
-    WHERE object_id = OBJECT_ID('actividades') AND name = 'limite_total'
-)
-    ALTER TABLE actividades ADD limite_total TINYINT NULL;
-GO
-
--- Cargar valores según cada actividad (ajustar nombres si difieren)
--- Gimnasio
-UPDATE actividades SET limite_por_semana = 2,    limite_total = NULL WHERE nombre = 'Gimnasio 2 Veces Por Semana';
-UPDATE actividades SET limite_por_semana = 3,    limite_total = NULL WHERE nombre = 'Gimnasio 3 Veces Por Semana';
-UPDATE actividades SET limite_por_semana = NULL, limite_total = NULL WHERE nombre = 'Gimnasio Todos Los Dias';
--- Boxeo
-UPDATE actividades SET limite_por_semana = 2,    limite_total = NULL WHERE nombre = 'Boxeo Cai 2 Vxs';
-UPDATE actividades SET limite_por_semana = 3,    limite_total = NULL WHERE nombre = 'Boxeo Cai 3 Vxs';
-UPDATE actividades SET limite_por_semana = NULL, limite_total = NULL WHERE nombre = 'Boxeo Todos Los Dias';
--- Deportistas
-UPDATE actividades SET limite_por_semana = 2,    limite_total = NULL WHERE nombre = 'Deportistas Cai';
-UPDATE actividades SET limite_por_semana = 3,    limite_total = NULL WHERE nombre = 'Deportistas Cai 3 Vxs';
-UPDATE actividades SET limite_por_semana = NULL, limite_total = NULL WHERE nombre = 'Deportistas Cai Todos Los Dias';
-GO
-
 -- Eliminar cualquier CHECK constraint existente sobre la columna resultado
 DECLARE @ck NVARCHAR(200);
 SELECT @ck = cc.name
