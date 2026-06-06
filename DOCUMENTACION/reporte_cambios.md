@@ -846,3 +846,86 @@ Ejecutar nuevamente:
 ```
 DataBase\spMembresias.sql
 ```
+
+---
+
+## 20. Correcciones recientes en Socios y Membresias
+
+### Mini resumen
+- Se agrego la validacion de edad minima para crear socios: por ahora solo se permiten socios mayores de 6 anios.
+- La validacion se aplica al presionar `Siguiente` en la ventana emergente `Nuevo Socio`.
+- Tambien se dejo la misma regla en el formulario embebido de `SociosPage` por si ese flujo se vuelve a usar.
+- Al cambiar filtros/chips en Socios, el scroll de la tabla vuelve al inicio para evitar cargas automaticas no deseadas.
+- Al dar de baja o restaurar un socio desde la ficha abierta por el buscador global, se actualizan dinamicamente los stats y listados de Socios.
+- Al dar de baja un socio, sus membresias activas se cancelan automaticamente.
+- La ficha del socio ahora recarga sus membresias al darlo de baja/restaurarlo, para mostrar el estado actualizado sin cerrar y volver a buscar.
+- Tambien se agrego refresco del listado de Membresias si esa pagina esta abierta.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `Ventanas\NuevoSocioWindow.xaml.cs` | Validacion de edad minima de 6 anios al avanzar desde el paso de datos personales |
+| `Paginas\SociosPage.xaml.cs` | Validacion de edad, reset de scroll al cambiar filtros y refresco de stats/listado |
+| `Paginas\FichaSocioWindow.xaml.cs` | Marca de cambios y recarga dinamica de membresias al dar de baja/restaurar |
+| `Paginas\MembresiasPage.xaml.cs` | Metodo publico para refrescar el listado cuando cambia el socio desde otra ventana |
+| `MainWindow.xaml.cs` | Refresco de paginas afectadas cuando la ficha de socio modifica estado |
+| `Models\DAO\SocioDao.cs` | Lectura de membresias canceladas devueltas por los SPs |
+| `Controllers\SocioController.cs` | Auditoria de membresias canceladas por baja de socio |
+| `DataBase\spSocios.sql` | Cancelacion automatica de membresias activas al dar de baja socios |
+
+### SPs a ejecutar
+
+Como se modificaron Stored Procedures de Socios, ejecutar nuevamente:
+
+```
+DataBase\spSocios.sql
+```
+
+Ese script actualiza principalmente:
+
+```
+sp_CambiarEstadoSocio
+sp_DarDeBajaSocios
+```
+
+### Importante
+Para las validaciones de edad, el reset de scroll y el refresco dinamico de la ficha no hace falta ejecutar SPs adicionales.
+
+Si no se ejecuta `DataBase\spSocios.sql`, la aplicacion puede compilar, pero la base no tendra aplicada la cancelacion automatica de membresias activas al dar de baja socios.
+
+---
+
+## 21. Filtro Dejaron de venir en Socios
+
+### Mini resumen
+- Se ajusto el filtro `Dejaron de venir` para incluir socios con ultima asistencia hace N dias o mas.
+- Tambien incluye socios que nunca asistieron, pero solo si su membresia inicio hace N dias o mas.
+- En la tabla, al activar este filtro, `TELEFONO` pasa a mostrar `ULTIMA ASISTENCIA` y `ACTIVIDAD` pasa a mostrar `DIAS SIN ASISTIR`.
+- Al limpiar el filtro, vuelven las columnas originales.
+
+### Problemas detectados y solucion
+- Error WPF: `{DependencyProperty.UnsetValue}` no era valido para `Background`.
+  - Solucion: no agregar/remover columnas dinamicamente; se reutilizan columnas existentes y solo se cambian `Header`, `Binding` y `CellTemplate`.
+- La columna `ACTIVIDAD` habia perdido el badge verde.
+  - Solucion: se recupero el template original con borde/estilo verde.
+- Socios nuevos sin asistencia aparecian en `Dejaron de venir hace 30 dias`.
+  - Solucion: para socios sin asistencias se valida tambien `m.fecha_inicio <= hoy - N dias`.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\sp_ListarSociosConMembresias.sql` | Filtro de inactividad con ultima asistencia o membresia iniciada hace N dias o mas |
+| `Paginas\SociosPage.xaml` | Templates para actividad con badge y dias sin asistir |
+| `Paginas\SociosPage.xaml.cs` | Cambio seguro de columnas sin recrearlas y texto de resumen del filtro |
+
+### SPs a ejecutar
+
+Ejecutar nuevamente:
+
+```
+DataBase\sp_ListarSociosConMembresias.sql
+```
+
+No hace falta ejecutar otros SPs por estos cambios.

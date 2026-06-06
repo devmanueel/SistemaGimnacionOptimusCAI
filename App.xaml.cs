@@ -9,7 +9,7 @@ namespace SistemaGimnacionOptimusCAI
         {
             base.OnStartup(e);
             // Detectar el lector de huellas en segundo plano para no demorar el inicio
-            //BiometricManager.InicializarAsync();
+            BiometricManager.InicializarAsync();
         }
 
         protected override void OnExit(ExitEventArgs e)

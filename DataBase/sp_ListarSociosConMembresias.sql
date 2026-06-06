@@ -57,11 +57,22 @@ BEGIN
       AND (@FiltroInstructorId IS NULL OR m.instructor_id   = @FiltroInstructorId)
       AND (@FiltroSexo         IS NULL OR s.sexo            = @FiltroSexo)
       AND (@FiltroDejaronVenir IS NULL
-           OR NOT EXISTS (
-               SELECT 1 FROM registros_acceso ra
-               WHERE ra.socio_id  = s.id
-                 AND ra.resultado = 'permitido'
-                 AND ra.accedido_en >= DATEADD(DAY, -@FiltroDejaronVenir, GETDATE())
+           OR (
+               -- Tiene asistencias y la ultima fue hace N dias o mas
+               (SELECT MAX(CAST(ra.accedido_en AS DATE))
+                FROM registros_acceso ra
+                WHERE ra.socio_id = s.id
+                  AND ra.resultado = 'permitido')
+               <= DATEADD(DAY, -@FiltroDejaronVenir, CAST(GETDATE() AS DATE))
+               -- O nunca asistio y la membresia ya inicio hace N dias o mas
+               OR (
+                   m.fecha_inicio <= DATEADD(DAY, -@FiltroDejaronVenir, CAST(GETDATE() AS DATE))
+                   AND NOT EXISTS (
+                       SELECT 1 FROM registros_acceso ra
+                       WHERE ra.socio_id = s.id
+                         AND ra.resultado = 'permitido'
+                   )
+               )
            ));
 
     -- ── Result set 2: datos paginados ──
@@ -127,11 +138,22 @@ BEGIN
       AND (@FiltroInstructorId IS NULL OR m.instructor_id   = @FiltroInstructorId)
       AND (@FiltroSexo         IS NULL OR s.sexo            = @FiltroSexo)
       AND (@FiltroDejaronVenir IS NULL
-           OR NOT EXISTS (
-               SELECT 1 FROM registros_acceso ra
-               WHERE ra.socio_id  = s.id
-                 AND ra.resultado = 'permitido'
-                 AND ra.accedido_en >= DATEADD(DAY, -@FiltroDejaronVenir, GETDATE())
+           OR (
+               -- Tiene asistencias y la ultima fue hace N dias o mas
+               (SELECT MAX(CAST(ra.accedido_en AS DATE))
+                FROM registros_acceso ra
+                WHERE ra.socio_id = s.id
+                  AND ra.resultado = 'permitido')
+               <= DATEADD(DAY, -@FiltroDejaronVenir, CAST(GETDATE() AS DATE))
+               -- O nunca asistio y la membresia ya inicio hace N dias o mas
+               OR (
+                   m.fecha_inicio <= DATEADD(DAY, -@FiltroDejaronVenir, CAST(GETDATE() AS DATE))
+                   AND NOT EXISTS (
+                       SELECT 1 FROM registros_acceso ra
+                       WHERE ra.socio_id = s.id
+                         AND ra.resultado = 'permitido'
+                   )
+               )
            ))
     ORDER BY s.apellido, s.nombre, m.fecha_vencimiento DESC
     OFFSET (@Pagina - 1) * @TamPagina ROWS
