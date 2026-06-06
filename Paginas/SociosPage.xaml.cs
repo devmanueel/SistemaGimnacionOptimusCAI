@@ -105,6 +105,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _paginaActual = 1;
             _hayMas       = true;
             _primeraCargaCompleta = false;
+            _ignorarScroll = true;
+            RestablecerScrollSocios();
             CargarSociosPagina(1, agregar: false);
         }
 
@@ -159,7 +161,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     gridSocios.ItemsSource = listaActual;
 
                     // Restaurar posición del scroll después de agregar
-                    Dispatcher.BeginInvoke(new Action(() =>
+                    _ = Dispatcher.BeginInvoke(new Action(() =>
                     {
                         var sv = ObtenerScrollViewer(gridSocios);
                         if (sv != null)
@@ -183,19 +185,36 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 // Si es la primera carga, marcar como completa
                 if (!agregar)
-                    _primeraCargaCompleta = true;
+                {
+                    _ = Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        RestablecerScrollSocios();
+                        _primeraCargaCompleta = true;
+                        _ignorarScroll = false;
+                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }
+                else
+                {
+                    _ignorarScroll = false;
+                }
 
-                _ignorarScroll = false;
                 _cargando = false;
                 if (panelCargando != null)
                     panelCargando.Visibility = Visibility.Collapsed;
             }
         }
 
+        private void RestablecerScrollSocios()
+        {
+            var sv = ObtenerScrollViewer(gridSocios);
+            if (sv != null)
+                sv.ScrollToTop();
+        }
+
         private void SuscribirScrollDataGrid()
         {
             // Esperar a que el DataGrid termine de renderizar su template
-            Dispatcher.BeginInvoke(new Action(() =>
+            _ = Dispatcher.BeginInvoke(new Action(() =>
             {
                 var scrollViewer = ObtenerScrollViewer(gridSocios);
                 if (scrollViewer != null)
