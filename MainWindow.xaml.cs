@@ -470,11 +470,21 @@ namespace SistemaGimnacionOptimusCAI
             {
                 var ficha = new FichaSocioWindow(socio) { Owner = this };
                 ficha.ShowDialog();
+
+                if (ficha.HuboCambiosSocio)
+                    RefrescarSociosSiEstaAbierta();
             }
             catch (Exception ex)
             {
                 NotificacionWindow.MostrarError("Error al abrir la ficha.\n" + ex.Message);
             }
+        }
+
+        private void RefrescarSociosSiEstaAbierta()
+        {
+            var sociosPage = frameContenido.Content as SociosPage;
+            if (sociosPage != null)
+                sociosPage.RefrescarListadoYStats();
         }
 
         private void txtBuscadorGlobal_KeyDown(object sender, KeyEventArgs e)

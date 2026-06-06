@@ -110,6 +110,12 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarSociosPagina(1, agregar: false);
         }
 
+        public void RefrescarListadoYStats()
+        {
+            ActualizarStats();
+            CargarSocios();
+        }
+
         private async void CargarSociosPagina(int pagina, bool agregar)
         {
             if (_cargando) return;
