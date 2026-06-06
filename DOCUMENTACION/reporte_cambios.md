@@ -893,3 +893,39 @@ sp_DarDeBajaSocios
 Para las validaciones de edad, el reset de scroll y el refresco dinamico de la ficha no hace falta ejecutar SPs adicionales.
 
 Si no se ejecuta `DataBase\spSocios.sql`, la aplicacion puede compilar, pero la base no tendra aplicada la cancelacion automatica de membresias activas al dar de baja socios.
+
+---
+
+## 21. Filtro Dejaron de venir en Socios
+
+### Mini resumen
+- Se ajusto el filtro `Dejaron de venir` para incluir socios con ultima asistencia hace N dias o mas.
+- Tambien incluye socios que nunca asistieron, pero solo si su membresia inicio hace N dias o mas.
+- En la tabla, al activar este filtro, `TELEFONO` pasa a mostrar `ULTIMA ASISTENCIA` y `ACTIVIDAD` pasa a mostrar `DIAS SIN ASISTIR`.
+- Al limpiar el filtro, vuelven las columnas originales.
+
+### Problemas detectados y solucion
+- Error WPF: `{DependencyProperty.UnsetValue}` no era valido para `Background`.
+  - Solucion: no agregar/remover columnas dinamicamente; se reutilizan columnas existentes y solo se cambian `Header`, `Binding` y `CellTemplate`.
+- La columna `ACTIVIDAD` habia perdido el badge verde.
+  - Solucion: se recupero el template original con borde/estilo verde.
+- Socios nuevos sin asistencia aparecian en `Dejaron de venir hace 30 dias`.
+  - Solucion: para socios sin asistencias se valida tambien `m.fecha_inicio <= hoy - N dias`.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\sp_ListarSociosConMembresias.sql` | Filtro de inactividad con ultima asistencia o membresia iniciada hace N dias o mas |
+| `Paginas\SociosPage.xaml` | Templates para actividad con badge y dias sin asistir |
+| `Paginas\SociosPage.xaml.cs` | Cambio seguro de columnas sin recrearlas y texto de resumen del filtro |
+
+### SPs a ejecutar
+
+Ejecutar nuevamente:
+
+```
+DataBase\sp_ListarSociosConMembresias.sql
+```
+
+No hace falta ejecutar otros SPs por estos cambios.

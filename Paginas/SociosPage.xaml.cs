@@ -43,10 +43,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private long _idEditar = 0;
         private byte[] _fotoBytes = null;
         private string _filtroEstado = "todos";
-        private string _filtroAvanzado = "todos";
         private string _tabActivo = "datos";
-        private List<DataGridColumn> _columnasDinamicas = new List<DataGridColumn>();
-
         // Filtros avanzados (se aplican solo al presionar "Filtrar")
         private long?  _filtroActividadId  = null;
         private bool?  _filtroCuotaVencida = null;
@@ -107,6 +104,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _primeraCargaCompleta = false;
             _ignorarScroll = true;
             RestablecerScrollSocios();
+            ConfigurarColumnasGrid();
             CargarSociosPagina(1, agregar: false);
         }
 
@@ -394,7 +392,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
 
             if (_filtroDejaronVenir.HasValue)
-                partes.Add(string.Format("que no asisten hace más de {0} días", _filtroDejaronVenir.Value));
+                partes.Add(string.Format("que no asisten hace {0} días o más, o que nunca asistieron desde una membresía iniciada hace {0} días o más", _filtroDejaronVenir.Value));
 
             string textoFiltros = "Se muestran " + string.Join(" ", partes.ToArray());
             lblFiltrosActivos.Text = textoFiltros;
@@ -479,16 +477,24 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
                 case "Sexo":
                     if (cmbFiltroSexo.SelectedItem is ComboBoxItem itemSexo)
-                        _filtroSexo = itemSexo.Tag?.ToString();
+                    {
+                        string tagSexo = itemSexo.Tag?.ToString();
+                        _filtroSexo = string.IsNullOrEmpty(tagSexo) ? null : tagSexo;
+                    }
                     break;
 
                 case "Dejaron de venir":
                     if (cmbFiltroDias.SelectedItem is ComboBoxItem itemDias
-                        && int.TryParse(itemDias.Tag?.ToString(), out int dias))
+                        && int.TryParse(itemDias.Tag?.ToString(), out int dias)
+                        && dias > 0)
                         _filtroDejaronVenir = dias;
                     break;
             }
 
+            // Limpiar filas ANTES de tocar columnas (WPF no permite modificar
+            // columnas mientras hay celdas materializadas).
+            gridSocios.ItemsSource = null;
+            ConfigurarColumnasGrid();
             CargarSocios();
         }
 
@@ -518,6 +524,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _ordenamiento = "nombre_asc";
             if (cmbOrdenarPor != null) cmbOrdenarPor.SelectedIndex = 0;
 
+            // Limpiar filas ANTES de tocar columnas
+            gridSocios.ItemsSource = null;
+            ConfigurarColumnasGrid();
             CargarSocios();
         }
 
@@ -623,23 +632,24 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             if (gridSocios == null) return;
 
-            // Remover columnas dinámicas previas
-            foreach (var col in _columnasDinamicas)
-                gridSocios.Columns.Remove(col);
-            _columnasDinamicas.Clear();
+            bool dejaronVenirActivo = _filtroDejaronVenir.HasValue;
 
-            if (_filtroAvanzado == "actividad")
+            if (colTelefono != null)
             {
-                var col = CrearColumnaTexto("ACTIVIDAD", "ActividadNombre", new DataGridLength(1.2, DataGridLengthUnitType.Star));
-                gridSocios.Columns.Add(col);
-                _columnasDinamicas.Add(col);
+                colTelefono.Header = dejaronVenirActivo ? "ÚLTIMA ASISTENCIA" : "TELÉFONO";
+                colTelefono.Binding = new Binding(dejaronVenirActivo ? "UltimaAsistenciaTexto" : "Telefono");
+                colTelefono.Width = dejaronVenirActivo ? new DataGridLength(130) : new DataGridLength(100);
             }
 
-            if (_filtroAvanzado == "instructor")
+            if (colActividad != null)
             {
-                var col = CrearColumnaTexto("PROFESOR", "InstructorNombre", new DataGridLength(1.2, DataGridLengthUnitType.Star));
-                gridSocios.Columns.Add(col);
-                _columnasDinamicas.Add(col);
+                colActividad.Header = dejaronVenirActivo ? "DÍAS SIN ASISTIR" : "ACTIVIDAD";
+                colActividad.CellTemplate = (DataTemplate)FindResource(dejaronVenirActivo
+                    ? "DiasSinAsistirCellTemplate"
+                    : "ActividadSocioCellTemplate");
+                colActividad.Width = dejaronVenirActivo
+                    ? new DataGridLength(130)
+                    : new DataGridLength(1.5, DataGridLengthUnitType.Star);
             }
         }
 
