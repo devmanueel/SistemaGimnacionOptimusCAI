@@ -307,6 +307,12 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 return false;
             }
 
+            if (dpNacimiento.SelectedDate.HasValue && dpNacimiento.SelectedDate.Value.Date > DateTime.Today.AddYears(-6))
+            {
+                NotificacionWindow.MostrarError("El socio debe tener al menos 6 años para ser registrado.");
+                return false;
+            }
+
             var e4 = Validador.ValidarTelefono(txtTelefono.Text);
             AplicarError(txtTelefono, errTelefono, e4);
             if (e4 != null) ok = false;
