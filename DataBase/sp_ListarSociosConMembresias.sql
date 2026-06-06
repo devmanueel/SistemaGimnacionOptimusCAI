@@ -39,6 +39,7 @@ BEGIN
     INNER JOIN membresias  m ON m.socio_id = s.id
     INNER JOIN actividades a ON a.id       = m.actividad_id
     WHERE s.eliminado_en IS NULL
+      AND s.activo = 1
       AND (
             @FiltroEstado = 'todos'
          OR (@FiltroEstado = 'activos'   AND m.estado = 'activa')
@@ -108,6 +109,7 @@ BEGIN
     INNER JOIN actividades a ON a.id       = m.actividad_id
     LEFT  JOIN usuarios    u ON u.id       = m.instructor_id
     WHERE s.eliminado_en IS NULL
+      AND s.activo = 1
       AND (
             @FiltroEstado = 'todos'
          OR (@FiltroEstado = 'activos'   AND m.estado = 'activa')

@@ -816,3 +816,33 @@ DataBase\spInstructorAsistencias.sql
 DataBase\spWhatsapp.sql
 DataBase\spActualizarActividadesCategoriaNivel.sql
 ```
+
+---
+
+## 19. Renovacion de membresias desde Socios
+
+### Mini resumen
+- Se agrego la renovacion de membresia directamente desde la tabla de Socios.
+- La renovacion permite usar una membresia activa, vencida o cancelada y volver a cobrarla.
+- Desde la ventana emergente se puede cambiar la actividad, instructor, monto y observaciones.
+- Se incorporo un preview de cobro similar al de Nuevo Socio para ver siempre cuanto se va a cobrar.
+- La renovacion actualiza fecha de inicio, fecha de vencimiento, estado, historial y caja.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\spMembresias.sql` | `sp_RenovarMembresia` acepta actividad, instructor y observaciones |
+| `Models\DAO\MembresiaDao.cs` | Renovacion parametrizada con actividad/instructor opcionales |
+| `Controllers\MembresiaController.cs` | Logica de renovacion y auditoria |
+| `Ventanas\MembresiaWindow.xaml` | Agregado preview de cobro |
+| `Ventanas\MembresiaWindow.xaml.cs` | Modo renovacion con calculo y confirmacion |
+| `Paginas\SociosPage.xaml` | Boton de renovacion en la tabla |
+| `Paginas\SociosPage.xaml.cs` | Handler para abrir la renovacion del socio |
+
+### SP a ejecutar
+Ejecutar nuevamente:
+
+```
+DataBase\spMembresias.sql
+```
