@@ -205,14 +205,27 @@ namespace Controllers
         {
             try
             {
-                bool ok = _dao.CambiarEstadoSocio(id, nuevoEstado);
+                var resultado = _dao.CambiarEstadoSocio(id, nuevoEstado);
                 string accion = nuevoEstado ? "activado" : "desactivado";
-                if (ok)
+                if (resultado.ok)
                 {
                     Auditor.Registrar(nuevoEstado ? "activar" : "desactivar", "socio", id);
+
+                    if (!nuevoEstado && resultado.membresiaIds != null)
+                    {
+                        foreach (long membresiaId in resultado.membresiaIds)
+                            Auditor.Registrar("anular", "membresia", membresiaId, new Dictionary<string, object> {
+                                { "motivo", "baja_socio" }, { "socio_id", id }
+                            });
+                    }
                 }
-                return ok
-                    ? (true, $"Socio {accion} correctamente.")
+
+                string mensaje = "Socio " + accion + " correctamente.";
+                if (!nuevoEstado && resultado.membresiasCanceladas > 0)
+                    mensaje += " Se cancelaron " + resultado.membresiasCanceladas + " membresia(s) activa(s).";
+
+                return resultado.ok
+                    ? (true, mensaje)
                     : (false, "No se encontró el socio.");
             }
             catch (Exception ex)
@@ -260,8 +273,21 @@ namespace Controllers
             string listaIds = string.Join(",", ids);
             try
             {
-                int afectados = _dao.DarDeBajaLote(listaIds);
-                return (true, afectados + " socio(s) dados de baja correctamente.", afectados);
+                var resultado = _dao.DarDeBajaLote(listaIds);
+
+                if (resultado.membresiaIds != null)
+                {
+                    foreach (long membresiaId in resultado.membresiaIds)
+                        Auditor.Registrar("anular", "membresia", membresiaId, new Dictionary<string, object> {
+                            { "motivo", "baja_lote_socios" }
+                        });
+                }
+
+                string mensaje = resultado.afectados + " socio(s) dados de baja correctamente.";
+                if (resultado.membresiasCanceladas > 0)
+                    mensaje += " Se cancelaron " + resultado.membresiasCanceladas + " membresia(s) activa(s).";
+
+                return (true, mensaje, resultado.afectados);
             }
             catch (Exception ex)
             {

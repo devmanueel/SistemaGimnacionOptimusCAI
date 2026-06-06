@@ -556,22 +556,35 @@ CREATE PROCEDURE sp_RenovarMembresia
     @MontoPagado   DECIMAL(12,2),
     @MetodoPago    VARCHAR(20)  = 'efectivo',
     @RegistradoPor BIGINT,
-    @DiasASumar    INT          = 0
+    @DiasASumar    INT          = 0,
+    @ActividadId   BIGINT       = NULL,
+    @InstructorId  BIGINT       = NULL,
+    @Observaciones NVARCHAR(500) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
     DECLARE @SocioId     BIGINT;
-    DECLARE @ActividadId BIGINT;
+    DECLARE @ActividadActualId BIGINT;
+    DECLARE @ActividadFinalId BIGINT;
     DECLARE @TipoPlan    VARCHAR(20);
+    DECLARE @Estado      VARCHAR(20);
 
-    SELECT @SocioId = socio_id, @ActividadId = actividad_id,
-           @TipoPlan = tipo_plan
+    SELECT @SocioId = socio_id, @ActividadActualId = actividad_id,
+           @TipoPlan = tipo_plan, @Estado = estado
     FROM membresias WHERE id = @Id;
 
     IF @TipoPlan IS NULL
     BEGIN
         RAISERROR('MembresÃ­a no encontrada.', 16, 1);
+        RETURN;
+    END
+
+    SET @ActividadFinalId = ISNULL(@ActividadId, @ActividadActualId);
+
+    IF NOT EXISTS (SELECT 1 FROM actividades WHERE id = @ActividadFinalId AND activo = 1)
+    BEGIN
+        RAISERROR('La actividad seleccionada no existe o esta inactiva.', 16, 1);
         RETURN;
     END
 
@@ -598,18 +611,24 @@ BEGIN
     -- Obtener vencimiento actual
     SELECT @Vencim = fecha_vencimiento FROM membresias WHERE id = @Id;
 
-    -- Si ya venci--, arrancar desde hoy; si no, sumar al vencimiento actual
-    IF @Vencim < @Hoy
-        SET @Vencim = DATEADD(DAY, @Dias, @Hoy);
-    ELSE
+    -- Si esta activa y vigente, sumar al vencimiento actual. Si no, arrancar desde hoy.
+    IF @Estado = 'activa' AND @Vencim >= @Hoy
         SET @Vencim = DATEADD(DAY, @Dias, @Vencim);
+    ELSE
+        SET @Vencim = DATEADD(DAY, @Dias, @Hoy);
 
     UPDATE membresias SET
+        actividad_id      = @ActividadFinalId,
+        instructor_id     = @InstructorId,
         fecha_inicio      = @Hoy,
         fecha_vencimiento = @Vencim,
         monto_pagado      = @MontoPagado,
         metodo_pago       = @MetodoPago,
         estado            = 'activa',
+        observaciones     = CASE
+                                WHEN @Observaciones IS NULL OR LTRIM(RTRIM(@Observaciones)) = '' THEN observaciones
+                                ELSE @Observaciones
+                             END,
         actualizado_en    = GETDATE()
     WHERE id = @Id;
 
@@ -618,11 +637,11 @@ BEGIN
          detalle, metodo_pago, monto)
     SELECT
         'ingreso_cuota', 'RenovaciÃ³n de cuota', @RegistradoPor, @SocioId,
-        @Id, @ActividadId,
+        @Id, @ActividadFinalId,
         'RenovaciÃ³n de ' + a.nombre + ' (' + s.nombre + ' ' + s.apellido + ')',
         @MetodoPago, @MontoPagado
     FROM socios s, actividades a
-    WHERE s.id = @SocioId AND a.id = @ActividadId;
+    WHERE s.id = @SocioId AND a.id = @ActividadFinalId;
 
     INSERT INTO membresia_historial
         (membresia_id, tipo_evento, fecha_desde, fecha_hasta, importe, metodo_pago, registrado_por)

@@ -213,6 +213,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
+        public void RefrescarListadoYStats()
+        {
+            CargarMembresias();
+        }
+
         private void ActualizarStats()
         {
             try

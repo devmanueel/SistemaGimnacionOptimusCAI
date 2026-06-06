@@ -21,6 +21,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private readonly AsistenciaController _asistenciaController = new AsistenciaController();
         private readonly FichaMedicaController _fichaController = new FichaMedicaController();
 
+        public bool HuboCambiosSocio { get; private set; }
+
         public FichaSocioWindow(Socio socio)
         {
             InitializeComponent();
@@ -69,6 +71,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             try
             {
+                _membresiaActiva = null;
                 var todas = _membresiaController.BuscarMembresias(_socio.Dni, "todos");
                 var delSocio = new List<Membresia>();
                 foreach (var m in todas)
@@ -289,6 +292,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (r.ok)
             {
                 _socio.Activo = false;
+                HuboCambiosSocio = true;
+                CargarMembresias();
                 ConfigurarModo();
                 NotificacionWindow.MostrarExito(r.mensaje);
             }
@@ -310,6 +315,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (r.ok)
             {
                 _socio.Activo = true;
+                HuboCambiosSocio = true;
+                CargarMembresias();
                 ConfigurarModo();
                 NotificacionWindow.MostrarExito(r.mensaje);
             }

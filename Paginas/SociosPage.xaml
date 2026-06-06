@@ -74,6 +74,21 @@
 
             <Style x:Key="TabBtnEstilo2" TargetType="Button" BasedOn="{StaticResource TabBtnEstilo}"/>
 
+            <DataTemplate x:Key="ActividadSocioCellTemplate">
+                <Border HorizontalAlignment="Left" Style="{StaticResource TipoBadgeStyle}">
+                    <TextBlock Text="{Binding ActividadNombre}" FontSize="12"
+                               FontWeight="SemiBold" Foreground="{StaticResource GreenMain}"
+                               TextWrapping="Wrap"/>
+                </Border>
+            </DataTemplate>
+
+            <DataTemplate x:Key="DiasSinAsistirCellTemplate">
+                <TextBlock Text="{Binding DiasSinAsistirTexto}"
+                           FontSize="12"
+                           Foreground="{StaticResource ColorCuerpo}"
+                           VerticalAlignment="Center"/>
+            </DataTemplate>
+
         </ResourceDictionary>
     </Page.Resources>
 
@@ -594,20 +609,13 @@
                             <DataGridTextColumn Header="EDAD" Binding="{Binding EdadTexto}" Width="70"/>
 
                             <!-- Teléfono -->
-                            <DataGridTextColumn Header="TELÉFONO" Binding="{Binding Telefono}" Width="100"/>
+                            <DataGridTextColumn x:Name="colTelefono" Header="TELÉFONO" Binding="{Binding Telefono}" Width="100"/>
 
-                            <!-- Actividad badge -->
-                            <DataGridTemplateColumn Header="ACTIVIDAD" Width="1.5*">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border HorizontalAlignment="Left" Style="{StaticResource TipoBadgeStyle}">
-                                            <TextBlock Text="{Binding ActividadNombre}" FontSize="12"
-                                                       FontWeight="SemiBold" Foreground="{StaticResource GreenMain}"
-                                                       TextWrapping="Wrap"/>
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
+                            <!-- Actividad / Dias sin asistir -->
+                            <DataGridTemplateColumn x:Name="colActividad"
+                                                    Header="ACTIVIDAD"
+                                                    Width="1.5*"
+                                                    CellTemplate="{StaticResource ActividadSocioCellTemplate}"/>
 
                             <!-- Vencimiento -->
                             <DataGridTextColumn Header="VENCE" Binding="{Binding FechaVencimientoTexto}" Width="100"/>
@@ -650,12 +658,21 @@
                             </DataGridTemplateColumn>
 
                             <!-- Acciones -->
-                            <DataGridTemplateColumn Header="ACCIONES" Width="100">
+                            <DataGridTemplateColumn Header="ACCIONES" Width="160">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center">
+                                            <Button Style="{StaticResource ButtonStyleRenovar}"
+                                                    Margin="0,0,4,0"
+                                                    ToolTip="Renovar membresía"
+                                                    Click="btnRenovarMembresia_Click">
+                                                <TextBlock Text="+31d"
+                                                           FontSize="11"
+                                                           FontWeight="Bold"
+                                                           Foreground="{StaticResource GreenMain}"/>
+                                            </Button>
                                             <Button Style="{StaticResource ButtonStyleEditar}"
                                                     Margin="0,0,4,0"
                                                     ToolTip="Modificar membresía"

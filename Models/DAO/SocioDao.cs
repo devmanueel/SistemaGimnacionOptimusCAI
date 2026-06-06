@@ -310,8 +310,12 @@ namespace Models.Dao
         // ──────────────────────────────────────────────────────
         // CAMBIAR ESTADO
         // ──────────────────────────────────────────────────────
-        public bool CambiarEstadoSocio(long id, bool nuevoEstado)
+        public (bool ok, int membresiasCanceladas, List<long> membresiaIds) CambiarEstadoSocio(long id, bool nuevoEstado)
         {
+            var membresiaIds = new List<long>();
+            int filasAfectadas = 0;
+            int membresiasCanceladas = 0;
+
             using (var conn = GetConnection())
             {
                 conn.Open();
@@ -320,10 +324,25 @@ namespace Models.Dao
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Id", id);
                     cmd.Parameters.AddWithValue("@Activo", nuevoEstado);
-                    var filas = cmd.ExecuteScalar();
-                    return filas != null && Convert.ToInt32(filas) > 0;
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            filasAfectadas = Convert.ToInt32(reader["filas_afectadas"]);
+                            membresiasCanceladas = Convert.ToInt32(reader["membresias_canceladas"]);
+                        }
+
+                        if (reader.NextResult())
+                        {
+                            while (reader.Read())
+                                membresiaIds.Add(Convert.ToInt64(reader["id"]));
+                        }
+                    }
                 }
             }
+
+            return (filasAfectadas > 0, membresiasCanceladas, membresiaIds);
         }
 
         // ──────────────────────────────────────────────────────
@@ -377,8 +396,12 @@ namespace Models.Dao
             return lista;
         }
 
-        public int DarDeBajaLote(string ids)
+        public (int afectados, int membresiasCanceladas, List<long> membresiaIds) DarDeBajaLote(string ids)
         {
+            var membresiaIds = new List<long>();
+            int afectados = 0;
+            int membresiasCanceladas = 0;
+
             using (var conn = GetConnection())
             {
                 conn.Open();
@@ -386,10 +409,25 @@ namespace Models.Dao
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@Ids", ids);
-                    var resultado = cmd.ExecuteScalar();
-                    return resultado != null ? Convert.ToInt32(resultado) : 0;
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            afectados = Convert.ToInt32(reader["afectados"]);
+                            membresiasCanceladas = Convert.ToInt32(reader["membresias_canceladas"]);
+                        }
+
+                        if (reader.NextResult())
+                        {
+                            while (reader.Read())
+                                membresiaIds.Add(Convert.ToInt64(reader["id"]));
+                        }
+                    }
                 }
             }
+
+            return (afectados, membresiasCanceladas, membresiaIds);
         }
 
         // ──────────────────────────────────────────────────────

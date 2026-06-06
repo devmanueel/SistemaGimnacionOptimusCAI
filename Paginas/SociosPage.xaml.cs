@@ -43,10 +43,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private long _idEditar = 0;
         private byte[] _fotoBytes = null;
         private string _filtroEstado = "todos";
-        private string _filtroAvanzado = "todos";
         private string _tabActivo = "datos";
-        private List<DataGridColumn> _columnasDinamicas = new List<DataGridColumn>();
-
         // Filtros avanzados (se aplican solo al presionar "Filtrar")
         private long?  _filtroActividadId  = null;
         private bool?  _filtroCuotaVencida = null;
@@ -105,7 +102,16 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _paginaActual = 1;
             _hayMas       = true;
             _primeraCargaCompleta = false;
+            _ignorarScroll = true;
+            RestablecerScrollSocios();
+            ConfigurarColumnasGrid();
             CargarSociosPagina(1, agregar: false);
+        }
+
+        public void RefrescarListadoYStats()
+        {
+            ActualizarStats();
+            CargarSocios();
         }
 
         private async void CargarSociosPagina(int pagina, bool agregar)
@@ -159,7 +165,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     gridSocios.ItemsSource = listaActual;
 
                     // Restaurar posición del scroll después de agregar
-                    Dispatcher.BeginInvoke(new Action(() =>
+                    _ = Dispatcher.BeginInvoke(new Action(() =>
                     {
                         var sv = ObtenerScrollViewer(gridSocios);
                         if (sv != null)
@@ -183,19 +189,36 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 // Si es la primera carga, marcar como completa
                 if (!agregar)
-                    _primeraCargaCompleta = true;
+                {
+                    _ = Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        RestablecerScrollSocios();
+                        _primeraCargaCompleta = true;
+                        _ignorarScroll = false;
+                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }
+                else
+                {
+                    _ignorarScroll = false;
+                }
 
-                _ignorarScroll = false;
                 _cargando = false;
                 if (panelCargando != null)
                     panelCargando.Visibility = Visibility.Collapsed;
             }
         }
 
+        private void RestablecerScrollSocios()
+        {
+            var sv = ObtenerScrollViewer(gridSocios);
+            if (sv != null)
+                sv.ScrollToTop();
+        }
+
         private void SuscribirScrollDataGrid()
         {
             // Esperar a que el DataGrid termine de renderizar su template
-            Dispatcher.BeginInvoke(new Action(() =>
+            _ = Dispatcher.BeginInvoke(new Action(() =>
             {
                 var scrollViewer = ObtenerScrollViewer(gridSocios);
                 if (scrollViewer != null)
@@ -369,7 +392,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
 
             if (_filtroDejaronVenir.HasValue)
-                partes.Add(string.Format("que no asisten hace más de {0} días", _filtroDejaronVenir.Value));
+                partes.Add(string.Format("que no asisten hace {0} días o más, o que nunca asistieron desde una membresía iniciada hace {0} días o más", _filtroDejaronVenir.Value));
 
             string textoFiltros = "Se muestran " + string.Join(" ", partes.ToArray());
             lblFiltrosActivos.Text = textoFiltros;
@@ -454,16 +477,24 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
                 case "Sexo":
                     if (cmbFiltroSexo.SelectedItem is ComboBoxItem itemSexo)
-                        _filtroSexo = itemSexo.Tag?.ToString();
+                    {
+                        string tagSexo = itemSexo.Tag?.ToString();
+                        _filtroSexo = string.IsNullOrEmpty(tagSexo) ? null : tagSexo;
+                    }
                     break;
 
                 case "Dejaron de venir":
                     if (cmbFiltroDias.SelectedItem is ComboBoxItem itemDias
-                        && int.TryParse(itemDias.Tag?.ToString(), out int dias))
+                        && int.TryParse(itemDias.Tag?.ToString(), out int dias)
+                        && dias > 0)
                         _filtroDejaronVenir = dias;
                     break;
             }
 
+            // Limpiar filas ANTES de tocar columnas (WPF no permite modificar
+            // columnas mientras hay celdas materializadas).
+            gridSocios.ItemsSource = null;
+            ConfigurarColumnasGrid();
             CargarSocios();
         }
 
@@ -493,6 +524,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _ordenamiento = "nombre_asc";
             if (cmbOrdenarPor != null) cmbOrdenarPor.SelectedIndex = 0;
 
+            // Limpiar filas ANTES de tocar columnas
+            gridSocios.ItemsSource = null;
+            ConfigurarColumnasGrid();
             CargarSocios();
         }
 
@@ -598,23 +632,24 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             if (gridSocios == null) return;
 
-            // Remover columnas dinámicas previas
-            foreach (var col in _columnasDinamicas)
-                gridSocios.Columns.Remove(col);
-            _columnasDinamicas.Clear();
+            bool dejaronVenirActivo = _filtroDejaronVenir.HasValue;
 
-            if (_filtroAvanzado == "actividad")
+            if (colTelefono != null)
             {
-                var col = CrearColumnaTexto("ACTIVIDAD", "ActividadNombre", new DataGridLength(1.2, DataGridLengthUnitType.Star));
-                gridSocios.Columns.Add(col);
-                _columnasDinamicas.Add(col);
+                colTelefono.Header = dejaronVenirActivo ? "ÚLTIMA ASISTENCIA" : "TELÉFONO";
+                colTelefono.Binding = new Binding(dejaronVenirActivo ? "UltimaAsistenciaTexto" : "Telefono");
+                colTelefono.Width = dejaronVenirActivo ? new DataGridLength(130) : new DataGridLength(100);
             }
 
-            if (_filtroAvanzado == "instructor")
+            if (colActividad != null)
             {
-                var col = CrearColumnaTexto("PROFESOR", "InstructorNombre", new DataGridLength(1.2, DataGridLengthUnitType.Star));
-                gridSocios.Columns.Add(col);
-                _columnasDinamicas.Add(col);
+                colActividad.Header = dejaronVenirActivo ? "DÍAS SIN ASISTIR" : "ACTIVIDAD";
+                colActividad.CellTemplate = (DataTemplate)FindResource(dejaronVenirActivo
+                    ? "DiasSinAsistirCellTemplate"
+                    : "ActividadSocioCellTemplate");
+                colActividad.Width = dejaronVenirActivo
+                    ? new DataGridLength(130)
+                    : new DataGridLength(1.5, DataGridLengthUnitType.Star);
             }
         }
 
@@ -835,7 +870,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 if (r.ok)
                 {
                     NotificacionWindow.MostrarExito(r.mensaje, "Baja completada");
-                    CargarSocios();
+                    RefrescarListadoYStats();
                 }
                 else
                 {
@@ -876,6 +911,25 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             var win = new Ventanas.MembresiaWindow { Owner = Window.GetWindow(this) };
             win.Configurar(socio.MembresiaId);
+            if (win.ShowDialog() == true)
+            {
+                CargarSocios();
+                ActualizarStats();
+            }
+        }
+
+        private void btnRenovarMembresia_Click(object sender, RoutedEventArgs e)
+        {
+            var socio = ObtenerSocioDeFila(sender);
+            if (socio == null) return;
+            if (socio.MembresiaId <= 0)
+            {
+                NotificacionWindow.MostrarAdvertencia("Este socio no tiene una membresia asignada.");
+                return;
+            }
+
+            var win = new Ventanas.MembresiaWindow { Owner = Window.GetWindow(this) };
+            win.ConfigurarRenovacion(socio.MembresiaId);
             if (win.ShowDialog() == true)
             {
                 CargarSocios();
@@ -1110,6 +1164,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 if (dpNacimiento.SelectedDate.Value > DateTime.Today)
                 {
                     NotificacionWindow.MostrarError("La fecha de nacimiento no puede ser futura.");
+                    CambiarTab("datos");
+                    return false;
+                }
+
+                if (dpNacimiento.SelectedDate.Value.Date > DateTime.Today.AddYears(-6))
+                {
+                    NotificacionWindow.MostrarError("El socio debe tener al menos 6 años para ser registrado.");
                     CambiarTab("datos");
                     return false;
                 }

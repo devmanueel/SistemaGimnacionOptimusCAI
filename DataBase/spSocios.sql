@@ -266,11 +266,37 @@ CREATE PROCEDURE sp_CambiarEstadoSocio
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    DECLARE @MembresiasCanceladas TABLE (id BIGINT);
+
     UPDATE socios
     SET activo = @Activo, actualizado_en = GETDATE()
     WHERE id = @Id AND eliminado_en IS NULL;
 
-    SELECT @@ROWCOUNT AS filas_afectadas;
+    DECLARE @FilasAfectadas INT = @@ROWCOUNT;
+
+    IF @FilasAfectadas > 0 AND @Activo = 0
+    BEGIN
+        UPDATE membresias
+        SET estado = 'cancelada',
+            actualizado_en = GETDATE()
+        OUTPUT inserted.id INTO @MembresiasCanceladas
+        WHERE socio_id = @Id
+          AND estado = 'activa';
+
+        INSERT INTO membresia_historial
+            (membresia_id, tipo_evento, fecha_desde, fecha_hasta, registrado_por)
+        SELECT
+            m.id, 'anulacion', m.fecha_inicio, m.fecha_vencimiento, NULL
+        FROM membresias m
+        INNER JOIN @MembresiasCanceladas mc ON mc.id = m.id;
+    END
+
+    SELECT
+        @FilasAfectadas AS filas_afectadas,
+        (SELECT COUNT(*) FROM @MembresiasCanceladas) AS membresias_canceladas;
+
+    SELECT id FROM @MembresiasCanceladas;
 END;
 GO
 
@@ -335,6 +361,8 @@ BEGIN
     SET NOCOUNT ON;
 
     CREATE TABLE #ids (id BIGINT);
+    DECLARE @SociosAfectados TABLE (id BIGINT);
+    DECLARE @MembresiasCanceladas TABLE (id BIGINT);
 
     DECLARE @pos INT = 1, @next INT, @val NVARCHAR(20);
     SET @Ids = LTRIM(RTRIM(@Ids)) + ',';
@@ -347,9 +375,32 @@ BEGIN
         SET @pos = @next + 1;
     END
 
-    UPDATE socios SET activo = 0, actualizado_en = GETDATE()
-    WHERE id IN (SELECT id FROM #ids);
+    UPDATE socios
+    SET activo = 0,
+        actualizado_en = GETDATE()
+    OUTPUT inserted.id INTO @SociosAfectados
+    WHERE id IN (SELECT id FROM #ids)
+      AND eliminado_en IS NULL
+      AND activo = 1;
 
-    SELECT @@ROWCOUNT AS afectados;
+    UPDATE membresias
+    SET estado = 'cancelada',
+        actualizado_en = GETDATE()
+    OUTPUT inserted.id INTO @MembresiasCanceladas
+    WHERE socio_id IN (SELECT id FROM @SociosAfectados)
+      AND estado = 'activa';
+
+    INSERT INTO membresia_historial
+        (membresia_id, tipo_evento, fecha_desde, fecha_hasta, registrado_por)
+    SELECT
+        m.id, 'anulacion', m.fecha_inicio, m.fecha_vencimiento, NULL
+    FROM membresias m
+    INNER JOIN @MembresiasCanceladas mc ON mc.id = m.id;
+
+    SELECT
+        (SELECT COUNT(*) FROM @SociosAfectados) AS afectados,
+        (SELECT COUNT(*) FROM @MembresiasCanceladas) AS membresias_canceladas;
+
+    SELECT id FROM @MembresiasCanceladas;
 END;
 GO
