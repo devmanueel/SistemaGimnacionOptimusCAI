@@ -883,6 +883,25 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
+        private void btnRenovarMembresia_Click(object sender, RoutedEventArgs e)
+        {
+            var socio = ObtenerSocioDeFila(sender);
+            if (socio == null) return;
+            if (socio.MembresiaId <= 0)
+            {
+                NotificacionWindow.MostrarAdvertencia("Este socio no tiene una membresia asignada.");
+                return;
+            }
+
+            var win = new Ventanas.MembresiaWindow { Owner = Window.GetWindow(this) };
+            win.ConfigurarRenovacion(socio.MembresiaId);
+            if (win.ShowDialog() == true)
+            {
+                CargarSocios();
+                ActualizarStats();
+            }
+        }
+
         private void btnCancelarMembresia_Click(object sender, RoutedEventArgs e)
         {
             var socio = ObtenerSocioDeFila(sender);

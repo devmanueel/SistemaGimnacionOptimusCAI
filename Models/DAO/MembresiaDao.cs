@@ -229,7 +229,10 @@ namespace Models.Dao
         // Retorna la nueva fecha de vencimiento.
         // ──────────────────────────────────────────────────────
         public DateTime? RenovarMembresia(long id, decimal monto, string metodoPago,
-                                          long registradoPor, int diasASumar = 31)
+                                          long registradoPor, int diasASumar = 31,
+                                          long? actividadId = null,
+                                          long? instructorId = null,
+                                          string observaciones = null)
         {
             using (var conn = GetConnection())
             {
@@ -242,6 +245,9 @@ namespace Models.Dao
                     cmd.Parameters.AddWithValue("@MetodoPago", metodoPago ?? "efectivo");
                     cmd.Parameters.AddWithValue("@RegistradoPor", registradoPor);
                     cmd.Parameters.AddWithValue("@DiasASumar", diasASumar);
+                    cmd.Parameters.AddWithValue("@ActividadId", (object)actividadId ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@InstructorId", (object)instructorId ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Observaciones", (object)observaciones ?? DBNull.Value);
 
                     var resultado = cmd.ExecuteScalar();
                     return resultado != null && resultado != DBNull.Value

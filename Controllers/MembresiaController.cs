@@ -198,18 +198,41 @@ namespace Controllers
             decimal monto,
             string metodoPago,
             long registradoPor,
-            int diasASumar = 31)
+            int diasASumar = 31,
+            long? actividadId = null,
+            long? instructorId = null,
+            string observaciones = null)
         {
+            if (id <= 0)
+                return (false, "ID de membresía inválido.", null);
+
             if (monto <= 0)
                 return (false, "El monto debe ser mayor a $0.", null);
 
             if (diasASumar < 1 || diasASumar > 365)
                 return (false, "Los días a sumar deben estar entre 1 y 365.", null);
 
+            if (actividadId.HasValue && actividadId.Value <= 0)
+                return (false, "Actividad inválida.", null);
+
             try
             {
                 DateTime? nueva = _dao.RenovarMembresia(id, monto, metodoPago ?? "efectivo",
-                                                       registradoPor, diasASumar);
+                                                       registradoPor, diasASumar,
+                                                       actividadId, instructorId,
+                                                       string.IsNullOrWhiteSpace(observaciones) ? null : observaciones.Trim());
+
+                if (nueva.HasValue)
+                {
+                    Auditor.Registrar("renovar", "membresia", id, new Dictionary<string, object> {
+                        { "monto_pagado", monto },
+                        { "metodo_pago", metodoPago ?? "efectivo" },
+                        { "dias_sumados", diasASumar },
+                        { "actividad_id", actividadId },
+                        { "instructor_id", instructorId }
+                    });
+                }
+
                 return nueva.HasValue
                     ? (true, "Membresía renovada hasta " + nueva.Value.ToString("dd/MM/yyyy") + ".", nueva)
                     : (false, "No se pudo renovar la membresía.", null);

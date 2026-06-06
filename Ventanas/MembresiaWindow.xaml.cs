@@ -22,6 +22,10 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
         private long _actividadActualId = 0;
         private string _actividadActualCategoria = null;
         private int? _actividadActualNivel = null;
+        private bool _modoRenovacion = false;
+        private string _estadoActual = null;
+        private string _socioNombre = null;
+        private DateTime _vencimientoActual = DateTime.Today;
         private long UsuarioId => SesionManager.HaySesion ? SesionManager.UsuarioId : 1;
 
         public MembresiaWindow()
@@ -61,6 +65,9 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 _actividadActualId = m.ActividadId;
                 _actividadActualCategoria = m.ActividadCategoria;
                 _actividadActualNivel = m.ActividadNivel;
+                _estadoActual = m.Estado;
+                _socioNombre = m.SocioNombre;
+                _vencimientoActual = m.FechaVencimiento;
 
                 cmbSocio.ItemsSource = new List<object> { new { NombreCompleto = m.SocioNombre, Id = m.SocioId } };
                 cmbSocio.SelectedIndex = 0;
@@ -104,6 +111,26 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
             }
         }
 
+        public void ConfigurarRenovacion(long membresiaId)
+        {
+            _modoRenovacion = true;
+            Configurar(membresiaId);
+
+            Title = "Renovar Membresia";
+            lblTituloFormulario.Text = "RENOVAR MEMBRESIA";
+            btnGuardar.Content = "RENOVAR";
+
+            dpInicio.SelectedDate = DateTime.Today;
+            dpVencimiento.SelectedDate = CalcularVencimientoRenovacion();
+            panelUpgrade.Visibility = Visibility.Collapsed;
+
+            var actividad = cmbActividad.SelectedItem as ActividadComboItem;
+            if (actividad != null)
+                txtMonto.Text = actividad.Precio.ToString("F0");
+
+            ActualizarPreviewCobro();
+        }
+
         private void btnCerrar_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
@@ -145,6 +172,42 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
             var metodoItem = cmbMetodoPago.SelectedItem as ComboBoxItem;
             string metodoPago = metodoItem?.Tag?.ToString() ?? "efectivo";
+
+            if (_modoRenovacion)
+            {
+                var confirmar = NotificacionWindow.MostrarConfirmacion(
+                    "Vas a renovar la membresia de:\n\n" +
+                    (_socioNombre ?? "Socio") + "\n" +
+                    "Actividad: " + actividad.Nombre + "\n" +
+                    "Monto: $" + monto.ToString("N0") + "\n" +
+                    "Vencimiento: " + (dpVencimiento.SelectedDate ?? CalcularVencimientoRenovacion()).ToString("dd/MM/yyyy") + "\n\n" +
+                    "Confirmas la renovacion y el cobro?",
+                    "Renovar membresia");
+
+                if (!confirmar) return;
+
+                var r = _membresiaController.Renovar(
+                    _membresiaId,
+                    monto,
+                    metodoPago,
+                    UsuarioId,
+                    31,
+                    actividad.Id,
+                    instructorId,
+                    txtObservaciones.Text.Trim());
+
+                if (!r.ok)
+                {
+                    NotificacionWindow.MostrarError(r.mensaje);
+                    return;
+                }
+
+                NotificacionWindow.MostrarExito(r.mensaje, "Renovacion exitosa");
+                MembresiaGuardada = true;
+                DialogResult = true;
+                Close();
+                return;
+            }
 
             bool esUpgrade = actividad.Id != _actividadActualId
                 && !string.IsNullOrEmpty(_actividadActualCategoria)
@@ -239,6 +302,16 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
             var act = cmbActividad.SelectedItem as ActividadComboItem;
             if (act == null) return;
 
+            if (_modoRenovacion)
+            {
+                panelUpgrade.Visibility = Visibility.Collapsed;
+                txtMonto.Text = act.Precio.ToString("F0");
+                dpInicio.SelectedDate = DateTime.Today;
+                dpVencimiento.SelectedDate = CalcularVencimientoRenovacion();
+                ActualizarPreviewCobro();
+                return;
+            }
+
             if (_membresiaId <= 0)
             {
                 panelUpgrade.Visibility = Visibility.Collapsed;
@@ -287,6 +360,14 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 txtMonto.ClearValue(System.Windows.Controls.TextBox.BorderBrushProperty);
                 txtMonto.ClearValue(System.Windows.Controls.TextBox.BorderThicknessProperty);
             }
+
+            ActualizarPreviewCobro();
+        }
+
+        private void txtMonto_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (_modoRenovacion)
+                ActualizarPreviewCobro();
         }
 
         private void txtSoloNumerosYComa_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -310,6 +391,44 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 if (a != null && a.Id == actividadId) return a.Precio;
             }
             return 0;
+        }
+
+        private DateTime CalcularVencimientoRenovacion()
+        {
+            DateTime hoy = DateTime.Today;
+            if (_estadoActual == "activa" && _vencimientoActual >= hoy)
+                return _vencimientoActual.AddDays(31);
+
+            return hoy.AddDays(31);
+        }
+
+        private void ActualizarPreviewCobro()
+        {
+            if (!_modoRenovacion)
+            {
+                panelPreviewCobro.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            var actividad = cmbActividad.SelectedItem as ActividadComboItem;
+            if (actividad == null)
+            {
+                panelPreviewCobro.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            decimal monto;
+            if (!decimal.TryParse(txtMonto.Text.Trim(), out monto) || monto <= 0)
+            {
+                lblPreviewMonto.Text = "$0";
+            }
+            else
+            {
+                lblPreviewMonto.Text = "$" + monto.ToString("N0");
+            }
+
+            lblPreviewActividad.Text = actividad.Nombre;
+            panelPreviewCobro.Visibility = Visibility.Visible;
         }
     }
 }
