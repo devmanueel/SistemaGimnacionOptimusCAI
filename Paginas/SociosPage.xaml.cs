@@ -860,7 +860,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 if (r.ok)
                 {
                     NotificacionWindow.MostrarExito(r.mensaje, "Baja completada");
-                    CargarSocios();
+                    RefrescarListadoYStats();
                 }
                 else
                 {

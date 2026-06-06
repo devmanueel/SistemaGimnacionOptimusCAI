@@ -472,7 +472,7 @@ namespace SistemaGimnacionOptimusCAI
                 ficha.ShowDialog();
 
                 if (ficha.HuboCambiosSocio)
-                    RefrescarSociosSiEstaAbierta();
+                    RefrescarPaginasAfectadasPorSocio();
             }
             catch (Exception ex)
             {
@@ -480,11 +480,18 @@ namespace SistemaGimnacionOptimusCAI
             }
         }
 
-        private void RefrescarSociosSiEstaAbierta()
+        private void RefrescarPaginasAfectadasPorSocio()
         {
             var sociosPage = frameContenido.Content as SociosPage;
             if (sociosPage != null)
+            {
                 sociosPage.RefrescarListadoYStats();
+                return;
+            }
+
+            var membresiasPage = frameContenido.Content as MembresiasPage;
+            if (membresiasPage != null)
+                membresiasPage.RefrescarListadoYStats();
         }
 
         private void txtBuscadorGlobal_KeyDown(object sender, KeyEventArgs e)

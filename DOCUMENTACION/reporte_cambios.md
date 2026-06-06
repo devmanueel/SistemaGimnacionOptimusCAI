@@ -846,3 +846,50 @@ Ejecutar nuevamente:
 ```
 DataBase\spMembresias.sql
 ```
+
+---
+
+## 20. Correcciones recientes en Socios y Membresias
+
+### Mini resumen
+- Se agrego la validacion de edad minima para crear socios: por ahora solo se permiten socios mayores de 6 anios.
+- La validacion se aplica al presionar `Siguiente` en la ventana emergente `Nuevo Socio`.
+- Tambien se dejo la misma regla en el formulario embebido de `SociosPage` por si ese flujo se vuelve a usar.
+- Al cambiar filtros/chips en Socios, el scroll de la tabla vuelve al inicio para evitar cargas automaticas no deseadas.
+- Al dar de baja o restaurar un socio desde la ficha abierta por el buscador global, se actualizan dinamicamente los stats y listados de Socios.
+- Al dar de baja un socio, sus membresias activas se cancelan automaticamente.
+- La ficha del socio ahora recarga sus membresias al darlo de baja/restaurarlo, para mostrar el estado actualizado sin cerrar y volver a buscar.
+- Tambien se agrego refresco del listado de Membresias si esa pagina esta abierta.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `Ventanas\NuevoSocioWindow.xaml.cs` | Validacion de edad minima de 6 anios al avanzar desde el paso de datos personales |
+| `Paginas\SociosPage.xaml.cs` | Validacion de edad, reset de scroll al cambiar filtros y refresco de stats/listado |
+| `Paginas\FichaSocioWindow.xaml.cs` | Marca de cambios y recarga dinamica de membresias al dar de baja/restaurar |
+| `Paginas\MembresiasPage.xaml.cs` | Metodo publico para refrescar el listado cuando cambia el socio desde otra ventana |
+| `MainWindow.xaml.cs` | Refresco de paginas afectadas cuando la ficha de socio modifica estado |
+| `Models\DAO\SocioDao.cs` | Lectura de membresias canceladas devueltas por los SPs |
+| `Controllers\SocioController.cs` | Auditoria de membresias canceladas por baja de socio |
+| `DataBase\spSocios.sql` | Cancelacion automatica de membresias activas al dar de baja socios |
+
+### SPs a ejecutar
+
+Como se modificaron Stored Procedures de Socios, ejecutar nuevamente:
+
+```
+DataBase\spSocios.sql
+```
+
+Ese script actualiza principalmente:
+
+```
+sp_CambiarEstadoSocio
+sp_DarDeBajaSocios
+```
+
+### Importante
+Para las validaciones de edad, el reset de scroll y el refresco dinamico de la ficha no hace falta ejecutar SPs adicionales.
+
+Si no se ejecuta `DataBase\spSocios.sql`, la aplicacion puede compilar, pero la base no tendra aplicada la cancelacion automatica de membresias activas al dar de baja socios.
