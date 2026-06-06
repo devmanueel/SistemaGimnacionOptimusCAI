@@ -418,6 +418,58 @@ namespace SistemaGimnacionOptimusCAI
             _timerBusqueda.Start();
         }
 
+        private void txtBuscadorGlobal_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (textBox == null) return;
+
+            string textoResultante = ObtenerTextoResultante(textBox, e.Text);
+            e.Handled = EsNumeroLargo(textoResultante);
+        }
+
+        private void txtBuscadorGlobal_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (textBox == null) return;
+
+            if (!e.DataObject.GetDataPresent(typeof(string))) return;
+
+            string textoPegado = e.DataObject.GetData(typeof(string)) as string;
+            string textoResultante = ObtenerTextoResultante(textBox, textoPegado ?? string.Empty);
+
+            if (EsNumeroLargo(textoResultante))
+                e.CancelCommand();
+        }
+
+        private string ObtenerTextoResultante(TextBox textBox, string textoIngresado)
+        {
+            string textoActual = textBox.Text ?? string.Empty;
+            int inicio = textBox.SelectionStart;
+            int largoSeleccion = textBox.SelectionLength;
+
+            if (inicio < 0) inicio = 0;
+            if (inicio > textoActual.Length) inicio = textoActual.Length;
+            if (largoSeleccion < 0) largoSeleccion = 0;
+            if (inicio + largoSeleccion > textoActual.Length)
+                largoSeleccion = textoActual.Length - inicio;
+
+            return textoActual.Remove(inicio, largoSeleccion)
+                              .Insert(inicio, textoIngresado ?? string.Empty);
+        }
+
+        private bool EsNumeroLargo(string texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) return false;
+
+            texto = texto.Trim();
+            if (texto.Length <= 8) return false;
+
+            foreach (char c in texto)
+                if (!char.IsDigit(c)) return false;
+
+            return true;
+        }
+
         private void TimerBusqueda_Tick(object sender, EventArgs e)
         {
             _timerBusqueda.Stop();

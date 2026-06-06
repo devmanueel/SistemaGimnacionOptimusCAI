@@ -168,6 +168,8 @@
                                      Tag="Buscar socio por nombre, apellido o DNI..."
                                      KeyDown="txtBuscadorGlobal_KeyDown"
                                      TextChanged="txtBuscadorGlobal_TextChanged"
+                                     PreviewTextInput="txtBuscadorGlobal_PreviewTextInput"
+                                     DataObject.Pasting="txtBuscadorGlobal_Pasting"
                                      LostFocus="txtBuscadorGlobal_LostFocus"/>
 
                             <Popup x:Name="popupResultados"
