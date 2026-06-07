@@ -62,11 +62,44 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     dpHasta.SelectedDate);
 
                 gridMovimientos.ItemsSource = lista;
+                ActualizarFooterMovimientos(lista);
             }
             catch (Exception ex)
             {
+                ActualizarFooterMovimientos(new List<CajaMovimiento>());
                 NotificacionWindow.MostrarError(ex.Message, "Error al cargar movimientos");
             }
+        }
+
+        private void ActualizarFooterMovimientos(List<CajaMovimiento> movimientos)
+        {
+            int cantidad = movimientos != null ? movimientos.Count : 0;
+            decimal ingresos = 0;
+            decimal gastos = 0;
+
+            if (movimientos != null)
+            {
+                foreach (var mov in movimientos)
+                {
+                    if (mov == null) continue;
+
+                    if (mov.EsIngreso)
+                        ingresos += mov.Monto;
+                    else if (mov.EsGasto)
+                        gastos += mov.Monto;
+                }
+            }
+
+            decimal neto = ingresos - gastos;
+
+            lblTotalRegistros.Text = cantidad == 1
+                ? "1 movimiento"
+                : cantidad + " movimientos";
+
+            lblTotalIngresos.Text = "$" + ingresos.ToString("N0");
+            lblTotalGastos.Text = "$" + gastos.ToString("N0");
+            lblTotalNeto.Text = "$" + neto.ToString("N0");
+            lblTotalNeto.Tag = neto >= 0 ? "positivo" : "negativo";
         }
 
         private void CargarDashboard()

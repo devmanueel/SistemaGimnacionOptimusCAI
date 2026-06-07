@@ -130,7 +130,8 @@ namespace Models.Dao
             string filtroSexo         = null,
             int?   filtroDejaronVenir = null,
             int    pagina             = 1,
-            int    tamPagina          = 8)
+            int    tamPagina          = 8,
+            string ordenamiento       = "nombre_asc")
         {
             var resultado = new ResultadoPaginado<SocioConMembresia>
             {
@@ -153,6 +154,7 @@ namespace Models.Dao
                     cmd.Parameters.AddWithValue("@FiltroDejaronVenir",  (object)filtroDejaronVenir ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@Pagina",              pagina);
                     cmd.Parameters.AddWithValue("@TamPagina",           tamPagina);
+                    cmd.Parameters.AddWithValue("@Ordenamiento",         ordenamiento ?? "nombre_asc");
 
                     using (var reader = cmd.ExecuteReader())
                     {

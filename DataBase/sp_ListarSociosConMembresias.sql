@@ -6,6 +6,10 @@
 --    1) COUNT(*) AS total
 --    2) Datos paginados
 --
+--  Ordenamiento:
+--    Se aplica en SQL antes del OFFSET/FETCH para que la paginacion
+--    infinita respete el orden global, no solo la pagina cargada.
+--
 --  Regla UX:
 --    La grilla de Socios muestra una sola fila por socio.
 --    Los chips Activos/Inactivos filtran por socios.activo.
@@ -26,7 +30,8 @@ CREATE PROCEDURE sp_ListarSociosConMembresias
     @FiltroSexo          VARCHAR(10)   = NULL,
     @FiltroDejaronVenir  INT           = NULL,
     @Pagina              INT           = 1,
-    @TamPagina           INT           = 8
+    @TamPagina           INT           = 8,
+    @Ordenamiento        VARCHAR(30)   = 'nombre_asc'
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -259,7 +264,17 @@ BEGIN
         dias_sin_asistir
     FROM Base
     WHERE rn = 1
-    ORDER BY apellido, nombre
+    ORDER BY
+        CASE WHEN @Ordenamiento = 'nombre_asc' THEN apellido END ASC,
+        CASE WHEN @Ordenamiento = 'nombre_asc' THEN nombre END ASC,
+        CASE WHEN @Ordenamiento = 'nombre_desc' THEN apellido END DESC,
+        CASE WHEN @Ordenamiento = 'nombre_desc' THEN nombre END DESC,
+        CASE WHEN @Ordenamiento = 'vencimiento_desc' THEN CASE WHEN fecha_vencimiento IS NULL THEN 1 ELSE 0 END END ASC,
+        CASE WHEN @Ordenamiento = 'vencimiento_desc' THEN fecha_vencimiento END DESC,
+        CASE WHEN @Ordenamiento = 'vencimiento_asc' THEN CASE WHEN fecha_vencimiento IS NULL THEN 1 ELSE 0 END END ASC,
+        CASE WHEN @Ordenamiento = 'vencimiento_asc' THEN fecha_vencimiento END ASC,
+        apellido ASC,
+        nombre ASC
     OFFSET (@Pagina - 1) * @TamPagina ROWS
     FETCH NEXT @TamPagina ROWS ONLY;
 END;
