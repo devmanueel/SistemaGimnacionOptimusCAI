@@ -276,9 +276,12 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Fechas autom--ticas (regla de negocio: siempre 31 d--as)
+    -- Fechas automaticas (regla de negocio: un mes calendario).
+    -- El vencimiento cae el MISMO dia del mes siguiente (ej: 07/06 -> 07/07),
+    -- no a los 31 dias exactos. DATEADD(MONTH,...) ajusta meses cortos
+    -- (ej: 31/01 -> 28/02).
     SET @FechaInicio = CAST(GETDATE() AS DATE);
-    SET @FechaVencimiento = DATEADD(DAY, 31, @FechaInicio);
+    SET @FechaVencimiento = DATEADD(MONTH, 1, @FechaInicio);
 
     IF NOT EXISTS (SELECT 1 FROM socios WHERE id = @SocioId AND eliminado_en IS NULL)
     BEGIN
@@ -607,15 +610,31 @@ BEGIN
 
     DECLARE @Hoy      DATE = CAST(GETDATE() AS DATE);
     DECLARE @Vencim   DATE;
+    DECLARE @Base     DATE;
 
     -- Obtener vencimiento actual
     SELECT @Vencim = fecha_vencimiento FROM membresias WHERE id = @Id;
 
-    -- Si esta activa y vigente, sumar al vencimiento actual. Si no, arrancar desde hoy.
+    -- Base del calculo: si esta activa y vigente, se suma al vencimiento actual
+    -- (renovacion encadenada). Si no, arranca desde hoy.
     IF @Estado = 'activa' AND @Vencim >= @Hoy
-        SET @Vencim = DATEADD(DAY, @Dias, @Vencim);
+        SET @Base = @Vencim;
     ELSE
-        SET @Vencim = DATEADD(DAY, @Dias, @Hoy);
+        SET @Base = @Hoy;
+
+    -- Planes por mes calendario: el vencimiento cae el MISMO dia del mes
+    -- correspondiente (ej: 07/06 -> 07/07), no a los 31 dias exactos.
+    -- Los planes por dias (clase, semanal, quincenal) mantienen el conteo en dias.
+    IF @TipoPlan = 'mensual'
+        SET @Vencim = DATEADD(MONTH, 1, @Base);
+    ELSE IF @TipoPlan = 'trimestral'
+        SET @Vencim = DATEADD(MONTH, 3, @Base);
+    ELSE IF @TipoPlan = 'semestral'
+        SET @Vencim = DATEADD(MONTH, 6, @Base);
+    ELSE IF @TipoPlan = 'anual'
+        SET @Vencim = DATEADD(MONTH, 12, @Base);
+    ELSE
+        SET @Vencim = DATEADD(DAY, @Dias, @Base);
 
     UPDATE membresias SET
         actividad_id      = @ActividadFinalId,

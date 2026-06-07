@@ -441,13 +441,15 @@
                             <StackPanel x:Name="panelAsignar" Visibility="Collapsed">
                                 <TextBlock Text="ASIGNAR A SOCIO" Style="{StaticResource LabelCampoEstilo}"/>
                                 <ComboBox x:Name="cmbSocio"
-                                          Style="{StaticResource ComboBoxEstilo}"
-                                          VerticalContentAlignment="Center" Height="46">
-                                    <ComboBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding TextoCombo}" Foreground="{StaticResource TextPrimary}"/>
-                                        </DataTemplate>
-                                    </ComboBox.ItemTemplate>
+                                          Style="{StaticResource ComboBoxBuscableEstilo}"
+                                          DisplayMemberPath="TextoCombo"
+                                          TextSearch.TextPath="TextoCombo"
+                                          KeyUp="cmbSocio_KeyUp"
+                                          DropDownClosed="cmbSocio_DropDownClosed">
+                                    <ComboBox.Resources>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
+                                        <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
+                                    </ComboBox.Resources>
                                 </ComboBox>
                                 <Button Content="ASIGNAR CASILLERO"
                                         Style="{StaticResource BotonPrincipalEstilo}"

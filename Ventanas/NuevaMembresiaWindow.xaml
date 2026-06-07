@@ -127,7 +127,7 @@
                             <TextBlock Text="FECHA DE VENCIMIENTO" Style="{StaticResource LabelCampoEstilo}"/>
                             <DatePicker x:Name="dpVencimiento" Style="{StaticResource DatePickerEstilo}"
                                         IsEnabled="False" Margin="0,0,0,4"/>
-                            <TextBlock Text="Se calcula automáticamente (hoy + 31 días)"
+                            <TextBlock Text="Se calcula automáticamente (un mes: mismo día del mes siguiente)"
                                        FontSize="10" FontStyle="Italic"
                                        Foreground="{StaticResource TextMuted}" Margin="0,0,0,14"/>
                         </StackPanel>

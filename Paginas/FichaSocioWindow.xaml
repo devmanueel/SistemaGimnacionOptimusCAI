@@ -374,7 +374,7 @@
                                             Style="{StaticResource BtnActividadAccion}" Background="#1565C0"
                                             Click="btnNuevaMembresia_Click"/>
 
-                                    <Button x:Name="btnRenovarActiva" Content="Renovar (+31 dias)"
+                                    <Button x:Name="btnRenovarActiva" Content="Renovar (+1 mes)"
                                             Style="{StaticResource BtnActividadAccion}" Background="#1B5E20"
                                             Visibility="Collapsed" Click="btnRenovarActiva_Click"/>
 

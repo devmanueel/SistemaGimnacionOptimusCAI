@@ -70,12 +70,22 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarSocios();
             ResaltarChip(chipTodos);
             CambiarTab("datos");
-            if (SesionManager.AbrirPanelAlNavegar)
+            // Abrir el alta de socio diferido al evento Loaded: durante el
+            // constructor la página aún no está adjunta a una ventana, por lo que
+            // Window.GetWindow(this) devuelve null y el popup no puede centrarse
+            // sobre su dueño (WindowStartupLocation="CenterOwner").
+            bool abrirNuevoSocio = SesionManager.AbrirPanelAlNavegar;
+            if (abrirNuevoSocio) SesionManager.AbrirPanelAlNavegar = false;
+
+            Loaded += (s, e) =>
             {
-                SesionManager.AbrirPanelAlNavegar = false;
-                btnNuevo_Click(null, null);
-            }
-            Loaded += (s, e) => SuscribirScrollDataGrid();
+                SuscribirScrollDataGrid();
+                if (abrirNuevoSocio)
+                {
+                    abrirNuevoSocio = false;
+                    btnNuevo_Click(null, null);
+                }
+            };
         }
 
         // ─────────────────────────────────────────────────────
