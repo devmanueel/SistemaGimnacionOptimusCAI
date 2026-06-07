@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace SistemaGimnacionOptimusCAI.Helpers
@@ -369,20 +370,55 @@ namespace SistemaGimnacionOptimusCAI.Helpers
 
         public static BiometricService Servicio => _servicio;
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr LoadLibrary(string lpFileName);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool FreeLibrary(IntPtr hModule);
+
         /// <summary>
         /// Inicializa el servicio en hilo secundario y retorna inmediatamente.
         /// El resultado se lee desde Servicio.Disponible / Servicio.MensajeEstado.
         /// </summary>
         public static void InicializarAsync()
         {
+            if (!EstaDisponibleSdkDigitalPersona())
+            {
+                _servicio = null;
+                return;
+            }
+
             _servicio = new BiometricService();
-            System.Threading.Tasks.Task.Run(() => _servicio.Inicializar());
+            System.Threading.Tasks.Task.Run(() =>
+            {
+                try { _servicio.Inicializar(); }
+                catch { _servicio = null; }
+            });
         }
 
         public static void Liberar()
         {
             _servicio?.Dispose();
             _servicio = null;
+        }
+
+        private static bool EstaDisponibleSdkDigitalPersona()
+        {
+            IntPtr handle = IntPtr.Zero;
+            try
+            {
+                handle = LoadLibrary("DPFPApi.dll");
+                return handle != IntPtr.Zero;
+            }
+            catch
+            {
+                return false;
+            }
+            finally
+            {
+                if (handle != IntPtr.Zero)
+                    FreeLibrary(handle);
+            }
         }
     }
 }
