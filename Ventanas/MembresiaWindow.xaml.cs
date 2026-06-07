@@ -23,6 +23,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
         private string _actividadActualCategoria = null;
         private int? _actividadActualNivel = null;
         private bool _modoRenovacion = false;
+        private bool _permiteCambiarActividadEnRenovacion = true;
         private string _estadoActual = null;
         private string _socioNombre = null;
         private DateTime _vencimientoActual = DateTime.Today;
@@ -113,12 +114,19 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
         public void ConfigurarRenovacion(long membresiaId)
         {
+            ConfigurarRenovacion(membresiaId, true);
+        }
+
+        public void ConfigurarRenovacion(long membresiaId, bool permiteCambiarActividad)
+        {
             _modoRenovacion = true;
+            _permiteCambiarActividadEnRenovacion = permiteCambiarActividad;
             Configurar(membresiaId);
 
             Title = "Renovar Membresia";
             lblTituloFormulario.Text = "RENOVAR MEMBRESIA";
             btnGuardar.Content = "RENOVAR";
+            cmbActividad.IsEnabled = permiteCambiarActividad;
 
             dpInicio.SelectedDate = DateTime.Today;
             dpVencimiento.SelectedDate = CalcularVencimientoRenovacion();
@@ -186,7 +194,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
                 if (!confirmar) return;
 
-                var r = _membresiaController.Renovar(
+                var r = _membresiaController.RenovarDesdeMembresia(
                     _membresiaId,
                     monto,
                     metodoPago,
@@ -304,6 +312,9 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
             if (_modoRenovacion)
             {
+                if (!_permiteCambiarActividadEnRenovacion && act.Id != _actividadActualId)
+                    return;
+
                 panelUpgrade.Visibility = Visibility.Collapsed;
                 txtMonto.Text = act.Precio.ToString("F0");
                 dpInicio.SelectedDate = DateTime.Today;

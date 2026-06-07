@@ -243,6 +243,58 @@ namespace Controllers
             }
         }
 
+        public (bool ok, string mensaje, long membresiaId, DateTime? nuevaFecha) RenovarDesdeMembresia(
+            long id,
+            decimal monto,
+            string metodoPago,
+            long registradoPor,
+            int diasASumar = 31,
+            long? actividadId = null,
+            long? instructorId = null,
+            string observaciones = null)
+        {
+            if (id <= 0)
+                return (false, "ID de membresía inválido.", 0, null);
+
+            Membresia actual = ObtenerPorId(id);
+            if (actual == null)
+                return (false, "Membresía no encontrada.", 0, null);
+
+            long actividadFinalId = actividadId.HasValue ? actividadId.Value : actual.ActividadId;
+
+            if (actual.Estado == "cancelada")
+            {
+                var alta = Insertar(
+                    actual.SocioId,
+                    actividadFinalId,
+                    instructorId,
+                    DateTime.Today,
+                    DateTime.Today.AddDays(diasASumar > 0 ? diasASumar : 31),
+                    monto,
+                    metodoPago ?? "efectivo",
+                    registradoPor,
+                    observaciones,
+                    actual.TipoPlan ?? "mensual");
+
+                if (!alta.ok)
+                    return (false, alta.mensaje, 0, null);
+
+                return (true, alta.mensaje, alta.nuevoId, DateTime.Today.AddDays(diasASumar > 0 ? diasASumar : 31));
+            }
+
+            var renovacion = Renovar(
+                id,
+                monto,
+                metodoPago,
+                registradoPor,
+                diasASumar,
+                actividadFinalId,
+                instructorId,
+                observaciones);
+
+            return (renovacion.ok, renovacion.mensaje, renovacion.ok ? id : 0, renovacion.nuevaFecha);
+        }
+
         // ──────────────────────────────────────────────────────
         // CANCELAR (alias de cambiar estado a "cancelada")
         // ──────────────────────────────────────────────────────

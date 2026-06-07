@@ -16,6 +16,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
     {
         private readonly Socio _socio;
         private Membresia _membresiaActiva;
+        private Membresia _membresiaVencida;
+        private Membresia _membresiaCancelada;
+        private Membresia _membresiaSuspendida;
+        private bool _tieneMembresias;
         private readonly SocioController _socioController = new SocioController();
         private readonly MembresiaController _membresiaController = new MembresiaController();
         private readonly AsistenciaController _asistenciaController = new AsistenciaController();
@@ -72,25 +76,47 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             try
             {
                 _membresiaActiva = null;
+                _membresiaVencida = null;
+                _membresiaCancelada = null;
+                _membresiaSuspendida = null;
+                _tieneMembresias = false;
                 var todas = _membresiaController.BuscarMembresias(_socio.Dni, "todos");
                 var delSocio = new List<Membresia>();
                 foreach (var m in todas)
                 {
                     if (m.SocioId == _socio.Id)
                     {
+                        _tieneMembresias = true;
                         delSocio.Add(m);
-                        if (m.Estado == "activa" && _membresiaActiva == null)
+                        if (m.Estado == "activa" && EsMasNueva(m, _membresiaActiva))
                             _membresiaActiva = m;
+                        else if (m.Estado == "vencida" && EsMasNueva(m, _membresiaVencida))
+                            _membresiaVencida = m;
+                        else if (m.Estado == "cancelada" && EsMasNueva(m, _membresiaCancelada))
+                            _membresiaCancelada = m;
+                        else if (m.Estado == "suspendida" && EsMasNueva(m, _membresiaSuspendida))
+                            _membresiaSuspendida = m;
                     }
                 }
                 listaActividades.ItemsSource = delSocio;
                 lblSinActividades.Visibility = delSocio.Count == 0
                     ? Visibility.Visible : Visibility.Collapsed;
+                ConfigurarAccionesMembresia();
             }
             catch
             {
                 lblSinActividades.Visibility = Visibility.Visible;
+                ConfigurarAccionesMembresia();
             }
+        }
+
+        private bool EsMasNueva(Membresia candidata, Membresia actual)
+        {
+            if (candidata == null) return false;
+            if (actual == null) return true;
+            if (candidata.FechaVencimiento.Date != actual.FechaVencimiento.Date)
+                return candidata.FechaVencimiento.Date > actual.FechaVencimiento.Date;
+            return candidata.Id > actual.Id;
         }
 
         private void CargarAsistencias()
@@ -174,9 +200,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             // Botones del panel derecho que solo aplican a socios activos
             var visActivo = activo ? Visibility.Visible : Visibility.Collapsed;
             btnHuella.Visibility         = visActivo;
-            btnNuevaMembresia.Visibility = visActivo;
             btnRutinas.Visibility        = visActivo;
             btnGenerarCarnet.Visibility  = visActivo;
+            ConfigurarAccionesMembresia();
 
             // Tab de actividades solo si está activo
             tabActividades.Visibility = visActivo;
@@ -184,6 +210,51 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             // Footer: dar de baja (activo) / restaurar (inactivo)
             btnDarDeBaja.Visibility      = activo ? Visibility.Visible : Visibility.Collapsed;
             btnRestaurarSocio.Visibility = activo ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void ConfigurarAccionesMembresia()
+        {
+            if (btnNuevaMembresia == null) return;
+
+            bool socioActivo = _socio != null && _socio.Activo;
+            btnNuevaMembresia.Visibility = Visibility.Collapsed;
+            btnRenovarActiva.Visibility = Visibility.Collapsed;
+            btnEditarMembresia.Visibility = Visibility.Collapsed;
+            btnRenovarVencida.Visibility = Visibility.Collapsed;
+            btnAltaCancelada.Visibility = Visibility.Collapsed;
+            btnCancelarMembresia.Visibility = Visibility.Collapsed;
+
+            if (!socioActivo) return;
+
+            if (_membresiaActiva != null)
+            {
+                btnRenovarActiva.Visibility = Visibility.Visible;
+                btnEditarMembresia.Visibility = Visibility.Visible;
+                btnCancelarMembresia.Visibility = Visibility.Visible;
+                return;
+            }
+
+            if (_membresiaVencida != null)
+            {
+                btnRenovarVencida.Visibility = Visibility.Visible;
+                btnCancelarMembresia.Visibility = Visibility.Visible;
+                return;
+            }
+
+            if (_membresiaSuspendida != null)
+            {
+                btnCancelarMembresia.Visibility = Visibility.Visible;
+                return;
+            }
+
+            if (_membresiaCancelada != null)
+            {
+                btnAltaCancelada.Visibility = Visibility.Visible;
+                return;
+            }
+
+            if (!_tieneMembresias)
+                btnNuevaMembresia.Visibility = Visibility.Visible;
         }
 
         // ──────────────────────────────────────────────────────
@@ -202,7 +273,87 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             // Popup rápido para cambiar / asignar membresía sin salir de la ficha.
             var win = new NuevaMembresiaWindow(_socio) { Owner = this };
             if (win.ShowDialog() == true)
+            {
+                HuboCambiosSocio = true;
                 CargarMembresias();
+            }
+        }
+
+        private void btnRenovarActiva_Click(object sender, RoutedEventArgs e)
+        {
+            if (_membresiaActiva == null) return;
+
+            var win = new MembresiaWindow { Owner = this };
+            win.ConfigurarRenovacion(_membresiaActiva.Id, false);
+            if (win.ShowDialog() == true)
+            {
+                HuboCambiosSocio = true;
+                CargarMembresias();
+            }
+        }
+
+        private void btnEditarMembresia_Click(object sender, RoutedEventArgs e)
+        {
+            if (_membresiaActiva == null) return;
+
+            var win = new MembresiaWindow { Owner = this };
+            win.Configurar(_membresiaActiva.Id);
+            if (win.ShowDialog() == true)
+            {
+                HuboCambiosSocio = true;
+                CargarMembresias();
+            }
+        }
+
+        private void btnRenovarVencida_Click(object sender, RoutedEventArgs e)
+        {
+            if (_membresiaVencida == null) return;
+
+            var win = new MembresiaWindow { Owner = this };
+            win.ConfigurarRenovacion(_membresiaVencida.Id, true);
+            if (win.ShowDialog() == true)
+            {
+                HuboCambiosSocio = true;
+                CargarMembresias();
+            }
+        }
+
+        private void btnAltaCancelada_Click(object sender, RoutedEventArgs e)
+        {
+            if (_membresiaCancelada == null) return;
+
+            var win = new MembresiaWindow { Owner = this };
+            win.ConfigurarRenovacion(_membresiaCancelada.Id, true);
+            if (win.ShowDialog() == true)
+            {
+                HuboCambiosSocio = true;
+                CargarMembresias();
+            }
+        }
+
+        private void btnCancelarMembresia_Click(object sender, RoutedEventArgs e)
+        {
+            Membresia membresia = _membresiaActiva ?? _membresiaVencida ?? _membresiaSuspendida;
+            if (membresia == null) return;
+
+            bool confirmo = NotificacionWindow.MostrarConfirmacion(
+                "¿Querés cancelar la membresía " + membresia.ActividadNombre + "?\n\n" +
+                "El registro se conserva pero queda en estado 'cancelada'.",
+                "Cancelar membresía");
+
+            if (!confirmo) return;
+
+            var r = _membresiaController.Cancelar(membresia.Id, SesionManager.UsuarioId);
+            if (r.ok)
+            {
+                HuboCambiosSocio = true;
+                CargarMembresias();
+                NotificacionWindow.MostrarExito(r.mensaje);
+            }
+            else
+            {
+                NotificacionWindow.MostrarError(r.mensaje);
+            }
         }
 
         /// <summary>Recarga los datos del socio desde la BD y refresca la ficha.</summary>

@@ -900,6 +900,35 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
+        private void btnGestionarSocio_Click(object sender, RoutedEventArgs e)
+        {
+            var fila = ObtenerSocioDeFila(sender);
+            if (fila == null) return;
+
+            try
+            {
+                var socio = _controller.ObtenerPorId(fila.Id);
+                if (socio == null)
+                {
+                    NotificacionWindow.MostrarAdvertencia("No se encontró el socio.");
+                    return;
+                }
+
+                var ficha = new FichaSocioWindow(socio) { Owner = Window.GetWindow(this) };
+                ficha.ShowDialog();
+
+                if (ficha.HuboCambiosSocio)
+                {
+                    CargarSocios();
+                    ActualizarStats();
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError("Error al abrir la ficha del socio.\n" + ex.Message);
+            }
+        }
+
         private void btnEditarMembresia_Click(object sender, RoutedEventArgs e)
         {
             var socio = ObtenerSocioDeFila(sender);
@@ -907,6 +936,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (socio.MembresiaId <= 0)
             {
                 NotificacionWindow.MostrarAdvertencia("Este socio no tiene una membresia asignada.");
+                return;
+            }
+            if (socio.MembresiaEstado != "activa")
+            {
+                NotificacionWindow.MostrarAdvertencia("Solo se puede editar/upgrade una membresia activa.");
                 return;
             }
             var win = new Ventanas.MembresiaWindow { Owner = Window.GetWindow(this) };
@@ -927,9 +961,62 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 NotificacionWindow.MostrarAdvertencia("Este socio no tiene una membresia asignada.");
                 return;
             }
+            if (socio.MembresiaEstado != "activa")
+            {
+                NotificacionWindow.MostrarAdvertencia("Este boton solo renueva membresias activas. Para vencidas usa Renovar vencida.");
+                return;
+            }
 
             var win = new Ventanas.MembresiaWindow { Owner = Window.GetWindow(this) };
-            win.ConfigurarRenovacion(socio.MembresiaId);
+            win.ConfigurarRenovacion(socio.MembresiaId, false);
+            if (win.ShowDialog() == true)
+            {
+                CargarSocios();
+                ActualizarStats();
+            }
+        }
+
+        private void btnRenovarMembresiaVencida_Click(object sender, RoutedEventArgs e)
+        {
+            var socio = ObtenerSocioDeFila(sender);
+            if (socio == null) return;
+            if (socio.MembresiaId <= 0)
+            {
+                NotificacionWindow.MostrarAdvertencia("Este socio no tiene una membresia asignada.");
+                return;
+            }
+            if (socio.MembresiaEstado != "vencida")
+            {
+                NotificacionWindow.MostrarAdvertencia("Esta accion solo aplica a membresias vencidas.");
+                return;
+            }
+
+            var win = new Ventanas.MembresiaWindow { Owner = Window.GetWindow(this) };
+            win.ConfigurarRenovacion(socio.MembresiaId, true);
+            if (win.ShowDialog() == true)
+            {
+                CargarSocios();
+                ActualizarStats();
+            }
+        }
+
+        private void btnAltaDesdeCancelada_Click(object sender, RoutedEventArgs e)
+        {
+            var socio = ObtenerSocioDeFila(sender);
+            if (socio == null) return;
+            if (socio.MembresiaId <= 0)
+            {
+                NotificacionWindow.MostrarAdvertencia("Este socio no tiene una membresia asignada.");
+                return;
+            }
+            if (socio.MembresiaEstado != "cancelada")
+            {
+                NotificacionWindow.MostrarAdvertencia("Esta accion solo aplica a membresias canceladas.");
+                return;
+            }
+
+            var win = new Ventanas.MembresiaWindow { Owner = Window.GetWindow(this) };
+            win.ConfigurarRenovacion(socio.MembresiaId, true);
             if (win.ShowDialog() == true)
             {
                 CargarSocios();

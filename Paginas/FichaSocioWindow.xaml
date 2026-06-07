@@ -49,6 +49,14 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+            <Style x:Key="BtnActividadAccion" TargetType="Button" BasedOn="{StaticResource BtnFichaPanel}">
+                <Setter Property="Height" Value="34"/>
+                <Setter Property="MinWidth" Value="118"/>
+                <Setter Property="Margin" Value="0,0,8,0"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -215,10 +223,6 @@
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="btnNuevaMembresia" Content="🎫  Nueva Membresía"
-                                Style="{StaticResource BtnFichaPanel}" Background="#1565C0"
-                                Click="btnNuevaMembresia_Click"/>
-
                         <Button x:Name="btnRutinas" Content="📋  Rutinas"
                                 Style="{StaticResource BtnFichaPanel}" Background="#1565C0"
                                 Click="btnRutinas_Click"/>
@@ -269,6 +273,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
                             <!-- Header de tabla -->
@@ -361,6 +366,35 @@
                                                Visibility="Collapsed" Margin="0,8,0,0"/>
                                 </StackPanel>
                             </ScrollViewer>
+
+                            <Border Grid.Row="3" BorderBrush="{StaticResource Border1}" BorderThickness="0,1,0,0"
+                                    Margin="0,12,0,0" Padding="0,12,0,0">
+                                <WrapPanel>
+                                    <Button x:Name="btnNuevaMembresia" Content="Nueva Membresía"
+                                            Style="{StaticResource BtnActividadAccion}" Background="#1565C0"
+                                            Click="btnNuevaMembresia_Click"/>
+
+                                    <Button x:Name="btnRenovarActiva" Content="Renovar (+31 dias)"
+                                            Style="{StaticResource BtnActividadAccion}" Background="#1B5E20"
+                                            Visibility="Collapsed" Click="btnRenovarActiva_Click"/>
+
+                                    <Button x:Name="btnEditarMembresia" Content="Membresia"
+                                            Style="{StaticResource BtnActividadAccion}" Background="#1565C0"
+                                            Visibility="Collapsed" Click="btnEditarMembresia_Click"/>
+
+                                    <Button x:Name="btnRenovarVencida" Content="Renovar / Cambiar"
+                                            Style="{StaticResource BtnActividadAccion}" Background="#1B5E20"
+                                            Visibility="Collapsed" Click="btnRenovarVencida_Click"/>
+
+                                    <Button x:Name="btnAltaCancelada" Content="Nueva Membresía"
+                                            Style="{StaticResource BtnActividadAccion}" Background="#1B5E20"
+                                            Visibility="Collapsed" Click="btnAltaCancelada_Click"/>
+
+                                    <Button x:Name="btnCancelarMembresia" Content="Cancelar"
+                                            Style="{StaticResource BtnActividadAccion}" Background="#C62828"
+                                            Visibility="Collapsed" Click="btnCancelarMembresia_Click"/>
+                                </WrapPanel>
+                            </Border>
                         </Grid>
                     </TabItem>
 

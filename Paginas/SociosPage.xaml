@@ -21,6 +21,7 @@
 
             <helpers:ByteToImageConverter x:Key="BytesAImagen"/>
             <helpers:InicialesConverter x:Key="InicialesConverter"/>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
 
             <Style x:Key="InputErrorEstilo" TargetType="TextBox" BasedOn="{StaticResource InputEstilo}">
                 <Setter Property="Background"      Value="#1E0A0A"/>
@@ -658,37 +659,19 @@
                             </DataGridTemplateColumn>
 
                             <!-- Acciones -->
-                            <DataGridTemplateColumn Header="ACCIONES" Width="160">
+                            <DataGridTemplateColumn Header="ACCIONES" Width="110">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal"
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center">
-                                            <Button Style="{StaticResource ButtonStyleRenovar}"
-                                                    Margin="0,0,4,0"
-                                                    ToolTip="Renovar membresía"
-                                                    Click="btnRenovarMembresia_Click">
-                                                <TextBlock Text="+31d"
-                                                           FontSize="11"
-                                                           FontWeight="Bold"
-                                                           Foreground="{StaticResource GreenMain}"/>
-                                            </Button>
-                                            <Button Style="{StaticResource ButtonStyleEditar}"
-                                                    Margin="0,0,4,0"
-                                                    ToolTip="Modificar membresía"
-                                                    Click="btnEditarMembresia_Click">
-                                                <fa:ImageAwesome Icon="Edit"
-                                                                   Foreground="{StaticResource ColorEditarCyan}"
-                                                                   Height="14"/>
-                                            </Button>
-                                            <Button Style="{StaticResource ButtonStyleCancelar}"
-                                                    Click="btnCancelarMembresia_Click"
-                                                    ToolTip="Cancelar membresía">
-                                                <fa:ImageAwesome Icon="Times"
-                                                                   Foreground="#FF5555"
-                                                                   Height="14"/>
-                                            </Button>
-                                        </StackPanel>
+                                        <Button Style="{StaticResource ButtonStyleRenovar}"
+                                                Width="88"
+                                                HorizontalAlignment="Center"
+                                                ToolTip="Abrir ficha del socio"
+                                                Click="btnGestionarSocio_Click">
+                                            <TextBlock Text="Gestionar"
+                                                       FontSize="11"
+                                                       FontWeight="Bold"
+                                                       Foreground="{StaticResource GreenMain}"/>
+                                        </Button>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

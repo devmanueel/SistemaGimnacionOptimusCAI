@@ -113,5 +113,30 @@ namespace Entities
         public string EdadTexto => Edad.HasValue ? Edad.Value.ToString() : "—";
 
         public string NumeroFormateado => NumeroSocio.ToString("D4");
+
+        public bool PuedeRenovarActiva
+        {
+            get { return MembresiaEstado == "activa"; }
+        }
+
+        public bool PuedeEditarMembresia
+        {
+            get { return MembresiaEstado == "activa"; }
+        }
+
+        public bool PuedeRenovarVencida
+        {
+            get { return MembresiaEstado == "vencida"; }
+        }
+
+        public bool PuedeCancelarMembresia
+        {
+            get { return MembresiaEstado == "activa" || MembresiaEstado == "vencida" || MembresiaEstado == "suspendida"; }
+        }
+
+        public bool PuedeAltaDesdeCancelada
+        {
+            get { return MembresiaEstado == "cancelada"; }
+        }
     }
 }
