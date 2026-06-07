@@ -18,6 +18,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
     {
         private readonly ReporteController _ctrl = new ReporteController();
         private readonly ConfiguracionController _configCtrl = new ConfiguracionController();
+        private readonly VentaController _ventaCtrl = new VentaController();
 
         private List<MovimientoReporte> _movimientos = new List<MovimientoReporte>();
         private TotalesReporte _totales = new TotalesReporte();
@@ -553,6 +554,76 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         private void btnActualizarMisVentas_Click(object sender, RoutedEventArgs e) => CargarMisVentas();
+
+        // ─── DETALLE DE UNA VENTA (popup, igual que la sección Ventas) ───
+        private void btnVerDetalleVenta_Click(object sender, RoutedEventArgs e)
+        {
+            var v = (sender as Button)?.DataContext as VentaEmpleado;
+            if (v == null) return;
+
+            try
+            {
+                var venta = _ventaCtrl.ObtenerPorId(v.Id);
+                if (venta == null)
+                {
+                    NotificacionWindow.MostrarError("No se pudo cargar el detalle de la venta.");
+                    return;
+                }
+
+                lblDetalleNumero.Text = "Venta " + venta.NumeroVenta;
+                lblDetalleTotal.Text = venta.TotalTexto;
+                lblDetalleMetodo.Text = "Método: " + venta.MetodoPagoTexto;
+
+                panelDetalleVenta.Children.Clear();
+                panelDetalleVenta.Children.Add(FilaDetalle("PRODUCTO", "CANT.", "SUBTOTAL", true));
+                foreach (var item in venta.Items)
+                    panelDetalleVenta.Children.Add(FilaDetalle(
+                        item.ProductoNombre ?? item.Descripcion,
+                        item.Cantidad.ToString(),
+                        item.SubtotalTexto, false));
+
+                modalDetalleVenta.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                NotificacionWindow.MostrarError(ex.Message);
+            }
+        }
+
+        private void btnCerrarDetalleVenta_Click(object sender, RoutedEventArgs e)
+        {
+            modalDetalleVenta.Visibility = Visibility.Collapsed;
+        }
+
+        private Grid FilaDetalle(string c1, string c2, string c3, bool header)
+        {
+            var g = new Grid { Margin = new Thickness(0, 3, 0, 3) };
+            g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) });
+            g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            Color color = header ? Color.FromRgb(138, 154, 138) : Color.FromRgb(200, 220, 200);
+
+            TextBlock Tb(string t, int col, TextAlignment align)
+            {
+                var tb = new TextBlock
+                {
+                    Text = t,
+                    FontSize = header ? 10 : 12,
+                    FontWeight = header ? FontWeights.Bold : FontWeights.Normal,
+                    Foreground = new SolidColorBrush(color),
+                    TextAlignment = align,
+                    TextWrapping = TextWrapping.Wrap
+                };
+                Grid.SetColumn(tb, col);
+                return tb;
+            }
+
+            g.Children.Add(Tb(c1, 0, TextAlignment.Left));
+            g.Children.Add(Tb(c2, 1, TextAlignment.Center));
+            g.Children.Add(Tb(c3, 2, TextAlignment.Right));
+            return g;
+        }
 
         // ─── EXPORTAR INGRESOS ──────────────────────────────────
         private void btnExportarPdf_Click(object sender, RoutedEventArgs e)

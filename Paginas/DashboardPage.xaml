@@ -433,7 +433,8 @@
                             </Button>
 
                             <Button Style="{StaticResource DashboardAccesoStyle}"
-                                    x:Name="btnRapidoReporte">
+                                    x:Name="btnRapidoReporte"
+                                    Click="btnRapidoReporte_Click">
                                 <StackPanel HorizontalAlignment="Center"
                                             VerticalAlignment="Center">
                                     <fa:ImageAwesome Icon="BarChart" Foreground="{StaticResource GreenMain}"

@@ -283,7 +283,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 }
 
                 decimal? montoParam = monto > 0 ? (decimal?)monto : null;
-                DateTime fechaVenc = dpVencimiento.SelectedDate ?? DateTime.Today.AddDays(31);
+                DateTime fechaVenc = dpVencimiento.SelectedDate ?? DateTime.Today.AddMonths(1);
 
                 var r = _membresiaController.Modificar(
                     _membresiaId, instructorId, fechaVenc,
@@ -406,11 +406,14 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
         private DateTime CalcularVencimientoRenovacion()
         {
+            // Mes calendario: el vencimiento cae el mismo dia del mes siguiente
+            // (ej: 07/06 -> 07/07), no a los 31 dias exactos. Coincide con el
+            // calculo de sp_RenovarMembresia.
             DateTime hoy = DateTime.Today;
             if (_estadoActual == "activa" && _vencimientoActual >= hoy)
-                return _vencimientoActual.AddDays(31);
+                return _vencimientoActual.AddMonths(1);
 
-            return hoy.AddDays(31);
+            return hoy.AddMonths(1);
         }
 
         private void ActualizarPreviewCobro()

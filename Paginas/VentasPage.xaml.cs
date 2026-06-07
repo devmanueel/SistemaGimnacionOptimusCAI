@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
@@ -330,6 +332,50 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             return btn;
         }
 
+        // ── COMBO SOCIO BUSCABLE ──────────────────────────────
+        // Filtra en vivo por nombre, apellido o DNI mientras se tipea,
+        // igual que el buscador de la sección Socios.
+        private void cmbSocio_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Escape || e.Key == Key.Tab ||
+                e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Left || e.Key == Key.Right)
+                return;
+
+            var view = CollectionViewSource.GetDefaultView(cmbSocio.ItemsSource);
+            if (view == null) return;
+
+            string filtro = (cmbSocio.Text ?? string.Empty).Trim().ToLower();
+
+            if (string.IsNullOrEmpty(filtro))
+            {
+                view.Filter = null;
+            }
+            else
+            {
+                view.Filter = o =>
+                {
+                    var s = o as SocioComboItem;
+                    if (s == null) return false;
+
+                    string nombreCompleto = ((s.Nombre ?? "") + " " + (s.Apellido ?? "")).ToLower();
+                    string apellidoNombre = ((s.Apellido ?? "") + " " + (s.Nombre ?? "")).ToLower();
+
+                    return nombreCompleto.Contains(filtro)
+                        || apellidoNombre.Contains(filtro)
+                        || (s.Dni ?? "").ToLower().Contains(filtro)
+                        || s.TextoCombo.ToLower().Contains(filtro);
+                };
+            }
+
+            cmbSocio.IsDropDownOpen = true;
+        }
+
+        private void cmbSocio_DropDownClosed(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(cmbSocio.ItemsSource);
+            if (view != null) view.Filter = null;
+        }
+
         // ── FILTROS ───────────────────────────────────────────
         private void txtBuscar_TextChanged(object sender, TextChangedEventArgs e) => CargarVentas();
         private void txtBuscarProducto_TextChanged(object sender, TextChangedEventArgs e) => RenderizarCatalogo();
@@ -365,6 +411,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             _carrito.Clear();
             cmbSocio.SelectedIndex = -1;
+            cmbSocio.Text = string.Empty;
             cmbMetodoPago.SelectedIndex = 0;
             txtBuscarProducto.Text = string.Empty;
             RenderizarCarrito();

@@ -624,5 +624,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void btnRapidoTurno_Click(object sender, RoutedEventArgs e)
             => NavegarConSidebar(typeof(TurnosPage), true);
+
+        private void btnRapidoReporte_Click(object sender, RoutedEventArgs e)
+            => NavegarConSidebar(typeof(ReportesPage));
     }
 }

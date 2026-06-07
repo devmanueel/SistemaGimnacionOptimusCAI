@@ -165,7 +165,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             dpInicio.SelectedDate = DateTime.Today;
             dpInicio.IsEnabled = false;
-            dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+            dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
             dpVencimiento.IsEnabled = false;
 
             cmbActividad.Focus();
@@ -379,7 +379,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             LimpiarErrores();
 
             dpInicio.SelectedDate = DateTime.Today;
-            dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+            dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
             cmbMetodoPago.SelectedIndex = 0;
             AbrirFormulario("COBRAR CUOTA");
         }
@@ -525,7 +525,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var metodoItem = cmbMetodoPago.SelectedItem as ComboBoxItem;
 
             DateTime inicio = DateTime.Today;
-            DateTime venc = DateTime.Today.AddDays(31);
+            DateTime venc = DateTime.Today.AddMonths(1);
             decimal monto = 0;
             decimal.TryParse(txtMonto.Text, out monto);
 
@@ -776,7 +776,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (_esNuevo)
             {
                 dpInicio.SelectedDate = DateTime.Today;
-                dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+                dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
                 cmbActividad.IsEnabled = true;
             }
             else
@@ -815,7 +815,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             cmbInstructor.SelectedIndex = 0;
             dpInicio.SelectedDate = DateTime.Today;
             dpInicio.IsEnabled = false;
-            dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+            dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
             dpVencimiento.IsEnabled = false;
             txtMonto.Text = string.Empty;
             txtMonto.IsEnabled = true;
