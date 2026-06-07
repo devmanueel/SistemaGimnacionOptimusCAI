@@ -1,4 +1,4 @@
-// Models/DAO/EstadisticasDao.cs — C# 7.3
+﻿// Models/DAO/EstadisticasDao.cs — C# 7.3
 using Entities;
 using System;
 using System.Collections.Generic;

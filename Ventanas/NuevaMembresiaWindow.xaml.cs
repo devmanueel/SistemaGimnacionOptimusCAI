@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  Archivo: NuevaMembresiaWindow.xaml.cs
 //
 //  Ventana emergente de cambio/alta rápida de membresía para un

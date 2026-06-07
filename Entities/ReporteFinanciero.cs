@@ -1,4 +1,4 @@
-// Entities/ReporteFinanciero.cs — C# 7.3
+﻿// Entities/ReporteFinanciero.cs — C# 7.3
 using System;
 
 namespace Entities

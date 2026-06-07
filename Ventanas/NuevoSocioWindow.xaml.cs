@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  Archivo: NuevoSocioWindow.xaml.cs
 //
 //  Ventana emergente de 2 pasos para crear socio + membresía.

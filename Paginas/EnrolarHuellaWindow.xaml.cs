@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  Paginas/EnrolarHuellaWindow.xaml.cs
 //
 //  Guía al operador a través del proceso de enrolamiento

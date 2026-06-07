@@ -1,4 +1,4 @@
-// Models/DAO/ReporteDao.cs — C# 7.3
+﻿// Models/DAO/ReporteDao.cs — C# 7.3
 using Entities;
 using System;
 using System.Collections.Generic;

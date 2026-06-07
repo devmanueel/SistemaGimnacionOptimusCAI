@@ -1,4 +1,4 @@
-// Helpers/ReportePdfExportador.cs — C# 7.3
+﻿// Helpers/ReportePdfExportador.cs — C# 7.3
 // Requiere: iTextSharp 5.5.13.3
 using Entities;
 using iTextSharp.text;
