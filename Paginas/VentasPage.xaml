@@ -428,15 +428,18 @@
                         <!-- Socio + metodo -->
                         <StackPanel Grid.Row="2" Margin="22,0,22,12">
                             <TextBlock Text="CLIENTE" Style="{StaticResource LabelCampoEstilo}"/>
-                            <ComboBox x:Name="cmbSocio" Style="{StaticResource ComboBoxEstilo}"
-                                      Foreground="{StaticResource TextPrimary}" VerticalContentAlignment="Center"
-                                      FontSize="12" Padding="10,0" IsTextSearchEnabled="True" DisplayMemberPath="TextoCombo">
+                            <ComboBox x:Name="cmbSocio" Style="{StaticResource ComboBoxBuscableEstilo}"
+                                      FontSize="12"
+                                      DisplayMemberPath="TextoCombo"
+                                      TextSearch.TextPath="TextoCombo"
+                                      KeyUp="cmbSocio_KeyUp"
+                                      DropDownClosed="cmbSocio_DropDownClosed">
                                 <ComboBox.Resources>
                                     <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}" Color="#111811"/>
                                     <SolidColorBrush x:Key="{x:Static SystemColors.WindowTextBrushKey}" Color="#E8F5E8"/>
                                 </ComboBox.Resources>
                             </ComboBox>
-                            <TextBlock Text="Dejar vacio para venta a publico general"
+                            <TextBlock Text="Escribi nombre, apellido o DNI. Dejar vacio para venta a publico general"
                                        FontSize="10" Foreground="{StaticResource TextMuted}"
                                        FontStyle="Italic" Margin="2,0,0,10"/>
 

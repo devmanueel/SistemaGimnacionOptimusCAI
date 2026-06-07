@@ -670,11 +670,77 @@
                             <DataGridTextColumn Header="ÍTEMS"    Binding="{Binding CantidadItems}"  Width="70"/>
                             <DataGridTextColumn Header="MÉTODO"   Binding="{Binding MetodoPago}"     Width="110"/>
                             <DataGridTextColumn Header="TOTAL"    Binding="{Binding TotalTexto}"     Width="100"/>
+                            <DataGridTemplateColumn Header="DETALLE" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="VER DETALLE"
+                                                FontSize="11" Cursor="Hand"
+                                                Padding="8,3" Margin="2"
+                                                Background="#16301E" Foreground="#7AC943"
+                                                BorderBrush="#2C5A2C" BorderThickness="1"
+                                                Click="btnVerDetalleVenta_Click"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>
 
             </Grid>
         </ScrollViewer>
+
+        <!-- ═══════════════════════════════════════════════════════
+             MODAL DETALLE DE VENTA — mismo estilo que el ticket de la
+             sección Ventas. Se llena dinámicamente desde el code-behind.
+        ═══════════════════════════════════════════════════════ -->
+        <Border x:Name="modalDetalleVenta" Grid.RowSpan="3"
+                Background="#CC000000" Visibility="Collapsed">
+            <Border Width="420" MaxHeight="560"
+                    VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Background="#0E140E" BorderBrush="#2C5A2C"
+                    BorderThickness="1" CornerRadius="14">
+                <Grid Margin="22">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="lblDetalleNumero" Text="Venta"
+                                   FontSize="16" FontWeight="Bold" Foreground="#E8F0E8"/>
+                        <Button Grid.Column="1" Content="✕" Width="28" Height="28"
+                                Background="Transparent" BorderThickness="0" Foreground="#8A9A8A"
+                                FontSize="14" Cursor="Hand" Click="btnCerrarDetalleVenta_Click"/>
+                    </Grid>
+
+                    <Border Grid.Row="1" Height="1" Background="#2C5A2C" Margin="0,12,0,12"/>
+
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto"
+                                  Style="{StaticResource PanelScrollViewerStyle}">
+                        <StackPanel x:Name="panelDetalleVenta"/>
+                    </ScrollViewer>
+
+                    <Border Grid.Row="3" Height="1" Background="#2C5A2C" Margin="0,12,0,10"/>
+
+                    <Grid Grid.Row="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="lblDetalleMetodo" Text=""
+                                   FontSize="11" Foreground="#8A9A8A" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="lblDetalleTotal" Grid.Column="1" Text="$0"
+                                   FontSize="18" FontWeight="Bold" Foreground="#7AC943"/>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Border>
     </Grid>
 </Page>

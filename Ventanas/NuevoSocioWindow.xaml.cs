@@ -40,7 +40,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
         {
             InitializeComponent();
             CargarCombos();
-            dpVencimiento.SelectedDate = DateTime.Today.AddDays(31);
+            dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
         }
 
         // ── Carga de combos ───────────────────────────────────
@@ -146,7 +146,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 actividadId:      actividad.Id,
                 instructorId:     instructorId,
                 fechaInicio:      DateTime.Today,
-                fechaVencimiento: DateTime.Today.AddDays(31),
+                fechaVencimiento: DateTime.Today.AddMonths(1),
                 montoPagado:      actividad.Precio,
                 metodoPago:       metodoPago,
                 registradoPor:    SesionManager.HaySesion ? SesionManager.UsuarioId : 0L,

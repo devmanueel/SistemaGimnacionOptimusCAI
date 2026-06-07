@@ -351,7 +351,7 @@
                                             <!-- RENOVAR -->
                                             <Button Style="{StaticResource ButtonStyleRenovar}" 
             Click="btnRenovar_Click" 
-            ToolTip="Renovar membresía (+31 días)"
+            ToolTip="Renovar membresía (+1 mes)"
                                                         Margin="0,0,4,0">
                                                 <TextBlock Text="+31d" FontSize="11" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
                                             </Button>

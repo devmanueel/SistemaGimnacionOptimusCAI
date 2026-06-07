@@ -57,7 +57,7 @@ namespace Controllers
             if (err != null) return (false, err, 0);
 
             fechaInicio = DateTime.Today;
-            fechaVencimiento = DateTime.Today.AddDays(31);
+            fechaVencimiento = DateTime.Today.AddMonths(1);
 
             var membresia = new Membresia
             {
@@ -269,7 +269,7 @@ namespace Controllers
                     actividadFinalId,
                     instructorId,
                     DateTime.Today,
-                    DateTime.Today.AddDays(diasASumar > 0 ? diasASumar : 31),
+                    DateTime.Today.AddMonths(1),
                     monto,
                     metodoPago ?? "efectivo",
                     registradoPor,
@@ -279,7 +279,7 @@ namespace Controllers
                 if (!alta.ok)
                     return (false, alta.mensaje, 0, null);
 
-                return (true, alta.mensaje, alta.nuevoId, DateTime.Today.AddDays(diasASumar > 0 ? diasASumar : 31));
+                return (true, alta.mensaje, alta.nuevoId, DateTime.Today.AddMonths(1));
             }
 
             var renovacion = Renovar(
