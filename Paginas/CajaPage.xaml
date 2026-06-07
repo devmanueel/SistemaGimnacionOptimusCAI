@@ -493,7 +493,7 @@
                                                 Binding="{Binding DescripcionInteligente}" Width="2*"/>
 
                             <DataGridTextColumn Header="SOCIO"
-                                                Binding="{Binding SocioNombre}" Width="1.4*"/>
+                                                Binding="{Binding SocioNombre}" Width="1.2*"/>
 
                             <!-- Monto con signo — alineado a la derecha -->
                             <DataGridTemplateColumn Header="MONTO" Width="1*">
