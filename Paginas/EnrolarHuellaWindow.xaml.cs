@@ -19,7 +19,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
     public partial class EnrolarHuellaWindow : Window
     {
         private readonly Socio _socio;
+        private readonly Usuario _usuario;
         private readonly SocioController _socioController = new SocioController();
+        private readonly UsuarioController _usuarioController = new UsuarioController();
+
+        // Estrategia de guardado según la entidad (socio o docente).
+        private readonly Func<Guid, byte[], (bool ok, string mensaje)> _guardarHuella;
+
         private CancellationTokenSource _cts;
 
         public bool Exito { get; private set; }
@@ -29,6 +35,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             InitializeComponent();
             _socio = socio;
             lblSocioNombre.Text = socio.NombreCompleto + " — " + socio.NumeroFormateado;
+            _guardarHuella = (guid, template) =>
+                _socioController.GuardarHuella(_socio.Id, guid, template);
+        }
+
+        public EnrolarHuellaWindow(Usuario usuario)
+        {
+            InitializeComponent();
+            _usuario = usuario;
+            lblSocioNombre.Text = usuario.NombreCompleto + " — Docente";
+            _guardarHuella = (guid, template) =>
+                _usuarioController.GuardarHuella(_usuario.Id, guid, template);
         }
 
         // ── Ciclo de vida ───────────────────────────────────────
@@ -101,19 +118,20 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (exito)
             {
                 // Guardar el GUID lógico + el template biométrico en la BD
-                var res = _socioController.GuardarHuella(_socio.Id, guid, template);
+                var res = _guardarHuella(guid, template);
                 if (!res.ok)
                 {
                     MostrarError("Huella capturada pero no se pudo guardar: " + res.mensaje);
                     return;
                 }
 
-                _socio.HuellaGuid = guid;
+                if (_socio != null) _socio.HuellaGuid = guid;
+                if (_usuario != null) _usuario.HuellaGuid = guid;
                 Exito = true;
                 iconHuella.Foreground = new SolidColorBrush(Color.FromRgb(0x4A, 0xDE, 0x80));
                 iconHuella.Icon = FontAwesome.WPF.FontAwesomeIcon.CheckCircle;
                 lblEstado.Text  = "¡Huella registrada correctamente!";
-                lblDetalle.Text = "El socio ya puede ingresar con su huella.";
+                lblDetalle.Text = "Ya puede registrar su asistencia con la huella.";
                 lblCapturas.Text = "4 / 4 capturas";
                 dot1.Fill = dot2.Fill = dot3.Fill = dot4.Fill =
                     new SolidColorBrush(Color.FromRgb(0x4A, 0xDE, 0x80));

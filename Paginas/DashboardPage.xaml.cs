@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,14 +21,22 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private readonly AsistenciaController _asistenciaCtrl = new AsistenciaController();
         private readonly InstructorAsistenciaController _instructorCtrl = new InstructorAsistenciaController();
         private readonly NotificacionMembresiaController _notificacionCtrl = new NotificacionMembresiaController();
+        private readonly SocioController _socioCtrl = new SocioController();
+        private readonly UsuarioController _usuarioCtrl = new UsuarioController();
 
         private DispatcherTimer _timerOcultar;
         private int _versionResultado;
+
+        // ── Reconocimiento de huella ───────────────────────────────
+        private CancellationTokenSource _huellaCts;
+        private DispatcherTimer _huellaInitTimer;
+        private int _huellaInitIntentos;
 
         public DashboardPage()
         {
             InitializeComponent();
             Loaded += DashboardPage_Loaded;
+            Unloaded += DashboardPage_Unloaded;
         }
 
         private void DashboardPage_Loaded(object sender, RoutedEventArgs e)
@@ -35,7 +44,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             CargarDatosUsuario();
             CargarFecha();
             CargarAlertasMembresias();
+            IniciarReconocimientoHuella();
             txtDni.Focus();
+        }
+
+        private void DashboardPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            DetenerReconocimientoHuella();
         }
 
         private void CargarDatosUsuario()
@@ -206,7 +221,132 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             ProcesarAsistencia();
         }
 
-        private void ProcesarAsistencia()
+        // ─────────────────────────────────────────────────────
+        // RECONOCIMIENTO DE HUELLA (automático en Inicio)
+        //  · Combina las huellas de socios y docentes.
+        //  · Al reconocer una, registra asistencia automáticamente
+        //    (socio = acceso con su membresía; docente = fichaje
+        //    entrada/salida con espera de 10 minutos).
+        // ─────────────────────────────────────────────────────
+        private void IniciarReconocimientoHuella()
+        {
+            DetenerReconocimientoHuella();
+
+            var servicio = BiometricManager.Servicio;
+
+            // El servicio se inicializa en segundo plano al arrancar la app.
+            // Si todavía no está listo, reintentamos unas cuantas veces.
+            if (servicio == null || !servicio.Disponible)
+            {
+                if (servicio != null && !servicio.Disponible &&
+                    !string.IsNullOrEmpty(servicio.MensajeEstado) &&
+                    _huellaInitIntentos >= 8)
+                {
+                    // Ya esperamos suficiente: el lector no está disponible.
+                    ActualizarEstadoHuella(false, servicio.MensajeEstado);
+                    return;
+                }
+
+                ActualizarEstadoHuella(false, "Iniciando lector de huellas...");
+                ProgramarReintentoHuella();
+                return;
+            }
+
+            // Cargar las huellas de socios + docentes (identificación 1:N)
+            var plantillas = new List<(Guid guid, byte[] template)>();
+            try { plantillas.AddRange(_socioCtrl.ObtenerHuellas()); } catch { }
+            try { plantillas.AddRange(_usuarioCtrl.ObtenerHuellas()); } catch { }
+
+            if (plantillas.Count == 0)
+            {
+                ActualizarEstadoHuella(true,
+                    "Lector listo. Aún no hay huellas registradas — usá el DNI.");
+                return;
+            }
+
+            ActualizarEstadoHuella(true, "Apoyá tu huella para registrar tu asistencia.");
+
+            _huellaCts = new CancellationTokenSource();
+            var token = _huellaCts.Token;
+            System.Threading.Tasks.Task.Run(() =>
+                servicio.IniciarIdentificacion(plantillas, token, OnHuellaIdentificada));
+        }
+
+        private void ProgramarReintentoHuella()
+        {
+            if (_huellaInitTimer == null)
+            {
+                _huellaInitTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+                _huellaInitTimer.Tick += (s, e) =>
+                {
+                    _huellaInitTimer.Stop();
+                    _huellaInitIntentos++;
+                    IniciarReconocimientoHuella();
+                };
+            }
+            _huellaInitTimer.Start();
+        }
+
+        private void DetenerReconocimientoHuella()
+        {
+            if (_huellaInitTimer != null) _huellaInitTimer.Stop();
+
+            if (_huellaCts != null)
+            {
+                try { _huellaCts.Cancel(); } catch { }
+                _huellaCts = null;
+            }
+
+            try { BiometricManager.Servicio?.Cancelar(); } catch { }
+        }
+
+        // Corre en hilo secundario (bucle de identificación del SDK).
+        private void OnHuellaIdentificada(Guid? match)
+        {
+            if (!match.HasValue)
+            {
+                Dispatcher.Invoke(() =>
+                    MostrarError("Huella no reconocida. Probá de nuevo o ingresá tu DNI."));
+                return;
+            }
+
+            // Resolver el DNI. Un docente tiene precedencia sobre un socio
+            // (un docente no puede ser socio).
+            string dni = null;
+            try { dni = _usuarioCtrl.ObtenerDniPorHuellaGuid(match.Value); } catch { }
+            if (string.IsNullOrEmpty(dni))
+            {
+                try { dni = _socioCtrl.ObtenerDniPorHuellaGuid(match.Value); } catch { }
+            }
+
+            Dispatcher.Invoke(() =>
+            {
+                if (string.IsNullOrEmpty(dni))
+                {
+                    MostrarError("Huella reconocida, pero la persona no está activa.");
+                    return;
+                }
+
+                txtDni.Text = dni;
+                ProcesarAsistencia("huella");
+            });
+        }
+
+        private void ActualizarEstadoHuella(bool disponible, string mensaje)
+        {
+            if (lblHuellaEstado == null) return;
+
+            lblHuellaEstado.Text = mensaje;
+
+            Color color = disponible
+                ? Color.FromRgb(0x4A, 0xDE, 0x80)   // verde
+                : Color.FromRgb(0xAA, 0xAA, 0xCC);  // gris/muted
+            var brush = new SolidColorBrush(color);
+            lblHuellaEstado.Foreground = brush;
+            if (iconHuellaDash != null) iconHuellaDash.Foreground = brush;
+        }
+
+        private void ProcesarAsistencia(string metodo = "dni_pin")
         {
             string dni = txtDni.Text.Trim();
             if (string.IsNullOrEmpty(dni)) return;
@@ -221,7 +361,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             if (tipo == "socio")
             {
-                ProcesarSocio(dni);
+                ProcesarSocio(dni, metodo);
             }
             else if (tipo == "instructor")
             {
@@ -229,9 +369,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        private void ProcesarSocio(string dni)
+        private void ProcesarSocio(string dni, string metodo = "dni_pin")
         {
-            ResultadoValidacion resultado = _asistenciaCtrl.ValidarAcceso(dni);
+            ResultadoValidacion resultado = _asistenciaCtrl.ValidarAcceso(dni, metodo);
             MostrarResultadoSocio(resultado);
         }
 

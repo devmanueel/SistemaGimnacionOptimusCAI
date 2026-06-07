@@ -20,6 +20,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
         private bool _esNuevo = true;
         private long _idEditar = 0;
+        private Usuario _usuarioEditar;   // referencia al docente en modo edición (para la huella)
 
         public UsuarioWindow()
         {
@@ -31,17 +32,22 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
         {
             _esNuevo = true;
             _idEditar = 0;
+            _usuarioEditar = null;
             _fotoBytes = null;
             lblTituloFormulario.Text = "NUEVO USUARIO";
             lblClave.Text = "CONTRASEÑA *";
             lblClaveAclaracion.Visibility = Visibility.Collapsed;
             LimpiarFormulario();
+
+            // La huella se registra recién después de crear el usuario.
+            panelHuella.Visibility = Visibility.Collapsed;
         }
 
         public void ModoEditar(Usuario usuario)
         {
             _esNuevo = false;
             _idEditar = usuario.Id;
+            _usuarioEditar = usuario;
 
             lblTituloFormulario.Text = "EDITAR USUARIO";
             txtNombre.Text = usuario.Nombre;
@@ -70,6 +76,121 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
             lblClave.Text = "NUEVA CONTRASEÑA  (opcional)";
             lblClaveAclaracion.Visibility = Visibility.Visible;
+
+            ActualizarPanelHuella();
+        }
+
+        // ─────────────────────────────────────────────────────────
+        // HUELLA DIGITAL (solo docentes)
+        // ─────────────────────────────────────────────────────────
+
+        private void cmbRol_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // El panel de huella solo aplica al editar un docente ya creado.
+            ActualizarPanelHuella();
+        }
+
+        /// <summary>Muestra/oculta y configura el botón de huella según el rol y el lector.</summary>
+        private void ActualizarPanelHuella()
+        {
+            if (panelHuella == null) return;
+
+            bool esDocente = EsRolDocenteSeleccionado();
+
+            // En alta no hay usuario aún: la huella se ofrece después de guardar.
+            if (_esNuevo || _usuarioEditar == null || !esDocente)
+            {
+                panelHuella.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            panelHuella.Visibility = Visibility.Visible;
+
+            var servicio = BiometricManager.Servicio;
+            bool lectorDisponible = servicio != null && servicio.Disponible;
+
+            if (!lectorDisponible)
+            {
+                btnHuella.IsEnabled = false;
+                lblBtnHuella.Text = "Huella (lector no disponible)";
+                lblHuellaEstado.Text = servicio != null
+                    ? servicio.MensajeEstado
+                    : "Servicio biométrico no inicializado.";
+                return;
+            }
+
+            btnHuella.IsEnabled = true;
+            bool tieneHuella = _usuarioEditar.TieneHuella;
+            lblBtnHuella.Text = tieneHuella ? "Actualizar Huella" : "Registrar Huella";
+            iconBtnHuella.Foreground = tieneHuella
+                ? new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromRgb(0x4A, 0xDE, 0x80))
+                : System.Windows.Media.Brushes.White;
+            lblHuellaEstado.Text = tieneHuella
+                ? "El docente ya tiene una huella registrada. Podés volver a capturarla."
+                : "Registrá la huella para que el docente fiche su asistencia.";
+        }
+
+        private bool EsRolDocenteSeleccionado()
+        {
+            var rolItem = cmbRol.SelectedItem as ComboBoxItem;
+            if (rolItem == null || rolItem.Tag == null) return false;
+            return Convert.ToInt32(rolItem.Tag) == 2;
+        }
+
+        /// <summary>Pregunta y, si el operador acepta, abre el enrolamiento de huella del docente.</summary>
+        private void OfrecerEnrolarHuella(Usuario docente)
+        {
+            bool registrar = NotificacionWindow.MostrarConfirmacion(
+                "Usuario docente creado correctamente.\n\n" +
+                "¿Querés registrar su huella digital ahora?",
+                "Huella digital");
+            if (!registrar) return;
+
+            var servicio = BiometricManager.Servicio;
+            if (servicio == null || !servicio.Disponible)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "El lector de huellas no está disponible en este momento.\n" +
+                    (servicio != null ? servicio.MensajeEstado
+                        : "Podés registrar la huella más tarde editando el docente."),
+                    "Lector no disponible");
+                return;
+            }
+
+            var win = new SistemaGimnacionOptimusCAI.Paginas.EnrolarHuellaWindow(docente)
+            {
+                Owner = this
+            };
+            win.ShowDialog();
+        }
+
+        private void btnHuella_Click(object sender, RoutedEventArgs e)
+        {
+            if (_usuarioEditar == null) return;
+
+            var servicio = BiometricManager.Servicio;
+            if (servicio == null || !servicio.Disponible)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "El lector de huellas no está disponible en este momento.\n" +
+                    (servicio != null ? servicio.MensajeEstado : ""),
+                    "Lector no disponible");
+                return;
+            }
+
+            var win = new SistemaGimnacionOptimusCAI.Paginas.EnrolarHuellaWindow(_usuarioEditar)
+            {
+                Owner = this
+            };
+            if (win.ShowDialog() == true)
+            {
+                // EnrolarHuellaWindow ya actualizó _usuarioEditar.HuellaGuid
+                ActualizarPanelHuella();
+                NotificacionWindow.MostrarExito(
+                    "Huella registrada. El docente ya puede fichar con su huella.",
+                    "Huella digital");
+            }
         }
 
         private void btnCerrar_Click(object sender, RoutedEventArgs e)
@@ -125,6 +246,20 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
                 NotificacionWindow.MostrarExito(r.mensaje, "¡Usuario registrado!");
+
+                // Si es docente, ofrecer registrar su huella ahora (igual que el socio).
+                if (rolId == 2 && r.nuevoId > 0)
+                {
+                    var docente = new Usuario
+                    {
+                        Id = r.nuevoId,
+                        RolId = rolId,
+                        Nombre = txtNombre.Text.Trim(),
+                        Apellido = txtApellido.Text.Trim(),
+                        Dni = txtDni.Text.Trim()
+                    };
+                    OfrecerEnrolarHuella(docente);
+                }
             }
             else
             {

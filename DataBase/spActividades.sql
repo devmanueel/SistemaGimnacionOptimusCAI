@@ -149,6 +149,28 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Al DAR DE BAJA (desactivar) una actividad, no permitir si tiene
+    -- socios activos (membresías en estado 'activa'). Primero hay que dar
+    -- de baja a esos socios o cambiarles la membresía.
+    IF @Activo = 0
+    BEGIN
+        DECLARE @SociosActivos INT;
+        SELECT @SociosActivos = COUNT(DISTINCT m.socio_id)
+        FROM membresias m
+        WHERE m.actividad_id = @Id AND m.estado = 'activa';
+
+        IF @SociosActivos > 0
+        BEGIN
+            DECLARE @Msg NVARCHAR(400) =
+                N'No se puede dar de baja la actividad: tiene ' +
+                CAST(@SociosActivos AS NVARCHAR(10)) +
+                N' socio(s) activo(s). Primero dá de baja a esos socios ' +
+                N'(o cambiá su membresía a otra actividad).';
+            RAISERROR(@Msg, 16, 1);
+            RETURN;
+        END
+    END
+
     UPDATE actividades SET activo = @Activo WHERE id = @Id;
     SELECT @@ROWCOUNT AS filas_afectadas;
 END;

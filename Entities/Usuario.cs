@@ -25,6 +25,10 @@ namespace Entities
         public bool Activo { get; set; }
         public decimal TarifaHora { get; set; }
 
+        // ── Huella digital (docentes/instructores) ────────────────
+        /// <summary>Identidad lógica de la huella. Su template vive en SQL.</summary>
+        public System.Guid? HuellaGuid { get; set; }
+
         // ── Viene del JOIN con la tabla roles ─────────────────────
         public string RolNombre { get; set; }  // "admin" o "empleado"
 
@@ -51,5 +55,11 @@ namespace Entities
         public string EstadoTexto => Activo ? "Activo" : "Inactivo";
 
         public string TarifaTexto => TarifaHora > 0 ? "$" + TarifaHora.ToString("N2") + "/h" : "-";
+
+        /// <summary>True si el docente tiene una huella digital registrada.</summary>
+        public bool TieneHuella => HuellaGuid.HasValue;
+
+        /// <summary>True si el usuario es docente/instructor (rol_id = 2).</summary>
+        public bool EsDocente => RolId == 2;
     }
 }

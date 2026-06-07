@@ -97,8 +97,6 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" CornerRadius="10"
@@ -129,26 +127,6 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0">
-                        <TextBlock x:Name="statDenegados" Text="—"
-                                   FontSize="26" FontWeight="Bold" Foreground="{StaticResource ColorError}"/>
-                        <TextBlock Text="DENEGADOS HOY" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
-                    </StackPanel>
-                    <fa:ImageAwesome Grid.Column="1" Icon="TimesCircle"
-                                     Foreground="{StaticResource ColorError}"
-                                     Height="28" Width="28"
-                                     Opacity="0.3"
-                                     VerticalAlignment="Center"/>
-                </Grid>
-            </Border>
-
-            <Border Grid.Column="4" CornerRadius="10"
-                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
                         <TextBlock x:Name="statSociosUnicos" Text="—"
                                    FontSize="26" FontWeight="Bold" Foreground="{StaticResource GreenMain}"/>
                         <TextBlock Text="SOCIOS DISTINTOS" FontSize="10" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,0"/>
@@ -161,7 +139,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Column="6" CornerRadius="10"
+            <Border Grid.Column="4" CornerRadius="10"
                     Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -204,26 +182,12 @@
 
                     <!-- Header de la lista -->
                     <Grid Grid.Row="1" Margin="22,18,22,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <fa:ImageAwesome Icon="ListUl" Foreground="{StaticResource GreenMain}" Height="16" Margin="0, 0, 8, 0"/>
                             <TextBlock Text="ACCESOS DEL DÍA"
                                        FontFamily="Bahnschrift SemiBold, Segoe UI"
                                        FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"
                                        VerticalAlignment="Center"/>
-                        </StackPanel>
-
-                        <!-- Filtros chips -->
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button x:Name="chipTodos"     Content="Todos"     Click="chipFiltro_Click" Tag="todos"
-                                    Style="{StaticResource BotonChipActivoEstilo}" Margin="0,0,6,0"/>
-                            <Button x:Name="chipPermitidos" Content="Permitidos" Click="chipFiltro_Click" Tag="permitido"
-                                    Style="{StaticResource BotonChipEstilo}" Margin="0,0,6,0"/>
-                            <Button x:Name="chipDenegados" Content="Denegados" Click="chipFiltro_Click" Tag="denegado"
-                                    Style="{StaticResource BotonChipEstilo}"/>
                         </StackPanel>
                     </Grid>
 

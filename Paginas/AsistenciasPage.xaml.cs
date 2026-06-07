@@ -20,7 +20,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
     {
         private readonly AsistenciaController _controller = new AsistenciaController();
 
-        private string _filtroResultado = "todos";
         private DispatcherTimer _timerReloj;
         private DispatcherTimer _timerRefresh;
 
@@ -28,7 +27,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             InitializeComponent();
 
-            ResaltarChip(chipTodos);
             CargarAccesos();
             ActualizarStats();
             IniciarReloj();
@@ -77,7 +75,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             try
             {
                 var hoy = DateTime.Today;
-                var lista = _controller.BuscarAccesos(string.Empty, _filtroResultado, hoy, hoy);
+                var lista = _controller.BuscarAccesos(string.Empty, "todos", hoy, hoy);
                 gridAccesos.ItemsSource = lista;
             }
             catch (Exception ex)
@@ -92,36 +90,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 var stats = _controller.ObtenerEstadisticas();
                 statPermitidos.Text = stats.PermitidosHoy.ToString();
-                statDenegados.Text = stats.DenegadosHoy.ToString();
                 statSociosUnicos.Text = stats.SociosUnicosHoy.ToString();
                 statSemana.Text = stats.AccesosSemana.ToString();
             }
             catch
             {
-                statPermitidos.Text = statDenegados.Text =
+                statPermitidos.Text =
                 statSociosUnicos.Text = statSemana.Text = "—";
             }
-        }
-
-        // ─────────────────────────────────────────────────────
-        // FILTROS
-        // ─────────────────────────────────────────────────────
-        private void chipFiltro_Click(object sender, RoutedEventArgs e)
-        {
-            var btn = sender as Button;
-            if (btn == null) return;
-            _filtroResultado = btn.Tag.ToString();
-            ResaltarChip(btn);
-            CargarAccesos();
-        }
-
-        private void ResaltarChip(Button seleccionado)
-        {
-            Button[] chips = { chipTodos, chipPermitidos, chipDenegados };
-            foreach (var c in chips)
-                c.Style = (Style)FindResource(c == seleccionado
-                    ? "BotonChipActivoEstilo"
-                    : "BotonChipEstilo");
         }
     }
 }

@@ -128,8 +128,8 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
         private void MostrarError(string mensaje)
         {
-            lblError.Text = mensaje;
-            lblError.Visibility = Visibility.Visible;
+            // Mostrar el error en ventana emergente, igual que el resto de los mensajes.
+            NotificacionWindow.MostrarError(mensaje);
         }
     }
 }
