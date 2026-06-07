@@ -1,4 +1,4 @@
-// Entities/EstadisticasKPI.cs — C# 7.3
+﻿// Entities/EstadisticasKPI.cs — C# 7.3
 using System;
 
 namespace Entities

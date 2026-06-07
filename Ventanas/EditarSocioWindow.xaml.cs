@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  Archivo: EditarSocioWindow.xaml.cs
 //
 //  Ventana emergente para editar SOLO los datos personales de

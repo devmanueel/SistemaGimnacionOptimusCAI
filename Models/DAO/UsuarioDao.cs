@@ -35,8 +35,19 @@ namespace Models.Dao
                 PasswordHash = LeerColumnaSegura(r, "password_hash") ?? string.Empty,
                 Foto = r["foto"] != DBNull.Value ? (byte[])r["foto"] : null,
                 Activo = Convert.ToBoolean(r["activo"]),
-                TarifaHora = LeerDecimalSegura(r, "tarifa_hora")
+                TarifaHora = LeerDecimalSegura(r, "tarifa_hora"),
+                HuellaGuid = LeerGuidSegura(r, "huella_guid")
             };
+        }
+
+        // Lee un GUID nullable de un DataReader (la columna puede no existir
+        // en SPs viejos que aún no devuelven huella_guid).
+        private static Guid? LeerGuidSegura(SqlDataReader r, string columna)
+        {
+            for (int i = 0; i < r.FieldCount; i++)
+                if (r.GetName(i).Equals(columna, StringComparison.OrdinalIgnoreCase))
+                    return r[columna] != DBNull.Value ? (Guid?)(Guid)r[columna] : null;
+            return null;
         }
 
         private static decimal LeerDecimalSegura(SqlDataReader r, string columna)
@@ -344,6 +355,90 @@ namespace Models.Dao
                     return filas != null && Convert.ToInt32(filas) > 0;
                 }
             }
+        }
+
+        // ──────────────────────────────────────────────────────────
+        // HUELLAS DIGITALES (docentes / instructores)
+        // ──────────────────────────────────────────────────────────
+
+        /// <summary>Guarda el GUID lógico y el template biométrico serializado del docente.</summary>
+        public void GuardarHuella(long usuarioId, Guid guid, byte[] template)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_UsuarioGuardarHuella", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", usuarioId);
+                    cmd.Parameters.AddWithValue("@HuellaGuid", guid);
+                    var pTpl = cmd.Parameters.Add("@Template", SqlDbType.VarBinary, -1);
+                    pTpl.Value = (object)template ?? DBNull.Value;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void ActualizarHuellaGuid(long usuarioId, Guid? guid)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_UsuarioActualizarHuellaGuid", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", usuarioId);
+                    cmd.Parameters.AddWithValue("@HuellaGuid",
+                        guid.HasValue ? (object)guid.Value : DBNull.Value);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>Retorna (id, dni) del docente con esa huella, o null si no existe.</summary>
+        public (long id, string dni)? ObtenerDniPorHuellaGuid(Guid guid)
+        {
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_UsuarioDniPorHuellaGuid", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@HuellaGuid", guid);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                            return (Convert.ToInt64(reader["id"]), reader["dni"].ToString());
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>Devuelve (guid, template) de todos los docentes activos con huella registrada.</summary>
+        public List<(Guid guid, byte[] template)> ObtenerHuellas()
+        {
+            var lista = new List<(Guid guid, byte[] template)>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_UsuariosConHuella", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (var r = cmd.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            if (r["huella_guid"] == DBNull.Value ||
+                                r["huella_template"] == DBNull.Value) continue;
+                            lista.Add((
+                                (Guid)r["huella_guid"],
+                                (byte[])r["huella_template"]));
+                        }
+                    }
+                }
+            }
+            return lista;
         }
     }
 }

@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 //  Helpers/BiometricService.cs
 //
 //  Servicio de alto nivel para el lector de huellas digitales.

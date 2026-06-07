@@ -1,4 +1,4 @@
-// Models/DAO/ConfiguracionDao.cs — C# 7.3
+﻿// Models/DAO/ConfiguracionDao.cs — C# 7.3
 // Acceso a la tabla configuracion_sistema (clave-valor).
 using System;
 using System.Data;

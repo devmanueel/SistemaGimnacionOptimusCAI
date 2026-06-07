@@ -149,8 +149,24 @@ namespace Controllers
             }
             catch (Exception ex)
             {
-                return (false, "Error al cambiar estado.\n" + ex.Message);
+                // El SP lanza RAISERROR si la actividad tiene socios activos al darla de baja.
+                return (false, ex.Message.Contains("socio")
+                    ? ex.Message
+                    : "Error al cambiar estado.\n" + ex.Message);
             }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // CONTAR SOCIOS ACTIVOS de una actividad (para avisar antes de la baja)
+        // ──────────────────────────────────────────────────────
+        public int ContarSociosActivos(long actividadId)
+        {
+            try
+            {
+                var act = _dao.ObtenerActividadPorId(actividadId);
+                return act?.CantSocios ?? 0;
+            }
+            catch { return 0; }
         }
 
         // ──────────────────────────────────────────────────────

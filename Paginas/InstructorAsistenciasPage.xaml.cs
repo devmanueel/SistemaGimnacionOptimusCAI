@@ -1,4 +1,4 @@
-// SistemaGimnacionOptimusCAI/Paginas/InstructorAsistenciasPage.xaml.cs — C# 7.3
+﻿// SistemaGimnacionOptimusCAI/Paginas/InstructorAsistenciasPage.xaml.cs — C# 7.3
 using Controllers;
 using Entities;
 using SistemaGimnacionOptimusCAI.Helpers;

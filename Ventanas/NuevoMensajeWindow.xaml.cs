@@ -3,9 +3,11 @@ using Entities;
 using SistemaGimnacionOptimusCAI.Helpers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace SistemaGimnacionOptimusCAI.Ventanas
@@ -14,6 +16,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
     {
         private readonly WhatsappController _controller = new WhatsappController();
         private List<SocioMasivoItem> _sociosMasivo = new List<SocioMasivoItem>();
+        private List<SocioComboItem> _sociosCombo = new List<SocioComboItem>();
 
         public bool MensajeGuardado { get; private set; } = false;
 
@@ -27,7 +30,11 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
         private void CargarComboSocios()
         {
-            try { cmbSocio.ItemsSource = _controller.ListarSociosParaCombo(); }
+            try
+            {
+                _sociosCombo = _controller.ListarSociosParaCombo();
+                cmbSocio.ItemsSource = _sociosCombo;
+            }
             catch { }
         }
 
@@ -104,6 +111,52 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
         {
             var socio = cmbSocio.SelectedItem as SocioComboItem;
             if (socio == null) return;
+
+            // Al elegir un socio, traemos su telefono. El admin/docente puede editarlo luego.
+            txtTelefono.Text = socio.Telefono ?? string.Empty;
+        }
+
+        // Filtra el combo en vivo por DNI, nombre o apellido mientras se tipea.
+        private void cmbSocio_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter || e.Key == Key.Escape || e.Key == Key.Tab ||
+                e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Left || e.Key == Key.Right)
+                return;
+
+            var view = CollectionViewSource.GetDefaultView(cmbSocio.ItemsSource);
+            if (view == null) return;
+
+            string filtro = (cmbSocio.Text ?? string.Empty).Trim().ToLower();
+
+            if (string.IsNullOrEmpty(filtro))
+            {
+                view.Filter = null;
+            }
+            else
+            {
+                view.Filter = o =>
+                {
+                    var s = o as SocioComboItem;
+                    if (s == null) return false;
+
+                    string nombreCompleto = ((s.Nombre ?? "") + " " + (s.Apellido ?? "")).ToLower();
+                    string apellidoNombre = ((s.Apellido ?? "") + " " + (s.Nombre ?? "")).ToLower();
+
+                    return nombreCompleto.Contains(filtro)
+                        || apellidoNombre.Contains(filtro)
+                        || (s.Dni ?? "").ToLower().Contains(filtro)
+                        || s.TextoCombo.ToLower().Contains(filtro);
+                };
+            }
+
+            cmbSocio.IsDropDownOpen = true;
+        }
+
+        // Al cerrar el desplegable limpiamos el filtro para que el proximo abra completo.
+        private void cmbSocio_DropDownClosed(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(cmbSocio.ItemsSource);
+            if (view != null) view.Filter = null;
         }
 
         private void btnPlantilla_Click(object sender, RoutedEventArgs e)

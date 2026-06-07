@@ -697,7 +697,7 @@ CREATE PROCEDURE sp_ListarSociosParaCombo
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT id, numero_socio, nombre, apellido, dni
+    SELECT id, numero_socio, nombre, apellido, dni, telefono
     FROM socios
     WHERE activo = 1 AND eliminado_en IS NULL
     ORDER BY apellido, nombre;

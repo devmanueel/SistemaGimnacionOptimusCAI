@@ -129,6 +129,22 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             bool nuevo = !act.Activo;
             string accion = nuevo ? "activar" : "desactivar";
 
+            // Al dar de baja: avisar si hay socios activos y bloquear la operación.
+            if (!nuevo)
+            {
+                int sociosActivos = _controller.ContarSociosActivos(act.Id);
+                if (sociosActivos > 0)
+                {
+                    NotificacionWindow.MostrarError(
+                        "La actividad \"" + act.Nombre + "\" tiene " + sociosActivos +
+                        " socio(s) activo(s).\n\n" +
+                        "Primero dá de baja a esos socios (o cambiá su membresía a otra actividad) " +
+                        "antes de desactivar la actividad.",
+                        "No se puede desactivar");
+                    return;
+                }
+            }
+
             bool confirmo = NotificacionWindow.MostrarConfirmacion(
                 "¿Querés " + accion + " la actividad \"" + act.Nombre + "\"?",
                 "Confirmar cambio de estado");

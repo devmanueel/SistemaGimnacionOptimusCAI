@@ -1,4 +1,4 @@
-// Paginas/FichaUsuarioWindow.xaml.cs — C# 7.3
+﻿// Paginas/FichaUsuarioWindow.xaml.cs — C# 7.3
 using Controllers;
 using Entities;
 using System;

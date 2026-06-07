@@ -153,7 +153,7 @@ namespace Controllers
                     return (false, "No se puede cambiar a otra categoría. El cambio de plan solo está permitido dentro de la misma categoría.");
                 
                 if (mensaje.Contains("upgrade") || mensaje.Contains("superior"))
-                    return (false, "Solo se permite cambiar a un plan superior (upgrade). El downgrade no está permitido.");
+                    return (false, "Solo podés cambiar a un plan superior. No se puede pasar a un plan inferior.");
                 
                 return (false, "Error al actualizar.\n" + ex.Message);
             }
@@ -318,7 +318,7 @@ namespace Controllers
         public List<OpcionUpgrade> CalcularUpgrade(long membresiaId)
         {
             try { return _dao.CalcularUpgrade(membresiaId); }
-            catch (Exception ex) { throw new Exception("Error al calcular upgrade.\n" + ex.Message); }
+            catch (Exception ex) { throw new Exception("No se pudo calcular la mejora de plan.\n" + ex.Message); }
         }
 
         // ──────────────────────────────────────────────────────
@@ -348,12 +348,12 @@ namespace Controllers
             catch (Exception ex)
             {
                 if (ex.Message.Contains("ya tuvo un upgrade"))
-                    throw new Exception("Esta membresía ya tuvo un upgrade. Solo se permite uno por membresía.");
+                    throw new Exception("Esta membresía ya cambió de plan una vez. Solo se permite un cambio por membresía.");
                 if (ex.Message.Contains("categoría"))
-                    throw new Exception("Solo se puede hacer upgrade dentro de la misma categoría.");
+                    throw new Exception("Solo podés cambiar a un plan de la misma categoría.");
                 if (ex.Message.Contains("plan superior"))
-                    throw new Exception("Solo se permite upgrade a una actividad de plan superior.");
-                throw new Exception("Error al ejecutar el upgrade.\n" + ex.Message);
+                    throw new Exception("Solo podés cambiar a una actividad de plan superior.");
+                throw new Exception("No se pudo cambiar el plan.\n" + ex.Message);
             }
         }
     }
