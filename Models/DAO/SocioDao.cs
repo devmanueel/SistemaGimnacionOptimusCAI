@@ -187,7 +187,7 @@ namespace Models.Dao
                 Telefono = r["telefono"] as string,
                 Email = r["email"] as string,
                 Activo = Convert.ToBoolean(r["socio_activo"]),
-                MembresiaId = Convert.ToInt64(r["membresia_id"]),
+                MembresiaId = r["membresia_id"] != DBNull.Value ? Convert.ToInt64(r["membresia_id"]) : 0,
                 ActividadNombre = r["actividad_nombre"] as string ?? "—",
                 FechaVencimiento = r["fecha_vencimiento"] != DBNull.Value ? (DateTime?)r["fecha_vencimiento"] : null,
                 MembresiaEstado = r["membresia_estado"] != DBNull.Value ? r["membresia_estado"].ToString() : null,

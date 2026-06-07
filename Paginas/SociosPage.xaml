@@ -571,10 +571,10 @@
                             </DataGridTemplateColumn>
 
                             <!-- N° -->
-                            <DataGridTemplateColumn Header="N°" Width="60">
+                            <DataGridTemplateColumn Header="N° Socio" Width="80">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Border Style="{StaticResource NumeroSocioBadgeStyle}">
+                                        <Border Style="{StaticResource NumeroSocioBadgeStyle}" Width="50">
                                             <TextBlock Text="{Binding NumeroFormateado}"
                                                        Style="{StaticResource NumeroSocioTextStyle}"/>
                                         </Border>
@@ -622,7 +622,7 @@
                             <DataGridTextColumn Header="VENCE" Binding="{Binding FechaVencimientoTexto}" Width="100"/>
 
                             <!-- Estado -->
-                            <DataGridTemplateColumn Header="ESTADO" Width="100">
+                            <DataGridTemplateColumn Header="MEMBRESIA" Width="100">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
