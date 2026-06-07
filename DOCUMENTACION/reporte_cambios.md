@@ -929,3 +929,63 @@ DataBase\sp_ListarSociosConMembresias.sql
 ```
 
 No hace falta ejecutar otros SPs por estos cambios.
+
+---
+
+## 22. UX Socios y renovacion de membresias
+
+### Mini resumen
+- En el buscador global se limito la escritura de numeros largos a un maximo de 8 digitos.
+- En la tabla de Socios se reemplazaron varios botones por un unico boton `Gestionar`.
+- `Gestionar` abre la misma ficha del socio que se usa desde el buscador global.
+- Las acciones de membresia se movieron dentro de la pestaña `ACTIVIDADES QUE REALIZA`, debajo del historial de actividades, para no romper el diseño de la ficha.
+- La ficha ahora muestra acciones contextuales segun el estado de la membresia del socio.
+- Para membresias activas, la renovacion `+31 dias` no permite cambiar la actividad.
+- Para membresias activas, `Upgrade` permite cambiar solo a una actividad de la misma categoria y de nivel mayor.
+- Para membresias vencidas, `Renovar / Cambiar` permite elegir cualquier actividad, sea mayor o menor.
+- Para membresias canceladas, `Nueva Membresia` crea una membresia nueva y conserva la anterior cancelada como historico.
+- Se ajusto el listado de Socios para priorizar una sola membresia relevante por socio y evitar duplicados visuales por membresias historicas.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `MainWindow.xaml` | Ajuste visual/validacion del buscador global |
+| `MainWindow.xaml.cs` | Limite de 8 digitos para busquedas numericas largas |
+| `Controllers\MembresiaController.cs` | Nuevo flujo `RenovarDesdeMembresia`; si la membresia esta cancelada, crea una nueva |
+| `Ventanas\MembresiaWindow.xaml.cs` | Renovacion configurable con o sin cambio de actividad segun el estado |
+| `Paginas\SociosPage.xaml` | Tabla simplificada con boton unico `Gestionar` |
+| `Paginas\SociosPage.xaml.cs` | `Gestionar` abre `FichaSocioWindow` y refresca la tabla si hubo cambios |
+| `Paginas\FichaSocioWindow.xaml` | Botones de membresia reubicados dentro de `ACTIVIDADES QUE REALIZA` |
+| `Paginas\FichaSocioWindow.xaml.cs` | Deteccion de membresia activa, vencida, cancelada o suspendida y acciones contextuales |
+| `Entities\SocioConMembresia.cs` | Propiedades auxiliares para estados/acciones disponibles |
+| `DataBase\sp_ListarSociosConMembresias.sql` | Seleccion de membresia relevante por socio para el listado |
+
+### Reglas de negocio resultantes
+
+| Estado | Accion disponible | Comportamiento |
+|--------|-------------------|----------------|
+| Activa | `+31 dias` | Suma 31 dias sin cambiar actividad |
+| Activa | `Upgrade` | Solo misma categoria y nivel mayor |
+| Vencida | `Renovar / Cambiar` | Permite cualquier actividad y cobra el precio completo |
+| Cancelada | `Nueva Membresia` | Crea una nueva membresia |
+| Sin membresia | `Nueva Membresia` | Crea la primera membresia del socio |
+
+### SPs a ejecutar
+
+Ejecutar nuevamente:
+
+```
+DataBase\sp_ListarSociosConMembresias.sql
+```
+
+No hace falta ejecutar otros SPs por estos cambios.
+
+### Validacion realizada
+
+| Validacion | Resultado |
+|------------|-----------|
+| Build Debug | Correcto: 0 errores, 0 advertencias |
+| SP aplicado en LocalDB | Correcto |
+| Tabla Socios | Queda con accion unica `Gestionar` |
+| Ficha Socio | Acciones de membresia quedan dentro de `ACTIVIDADES QUE REALIZA` |
