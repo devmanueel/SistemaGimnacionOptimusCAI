@@ -1,4 +1,4 @@
-// Paginas/EditarUsuarioWindow.xaml.cs — C# 7.3
+﻿// Paginas/EditarUsuarioWindow.xaml.cs — C# 7.3
 using Controllers;
 using Entities;
 using Microsoft.Win32;

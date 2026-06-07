@@ -1,4 +1,4 @@
-// Controllers/ConfiguracionController.cs — C# 7.3
+﻿// Controllers/ConfiguracionController.cs — C# 7.3
 // Reglas de negocio + auditoría para configuracion_sistema.
 using Entities;
 using Models.Dao;

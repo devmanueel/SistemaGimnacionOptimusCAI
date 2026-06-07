@@ -1,4 +1,4 @@
-// Helpers/ReporteExcelExportador.cs — C# 7.3
+﻿// Helpers/ReporteExcelExportador.cs — C# 7.3
 // Requiere: ClosedXML 0.95.4
 using ClosedXML.Excel;
 using Entities;

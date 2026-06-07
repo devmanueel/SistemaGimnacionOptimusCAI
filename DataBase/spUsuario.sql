@@ -41,7 +41,8 @@ BEGIN
         u.rol_id,
         r.nombre AS rol_nombre,
         u.creado_en,
-        u.tarifa_hora
+        u.tarifa_hora,
+        u.huella_guid
     FROM usuarios u
     INNER JOIN roles r ON r.id = u.rol_id
     WHERE u.eliminado_en IS NULL
@@ -71,7 +72,8 @@ BEGIN
         u.rol_id,
         r.nombre AS rol_nombre,
         u.creado_en,
-        u.tarifa_hora
+        u.tarifa_hora,
+        u.huella_guid
     FROM usuarios u
     INNER JOIN roles r ON r.id = u.rol_id
     WHERE u.id = @Id AND u.eliminado_en IS NULL;
@@ -100,7 +102,8 @@ BEGIN
         u.rol_id,
         r.nombre AS rol_nombre,
         u.creado_en,
-        u.tarifa_hora
+        u.tarifa_hora,
+        u.huella_guid
     FROM usuarios u
     INNER JOIN roles r ON r.id = u.rol_id
     WHERE u.eliminado_en IS NULL

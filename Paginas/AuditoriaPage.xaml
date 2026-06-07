@@ -344,12 +344,18 @@
                             <Border Background="{StaticResource Bg2}" CornerRadius="10" Padding="14,10"
                                     BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Margin="0,0,0,12">
                                 <StackPanel>
+                                    <!-- Descripción en lenguaje natural -->
+                                    <TextBlock x:Name="lblEventoDescripcion" Text="—"
+                                               FontSize="12" Foreground="{StaticResource TextPrimary}"
+                                               TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                    <Border Height="1" Background="{StaticResource Border1}" Margin="0,0,0,10"/>
+
                                     <Grid Margin="0,0,0,4">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="110"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Acción:"
+                                        <TextBlock Text="Qué hizo:"
                                                    FontSize="11" Foreground="{StaticResource TextMuted}" Grid.Column="0"/>
                                         <TextBlock x:Name="lblDatoAccion" Text="—"
                                                    FontSize="11" FontWeight="SemiBold"
@@ -357,10 +363,10 @@
                                     </Grid>
                                     <Grid Margin="0,0,0,4">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="110"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="Entidad:"
+                                        <TextBlock Text="Sección:"
                                                    FontSize="11" Foreground="{StaticResource TextMuted}" Grid.Column="0"/>
                                         <TextBlock x:Name="lblDatoEntidad" Text="—"
                                                    FontSize="11" FontWeight="SemiBold"
@@ -368,37 +374,37 @@
                                     </Grid>
                                     <Grid Margin="0,0,0,4">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="110"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="ID afectado:"
+                                        <TextBlock Text="Cuándo:"
                                                    FontSize="11" Foreground="{StaticResource TextMuted}" Grid.Column="0"/>
-                                        <TextBlock x:Name="lblDatoEntidadId" Text="—"
-                                                   FontSize="11" FontFamily="Consolas"
-                                                   Foreground="{StaticResource GreenMain}" Grid.Column="1"/>
+                                        <TextBlock x:Name="lblDatoCuando" Text="—"
+                                                   FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TextPrimary}" Grid.Column="1"/>
                                     </Grid>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="100"/>
+                                            <ColumnDefinition Width="110"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="ID registro:"
+                                        <TextBlock Text="N° de registro:"
                                                    FontSize="11" Foreground="{StaticResource TextMuted}" Grid.Column="0"/>
-                                        <TextBlock x:Name="lblDatoRegId" Text="—"
+                                        <TextBlock x:Name="lblDatoEntidadId" Text="—"
                                                    FontSize="11" FontFamily="Consolas"
                                                    Foreground="{StaticResource GreenMain}" Grid.Column="1"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>
 
-                            <!-- JSON detalle -->
-                            <TextBlock Text="DATOS ADICIONALES (JSON)" Style="{StaticResource LabelCampoEstilo}"/>
-                            <Border Background="#080A08" CornerRadius="10" Padding="14"
+                            <!-- Detalle de los cambios (legible) -->
+                            <TextBlock Text="DATOS ADICIONALES" Style="{StaticResource LabelCampoEstilo}"/>
+                            <Border Background="{StaticResource Bg2}" CornerRadius="10" Padding="14"
                                     BorderBrush="{StaticResource Border1}" BorderThickness="0.5">
                                 <TextBlock x:Name="lblDetalleJson" Text="—"
-                                           FontFamily="Consolas, Courier New"
-                                           FontSize="11" Foreground="{StaticResource TextMuted}"
-                                           TextWrapping="Wrap"/>
+                                           FontFamily="Segoe UI"
+                                           FontSize="12" Foreground="{StaticResource TextSecondary}"
+                                           TextWrapping="Wrap" LineHeight="19"/>
                             </Border>
 
                         </StackPanel>

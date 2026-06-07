@@ -581,13 +581,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     decimal diferencia = Math.Abs(actividad.Precio - ObtenerPrecioActividad(_actividadActualId));
 
                     bool confirmo = NotificacionWindow.MostrarConfirmacion(
-                        "Vas a hacer un upgrade de membresía:\n\n" +
+                        "Vas a mejorar el plan de la membresía:\n\n" +
                         "📋 " + ObtenerNombreActividad(_actividadActualId) + " → " + actividad.Nombre + "\n" +
                         "💰 Diferencia a cobrar: $" + diferencia.ToString("N0") + "\n" +
                         "💳 Método: " + metodoPagoEditar + "\n\n" +
-                        "⚠️ Solo se permite un upgrade por membresía.\n\n" +
-                        "¿Confirmás el upgrade y el cobro?",
-                        "Confirmar upgrade");
+                        "⚠️ Solo se permite mejorar el plan una vez por membresía.\n\n" +
+                        "¿Confirmás el cambio de plan y el cobro?",
+                        "Confirmar cambio de plan");
 
                     if (!confirmo) return;
 
@@ -597,11 +597,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                             _idEditar, actividad.Id, metodoPagoEditar, USUARIO_ACTUAL_ID);
 
                         if (r == null)
-                        { NotificacionWindow.MostrarError("No se pudo ejecutar el upgrade."); return; }
+                        { NotificacionWindow.MostrarError("No se pudo cambiar el plan."); return; }
 
                         NotificacionWindow.MostrarExito(
-                            "Upgrade realizado correctamente.\nMonto cobrado: $" + r.MontoCobrado.ToString("N0"),
-                            "¡Upgrade exitoso!");
+                            "El plan se actualizó correctamente.\nMonto cobrado: $" + r.MontoCobrado.ToString("N0"),
+                            "¡Plan actualizado!");
                     }
                     catch (Exception ex)
                     { NotificacionWindow.MostrarError(ex.Message); return; }
@@ -624,7 +624,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                             actividad.Nivel.Value <= _actividadActualNivel.Value)
                         {
                             NotificacionWindow.MostrarError(
-                                "Solo se permite cambiar a un plan superior (upgrade). El downgrade no está permitido.");
+                                "Solo podés cambiar a un plan superior. No se puede pasar a un plan inferior.");
                             return;
                         }
                     }

@@ -1,4 +1,4 @@
-// Paginas/ReportesPage.xaml.cs — C# 7.3
+﻿// Paginas/ReportesPage.xaml.cs — C# 7.3
 using Controllers;
 using Entities;
 using SistemaGimnacionOptimusCAI.Helpers;

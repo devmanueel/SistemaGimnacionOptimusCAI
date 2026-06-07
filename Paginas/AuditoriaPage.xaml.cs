@@ -377,64 +377,229 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             lblDetalleResumen.Text = _entryActual.ResumenAccion;
             lblDetalleFechaHora.Text = _entryActual.FechaLarga;
 
-            lblDatoAccion.Text = _entryActual.AccionTexto;
-            lblDatoEntidad.Text = _entryActual.EntidadTexto;
+            lblEventoDescripcion.Text = ConstruirDescripcionEvento(_entryActual);
+            lblDatoAccion.Text = AccionAmigable(_entryActual.Accion);
+            lblDatoEntidad.Text = EntidadAmigable(_entryActual.Entidad, false);
+            lblDatoCuando.Text = _entryActual.FechaLarga;
             lblDatoEntidadId.Text = _entryActual.EntidadId.HasValue
                                         ? "#" + _entryActual.EntidadId.Value
-                                        : "-";
-            lblDatoRegId.Text = "#" + _entryActual.Id.ToString("D6");
+                                        : "—";
 
-            // JSON formateado
+            // Datos adicionales en lenguaje claro (antes era JSON crudo)
             lblDetalleJson.Text = string.IsNullOrEmpty(_entryActual.Detalle)
-                                    ? "(sin datos adicionales)"
-                                    : FormatearJson(_entryActual.Detalle);
+                                    ? "Sin datos adicionales para este evento."
+                                    : FormatearDetalleHumano(_entryActual.Detalle);
         }
 
-        /// <summary>Formato simple del JSON con indentación.</summary>
-        private string FormatearJson(string json)
+        // ── DESCRIPCIÓN EN LENGUAJE NATURAL ───────────────────
+        /// <summary>"Manuel Mendoza editó un socio (registro N° 42) el 06/06/2026 a las 14:30."</summary>
+        private string ConstruirDescripcionEvento(AuditoriaEntry e)
         {
-            if (string.IsNullOrEmpty(json)) return "";
-            var sb = new StringBuilder();
-            int indent = 0;
-            bool inString = false;
+            string quien = string.IsNullOrWhiteSpace(e.ActorNombre) ? "Un usuario" : e.ActorNombre;
+            string verbo = VerboPasado(e.Accion);
+            string entidad = EntidadAmigable(e.Entidad, true);
 
-            foreach (char c in json)
+            string cuando = e.CreadoEn.ToString("dd/MM/yyyy 'a las' HH:mm",
+                new System.Globalization.CultureInfo("es-AR"));
+
+            string accion = (e.Accion ?? "").ToLower();
+            // Login / logout no tienen entidad
+            if (accion == "login" || accion == "logout")
+                return quien + " " + verbo + " el " + cuando + ".";
+
+            string idTxt = e.EntidadId.HasValue
+                ? " (registro N° " + e.EntidadId.Value + ")"
+                : "";
+
+            return quien + " " + verbo + " " + entidad + idTxt + " el " + cuando + ".";
+        }
+
+        private static string VerboPasado(string accion)
+        {
+            switch ((accion ?? "").ToLower())
             {
-                if (c == '"' && !inString) { inString = true; sb.Append(c); continue; }
-                if (c == '"' && inString) { inString = false; sb.Append(c); continue; }
+                case "crear":            return "creó";
+                case "editar":           return "editó";
+                case "modificar":        return "modificó";
+                case "eliminar":         return "eliminó";
+                case "activar":          return "activó";
+                case "desactivar":       return "dio de baja";
+                case "anular":           return "anuló";
+                case "login":            return "inició sesión";
+                case "logout":           return "cerró sesión";
+                case "cambiar_password": return "cambió la contraseña de";
+                case "registrar_huella": return "registró la huella de";
+                default:                 return (accion ?? "realizó una acción sobre");
+            }
+        }
 
-                if (inString) { sb.Append(c); continue; }
+        private static string AccionAmigable(string accion)
+        {
+            switch ((accion ?? "").ToLower())
+            {
+                case "crear":            return "Registró un alta";
+                case "editar":
+                case "modificar":        return "Modificó datos";
+                case "eliminar":         return "Eliminó un registro";
+                case "activar":          return "Activó";
+                case "desactivar":       return "Dio de baja";
+                case "anular":           return "Anuló";
+                case "login":            return "Inició sesión";
+                case "logout":           return "Cerró sesión";
+                case "cambiar_password": return "Cambió la contraseña";
+                case "registrar_huella": return "Registró una huella";
+                default:
+                    if (string.IsNullOrEmpty(accion)) return "—";
+                    return char.ToUpper(accion[0]) + accion.Substring(1);
+            }
+        }
 
-                if (c == '{' || c == '[')
+        /// <summary>Nombre amigable de la entidad. conArticulo=true → "un socio".</summary>
+        private static string EntidadAmigable(string entidad, bool conArticulo)
+        {
+            switch ((entidad ?? "").ToLower())
+            {
+                case "socio":                 return conArticulo ? "un socio" : "Socio";
+                case "usuario":
+                case "usuario_propio":        return conArticulo ? "un usuario" : "Usuario";
+                case "membresia":             return conArticulo ? "una membresía" : "Membresía";
+                case "actividad":             return conArticulo ? "una actividad" : "Actividad";
+                case "venta":                 return conArticulo ? "una venta" : "Venta";
+                case "producto":              return conArticulo ? "un producto" : "Producto";
+                case "caja":                  return conArticulo ? "un movimiento de caja" : "Caja";
+                case "rutina":                return conArticulo ? "una rutina" : "Rutina";
+                case "turno":                 return conArticulo ? "un turno" : "Turno";
+                case "asistencia":
+                case "asistencia_dashboard":  return conArticulo ? "una asistencia" : "Asistencia";
+                case "casillero":             return conArticulo ? "un casillero" : "Casillero";
+                case "whatsapp":              return conArticulo ? "un mensaje de WhatsApp" : "WhatsApp";
+                case "sesion":                return conArticulo ? "una sesión" : "Sesión";
+                default:
+                    if (string.IsNullOrEmpty(entidad)) return conArticulo ? "un registro" : "—";
+                    string txt = char.ToUpper(entidad[0]) + entidad.Substring(1);
+                    return conArticulo ? "un " + entidad : txt;
+            }
+        }
+
+        // ── DATOS ADICIONALES: JSON → texto legible ────────────
+        private string FormatearDetalleHumano(string json)
+        {
+            var pares = ParsearJsonPlano(json);
+            if (pares.Count == 0)
+                return "Sin datos adicionales para este evento.";
+
+            var sb = new StringBuilder();
+            foreach (var kv in pares)
+            {
+                sb.Append("• ");
+                sb.Append(EtiquetaCampo(kv.Key));
+                sb.Append(": ");
+                sb.AppendLine(ValorAmigable(kv.Key, kv.Value));
+            }
+            return sb.ToString().TrimEnd();
+        }
+
+        /// <summary>Parser sencillo para JSON plano {"clave":"valor",...} producido por Auditor.</summary>
+        private static List<KeyValuePair<string, string>> ParsearJsonPlano(string json)
+        {
+            var lista = new List<KeyValuePair<string, string>>();
+            if (string.IsNullOrWhiteSpace(json)) return lista;
+
+            string s = json.Trim();
+            if (s.StartsWith("{")) s = s.Substring(1);
+            if (s.EndsWith("}")) s = s.Substring(0, s.Length - 1);
+
+            int i = 0;
+            while (i < s.Length)
+            {
+                while (i < s.Length && (s[i] == ' ' || s[i] == ',' ||
+                       s[i] == '\n' || s[i] == '\r' || s[i] == '\t')) i++;
+                if (i >= s.Length || s[i] != '"') break;
+
+                i++; // abrir comilla de la clave
+                var key = new StringBuilder();
+                while (i < s.Length && s[i] != '"')
                 {
-                    sb.Append(c);
-                    indent++;
-                    sb.AppendLine();
-                    sb.Append(new string(' ', indent * 2));
+                    if (s[i] == '\\' && i + 1 < s.Length) { i++; key.Append(s[i]); }
+                    else key.Append(s[i]);
+                    i++;
                 }
-                else if (c == '}' || c == ']')
+                i++; // cerrar comilla
+
+                while (i < s.Length && (s[i] == ' ' || s[i] == ':')) i++;
+
+                var val = new StringBuilder();
+                if (i < s.Length && s[i] == '"')
                 {
-                    indent--;
-                    sb.AppendLine();
-                    sb.Append(new string(' ', indent * 2));
-                    sb.Append(c);
-                }
-                else if (c == ',')
-                {
-                    sb.Append(c);
-                    sb.AppendLine();
-                    sb.Append(new string(' ', indent * 2));
-                }
-                else if (c == ':')
-                {
-                    sb.Append(": ");
+                    i++;
+                    while (i < s.Length && s[i] != '"')
+                    {
+                        if (s[i] == '\\' && i + 1 < s.Length) { i++; val.Append(s[i]); }
+                        else val.Append(s[i]);
+                        i++;
+                    }
+                    i++;
                 }
                 else
                 {
-                    sb.Append(c);
+                    while (i < s.Length && s[i] != ',' && s[i] != '}') { val.Append(s[i]); i++; }
                 }
+
+                lista.Add(new KeyValuePair<string, string>(key.ToString().Trim(), val.ToString().Trim()));
             }
-            return sb.ToString();
+            return lista;
+        }
+
+        private static string EtiquetaCampo(string clave)
+        {
+            switch ((clave ?? "").ToLower())
+            {
+                case "nombre":               return "Nombre";
+                case "apellido":             return "Apellido";
+                case "dni":                  return "DNI";
+                case "rol_id":               return "Rol";
+                case "email":                return "Email";
+                case "telefono":             return "Teléfono";
+                case "domicilio":            return "Domicilio";
+                case "precio":               return "Precio";
+                case "tipo":                 return "Tipo";
+                case "motivo":               return "Motivo";
+                case "socio_id":             return "Socio";
+                case "instructor_id":        return "Instructor";
+                case "membresia_id":         return "Membresía";
+                case "actividad_id":         return "Actividad";
+                case "operacion":            return "Operación";
+                case "hora_entrada":         return "Hora de entrada";
+                case "hora_salida":          return "Hora de salida";
+                case "hora_entrada_nueva":   return "Nueva hora de entrada";
+                case "hora_salida_nueva":    return "Nueva hora de salida";
+                case "horas_trabajadas":     return "Horas trabajadas";
+                case "monto":                return "Monto";
+                case "monto_pagado":         return "Monto pagado";
+                case "metodo_pago":          return "Método de pago";
+                case "registrado_por":       return "Registrado por (usuario)";
+                case "corregido_por_admin":  return "Corregido por un admin";
+                case "tarifa_hora":          return "Tarifa por hora";
+                default:
+                    if (string.IsNullOrEmpty(clave)) return "Dato";
+                    string limpio = clave.Replace("_", " ");
+                    return char.ToUpper(limpio[0]) + limpio.Substring(1);
+            }
+        }
+
+        private static string ValorAmigable(string clave, string valor)
+        {
+            if (string.IsNullOrEmpty(valor) || valor == "null") return "—";
+
+            string k = (clave ?? "").ToLower();
+            if (k == "rol_id")
+            {
+                if (valor == "1") return "Administrador";
+                if (valor == "2") return "Empleado / Instructor";
+            }
+            if (valor == "true") return "Sí";
+            if (valor == "false") return "No";
+            return valor;
         }
 
         // ── EVENTOS ───────────────────────────────────────────

@@ -1,4 +1,4 @@
-// Entities/FormatoARS.cs — C# 7.3
+﻿// Entities/FormatoARS.cs — C# 7.3
 // Centraliza el formato de moneda en pesos argentinos (ARS).
 // Vive en Entities para evitar dependencias circulares: cualquier capa
 // (Entities, Models, Controllers, WPF) puede usarlo.

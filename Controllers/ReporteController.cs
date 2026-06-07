@@ -1,4 +1,4 @@
-// Controllers/ReporteController.cs — C# 7.3
+﻿// Controllers/ReporteController.cs — C# 7.3
 using Entities;
 using Models.Dao;
 using System;

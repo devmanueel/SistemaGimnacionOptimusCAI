@@ -390,5 +390,61 @@ namespace Controllers
                 return (false, "Error al eliminar.\n" + ex.Message);
             }
         }
+
+        // ──────────────────────────────────────────────────────────
+        // HUELLAS DIGITALES (docentes / instructores)
+        // ──────────────────────────────────────────────────────────
+
+        /// <summary>Guarda el GUID lógico + el template biométrico del docente.</summary>
+        public (bool ok, string mensaje) GuardarHuella(long usuarioId, Guid guid, byte[] template)
+        {
+            try
+            {
+                if (template == null || template.Length == 0)
+                    return (false, "El template de la huella está vacío.");
+
+                _dao.GuardarHuella(usuarioId, guid, template);
+
+                try { Auditor.Registrar("registrar_huella", "usuario", usuarioId); } catch { }
+
+                return (true, "Huella registrada correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return (false, "Error al guardar la huella.\n" + ex.Message);
+            }
+        }
+
+        public (bool ok, string mensaje) ActualizarHuellaGuid(long usuarioId, Guid? guid)
+        {
+            try
+            {
+                _dao.ActualizarHuellaGuid(usuarioId, guid);
+                string accion = guid.HasValue ? "registrada" : "eliminada";
+                return (true, "Huella " + accion + " correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return (false, "Error al actualizar la huella.\n" + ex.Message);
+            }
+        }
+
+        /// <summary>Retorna el DNI del docente con ese GUID de huella, o null si no existe.</summary>
+        public string ObtenerDniPorHuellaGuid(Guid guid)
+        {
+            try
+            {
+                var resultado = _dao.ObtenerDniPorHuellaGuid(guid);
+                return resultado?.dni;
+            }
+            catch { return null; }
+        }
+
+        /// <summary>Devuelve (guid, template) de todos los docentes activos con huella, para identificar 1:N.</summary>
+        public List<(Guid guid, byte[] template)> ObtenerHuellas()
+        {
+            try { return _dao.ObtenerHuellas(); }
+            catch { return new List<(Guid guid, byte[] template)>(); }
+        }
     }
 }
