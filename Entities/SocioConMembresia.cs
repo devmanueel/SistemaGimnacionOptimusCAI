@@ -65,7 +65,7 @@ namespace Entities
                     case "vencida": return "Vencida";
                     case "cancelada": return "Cancelada";
                     case "suspendida": return "Suspendida";
-                    default: return MembresiaEstado ?? "Desconocido";
+                    default: return MembresiaEstado ?? "Sin membresia";
                 }
             }
         }

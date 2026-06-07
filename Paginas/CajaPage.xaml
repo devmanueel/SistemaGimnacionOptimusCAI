@@ -320,9 +320,9 @@
                 <TextBlock Text="MOSTRAR:" Foreground="{StaticResource TextMuted}" FontSize="11"
                            FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,12,0"/>
                 <Button x:Name="chipTodos"    Content="Todos"    Click="chipFiltro_Click" Tag="todos"
-                        Style="{StaticResource BotonChipActivoEstilo}"/>
+                        Style="{StaticResource BotonChipActivoEstilo}" Margin="0,0,12,0"/>
                 <Button x:Name="chipIngresos" Content="Ingresos" Click="chipFiltro_Click" Tag="ingreso"
-                        Style="{StaticResource BotonChipEstilo}"/>
+                        Style="{StaticResource BotonChipEstilo}" Margin="0,0,12,0"/>
                 <Button x:Name="chipGastos"   Content="Gastos"   Click="chipFiltro_Click" Tag="gasto"
                         Style="{StaticResource BotonChipEstilo}"/>
             </StackPanel>
@@ -332,9 +332,9 @@
 
                 <!-- Rangos rápidos -->
                 <Button Content="Hoy"   Style="{StaticResource BtnRangoEstilo}"
-                        Click="btnRangoHoy_Click"    Margin="0,0,4,0"/>
+                        Click="btnRangoHoy_Click"    Margin="0,0,10,0"/>
                 <Button Content="Semana" Style="{StaticResource BtnRangoEstilo}"
-                        Click="btnRangoSemana_Click" Margin="0,0,4,0"/>
+                        Click="btnRangoSemana_Click" Margin="0,0,10,0"/>
                 <Button Content="Mes"   Style="{StaticResource BtnRangoEstilo}"
                         Click="btnRangoMes_Click"    Margin="0,0,16,0"/>
 
@@ -411,7 +411,7 @@
                             </DataGridTemplateColumn>
 
                             <!-- TIPO badge con ícono según tipo -->
-                            <DataGridTemplateColumn Header="TIPO" Width="110">
+                            <DataGridTemplateColumn Header="TIPO" Width="90">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border CornerRadius="6" Padding="7,4" HorizontalAlignment="Left">

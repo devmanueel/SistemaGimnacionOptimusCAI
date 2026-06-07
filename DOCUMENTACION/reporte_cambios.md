@@ -989,3 +989,38 @@ No hace falta ejecutar otros SPs por estos cambios.
 | SP aplicado en LocalDB | Correcto |
 | Tabla Socios | Queda con accion unica `Gestionar` |
 | Ficha Socio | Acciones de membresia quedan dentro de `ACTIVIDADES QUE REALIZA` |
+
+---
+
+## 23. Tabla Socios: chips por estado del socio y membresia visible
+
+**Fecha:** 07/06/2026
+
+### Mini resumen
+- Se ajusto la tabla de la seccion Socios para que liste todos los socios no eliminados, tanto activos como inactivos.
+- Los chips `Todos`, `Activos` e `Inactivos` ahora deben reflejar el estado real del socio (`socios.activo`).
+- La membresia se mantiene como dato complementario de la fila y no decide si el socio aparece como activo o inactivo.
+- La columna `MEMBRESIA` muestra el estado de la membresia (`Activa`, `Vencida`, `Cancelada`, `Suspendida` o `Sin membresia`) y no el estado del socio.
+- Se mantiene una sola fila por socio, priorizando la membresia mas relevante.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\sp_ListarSociosConMembresias.sql` | Chips por `socios.activo`; listado con socios activos/inactivos; `LEFT JOIN` para no excluir socios sin membresia |
+| `Models\DAO\SocioDao.cs` | Lectura segura de `membresia_id` cuando el socio no tiene membresia |
+| `Paginas\SociosPage.xaml.cs` | Conteo de chips usando `SocioConMembresia.Activo` |
+| `Entities\SocioConMembresia.cs` | Texto de columna `MEMBRESIA` basado en `MembresiaEstado` |
+
+### SPs a ejecutar
+
+Ejecutar nuevamente:
+
+```
+DataBase\sp_ListarSociosConMembresias.sql
+```
+
+No hace falta ejecutar otros SPs por estos cambios.
+
+### Importante
+Si no se ejecuta `DataBase\sp_ListarSociosConMembresias.sql`, la aplicacion puede compilar, pero la tabla de Socios seguira usando la version anterior del SP y los chips pueden no reflejar correctamente el total de socios activos/inactivos.

@@ -8,8 +8,9 @@
 --
 --  Regla UX:
 --    La grilla de Socios muestra una sola fila por socio.
+--    Los chips Activos/Inactivos filtran por socios.activo.
 --    Prioridad de membresia visible:
---      activa > vencida > suspendida > cancelada > resto
+--      activa > vencida > suspendida > cancelada > sin membresia > resto
 -- ============================================================
 
 IF OBJECT_ID('sp_ListarSociosConMembresias', 'P') IS NOT NULL
@@ -92,15 +93,14 @@ BEGIN
                     m.id DESC
             ) AS rn
         FROM socios s
-        INNER JOIN membresias  m ON m.socio_id = s.id
-        INNER JOIN actividades a ON a.id       = m.actividad_id
+        LEFT JOIN membresias   m ON m.socio_id = s.id
+        LEFT JOIN actividades  a ON a.id       = m.actividad_id
         LEFT  JOIN usuarios    u ON u.id       = m.instructor_id
         WHERE s.eliminado_en IS NULL
-          AND s.activo = 1
           AND (
                 @FiltroEstado = 'todos'
-             OR (@FiltroEstado = 'activos'   AND m.estado = 'activa')
-             OR (@FiltroEstado = 'inactivos' AND m.estado IN ('vencida', 'cancelada'))
+             OR (@FiltroEstado = 'activos'   AND s.activo = 1)
+             OR (@FiltroEstado = 'inactivos' AND s.activo = 0)
               )
           AND (
                 @Texto = ''
@@ -190,15 +190,14 @@ BEGIN
                     m.id DESC
             ) AS rn
         FROM socios s
-        INNER JOIN membresias  m ON m.socio_id = s.id
-        INNER JOIN actividades a ON a.id       = m.actividad_id
+        LEFT JOIN membresias   m ON m.socio_id = s.id
+        LEFT JOIN actividades  a ON a.id       = m.actividad_id
         LEFT  JOIN usuarios    u ON u.id       = m.instructor_id
         WHERE s.eliminado_en IS NULL
-          AND s.activo = 1
           AND (
                 @FiltroEstado = 'todos'
-             OR (@FiltroEstado = 'activos'   AND m.estado = 'activa')
-             OR (@FiltroEstado = 'inactivos' AND m.estado IN ('vencida', 'cancelada'))
+             OR (@FiltroEstado = 'activos'   AND s.activo = 1)
+             OR (@FiltroEstado = 'inactivos' AND s.activo = 0)
               )
           AND (
                 @Texto = ''

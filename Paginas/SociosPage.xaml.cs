@@ -323,7 +323,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 int totalInactivos = 0;
                 foreach (var s in todosParaContar.Items)
                 {
-                    if (s.MembresiaEstado == "activa") totalActivos++;
+                    if (s.Activo) totalActivos++;
                     else totalInactivos++;
                 }
 
