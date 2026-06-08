@@ -29,6 +29,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         public VentasPage()
         {
             InitializeComponent();
+            ConfigurarPermisosPorRol();
             ResaltarChip(chipTodos);
             CargarVentas();
             CargarComboSocios();
@@ -44,9 +45,20 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         {
             try
             {
-                var lista = _controller.BuscarVentas(
-                    txtBuscar.Text, _filtroMetodo,
-                    DateTime.Today.AddDays(-30), DateTime.Today);
+                List<Venta> lista;
+                if (SesionManager.EsAdmin)
+                {
+                    lista = _controller.BuscarVentas(
+                        txtBuscar.Text, _filtroMetodo,
+                        DateTime.Today.AddDays(-30), DateTime.Today);
+                }
+                else
+                {
+                    lista = _controller.BuscarVentasPorUsuario(
+                        txtBuscar.Text, _filtroMetodo,
+                        DateTime.Today, DateTime.Today,
+                        SesionManager.UsuarioId);
+                }
                 gridVentas.ItemsSource = lista;
                 ActualizarStats();
             }
@@ -55,6 +67,36 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void ActualizarStats()
         {
+            if (!SesionManager.EsAdmin)
+            {
+                try
+                {
+                    var ventasHoy = _controller.BuscarVentasPorUsuario(
+                        string.Empty,
+                        "todos",
+                        DateTime.Today,
+                        DateTime.Today,
+                        SesionManager.UsuarioId);
+
+                    decimal totalHoy = 0;
+                    foreach (var venta in ventasHoy)
+                    {
+                        if (venta != null)
+                            totalHoy += venta.Total;
+                    }
+
+                    statVentasHoy.Text = ventasHoy.Count.ToString();
+                    statTotalHoy.Text = "$" + totalHoy.ToString("N0");
+                    statVentasMes.Text = "-";
+                    statTotalMes.Text = "-";
+                }
+                catch
+                {
+                    statVentasHoy.Text = statTotalHoy.Text = "-";
+                }
+                return;
+            }
+
             try
             {
                 var s = _controller.ObtenerEstadisticas();
@@ -68,6 +110,20 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 statVentasHoy.Text = statTotalHoy.Text =
                     statVentasMes.Text = statTotalMes.Text = "-";
             }
+        }
+
+        private void ConfigurarPermisosPorRol()
+        {
+            if (SesionManager.EsAdmin) return;
+
+            cardVentasMes.Visibility = Visibility.Collapsed;
+            cardTotalMes.Visibility = Visibility.Collapsed;
+            colAnularVenta.Visibility = Visibility.Collapsed;
+
+            colStatSep2.Width = new GridLength(0);
+            colStatVentasMes.Width = new GridLength(0);
+            colStatSep3.Width = new GridLength(0);
+            colStatTotalMes.Width = new GridLength(0);
         }
 
         private void CargarComboSocios()
@@ -630,6 +686,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void btnAnular_Click(object sender, RoutedEventArgs e)
         {
+            if (!SesionManager.EsAdmin)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "Solo administradores pueden anular ventas.",
+                    "Acceso denegado");
+                return;
+            }
+
             var v = (sender as Button)?.DataContext as Venta;
             if (v == null) return;
 

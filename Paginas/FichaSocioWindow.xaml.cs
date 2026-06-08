@@ -208,8 +208,16 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             tabActividades.Visibility = visActivo;
 
             // Footer: dar de baja (activo) / restaurar (inactivo)
-            btnDarDeBaja.Visibility      = activo ? Visibility.Visible : Visibility.Collapsed;
-            btnRestaurarSocio.Visibility = activo ? Visibility.Collapsed : Visibility.Visible;
+            if (SesionManager.EsAdmin)
+            {
+                btnDarDeBaja.Visibility      = activo ? Visibility.Visible : Visibility.Collapsed;
+                btnRestaurarSocio.Visibility = activo ? Visibility.Collapsed : Visibility.Visible;
+            }
+            else
+            {
+                btnDarDeBaja.Visibility      = Visibility.Collapsed;
+                btnRestaurarSocio.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void ConfigurarAccionesMembresia()

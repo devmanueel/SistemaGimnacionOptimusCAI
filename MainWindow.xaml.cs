@@ -37,7 +37,7 @@ namespace SistemaGimnacionOptimusCAI
         // ── INICIO ────────────────────────────────────────────
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // Verificar sesion
+            // Verifica r sesion
             if (!SesionManager.HaySesion)
             {
                 MessageBox.Show("No hay sesion activa. Volviendo al login.",

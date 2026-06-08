@@ -27,11 +27,29 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             dpSemanalDesde.SelectedDate = DateTime.Today.AddDays(-6);
             dpSemanalHasta.SelectedDate = DateTime.Today;
 
+            ConfigurarPermisosPorRol();
             CargarCombosReporteMensual();
             IniciarReloj();
             SetTab("historial");
             CargarHistorial();
             ActualizarStats();
+        }
+
+        private void ConfigurarPermisosPorRol()
+        {
+            if (SesionManager.EsAdmin) return;
+
+            panelStatsInstructores.Visibility = Visibility.Collapsed;
+            panelTabsInstructores.Visibility = Visibility.Collapsed;
+            btnTabSemanal.Visibility = Visibility.Collapsed;
+            btnTabMensual.Visibility = Visibility.Collapsed;
+            panelFiltrosHistorial.Visibility = Visibility.Collapsed;
+            colAccionesHistorial.Visibility = Visibility.Collapsed;
+            panelEditarFichaje.Visibility = Visibility.Collapsed;
+
+            dpDesde.SelectedDate = DateTime.Today;
+            dpHasta.SelectedDate = DateTime.Today;
+            txtBuscar.Text = string.Empty;
         }
 
         // ── RELOJ ─────────────────────────────────────────────
@@ -56,6 +74,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void SetTab(string tab)
         {
+            if (!SesionManager.EsAdmin && (tab == "semanal" || tab == "mensual"))
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "Solo administradores pueden ver reportes semanales y mensuales.",
+                    "Acceso denegado");
+                return;
+            }
+
             btnTabHistorial.IsEnabled = (tab != "historial");
             btnTabSemanal.IsEnabled   = (tab != "semanal");
             btnTabMensual.IsEnabled   = (tab != "mensual");
@@ -74,6 +100,13 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ── STATS ─────────────────────────────────────────────
         private void ActualizarStats()
         {
+            if (!SesionManager.EsAdmin)
+            {
+                statHoy.Text = statAbiertas.Text =
+                    statInstructores.Text = statMes.Text = "-";
+                return;
+            }
+
             try
             {
                 var s = _controller.ObtenerEstadisticas();
@@ -89,14 +122,23 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
         }
 
-        // ── HISTORIAL (solo admin) ────────────────────────────
+        // ── HISTORIAL ─────────────────────────────────────────
         private void CargarHistorial()
         {
             try
             {
-                var lista = _controller.Buscar(
-                    txtBuscar.Text, null,
-                    dpDesde.SelectedDate, dpHasta.SelectedDate);
+                List<InstructorAsistencia> lista;
+                if (SesionManager.EsAdmin)
+                {
+                    lista = _controller.Buscar(
+                        txtBuscar.Text, null,
+                        dpDesde.SelectedDate, dpHasta.SelectedDate);
+                }
+                else
+                {
+                    lista = _controller.BuscarPropias(
+                        DateTime.Today, DateTime.Today);
+                }
                 gridHistorial.ItemsSource = lista;
             }
             catch (Exception ex)
@@ -106,7 +148,11 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         private void txtBuscar_TextChanged(object sender, TextChangedEventArgs e) => CargarHistorial();
-        private void dpFecha_Changed(object sender, SelectionChangedEventArgs e)  => CargarHistorial();
+        private void dpFecha_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            if (!SesionManager.EsAdmin) return;
+            CargarHistorial();
+        }
 
         private void gridHistorial_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -114,11 +160,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 panelEditarFichaje.Visibility = Visibility.Collapsed;
         }
 
-        // ── EDITAR FICHAJE (TAREA F-03) ───────────────────────
+        // ── EDITAR FICHAJE ────────────────────────────────────
         private void btnEditarFichaje_Click(object sender, RoutedEventArgs e)
         {
             _editando = (sender as Button)?.DataContext as InstructorAsistencia;
             if (_editando == null) return;
+
+            if (!SesionManager.EsAdmin)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "Solo administradores pueden editar fichajes.",
+                    "Acceso denegado");
+                return;
+            }
 
             txtEditHoraEntrada.Text  = _editando.HoraEntrada?.ToString(@"hh\:mm") ?? string.Empty;
             txtEditHoraSalida.Text   = _editando.HoraSalida?.ToString(@"hh\:mm")  ?? string.Empty;
@@ -131,6 +185,15 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private void btnGuardarEdicion_Click(object sender, RoutedEventArgs e)
         {
             if (_editando == null) return;
+
+            if (!SesionManager.EsAdmin)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "Solo administradores pueden editar fichajes.",
+                    "Acceso denegado");
+                panelEditarFichaje.Visibility = Visibility.Collapsed;
+                return;
+            }
 
             TimeSpan? entrada = ParseHora(txtEditHoraEntrada.Text);
             TimeSpan? salida  = ParseHora(txtEditHoraSalida.Text);
@@ -175,6 +238,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var asist = (sender as Button)?.DataContext as InstructorAsistencia;
             if (asist == null) return;
 
+            if (!SesionManager.EsAdmin)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "Solo administradores pueden eliminar fichajes.",
+                    "Acceso denegado");
+                return;
+            }
+
             bool ok = NotificacionWindow.MostrarConfirmacion(
                 "¿Eliminar asistencia de " + asist.InstructorNombre + " del " + asist.FechaTexto + "?",
                 "Eliminar asistencia");
@@ -192,6 +263,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ── REPORTE SEMANAL ───────────────────────────────────
         private void btnCargarSemanal_Click(object sender, RoutedEventArgs e)
         {
+            if (!SesionManager.EsAdmin)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "Solo administradores pueden ver reportes semanales.",
+                    "Acceso denegado");
+                return;
+            }
+
             if (dpSemanalDesde.SelectedDate == null || dpSemanalHasta.SelectedDate == null)
             {
                 NotificacionWindow.MostrarError("Seleccioná el rango de fechas.");
@@ -224,6 +303,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void btnCargarMensual_Click(object sender, RoutedEventArgs e)
         {
+            if (!SesionManager.EsAdmin)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "Solo administradores pueden ver reportes mensuales.",
+                    "Acceso denegado");
+                return;
+            }
+
             if (cmbMes.SelectedItem == null || cmbAnio.SelectedItem == null)
             {
                 NotificacionWindow.MostrarError("Seleccioná mes y año.");

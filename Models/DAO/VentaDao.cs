@@ -110,6 +110,28 @@ namespace Models.Dao
             return lista;
         }
 
+        public List<Venta> BuscarVentasPorUsuario(string texto, string metodoPago,
+            DateTime? desde, DateTime? hasta, long usuarioId)
+        {
+            var lista = new List<Venta>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_BuscarVentasPorUsuario", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Texto", texto ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@MetodoPago", metodoPago ?? "todos");
+                    cmd.Parameters.AddWithValue("@FechaDesde", (object)desde ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@FechaHasta", (object)hasta ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UsuarioId", usuarioId);
+                    using (var r = cmd.ExecuteReader())
+                        while (r.Read()) lista.Add(MapearVenta(r));
+                }
+            }
+            return lista;
+        }
+
         public (long id, decimal total) RegistrarVenta(
             long usuarioId, long? socioId, string metodoPago,
             string observaciones, List<ItemCarrito> items)
