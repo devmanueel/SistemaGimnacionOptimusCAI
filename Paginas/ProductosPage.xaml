@@ -193,8 +193,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="8"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="8"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition x:Name="colSepValorInventario" Width="8"/>
+                <ColumnDefinition x:Name="colValorInventario" Width="*"/>
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" CornerRadius="10"
@@ -257,7 +257,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Column="6" CornerRadius="10"
+            <Border x:Name="cardValorInventario" Grid.Column="6" CornerRadius="10"
                     Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
                 <Grid>
                     <Grid.ColumnDefinitions>

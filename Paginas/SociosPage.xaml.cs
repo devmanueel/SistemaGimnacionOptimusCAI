@@ -800,6 +800,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         // ─────────────────────────────────────────────────────
         private void btnBajaInactivos_Click(object sender, RoutedEventArgs e)
         {
+            if (!SesionManager.EsAdmin)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "Solo administradores pueden dar de baja socios.",
+                    "Acceso denegado");
+                return;
+            }
+
             List<SocioInactivo> inactivos;
             try
             {

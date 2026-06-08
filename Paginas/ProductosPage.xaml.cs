@@ -34,9 +34,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         public ProductosPage()
         {
             InitializeComponent();
+            ConfigurarPermisosPorRol();
             ResaltarChip(chipTodos);
             CargarCategoriasFiltro();
             CargarProductos();
+        }
+
+        private void ConfigurarPermisosPorRol()
+        {
+            if (SesionManager.EsAdmin) return;
+
+            cardValorInventario.Visibility = Visibility.Collapsed;
+            colSepValorInventario.Width = new GridLength(0);
+            colValorInventario.Width = new GridLength(0);
         }
 
         // ─────────────────────────────────────────────────────
@@ -64,7 +74,10 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 statTotal.Text = stats.Total.ToString();
                 statSinStock.Text = stats.SinStock.ToString();
                 statBajoStock.Text = stats.BajoStock.ToString();
-                statValorInventario.Text = stats.ValorInventarioTexto;
+                if (SesionManager.EsAdmin)
+                    statValorInventario.Text = stats.ValorInventarioTexto;
+                else
+                    statValorInventario.Text = "-";
             }
             catch
             {
@@ -300,16 +313,19 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             infoStack.Children.Add(gridFooter);
 
-            var btnToggle = new Button
+            if (SesionManager.EsAdmin)
             {
-                Content = p.Activo ? "DESACTIVAR" : "REACTIVAR",
-                Style = (Style)Resources["ProductoBtnToggleStyle"],
-                Margin = new Thickness(0, 10, 0, 0),
-                Tag = p.Id
-            };
-            btnToggle.Click += BtnToggle_Click;
+                var btnToggle = new Button
+                {
+                    Content = p.Activo ? "DESACTIVAR" : "REACTIVAR",
+                    Style = (Style)Resources["ProductoBtnToggleStyle"],
+                    Margin = new Thickness(0, 10, 0, 0),
+                    Tag = p.Id
+                };
+                btnToggle.Click += BtnToggle_Click;
+                infoStack.Children.Add(btnToggle);
+            }
 
-            infoStack.Children.Add(btnToggle);
             stack.Children.Add(infoStack);
 
             card.Child = stack;
@@ -364,10 +380,18 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ─────────────────────────────────────────────────────
-        // TOGGLE en cada card
+        // TOGGLE en cada card (solo admin)
         // ─────────────────────────────────────────────────────
         private void BtnToggle_Click(object sender, RoutedEventArgs e)
         {
+            if (!SesionManager.EsAdmin)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "Solo administradores pueden cambiar el estado de productos.",
+                    "Acceso denegado");
+                return;
+            }
+
             e.Handled = true;
             var btn = sender as Button;
             if (btn == null || btn.Tag == null) return;

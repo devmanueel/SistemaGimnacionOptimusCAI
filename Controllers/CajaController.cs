@@ -33,6 +33,13 @@ namespace Controllers
             catch (Exception ex) { throw new Exception("Error en la búsqueda.\n" + ex.Message); }
         }
 
+        public List<CajaMovimiento> BuscarMovimientosPorUsuario(string texto, string filtroTipo,
+                                                     DateTime? desde, DateTime? hasta, long usuarioId)
+        {
+            try { return _dao.BuscarMovimientosPorUsuario(texto, filtroTipo, desde, hasta, usuarioId); }
+            catch (Exception ex) { throw new Exception("Error en la búsqueda.\n" + ex.Message); }
+        }
+
         // ──────────────────────────────────────────────────────
         // RESUMEN
         // ──────────────────────────────────────────────────────

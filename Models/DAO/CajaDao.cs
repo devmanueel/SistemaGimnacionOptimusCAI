@@ -86,6 +86,30 @@ namespace Models.Dao
             return lista;
         }
 
+        public List<CajaMovimiento> BuscarMovimientosPorUsuario(
+            string texto, string filtroTipo = "todos",
+            DateTime? desde = null, DateTime? hasta = null, long usuarioId = 0)
+        {
+            var lista = new List<CajaMovimiento>();
+            using (var conn = GetConnection())
+            {
+                conn.Open();
+                using (var cmd = new SqlCommand("sp_BuscarMovimientosPorUsuario", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Texto", texto ?? string.Empty);
+                    cmd.Parameters.AddWithValue("@FiltroTipo", filtroTipo);
+                    cmd.Parameters.AddWithValue("@FechaDesde", (object)desde ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@FechaHasta", (object)hasta ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@UsuarioId", usuarioId);
+                    using (var reader = cmd.ExecuteReader())
+                        while (reader.Read())
+                            lista.Add(MapearMovimiento(reader));
+                }
+            }
+            return lista;
+        }
+
         // ──────────────────────────────────────────────────────
         // RESUMEN
         // ──────────────────────────────────────────────────────

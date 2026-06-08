@@ -129,6 +129,47 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
+-- 3b. BUSCAR VENTAS POR USUARIO (para instructor)
+-- ─────────────────────────────────────────────────────────────
+CREATE PROCEDURE sp_BuscarVentasPorUsuario
+    @Texto       NVARCHAR(150) = '',
+    @MetodoPago  VARCHAR(20)   = 'todos',
+    @FechaDesde  DATE          = NULL,
+    @FechaHasta  DATE          = NULL,
+    @UsuarioId   BIGINT        = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @FechaDesde IS NULL SET @FechaDesde = CAST(GETDATE() AS DATE);
+    IF @FechaHasta IS NULL SET @FechaHasta = CAST(GETDATE() AS DATE);
+
+    SELECT
+        v.id, v.usuario_id, v.socio_id, v.total, v.metodo_pago,
+        v.observaciones, v.creado_en,
+        ISNULL(u.nombre + ' ' + u.apellido, 'Sistema')          AS usuario_nombre,
+        ISNULL(s.nombre + ' ' + s.apellido, 'Publico general')  AS socio_nombre,
+        s.numero_socio,
+        s.foto AS socio_foto,
+        (SELECT COUNT(*) FROM ventas_items vi WHERE vi.venta_id = v.id) AS cantidad_items
+    FROM ventas v
+    LEFT JOIN usuarios u ON u.id = v.usuario_id
+    LEFT JOIN socios   s ON s.id = v.socio_id
+    WHERE CAST(v.creado_en AS DATE) BETWEEN @FechaDesde AND @FechaHasta
+      AND v.usuario_id = @UsuarioId
+      AND (
+            @Texto = ''
+         OR s.nombre    LIKE '%' + @Texto + '%'
+         OR s.apellido  LIKE '%' + @Texto + '%'
+         OR s.dni       LIKE '%' + @Texto + '%'
+         OR CAST(v.id AS VARCHAR(20)) LIKE '%' + @Texto + '%'
+          )
+      AND (@MetodoPago = 'todos' OR v.metodo_pago = @MetodoPago)
+    ORDER BY v.creado_en DESC;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
 -- 4. REGISTRAR VENTA (con transaccion)
 -- ─────────────────────────────────────────────────────────────
 CREATE PROCEDURE sp_RegistrarVenta

@@ -24,6 +24,13 @@ namespace Controllers
             catch (Exception ex) { throw new Exception("Error en la busqueda.\n" + ex.Message); }
         }
 
+        public List<Venta> BuscarVentasPorUsuario(string texto, string metodoPago,
+            DateTime? desde, DateTime? hasta, long usuarioId)
+        {
+            try { return _dao.BuscarVentasPorUsuario(texto, metodoPago, desde, hasta, usuarioId); }
+            catch (Exception ex) { throw new Exception("Error en la busqueda.\n" + ex.Message); }
+        }
+
         public Venta ObtenerPorId(long id)
         {
             try { return _dao.ObtenerVentaPorId(id); }

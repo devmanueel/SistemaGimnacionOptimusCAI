@@ -135,7 +135,8 @@
                     <TextBlock Text="CAJA Y MOVIMIENTOS"
                                FontFamily="Bahnschrift SemiBold, Segoe UI"
                                FontSize="19" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-                    <TextBlock Text="Ingresos, gastos y balance del gimnasio"
+                    <TextBlock x:Name="lblSubtituloCaja"
+                               Text="Ingresos, gastos y balance del gimnasio"
                                FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                 </StackPanel>
             </StackPanel>
@@ -144,15 +145,15 @@
                 <TextBox x:Name="txtBuscar"
                          Tag="Buscar movimiento..." Style="{StaticResource BuscadorStyle}"
                          Width="290" Margin="0,0,12,0" TextChanged="txtBuscar_TextChanged"/>
-                <Button Content="+ INGRESO" Style="{StaticResource ButtonIngresoStyle}"
+                <Button x:Name="btnIngresoCaja" Content="+ INGRESO" Style="{StaticResource ButtonIngresoStyle}"
                         Click="btnIngreso_Click" Margin="0,0,8,0"/>
-                <Button Content="− GASTO" Style="{StaticResource ButtonGastoStyle}"
+                <Button x:Name="btnGastoCaja" Content="− GASTO" Style="{StaticResource ButtonGastoStyle}"
                         Click="btnGasto_Click"/>
             </StackPanel>
         </Grid>
 
         <!-- ══════════════════ DASHBOARD BALANCE ══════════════════ -->
-        <Grid Grid.Row="1" Margin="0,0,0,16">
+        <Grid x:Name="panelEstadisticasCaja" Grid.Row="1" Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="3*"/>
@@ -309,7 +310,7 @@
         </Grid>
 
         <!-- ══════════════════ FILTROS ══════════════════ -->
-        <Grid Grid.Row="2" Margin="0,0,0,12">
+        <Grid x:Name="panelFiltrosCaja" Grid.Row="2" Margin="0,0,0,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -559,7 +560,7 @@
 
                             <!-- Eliminar -->
                             <!-- Eliminar -->
-                            <DataGridTemplateColumn Header="Accion" Width="70">
+                            <DataGridTemplateColumn x:Name="colAccion" Header="Accion" Width="70">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Button Click="btnEliminar_Click"
@@ -577,7 +578,7 @@
                     </DataGrid>
 
                     <!-- ── Footer de totales del período ── -->
-                    <Border Grid.Row="2" Background="{StaticResource Bg2}"
+                    <Border x:Name="footerTotalesCaja" Grid.Row="2" Background="{StaticResource Bg2}"
                             BorderBrush="{StaticResource Border1}" BorderThickness="0,1,0,0"
                             Padding="16,10">
                         <Grid>

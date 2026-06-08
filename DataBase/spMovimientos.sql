@@ -88,6 +88,53 @@ END;
 GO
 
 -- ─────────────────────────────────────────────────────────────
+-- 2b. BUSCAR MOVIMIENTOS POR USUARIO (filtra por usuario_id)
+-- ─────────────────────────────────────────────────────────────
+CREATE OR ALTER PROCEDURE sp_BuscarMovimientosPorUsuario
+    @Texto       NVARCHAR(150) = '',
+    @FiltroTipo  VARCHAR(30)   = 'todos',
+    @FechaDesde  DATE          = NULL,
+    @FechaHasta  DATE          = NULL,
+    @UsuarioId   BIGINT        = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @FechaDesde IS NULL SET @FechaDesde = DATEADD(DAY, -30, CAST(GETDATE() AS DATE));
+    IF @FechaHasta IS NULL SET @FechaHasta = CAST(GETDATE() AS DATE);
+
+    SELECT
+        c.id, c.tipo, c.subtipo,
+        c.usuario_id, c.socio_id, c.membresia_id, c.actividad_id, c.venta_id,
+        c.detalle, c.metodo_pago, c.monto, c.creado_en,
+        ISNULL(u.nombre + ' ' + u.apellido, 'Sistema')   AS usuario_nombre,
+        ISNULL(s.nombre + ' ' + s.apellido, '')          AS socio_nombre,
+        ISNULL(a.nombre, '')                             AS actividad_nombre,
+        s.numero_socio
+    FROM caja_movimientos c
+    LEFT JOIN usuarios     u ON u.id = c.usuario_id
+    LEFT JOIN socios       s ON s.id = c.socio_id
+    LEFT JOIN actividades  a ON a.id = c.actividad_id
+    WHERE CAST(c.creado_en AS DATE) BETWEEN @FechaDesde AND @FechaHasta
+      AND c.usuario_id = @UsuarioId
+      AND (
+            @Texto = ''
+         OR c.detalle  LIKE '%' + @Texto + '%'
+         OR c.subtipo  LIKE '%' + @Texto + '%'
+         OR s.nombre   LIKE '%' + @Texto + '%'
+         OR s.apellido LIKE '%' + @Texto + '%'
+         OR a.nombre   LIKE '%' + @Texto + '%'
+          )
+      AND (
+            @FiltroTipo = 'todos'
+         OR (@FiltroTipo = 'ingreso' AND c.tipo LIKE 'ingreso%')
+         OR c.tipo = @FiltroTipo
+           )
+    ORDER BY c.creado_en DESC;
+END;
+GO
+
+-- ─────────────────────────────────────────────────────────────
 -- 3. RESUMEN DE CAJA (totales por rango)
 -- ─────────────────────────────────────────────────────────────
 CREATE OR ALTER PROCEDURE sp_ResumenCaja

@@ -37,6 +37,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             dpDesde.SelectedDate = DateTime.Today.AddDays(-30);
             dpHasta.SelectedDate = DateTime.Today;
 
+            ConfigurarPermisosPorRol();
             ResaltarChip(chipTodos);
             CargarTodo();
         }
@@ -47,28 +48,63 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         private void CargarTodo()
         {
             CargarMovimientos();
-            CargarDashboard();
-            CargarGrafico7Dias();
+            if (SesionManager.EsAdmin)
+            {
+                CargarDashboard();
+                CargarGrafico7Dias();
+            }
         }
 
         private void CargarMovimientos()
         {
             try
             {
-                var lista = _controller.BuscarMovimientos(
-                    txtBuscar.Text,
-                    _filtroTipo,
-                    dpDesde.SelectedDate,
-                    dpHasta.SelectedDate);
+                List<CajaMovimiento> lista;
+                if (SesionManager.EsAdmin)
+                {
+                    lista = _controller.BuscarMovimientos(
+                        txtBuscar.Text,
+                        _filtroTipo,
+                        dpDesde.SelectedDate,
+                        dpHasta.SelectedDate);
+                }
+                else
+                {
+                    lista = _controller.BuscarMovimientosPorUsuario(
+                        txtBuscar.Text,
+                        "todos",
+                        DateTime.Today,
+                        DateTime.Today,
+                        SesionManager.UsuarioId);
+                }
 
                 gridMovimientos.ItemsSource = lista;
-                ActualizarFooterMovimientos(lista);
+                if (SesionManager.EsAdmin)
+                    ActualizarFooterMovimientos(lista);
             }
             catch (Exception ex)
             {
-                ActualizarFooterMovimientos(new List<CajaMovimiento>());
+                if (SesionManager.EsAdmin)
+                    ActualizarFooterMovimientos(new List<CajaMovimiento>());
                 NotificacionWindow.MostrarError(ex.Message, "Error al cargar movimientos");
             }
+        }
+
+        private void ConfigurarPermisosPorRol()
+        {
+            if (SesionManager.EsAdmin) return;
+
+            panelEstadisticasCaja.Visibility = Visibility.Collapsed;
+            panelFiltrosCaja.Visibility = Visibility.Collapsed;
+            footerTotalesCaja.Visibility = Visibility.Collapsed;
+            colAccion.Visibility = Visibility.Collapsed;
+
+            dpDesde.SelectedDate = DateTime.Today;
+            dpHasta.SelectedDate = DateTime.Today;
+            _filtroTipo = "ingreso";
+
+            lblSubtituloCaja.Text = "Ventas registradas hoy y carga de gastos";
+            txtBuscar.Tag = "Buscar venta del dia...";
         }
 
         private void ActualizarFooterMovimientos(List<CajaMovimiento> movimientos)
@@ -104,6 +140,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void CargarDashboard()
         {
+            if (!SesionManager.EsAdmin) return;
+
             try
             {
                 var resumenDia = _controller.ResumenDelDia();
@@ -131,10 +169,12 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ─────────────────────────────────────────────────────
-        // GRÁFICO DE BARRAS — 7 días
+        // GRÁFICO DE BARRAS — 7 días (solo admin)
         // ─────────────────────────────────────────────────────
         private void CargarGrafico7Dias()
         {
+            if (!SesionManager.EsAdmin) return;
+
             try
             {
                 gridChart.Children.Clear();
@@ -220,12 +260,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void dpFecha_Changed(object sender, SelectionChangedEventArgs e)
         {
+            if (!SesionManager.EsAdmin) return;
             CargarMovimientos();
             CargarDashboard();
         }
 
         private void chipFiltro_Click(object sender, RoutedEventArgs e)
         {
+            if (!SesionManager.EsAdmin) return;
             var btn = sender as Button;
             if (btn == null) return;
             _filtroTipo = btn.Tag.ToString();
@@ -274,6 +316,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void btnEliminar_Click(object sender, RoutedEventArgs e)
         {
+            if (!SesionManager.EsAdmin)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "Solo administradores pueden eliminar movimientos.",
+                    "Acceso denegado");
+                return;
+            }
+
             var mov = ObtenerMovimientoDeFila(sender);
             if (mov == null) return;
 
