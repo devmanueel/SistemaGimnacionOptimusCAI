@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Media;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -395,6 +396,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void MostrarResultadoSocio(ResultadoValidacion r)
         {
+            ReproducirSonidoAcceso(r.EsPermitido);
+
             _versionResultado++;
             panelResultado.BeginAnimation(UIElement.OpacityProperty, null);
             panelResultado.Opacity = 1;
@@ -456,6 +459,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void MostrarResultadoInstructor(FichajeResultado r)
         {
+            ReproducirSonidoAcceso(r.Operacion != "espera_minima");
+
             _versionResultado++;
             panelResultado.BeginAnimation(UIElement.OpacityProperty, null);
             panelResultado.Opacity = 1;
@@ -519,6 +524,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void MostrarError(string mensaje)
         {
+            ReproducirSonidoAcceso(false);
+
             _versionResultado++;
             panelResultado.BeginAnimation(UIElement.OpacityProperty, null);
             panelResultado.Opacity = 1;
@@ -537,6 +544,21 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             panelInfoFichaje.Visibility = Visibility.Collapsed;
 
             IniciarTimerOcultar();
+        }
+
+        private void ReproducirSonidoAcceso(bool accesoPermitido)
+        {
+            string archivo = accesoPermitido ? "acceso_ok.wav" : "acceso_error.wav";
+            string ruta = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Sounds", archivo);
+
+            if (!File.Exists(ruta)) return;
+
+            try
+            {
+                var player = new SoundPlayer(ruta);
+                player.Play();
+            }
+            catch { }
         }
 
         private void IniciarTimerOcultar()

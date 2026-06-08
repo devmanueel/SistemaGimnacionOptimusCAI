@@ -14,6 +14,9 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 {
     public partial class NuevoMensajeWindow : Window
     {
+        private const int TelefonoWhatsappMinLength = 8;
+        private const int TelefonoWhatsappMaxLength = 15;
+
         private readonly WhatsappController _controller = new WhatsappController();
         private List<SocioMasivoItem> _sociosMasivo = new List<SocioMasivoItem>();
         private List<SocioComboItem> _sociosCombo = new List<SocioComboItem>();
@@ -74,8 +77,17 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
         private void GuardarIndividual()
         {
+            AutocompletarTelefonoSocioSeleccionado();
+
             var socio = cmbSocio.SelectedItem as SocioComboItem;
             long? socioId = socio != null ? (long?)socio.Id : null;
+
+            string errorTelefono = ValidarTelefonoWhatsapp(txtTelefono.Text);
+            if (errorTelefono != null)
+            {
+                NotificacionWindow.MostrarError(errorTelefono);
+                return;
+            }
 
             var r = _controller.Insertar("masivo", socioId, txtTelefono.Text, txtMensaje.Text, UsuarioId);
             if (!r.ok)
@@ -109,11 +121,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
         private void cmbSocio_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var socio = cmbSocio.SelectedItem as SocioComboItem;
-            if (socio == null) return;
-
-            // Al elegir un socio, traemos su telefono. El admin/docente puede editarlo luego.
-            txtTelefono.Text = socio.Telefono ?? string.Empty;
+            AutocompletarTelefonoSocioSeleccionado();
         }
 
         // Filtra el combo en vivo por DNI, nombre o apellido mientras se tipea.
@@ -157,6 +165,102 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
         {
             var view = CollectionViewSource.GetDefaultView(cmbSocio.ItemsSource);
             if (view != null) view.Filter = null;
+
+            AutocompletarTelefonoSocioSeleccionado();
+        }
+
+        private void AutocompletarTelefonoSocioSeleccionado()
+        {
+            if (RbIndividual == null || RbIndividual.IsChecked != true) return;
+
+            var socio = cmbSocio.SelectedItem as SocioComboItem;
+            if (socio == null) return;
+
+            txtTelefono.Text = NormalizarTelefonoWhatsapp(socio.Telefono);
+        }
+
+        private void txtTelefono_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (!EsTextoTelefonoValido(e.Text))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            e.Handled = SuperaLargoMaximo(txtTelefono, e.Text);
+        }
+
+        private void txtTelefono_Pasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (!e.DataObject.GetDataPresent(typeof(string)))
+            {
+                e.CancelCommand();
+                return;
+            }
+
+            string texto = e.DataObject.GetData(typeof(string)) as string;
+            texto = NormalizarTelefonoWhatsapp(texto);
+
+            if (string.IsNullOrEmpty(texto) || SuperaLargoMaximo(txtTelefono, texto))
+            {
+                e.CancelCommand();
+                return;
+            }
+
+            e.DataObject.SetData(typeof(string), texto);
+        }
+
+        private static bool EsTextoTelefonoValido(string texto)
+        {
+            if (string.IsNullOrEmpty(texto)) return false;
+
+            foreach (char c in texto)
+                if (!char.IsDigit(c)) return false;
+
+            return true;
+        }
+
+        private static bool SuperaLargoMaximo(TextBox textBox, string textoNuevo)
+        {
+            int largoActual = textBox.Text != null ? textBox.Text.Length : 0;
+            int largoFinal = largoActual - textBox.SelectionLength + (textoNuevo != null ? textoNuevo.Length : 0);
+            return largoFinal > TelefonoWhatsappMaxLength;
+        }
+
+        private static string NormalizarTelefonoWhatsapp(string telefono)
+        {
+            if (string.IsNullOrWhiteSpace(telefono)) return string.Empty;
+
+            var caracteres = new List<char>();
+            foreach (char c in telefono)
+            {
+                if (char.IsDigit(c))
+                {
+                    caracteres.Add(c);
+                    if (caracteres.Count == TelefonoWhatsappMaxLength) break;
+                }
+            }
+
+            return new string(caracteres.ToArray());
+        }
+
+        private static string ValidarTelefonoWhatsapp(string telefono)
+        {
+            telefono = telefono != null ? telefono.Trim() : string.Empty;
+
+            if (string.IsNullOrWhiteSpace(telefono))
+                return "El telefono es obligatorio.";
+
+            if (!EsTextoTelefonoValido(telefono))
+                return "El telefono solo puede contener numeros.";
+
+            if (telefono.Length < TelefonoWhatsappMinLength)
+                return "El telefono debe tener al menos 8 digitos.";
+
+            if (telefono.Length > TelefonoWhatsappMaxLength)
+                return "El telefono no puede superar los 15 digitos.";
+
+            return null;
         }
 
         private void btnPlantilla_Click(object sender, RoutedEventArgs e)

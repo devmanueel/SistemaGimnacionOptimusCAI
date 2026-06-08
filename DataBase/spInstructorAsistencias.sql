@@ -480,14 +480,22 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @TarifaGlobal DECIMAL(10,2) = 4000;
+
+    SELECT @TarifaGlobal = TRY_CAST(valor AS DECIMAL(10,2))
+    FROM configuracion_sistema
+    WHERE clave = 'tarifa_hora_docentes';
+
+    IF @TarifaGlobal IS NULL SET @TarifaGlobal = 4000;
+
     SELECT
         u.id                                                        AS instructor_id,
         u.nombre + ' ' + u.apellido                                 AS nombre_completo,
-        u.tarifa_hora,
+        @TarifaGlobal                                                AS tarifa_hora,
         ISNULL(a.nombre, '-')                                       AS actividad_nombre,
         COUNT(DISTINCT ia.fecha)                                     AS dias_asistidos,
         ISNULL(SUM(ia.horas_trabajadas), 0)                         AS total_horas,
-        ISNULL(SUM(ia.horas_trabajadas), 0) * u.tarifa_hora         AS sueldo_estimado,
+        ISNULL(SUM(ia.horas_trabajadas), 0) * @TarifaGlobal         AS sueldo_estimado,
         MIN(ia.fecha)                                                AS primer_dia,
         MAX(ia.fecha)                                                AS ultimo_dia
     FROM usuarios u
@@ -502,7 +510,7 @@ BEGIN
     WHERE u.rol_id  = 2
       AND u.activo  = 1
       AND u.eliminado_en IS NULL
-    GROUP BY u.id, u.nombre, u.apellido, u.tarifa_hora, a.nombre
+    GROUP BY u.id, u.nombre, u.apellido, a.nombre
     ORDER BY u.apellido ASC, u.nombre ASC;
 END;
 GO

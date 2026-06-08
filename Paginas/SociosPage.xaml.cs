@@ -18,7 +18,6 @@ using SistemaGimnacionOptimusCAI.Ventanas;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -149,7 +148,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     filtroSexo:         _filtroSexo,
                     filtroDejaronVenir: _filtroDejaronVenir,
                     pagina:             pagina,
-                    tamPagina:          TAM_PAGINA);
+                    tamPagina:          TAM_PAGINA,
+                    ordenamiento:       _ordenamiento);
 
                 _hayMas = resultado.HayMas;
 
@@ -189,7 +189,6 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 }
 
                 ActualizarResumenFiltros(resultado.Items);
-                AplicarOrdenamiento();
             }
             catch (Exception ex)
             {
@@ -327,7 +326,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     filtroSexo:         _filtroSexo,
                     filtroDejaronVenir: _filtroDejaronVenir,
                     pagina:             1,
-                    tamPagina:          99999);
+                    tamPagina:          99999,
+                    ordenamiento:       _ordenamiento);
 
                 int totalActivos   = 0;
                 int totalInactivos = 0;
@@ -551,46 +551,12 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             if (item != null && item.Tag != null)
                 _ordenamiento = item.Tag.ToString();
 
-            AplicarOrdenamiento();
-        }
+            if (gridSocios == null || !_primeraCargaCompleta) return;
 
-        private void AplicarOrdenamiento()
-        {
-            var lista = gridSocios?.ItemsSource as List<SocioConMembresia>;
-            if (lista == null || lista.Count == 0) return;
+            if (gridSocios != null)
+                gridSocios.ItemsSource = null;
 
-            List<SocioConMembresia> ordenada;
-
-            switch (_ordenamiento)
-            {
-                case "nombre_desc":
-                    ordenada = new List<SocioConMembresia>(
-                        ((List<SocioConMembresia>)gridSocios.ItemsSource)
-                            .OrderByDescending(x => x.NombreCompleto));
-                    break;
-
-                case "vencimiento_desc":
-                    ordenada = new List<SocioConMembresia>(
-                        ((List<SocioConMembresia>)gridSocios.ItemsSource)
-                            .OrderByDescending(x => x.FechaVencimiento.HasValue)
-                            .ThenByDescending(x => x.FechaVencimiento));
-                    break;
-
-                case "vencimiento_asc":
-                    ordenada = new List<SocioConMembresia>(
-                        ((List<SocioConMembresia>)gridSocios.ItemsSource)
-                            .OrderBy(x => x.FechaVencimiento.HasValue)
-                            .ThenBy(x => x.FechaVencimiento));
-                    break;
-
-                default: // nombre_asc
-                    ordenada = new List<SocioConMembresia>(
-                        ((List<SocioConMembresia>)gridSocios.ItemsSource)
-                            .OrderBy(x => x.NombreCompleto));
-                    break;
-            }
-
-            gridSocios.ItemsSource = ordenada;
+            CargarSocios();
         }
 
         // ─────────────────────────────────────────────────────

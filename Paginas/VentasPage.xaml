@@ -381,7 +381,11 @@
                                 <StackPanel Grid.Row="0" x:Name="panelSinProductos"
                                             HorizontalAlignment="Center" Margin="0,80,0,0"
                                             Visibility="Collapsed">
-                                    <TextBlock Text="📦" FontSize="56" HorizontalAlignment="Center" Opacity="0.4"/>
+                                    <fa:ImageAwesome Icon="Cube"
+                                                     Height="54" Width="54"
+                                                     HorizontalAlignment="Center"
+                                                     Foreground="{StaticResource TextMuted}"
+                                                     Opacity="0.4"/>
                                     <TextBlock Text="No hay productos disponibles"
                                                FontSize="14" Foreground="{StaticResource TextMuted}"
                                                HorizontalAlignment="Center" Margin="0,12,0,0"/>
@@ -468,7 +472,11 @@
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" x:Name="panelCarritoVacio"
                                             HorizontalAlignment="Center" Margin="0,40,0,0">
-                                    <fa:ImageAwesome Icon="ShoppingCart" Height="72" Width="72" HorizontalAlignment="Center" Opacity="0.3"/>
+                                    <fa:ImageAwesome Icon="ShoppingCart"
+                                                     Height="72" Width="72"
+                                                     HorizontalAlignment="Center"
+                                                     Foreground="{StaticResource TextMuted}"
+                                                     Opacity="0.3"/>
                                     <TextBlock Text="Tu carrito esta vacio"
                                                FontSize="13" Foreground="{StaticResource TextMuted}"
                                                HorizontalAlignment="Center" Margin="0,8,0,4"/>
@@ -497,6 +505,7 @@
                                                FontSize="32" FontWeight="Bold" Foreground="#00E676"/>
                                 </Grid>
                                 <Button x:Name="btnCobrar" Content="CERRAR Y COBRAR"
+                                        Tag="CreditCard"
                                         Style="{StaticResource BotonCobrarEstilo}"
                                         Height="50" FontSize="14" Click="btnCobrar_Click"/>
                             </StackPanel>

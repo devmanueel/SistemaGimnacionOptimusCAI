@@ -341,8 +341,11 @@
                             <StackPanel Grid.Row="0" x:Name="panelVacio"
                                         VerticalAlignment="Center" HorizontalAlignment="Center"
                                         Margin="0,80,0,0" Visibility="Collapsed">
-                                <TextBlock Text="📦" FontSize="64" HorizontalAlignment="Center"
-                                           Opacity="0.4"/>
+                                <fa:ImageAwesome Icon="Cube"
+                                                 Height="62" Width="62"
+                                                 HorizontalAlignment="Center"
+                                                 Foreground="{StaticResource TextMuted}"
+                                                 Opacity="0.4"/>
                                 <TextBlock Text="No hay productos cargados"
                                            FontFamily="Bahnschrift SemiBold"
                                            FontSize="16" FontWeight="Bold"
@@ -356,7 +359,7 @@
                             <!-- WrapPanel donde se generan las cards -->
                             <WrapPanel Grid.Row="1" x:Name="panelProductos"
                                        Orientation="Horizontal"
-                                       HorizontalAlignment="Left"/>
+                                       HorizontalAlignment="Center"/>
                         </Grid>
                     </ScrollViewer>
                 </Grid>

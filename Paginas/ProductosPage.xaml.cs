@@ -12,6 +12,7 @@
 
 using Controllers;
 using Entities;
+using FontAwesome.WPF;
 using SistemaGimnacionOptimusCAI.Helpers;
 using SistemaGimnacionOptimusCAI.Ventanas;
 using System;
@@ -167,15 +168,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             }
             else
             {
-                var emoji = new TextBlock
+                var iconoCategoria = new ImageAwesome
                 {
-                    Text = ObtenerEmojiCategoria(p.Categoria),
-                    FontSize = 48,
+                    Icon = ObtenerIconoCategoria(p.Categoria),
+                    Width = 54,
+                    Height = 54,
+                    Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     Opacity = 0.4
                 };
-                gridFoto.Children.Add(emoji);
+                gridFoto.Children.Add(iconoCategoria);
             }
 
             var badgeEstado = new Border
@@ -313,17 +316,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             return card;
         }
 
-        private string ObtenerEmojiCategoria(string categoria)
+        private FontAwesomeIcon ObtenerIconoCategoria(string categoria)
         {
-            if (string.IsNullOrEmpty(categoria)) return "📦";
+            if (string.IsNullOrEmpty(categoria)) return FontAwesomeIcon.Cube;
             string c = categoria.ToLower();
-            if (c.Contains("bebida")) return "🥤";
-            if (c.Contains("supl")) return "💊";
-            if (c.Contains("snack")) return "🍫";
-            if (c.Contains("ropa")) return "👕";
-            if (c.Contains("acces")) return "🎒";
-            if (c.Contains("higien")) return "🧴";
-            return "📦";
+            if (c.Contains("bebida")) return FontAwesomeIcon.Coffee;
+            if (c.Contains("supl")) return FontAwesomeIcon.Medkit;
+            if (c.Contains("snack")) return FontAwesomeIcon.Cutlery;
+            if (c.Contains("ropa")) return FontAwesomeIcon.ShoppingBag;
+            if (c.Contains("acces")) return FontAwesomeIcon.Tags;
+            if (c.Contains("higien")) return FontAwesomeIcon.Flask;
+            return FontAwesomeIcon.Cube;
         }
 
         // ─────────────────────────────────────────────────────

@@ -1024,3 +1024,39 @@ No hace falta ejecutar otros SPs por estos cambios.
 
 ### Importante
 Si no se ejecuta `DataBase\sp_ListarSociosConMembresias.sql`, la aplicacion puede compilar, pero la tabla de Socios seguira usando la version anterior del SP y los chips pueden no reflejar correctamente el total de socios activos/inactivos.
+
+---
+
+## 24. Ordenamiento global en Socios y footer de Caja
+
+**Fecha:** 07/06/2026
+
+### Mini resumen
+- Se movio el ordenamiento de la tabla Socios a la base de datos para que funcione correctamente con paginacion/infinite scroll.
+- El combo `ORDENAR POR` ahora recarga la tabla desde la pagina 1 y el SP devuelve los socios ya ordenados globalmente.
+- Se elimino el ordenamiento local sobre los socios ya cargados, porque solo ordenaba la pagina visible.
+- En Caja, el footer inferior ahora calcula `movimientos`, `Ingresos`, `Gastos` y `Neto` usando la misma lista que se muestra en la grilla.
+- El footer de Caja refleja los filtros visibles: busqueda, chips y rango de fechas.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `DataBase\sp_ListarSociosConMembresias.sql` | Nuevo parametro `@Ordenamiento` y `ORDER BY` SQL antes de `OFFSET/FETCH` |
+| `Models\DAO\SocioDao.cs` | Envia `@Ordenamiento` al SP |
+| `Controllers\SocioController.cs` | Expone parametro `ordenamiento` hacia la UI |
+| `Paginas\SociosPage.xaml.cs` | Recarga desde pagina 1 al cambiar orden; deja de ordenar localmente la pagina parcial |
+| `Paginas\CajaPage.xaml.cs` | Footer de Caja calculado con la lista visible en `gridMovimientos` |
+
+### SPs a ejecutar
+
+Ejecutar nuevamente:
+
+```
+DataBase\sp_ListarSociosConMembresias.sql
+```
+
+No hace falta ejecutar SPs por el cambio del footer de Caja.
+
+### Importante
+Si no se ejecuta `DataBase\sp_ListarSociosConMembresias.sql`, la aplicacion puede compilar, pero la seccion Socios puede fallar al listar porque el codigo ya envia el parametro `@Ordenamiento` al SP.

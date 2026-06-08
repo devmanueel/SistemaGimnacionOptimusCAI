@@ -44,7 +44,8 @@ namespace Controllers
             string filtroSexo         = null,
             int?   filtroDejaronVenir = null,
             int    pagina             = 1,
-            int    tamPagina          = 8)
+            int    tamPagina          = 8,
+            string ordenamiento       = "nombre_asc")
         {
             try
             {
@@ -52,7 +53,7 @@ namespace Controllers
                     texto, filtroEstado, filtroActividadId,
                     filtroCuotaVencida, filtroInstructorId,
                     filtroSexo, filtroDejaronVenir,
-                    pagina, tamPagina);
+                    pagina, tamPagina, ordenamiento);
             }
             catch (Exception ex)
             {

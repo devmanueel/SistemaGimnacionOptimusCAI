@@ -94,7 +94,10 @@
 
                         <TextBlock Text="TELEFONO * (con codigo de pais, ej: 5491155555555)"
                                    Style="{StaticResource LabelCampoEstilo}"/>
-                        <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"/>
+                        <TextBox x:Name="txtTelefono" Style="{StaticResource InputEstilo}"
+                                 MaxLength="15"
+                                 PreviewTextInput="txtTelefono_PreviewTextInput"
+                                 DataObject.Pasting="txtTelefono_Pasting"/>
                     </StackPanel>
 
                     <StackPanel x:Name="GridMasivo" Visibility="Collapsed">

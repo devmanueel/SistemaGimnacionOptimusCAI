@@ -166,14 +166,14 @@
                         <Border Grid.Row="0" Background="#4ADE80"/>
 
                         <!-- Tabs -->
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="8,0,0,0">
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="8,20,0,0">
                             <Button x:Name="btnTabHistorial" Content="HISTORIAL"
                                     Style="{StaticResource TabBtnEstilo}"
                                     Click="btnTabHistorial_Click"/>
-                            <Button x:Name="btnTabSemanal" Content="REPORTE SEMANAL"
+                            <Button x:Name="btnTabSemanal" Content="REPORTE SEMANAL" Margin="20,0,0,0"
                                     Style="{StaticResource TabBtnEstilo}"
                                     Click="btnTabSemanal_Click"/>
-                            <Button x:Name="btnTabMensual" Content="REPORTE MENSUAL"
+                            <Button x:Name="btnTabMensual" Content="REPORTE MENSUAL" Margin="20,0,0,0"
                                     Style="{StaticResource TabBtnEstilo}"
                                     Click="btnTabMensual_Click"/>
                         </StackPanel>
@@ -201,7 +201,7 @@
                                     <TextBlock Text="HASTA:" Foreground="{StaticResource TextMuted}" FontSize="10"
                                                FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                     <DatePicker x:Name="dpHasta" Style="{StaticResource DatePickerEstilo}"
-                                                Width="140" Height="42"
+                                                Width="140" Height="42" Margin="0, 12"
                                                 SelectedDateChanged="dpFecha_Changed"/>
                                 </StackPanel>
                                 <TextBox x:Name="txtBuscar" Tag="Buscar instructor..." Grid.Column="1"
