@@ -597,12 +597,28 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private Grid FilaDetalle(string c1, string c2, string c3, bool header)
         {
-            var g = new Grid { Margin = new Thickness(0, 3, 0, 3) };
+            var g = new Grid
+            {
+                Margin = header ? new Thickness(0, 0, 0, 6) : new Thickness(0, 0, 0, 4),
+                MinHeight = header ? 26 : 34
+            };
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) });
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            Color color = header ? Color.FromRgb(138, 154, 138) : Color.FromRgb(200, 220, 200);
+            var fondo = new Border
+            {
+                Background = header
+                    ? new SolidColorBrush(Color.FromRgb(10, 26, 10))
+                    : new SolidColorBrush(Color.FromRgb(13, 20, 13)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(26, 58, 26)),
+                BorderThickness = new Thickness(0, 0, 0, 1),
+                CornerRadius = header ? new CornerRadius(6) : new CornerRadius(4)
+            };
+            Grid.SetColumnSpan(fondo, 3);
+            g.Children.Add(fondo);
+
+            Color color = header ? Color.FromRgb(138, 176, 138) : Color.FromRgb(225, 245, 225);
 
             TextBlock Tb(string t, int col, TextAlignment align)
             {
@@ -610,10 +626,14 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 {
                     Text = t,
                     FontSize = header ? 10 : 12,
-                    FontWeight = header ? FontWeights.Bold : FontWeights.Normal,
+                    FontWeight = header ? FontWeights.Bold : FontWeights.SemiBold,
                     Foreground = new SolidColorBrush(color),
                     TextAlignment = align,
-                    TextWrapping = TextWrapping.Wrap
+                    TextWrapping = TextWrapping.Wrap,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Margin = col == 0
+                        ? new Thickness(10, 0, 8, 0)
+                        : new Thickness(8, 0, 10, 0)
                 };
                 Grid.SetColumn(tb, col);
                 return tb;

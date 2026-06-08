@@ -1,6 +1,7 @@
 ﻿// SistemaGimnacionOptimusCAI/Paginas/VentasPage.xaml.cs — C# 7.3
 using Controllers;
 using Entities;
+using FontAwesome.WPF;
 using SistemaGimnacionOptimusCAI.Helpers;
 using System;
 using System.Collections.Generic;
@@ -105,37 +106,44 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private Border CrearCardCatalogo(Producto p)
         {
+            var bordeCard = new SolidColorBrush(Color.FromRgb(30, 40, 30));
             var card = new Border
             {
-                Width = 140,
-                Height = 180,
+                Width = 160,
+                Height = 204,
                 Margin = new Thickness(6),
                 Background = new SolidColorBrush(Color.FromRgb(17, 24, 17)),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(30, 40, 30)),
+                BorderBrush = bordeCard,
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(10),
                 Cursor = System.Windows.Input.Cursors.Hand,
                 ClipToBounds = true,
                 Tag = p.Id
             };
-            card.MouseLeftButtonUp += (s, e) => AgregarAlCarrito(p);
+            card.MouseLeftButtonUp += (s, e) =>
+            {
+                AgregarAlCarrito(p);
+                AnimarCardAgregada(card, bordeCard);
+            };
 
             var stack = new StackPanel();
 
             var cont = new Border
             {
-                Height = 90,
+                Height = 92,
                 Background = new SolidColorBrush(Color.FromRgb(17, 24, 17))
             };
             var g = new Grid();
             if (p.Foto != null && p.Foto.Length > 0)
                 g.Children.Add(new Image { Source = BytesABitmapImage(p.Foto), Stretch = Stretch.UniformToFill });
             else
-                g.Children.Add(new TextBlock
+                g.Children.Add(new ImageAwesome
                 {
-                    Text = ObtenerEmoji(p.Categoria),
-                    FontSize = 34,
-                    Opacity = 0.5,
+                    Icon = ObtenerIconoProducto(p.Categoria),
+                    Width = 38,
+                    Height = 38,
+                    Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
+                    Opacity = 0.42,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 });
@@ -147,7 +155,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Background = new SolidColorBrush(Color.FromRgb(30, 40, 30))
             });
 
-            var info = new StackPanel { Margin = new Thickness(10, 8, 10, 8) };
+            var info = new StackPanel { Margin = new Thickness(10, 8, 10, 10) };
             info.Children.Add(new TextBlock
             {
                 Text = p.Nombre,
@@ -155,7 +163,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 FontWeight = FontWeights.SemiBold,
                 Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
                 TextWrapping = TextWrapping.Wrap,
-                MaxHeight = 34,
+                MaxHeight = 36,
                 Margin = new Thickness(0, 0, 0, 6)
             });
 
@@ -173,22 +181,94 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             };
             Grid.SetColumn(lp, 0);
 
-            var ls = new TextBlock
+            var badgeStock = new Border
             {
-                Text = p.Stock + "u",
-                FontSize = 10,
-                Foreground = p.BajoStock
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(7, 2, 7, 2),
+                Background = p.BajoStock
+                    ? new SolidColorBrush(Color.FromRgb(47, 32, 12))
+                    : new SolidColorBrush(Color.FromRgb(10, 34, 18)),
+                BorderBrush = p.BajoStock
                     ? new SolidColorBrush(Color.FromRgb(255, 167, 38))
-                    : new SolidColorBrush(Color.FromRgb(122, 173, 122)),
+                    : new SolidColorBrush(Color.FromRgb(48, 92, 58)),
+                BorderThickness = new Thickness(0.5),
                 VerticalAlignment = VerticalAlignment.Center
             };
-            Grid.SetColumn(ls, 1);
+            badgeStock.Child = new TextBlock
+            {
+                Text = "Stock: " + p.Stock,
+                FontSize = 9,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = p.BajoStock
+                    ? new SolidColorBrush(Color.FromRgb(255, 167, 38))
+                    : new SolidColorBrush(Color.FromRgb(122, 173, 122))
+            };
+            Grid.SetColumn(badgeStock, 1);
 
-            gf.Children.Add(lp); gf.Children.Add(ls);
+            gf.Children.Add(lp);
+            gf.Children.Add(badgeStock);
             info.Children.Add(gf);
+
+            var btnAgregar = new Border
+            {
+                Height = 28,
+                CornerRadius = new CornerRadius(7),
+                Background = new SolidColorBrush(Color.FromRgb(10, 42, 20)),
+                BorderBrush = new SolidColorBrush(Color.FromRgb(74, 222, 128)),
+                BorderThickness = new Thickness(0.8),
+                Margin = new Thickness(0, 9, 0, 0)
+            };
+            var contenidoAgregar = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            contenidoAgregar.Children.Add(new ImageAwesome
+            {
+                Icon = FontAwesomeIcon.Plus,
+                Height = 10,
+                Width = 10,
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
+                Margin = new Thickness(0, 0, 6, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            });
+            contenidoAgregar.Children.Add(new TextBlock
+            {
+                Text = "AGREGAR",
+                FontSize = 10,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Color.FromRgb(232, 245, 232)),
+                VerticalAlignment = VerticalAlignment.Center
+            });
+            btnAgregar.Child = contenidoAgregar;
+            info.Children.Add(btnAgregar);
+
             stack.Children.Add(info);
             card.Child = stack;
             return card;
+        }
+
+        private void AnimarCardAgregada(Border card, SolidColorBrush bordeOriginal)
+        {
+            var fondo = card.Background as SolidColorBrush;
+            if (fondo == null) return;
+
+            var animFondo = new ColorAnimation
+            {
+                To = Color.FromRgb(16, 56, 28),
+                Duration = new Duration(TimeSpan.FromMilliseconds(90)),
+                AutoReverse = true
+            };
+            var animBorde = new ColorAnimation
+            {
+                To = Color.FromRgb(74, 222, 128),
+                Duration = new Duration(TimeSpan.FromMilliseconds(90)),
+                AutoReverse = true
+            };
+
+            fondo.BeginAnimation(SolidColorBrush.ColorProperty, animFondo);
+            bordeOriginal.BeginAnimation(SolidColorBrush.ColorProperty, animBorde);
         }
 
         // ── CARRITO ───────────────────────────────────────────
@@ -279,7 +359,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 Orientation = Orientation.Horizontal,
                 VerticalAlignment = VerticalAlignment.Center
             };
-            btns.Children.Add(CrearBtnCantidad("－", item, false));
+            btns.Children.Add(CrearBtnCantidad(FontAwesomeIcon.Minus, item, false));
             btns.Children.Add(new TextBlock
             {
                 Text = item.Cantidad.ToString(),
@@ -290,7 +370,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 TextAlignment = TextAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             });
-            btns.Children.Add(CrearBtnCantidad("＋", item, true));
+            btns.Children.Add(CrearBtnCantidad(FontAwesomeIcon.Plus, item, true));
             Grid.SetColumn(btns, 1);
 
             g.Children.Add(info); g.Children.Add(btns);
@@ -298,20 +378,26 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             return fila;
         }
 
-        private Button CrearBtnCantidad(string texto, ItemCarrito item, bool sumar)
+        private Button CrearBtnCantidad(FontAwesomeIcon icono, ItemCarrito item, bool sumar)
         {
+            var colorIcono = sumar
+                ? new SolidColorBrush(Color.FromRgb(0, 230, 118))
+                : new SolidColorBrush(Color.FromRgb(255, 107, 53));
+
             var btn = new Button
             {
-                Content = texto,
                 Width = 28,
                 Height = 28,
-                FontSize = 14,
-                FontWeight = FontWeights.Bold,
+                Content = new ImageAwesome
+                {
+                    Icon = icono,
+                    Width = 10,
+                    Height = 10,
+                    Foreground = colorIcono
+                },
                 BorderThickness = new Thickness(0),
                 Background = new SolidColorBrush(Color.FromRgb(26, 26, 56)),
-                Foreground = sumar
-                    ? new SolidColorBrush(Color.FromRgb(0, 230, 118))
-                    : new SolidColorBrush(Color.FromRgb(255, 107, 53)),
+                Foreground = colorIcono,
                 Cursor = System.Windows.Input.Cursors.Hand
             };
             btn.Click += (s, e) =>
@@ -563,17 +649,17 @@ namespace SistemaGimnacionOptimusCAI.Paginas
         }
 
         // ── HELPERS ───────────────────────────────────────────
-        private string ObtenerEmoji(string cat)
+        private FontAwesomeIcon ObtenerIconoProducto(string cat)
         {
-            if (string.IsNullOrEmpty(cat)) return "📦";
+            if (string.IsNullOrEmpty(cat)) return FontAwesomeIcon.Cube;
             string c = cat.ToLower();
-            if (c.Contains("bebida")) return "🥤";
-            if (c.Contains("supl")) return "💊";
-            if (c.Contains("snack")) return "🍫";
-            if (c.Contains("ropa")) return "👕";
-            if (c.Contains("acces")) return "🎒";
-            if (c.Contains("higien")) return "🧴";
-            return "📦";
+            if (c.Contains("bebida")) return FontAwesomeIcon.Coffee;
+            if (c.Contains("supl")) return FontAwesomeIcon.Medkit;
+            if (c.Contains("snack")) return FontAwesomeIcon.Cutlery;
+            if (c.Contains("ropa")) return FontAwesomeIcon.ShoppingBag;
+            if (c.Contains("acces")) return FontAwesomeIcon.Tags;
+            if (c.Contains("higien")) return FontAwesomeIcon.Flask;
+            return FontAwesomeIcon.Cube;
         }
 
         private static BitmapImage BytesABitmapImage(byte[] bytes)

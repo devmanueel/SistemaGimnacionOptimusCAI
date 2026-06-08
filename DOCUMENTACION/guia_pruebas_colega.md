@@ -15,6 +15,8 @@ Instalar en la PC:
 - Driver DigitalPersona si se va a probar el lector de huellas.
 - Inno Setup solo si se va a generar el instalador.
 
+Nota: el instalador de OptimusCAI intenta descargar e instalar automaticamente `.NET Framework 4.7.2` y `SQL Server LocalDB` si no los encuentra. Para eso la PC debe tener conexion a internet durante la instalacion.
+
 El proyecto debe compilarse como:
 
 ```powershell
@@ -262,6 +264,8 @@ Instalador\OptimusCAI.iss
 
 Compilar el script.
 
+Usar Inno Setup 6.1 o superior, porque el script usa descarga de prerequisitos durante la instalacion.
+
 El instalador generado queda normalmente en:
 
 ```text
@@ -280,6 +284,13 @@ La base instalada queda en:
 C:\OptimusCAI\DataBase\DB_CAI_Optimus.mdf
 C:\OptimusCAI\DataBase\DB_CAI_Optimus_log.ldf
 ```
+
+Durante la instalacion, el instalador revisa:
+
+- `.NET Framework 4.7.2` o superior.
+- `SQL Server LocalDB`.
+
+Si falta alguno, lo descarga e instala antes de copiar la aplicacion. El driver DigitalPersona no se descarga automaticamente porque depende del modelo del lector y debe instalarse con el instalador oficial correspondiente.
 
 ## 11. Importante para trabajar en equipo
 
@@ -306,4 +317,3 @@ Subir solo lo necesario:
 - Assets necesarios.
 - Instalador `.iss`.
 - Base `.mdf` y `.ldf` solo mientras se use como base compartida de prueba.
-
