@@ -102,10 +102,10 @@ namespace SistemaGimnacionOptimusCAI
                 new MenuItem { Icono = FontAwesomeIcon.Clipboard,           Texto = "Rutinas",              TipoPagina = typeof(RutinasPage),               SoloAdmin = false },
                 new MenuItem { Icono = FontAwesomeIcon.Whatsapp,            Texto = "WhatsApp",             TipoPagina = typeof(WhatsappPage),              SoloAdmin = false },
                 new MenuItem { Icono = FontAwesomeIcon.BarChart,             Texto = "Reportes",             TipoPagina = typeof(ReportesPage),              SoloAdmin = false },
-
+                new MenuItem { Icono = FontAwesomeIcon.Lock,            Texto = "Casilleros",           TipoPagina = typeof(CasillerosPage),            SoloAdmin = false },
     // Solo admin
     new MenuItem { Icono = FontAwesomeIcon.SoccerBallOutline,Texto = "Actividades",          TipoPagina = typeof(ActividadesPage),          SoloAdmin = true },
-    new MenuItem { Icono = FontAwesomeIcon.Lock,            Texto = "Casilleros",           TipoPagina = typeof(CasillerosPage),            SoloAdmin = true },
+    
     new MenuItem { Icono = FontAwesomeIcon.FileTextOutline,  Texto = "Auditoría",            TipoPagina = typeof(AuditoriaPage),            SoloAdmin = true },
     new MenuItem { Icono = FontAwesomeIcon.AreaChart,        Texto = "Estadísticas",         TipoPagina = typeof(EstadisticasPage),          SoloAdmin = true },
     new MenuItem { Icono = FontAwesomeIcon.User,            Texto = "Usuarios",             TipoPagina = typeof(UsuariosPage),              SoloAdmin = true  }
