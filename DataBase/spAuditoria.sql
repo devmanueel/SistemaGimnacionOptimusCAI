@@ -3,6 +3,11 @@
 --  Log de cambios del sistema (solo lectura desde la UI)
 -- ============================================================
 
+SET ANSI_NULLS ON;
+GO
+SET QUOTED_IDENTIFIER ON;
+GO
+
 IF OBJECT_ID('sp_RegistrarAuditoria',     'P') IS NOT NULL DROP PROCEDURE sp_RegistrarAuditoria;
 IF OBJECT_ID('sp_ObtenerAuditoria',       'P') IS NOT NULL DROP PROCEDURE sp_ObtenerAuditoria;
 IF OBJECT_ID('sp_ObtenerAuditoriaPorId',  'P') IS NOT NULL DROP PROCEDURE sp_ObtenerAuditoriaPorId;

@@ -4,6 +4,11 @@
 --  SQL Server / LocalDB
 -- ============================================================
 
+SET ANSI_NULLS ON;
+GO
+SET QUOTED_IDENTIFIER ON;
+GO
+
 IF NOT EXISTS (
     SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
     WHERE TABLE_NAME = 'usuarios' AND COLUMN_NAME = 'foto'

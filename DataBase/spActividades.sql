@@ -3,6 +3,24 @@
 --  Sistema Gimnasio OptimusCAI - SQL Server / LocalDB
 -- ============================================================
 
+IF NOT EXISTS (
+    SELECT 1 FROM sys.columns
+    WHERE object_id = OBJECT_ID('actividades') AND name = 'categoria'
+)
+    ALTER TABLE actividades ADD categoria VARCHAR(50) NULL;
+GO
+
+UPDATE actividades
+SET categoria = CASE
+    WHEN nombre LIKE '%Gimnasio%' OR nombre LIKE '%Gym%' THEN 'Gimnasio'
+    WHEN nombre LIKE '%Boxeo%' THEN 'Boxeo'
+    WHEN nombre LIKE '%Deportista%' THEN 'Deportistas'
+    WHEN nombre LIKE '%Clase%' THEN 'Clase'
+    ELSE categoria
+END
+WHERE categoria IS NULL;
+GO
+
 IF OBJECT_ID('sp_ObtenerActividades', 'P') IS NOT NULL
     DROP PROCEDURE sp_ObtenerActividades;
 GO
@@ -92,6 +110,15 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @Categoria VARCHAR(50);
+    SET @Categoria = CASE
+        WHEN @Nombre LIKE '%Gimnasio%' OR @Nombre LIKE '%Gym%' THEN 'Gimnasio'
+        WHEN @Nombre LIKE '%Boxeo%' THEN 'Boxeo'
+        WHEN @Nombre LIKE '%Deportista%' THEN 'Deportistas'
+        WHEN @Nombre LIKE '%Clase%' THEN 'Clase'
+        ELSE NULL
+    END;
+
     IF EXISTS (SELECT 1 FROM actividades WHERE nombre = @Nombre)
     BEGIN
         SELECT -1 AS id;
@@ -99,9 +126,9 @@ BEGIN
     END
 
     INSERT INTO actividades
-        (nombre, tipo, dias_sesiones, dias_semana, precio, activo)
+        (nombre, tipo, dias_sesiones, dias_semana, precio, categoria, activo)
     VALUES
-        (@Nombre, @Tipo, @DiasSesiones, @DiasSemana, @Precio, 1);
+        (@Nombre, @Tipo, @DiasSesiones, @DiasSemana, @Precio, @Categoria, 1);
 
     SELECT SCOPE_IDENTITY() AS id;
 END;
@@ -121,6 +148,15 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @Categoria VARCHAR(50);
+    SET @Categoria = CASE
+        WHEN @Nombre LIKE '%Gimnasio%' OR @Nombre LIKE '%Gym%' THEN 'Gimnasio'
+        WHEN @Nombre LIKE '%Boxeo%' THEN 'Boxeo'
+        WHEN @Nombre LIKE '%Deportista%' THEN 'Deportistas'
+        WHEN @Nombre LIKE '%Clase%' THEN 'Clase'
+        ELSE NULL
+    END;
+
     IF EXISTS (SELECT 1 FROM actividades WHERE nombre = @Nombre AND id <> @Id)
     BEGIN
         RAISERROR('Ya existe otra actividad con ese nombre.', 16, 1);
@@ -132,7 +168,8 @@ BEGIN
         tipo = @Tipo,
         dias_sesiones = @DiasSesiones,
         dias_semana = @DiasSemana,
-        precio = @Precio
+        precio = @Precio,
+        categoria = @Categoria
     WHERE id = @Id;
 
     SELECT @@ROWCOUNT AS filas_afectadas;

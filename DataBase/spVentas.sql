@@ -8,6 +8,7 @@
 IF OBJECT_ID('sp_ObtenerVentas',        'P') IS NOT NULL DROP PROCEDURE sp_ObtenerVentas;
 IF OBJECT_ID('sp_ObtenerVentaPorId',    'P') IS NOT NULL DROP PROCEDURE sp_ObtenerVentaPorId;
 IF OBJECT_ID('sp_BuscarVentas',         'P') IS NOT NULL DROP PROCEDURE sp_BuscarVentas;
+IF OBJECT_ID('sp_BuscarVentasPorUsuario','P') IS NOT NULL DROP PROCEDURE sp_BuscarVentasPorUsuario;
 IF OBJECT_ID('sp_RegistrarVenta',       'P') IS NOT NULL DROP PROCEDURE sp_RegistrarVenta;
 IF OBJECT_ID('sp_AnularVenta',          'P') IS NOT NULL DROP PROCEDURE sp_AnularVenta;
 IF OBJECT_ID('sp_EstadisticasVentas',   'P') IS NOT NULL DROP PROCEDURE sp_EstadisticasVentas;

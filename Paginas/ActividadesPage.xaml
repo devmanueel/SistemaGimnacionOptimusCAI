@@ -41,7 +41,7 @@
         </ResourceDictionary>
     </Page.Resources>
 
-    <Grid x:Name="gridRaiz" Margin="24,20,24,20" Opacity="0">
+    <Grid x:Name="gridRaiz" Margin="24,16,24,16" Opacity="0">
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
@@ -74,7 +74,7 @@
         </Grid.RowDefinitions>
 
         <!-- ══════════════════ HEADER ══════════════════ -->
-        <Grid Grid.Row="0" Margin="0,0,0,18">
+        <Grid Grid.Row="0" Margin="0,0,0,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -108,7 +108,7 @@
         </Grid>
 
         <!-- ══════════════════ STATS ══════════════════ -->
-        <Grid Grid.Row="1" Margin="0,0,0,16">
+        <Grid Grid.Row="1" Margin="0,0,0,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="8"/>
@@ -218,7 +218,7 @@
                               IsReadOnly="True" AutoGenerateColumns="False"
                               CanUserAddRows="False" CanUserResizeRows="False"
                               Background="Transparent" BorderThickness="0"
-                              RowHeaderWidth="0" RowHeight="58"
+                              RowHeaderWidth="0" RowHeight="54"
                               GridLinesVisibility="Horizontal"
                               HorizontalGridLinesBrush="#111811">
                         <DataGrid.Columns>

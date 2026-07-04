@@ -20,6 +20,7 @@ namespace Entities
         public long ActividadId { get; set; }
         public long? InstructorId { get; set; }
         public DateTime FechaInicio { get; set; }
+        public DateTime? FechaInicioOriginal { get; set; }
         public DateTime FechaVencimiento { get; set; }
         public decimal MontoPagado { get; set; }
         public string MetodoPago { get; set; } = "efectivo";
@@ -56,6 +57,16 @@ namespace Entities
 
         /// <summary>"01/12/2025" — fecha de inicio.</summary>
         public string FechaInicioTexto => FechaInicio.ToString("dd/MM/yyyy");
+
+        /// <summary>Fecha original de alta de la membresía, usada en la ficha del socio.</summary>
+        public string FechaInicioOriginalTexto
+        {
+            get
+            {
+                DateTime fecha = FechaInicioOriginal.HasValue ? FechaInicioOriginal.Value : FechaInicio;
+                return fecha.ToString("dd/MM/yyyy");
+            }
+        }
 
         /// <summary>
         /// Texto descriptivo de cuántos días quedan o pasaron desde el vencimiento.

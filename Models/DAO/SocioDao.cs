@@ -255,7 +255,14 @@ namespace Models.Dao
                         if (reader.Read())
                         {
                             var id = Convert.ToInt64(reader["id"]);
-                            if (id == -1) return null; // DNI duplicado
+                            if (id == -1)
+                            {
+                                return new Socio
+                                {
+                                    Id = -1,
+                                    NumeroSocio = 0
+                                };
+                            }
 
                             return new Socio
                             {

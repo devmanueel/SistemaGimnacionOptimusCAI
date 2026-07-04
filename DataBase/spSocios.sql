@@ -8,6 +8,13 @@
 --    · Nuevos SPs: sp_SociosParaDarDeBaja + sp_DarDeBajaSocios
 -- ============================================================
 
+-- IMPORTANTE: la tabla socios tiene indices que requieren que los SPs
+-- que hacen INSERT/UPDATE se creen con estas opciones activas.
+SET ANSI_NULLS ON;
+GO
+SET QUOTED_IDENTIFIER ON;
+GO
+
 -- Agregar columna numero_socio si no existe
 IF NOT EXISTS (
     SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS

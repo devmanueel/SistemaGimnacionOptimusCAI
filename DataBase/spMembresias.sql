@@ -41,6 +41,27 @@ IF NOT EXISTS (
     ALTER TABLE actividades ADD categoria VARCHAR(50) NULL;
 GO
 
+UPDATE actividades
+SET categoria = 'Gimnasio'
+WHERE categoria IS NULL
+  AND (nombre LIKE '%Gimnasio%' OR nombre LIKE '%Gym%');
+
+UPDATE actividades
+SET categoria = 'Boxeo'
+WHERE categoria IS NULL
+  AND nombre LIKE '%Boxeo%';
+
+UPDATE actividades
+SET categoria = 'Deportistas'
+WHERE categoria IS NULL
+  AND nombre LIKE '%Deportista%';
+
+UPDATE actividades
+SET categoria = 'Clase'
+WHERE categoria IS NULL
+  AND nombre LIKE '%Clase%';
+GO
+
 IF OBJECT_ID('membresia_historial') IS NULL
 CREATE TABLE membresia_historial (
     id             BIGINT        IDENTITY(1,1) PRIMARY KEY,
@@ -132,6 +153,11 @@ BEGIN
     SELECT
         m.id, m.socio_id, m.actividad_id, m.instructor_id,
         m.fecha_inicio, m.fecha_vencimiento,
+        ISNULL((
+            SELECT MIN(h.fecha_desde)
+            FROM membresia_historial h
+            WHERE h.membresia_id = m.id
+        ), m.fecha_inicio) AS fecha_inicio_original,
         m.monto_pagado, m.metodo_pago, m.estado, m.tipo_plan,
         m.registrado_por, m.observaciones,
         m.creado_en, m.actualizado_en,
@@ -169,6 +195,11 @@ BEGIN
     SELECT
         m.id, m.socio_id, m.actividad_id, m.instructor_id,
         m.fecha_inicio, m.fecha_vencimiento,
+        ISNULL((
+            SELECT MIN(h.fecha_desde)
+            FROM membresia_historial h
+            WHERE h.membresia_id = m.id
+        ), m.fecha_inicio) AS fecha_inicio_original,
         m.monto_pagado, m.metodo_pago, m.estado, m.tipo_plan,
         m.registrado_por, m.observaciones,
         m.creado_en, m.actualizado_en,
@@ -211,6 +242,11 @@ BEGIN
     SELECT
         m.id, m.socio_id, m.actividad_id, m.instructor_id,
         m.fecha_inicio, m.fecha_vencimiento,
+        ISNULL((
+            SELECT MIN(h.fecha_desde)
+            FROM membresia_historial h
+            WHERE h.membresia_id = m.id
+        ), m.fecha_inicio) AS fecha_inicio_original,
         m.monto_pagado, m.metodo_pago, m.estado, m.tipo_plan,
         m.registrado_por, m.observaciones,
         m.creado_en, m.actualizado_en,
@@ -267,6 +303,7 @@ CREATE PROCEDURE sp_InsertarMembresia
     @InstructorId     BIGINT          = NULL,
     @FechaInicio      DATE,
     @FechaVencimiento DATE,
+    @UsarFechaInicioManual BIT        = 0,
     @TipoPlan         VARCHAR(20)     = 'mensual',
     @MontoPagado      DECIMAL(12,2),
     @MetodoPago       VARCHAR(20)     = 'efectivo',
@@ -276,11 +313,14 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Fechas automaticas (regla de negocio: un mes calendario).
+    -- Fechas automaticas por defecto. Si @UsarFechaInicioManual = 1,
+    -- se respeta la fecha enviada desde la UI y se calcula un mes desde esa fecha.
     -- El vencimiento cae el MISMO dia del mes siguiente (ej: 07/06 -> 07/07),
     -- no a los 31 dias exactos. DATEADD(MONTH,...) ajusta meses cortos
     -- (ej: 31/01 -> 28/02).
-    SET @FechaInicio = CAST(GETDATE() AS DATE);
+    IF @UsarFechaInicioManual = 0 OR @FechaInicio IS NULL
+        SET @FechaInicio = CAST(GETDATE() AS DATE);
+
     SET @FechaVencimiento = DATEADD(MONTH, 1, @FechaInicio);
 
     IF NOT EXISTS (SELECT 1 FROM socios WHERE id = @SocioId AND eliminado_en IS NULL)
@@ -429,11 +469,13 @@ BEGIN
     DECLARE @VencActual   DATE;
     DECLARE @FechaInicio  DATE;
     DECLARE @ActividadActualId BIGINT;
+    DECLARE @UpgradeRealizado BIT;
 
     SELECT
         @VencActual  = fecha_vencimiento,
         @FechaInicio = fecha_inicio,
-        @ActividadActualId = actividad_id
+        @ActividadActualId = actividad_id,
+        @UpgradeRealizado = upgrade_realizado
     FROM membresias WHERE id = @Id;
 
     IF @VencActual IS NULL
@@ -452,6 +494,12 @@ BEGIN
     -- Validaci--n de cambio de plan (solo si se cambia la actividad)
     IF @ActividadId IS NOT NULL AND @ActividadId <> @ActividadActualId
     BEGIN
+        IF @UpgradeRealizado = 1
+        BEGIN
+            RAISERROR('Esta membresia ya cambio de actividad una vez. Solo se permite un cambio por membresia.', 16, 1);
+            RETURN;
+        END
+
         DECLARE @CategoriaActual VARCHAR(50);
         DECLARE @DiasSesionesActual TINYINT;
         DECLARE @CategoriaNueva VARCHAR(50);
@@ -639,7 +687,6 @@ BEGIN
     UPDATE membresias SET
         actividad_id      = @ActividadFinalId,
         instructor_id     = @InstructorId,
-        fecha_inicio      = @Hoy,
         fecha_vencimiento = @Vencim,
         monto_pagado      = @MontoPagado,
         metodo_pago       = @MetodoPago,
@@ -665,7 +712,7 @@ BEGIN
     INSERT INTO membresia_historial
         (membresia_id, tipo_evento, fecha_desde, fecha_hasta, importe, metodo_pago, registrado_por)
     VALUES
-        (@Id, 'renovacion', @Hoy, @Vencim, @MontoPagado, @MetodoPago, @RegistradoPor);
+        (@Id, 'renovacion', @Base, @Vencim, @MontoPagado, @MetodoPago, @RegistradoPor);
 
     SELECT @Vencim AS nueva_fecha_vencimiento;
 END;

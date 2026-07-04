@@ -15,6 +15,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
     {
         private readonly UsuarioController _controller = new UsuarioController();
         private readonly long _usuarioId;
+        private Usuario _usuarioActual;
 
         public FichaUsuarioWindow(long usuarioId)
         {
@@ -39,6 +40,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     Close();
                     return;
                 }
+
+                _usuarioActual = u;
 
                 lblNombre.Text = u.NombreCompleto;
                 lblRol.Text = u.RolTexto.ToUpper();
@@ -87,12 +90,49 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                     badgeRol.Background = new SolidColorBrush(Color.FromRgb(30, 24, 64));
                     lblRol.Foreground = new SolidColorBrush(Color.FromRgb(167, 139, 250));
                 }
+
+                ActualizarPanelHuella();
             }
             catch (Exception ex)
             {
                 NotificacionWindow.MostrarError("Error al cargar datos del usuario.\n" + ex.Message);
                 Close();
             }
+        }
+
+        private void ActualizarPanelHuella()
+        {
+            if (panelHuella == null) return;
+
+            if (_usuarioActual == null || _usuarioActual.RolId != 2)
+            {
+                panelHuella.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            panelHuella.Visibility = Visibility.Visible;
+
+            var servicio = BiometricManager.Servicio;
+            bool lectorDisponible = servicio != null && servicio.Disponible;
+
+            if (!lectorDisponible)
+            {
+                btnHuella.IsEnabled = false;
+                lblBtnHuella.Text = "Huella no disponible";
+                lblHuellaEstado.Text = servicio != null
+                    ? servicio.MensajeEstado
+                    : "Servicio biométrico no inicializado.";
+                iconBtnHuella.Foreground = new SolidColorBrush(Color.FromRgb(7, 18, 7));
+                return;
+            }
+
+            btnHuella.IsEnabled = true;
+            bool tieneHuella = _usuarioActual.TieneHuella;
+            lblBtnHuella.Text = tieneHuella ? "Actualizar Huella" : "Registrar Huella";
+            iconBtnHuella.Foreground = new SolidColorBrush(Color.FromRgb(7, 18, 7));
+            lblHuellaEstado.Text = tieneHuella
+                ? "Ya tenés una huella registrada. Podés volver a capturarla."
+                : "Registrá tu huella para fichar asistencia desde Inicio.";
         }
 
         private string ObtenerIniciales(string nombreCompleto)
@@ -119,6 +159,35 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             catch (Exception ex)
             {
                 NotificacionWindow.MostrarError("Error al abrir editor.\n" + ex.Message);
+            }
+        }
+
+        private void btnHuella_Click(object sender, RoutedEventArgs e)
+        {
+            if (_usuarioActual == null) return;
+
+            var servicio = BiometricManager.Servicio;
+            if (servicio == null || !servicio.Disponible)
+            {
+                NotificacionWindow.MostrarAdvertencia(
+                    "El lector de huellas no está disponible en este momento.\n" +
+                    (servicio != null ? servicio.MensajeEstado : "Servicio biométrico no inicializado."),
+                    "Lector no disponible");
+                ActualizarPanelHuella();
+                return;
+            }
+
+            var win = new EnrolarHuellaWindow(_usuarioActual)
+            {
+                Owner = this
+            };
+
+            if (win.ShowDialog() == true)
+            {
+                CargarDatos();
+                NotificacionWindow.MostrarExito(
+                    "Huella registrada. Ya podés fichar asistencia con tu huella.",
+                    "Huella digital");
             }
         }
 

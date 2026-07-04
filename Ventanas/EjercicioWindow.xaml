@@ -9,6 +9,14 @@
         AllowsTransparency="True"
         Background="Transparent">
 
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
     <Border Background="{StaticResource Bg1}"
             CornerRadius="14"
             BorderBrush="{StaticResource Border1}"

@@ -2,12 +2,132 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Asignar Rutina"
-        Width="420" Height="380"
+        Width="460" Height="520"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MiDiccionario.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="ComboSociosAsignarRutinaStyle" TargetType="{x:Type ComboBox}">
+                <Setter Property="Foreground" Value="#F2FFF5"/>
+                <Setter Property="Background" Value="#111811"/>
+                <Setter Property="BorderBrush" Value="#244B2A"/>
+                <Setter Property="BorderThickness" Value="1.5"/>
+                <Setter Property="Height" Value="46"/>
+                <Setter Property="Padding" Value="12,0"/>
+                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ComboBox}">
+                            <Grid>
+                                <ToggleButton x:Name="toggleButton"
+                                              Focusable="False"
+                                              ClickMode="Press"
+                                              IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                            <Border x:Name="borde"
+                                                    Background="#111811"
+                                                    BorderBrush="#244B2A"
+                                                    BorderThickness="1.5"
+                                                    CornerRadius="10">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="36"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Path Grid.Column="1"
+                                                          Data="M0,0 L4,4 L8,0 Z"
+                                                          Fill="#F2FFF5"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="borde" Property="BorderBrush" Value="#4ADE80"/>
+                                                    <Setter TargetName="borde" Property="Background" Value="#132414"/>
+                                                </Trigger>
+                                                <DataTrigger Binding="{Binding IsDropDownOpen, RelativeSource={RelativeSource AncestorType=ComboBox}}" Value="True">
+                                                    <Setter TargetName="borde" Property="BorderBrush" Value="#4ADE80"/>
+                                                    <Setter TargetName="borde" Property="BorderThickness" Value="2"/>
+                                                </DataTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+
+                                <ContentPresenter IsHitTestVisible="False"
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  Margin="14,0,34,0"
+                                                  VerticalAlignment="Center"
+                                                  HorizontalAlignment="Left"
+                                                  TextElement.Foreground="#F2FFF5"/>
+
+                                <Popup x:Name="PART_Popup"
+                                       AllowsTransparency="True"
+                                       IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                       Placement="Bottom"
+                                       PopupAnimation="Fade">
+                                    <Border Background="#111811"
+                                            BorderBrush="#244B2A"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            Margin="0,2,0,0"
+                                            MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
+                                        <ScrollViewer MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                                      VerticalScrollBarVisibility="Auto">
+                                            <ItemsPresenter/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="ComboSociosAsignarRutinaItemStyle" TargetType="{x:Type ComboBoxItem}">
+                <Setter Property="Foreground" Value="#F2FFF5"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Padding" Value="12,9"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ComboBoxItem}">
+                                            <Border x:Name="itemBorder"
+                                                    Background="{TemplateBinding Background}"
+                                                    Padding="{TemplateBinding Padding}"
+                                                    SnapsToDevicePixels="True">
+                                                <ContentPresenter
+                                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                    VerticalAlignment="Center"
+                                                    TextElement.Foreground="{TemplateBinding Foreground}"/>
+                                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="itemBorder" Property="Background" Value="#132414"/>
+                                    <Setter Property="Foreground" Value="#4ADE80"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="itemBorder" Property="Background" Value="#1D331E"/>
+                                    <Setter Property="Foreground" Value="#F2FFF5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
 
     <Border Background="{StaticResource Bg1}"
             CornerRadius="14"
@@ -46,33 +166,50 @@
                         Click="btnCerrar_Click"/>
             </Grid>
 
-            <StackPanel Grid.Row="2" Margin="22,14,22,0">
-                <TextBlock Text="SOCIO *"
-                           Foreground="{StaticResource TextMuted}"
-                           FontSize="10" FontWeight="Bold" Margin="2,0,0,6"/>
-                <ComboBox x:Name="cmbSocios" Style="{StaticResource ComboBoxEstilo}"
-                          DisplayMemberPath="NombreCompleto"
-                          SelectedValuePath="Id"/>
+            <ScrollViewer Grid.Row="2"
+                          Margin="22,14,14,0"
+                          Padding="0,0,8,0"
+                          VerticalScrollBarVisibility="Auto"
+                          Style="{StaticResource PanelScrollViewerStyle}">
+                <StackPanel>
+                    <TextBlock Text="SOCIO *"
+                               Foreground="{StaticResource TextMuted}"
+                               FontSize="10" FontWeight="Bold" Margin="2,0,0,6"/>
+                    <ComboBox x:Name="cmbSocios"
+                              Style="{StaticResource ComboSociosAsignarRutinaStyle}"
+                              ItemContainerStyle="{StaticResource ComboSociosAsignarRutinaItemStyle}"
+                              SelectedValuePath="Id"
+                              MaxDropDownHeight="190">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding TextoCombo}"
+                                           Foreground="#F2FFF5"
+                                           FontSize="13"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
-                <TextBlock Text="FECHA DE INICIO *"
-                           Foreground="{StaticResource TextMuted}"
-                           FontSize="10" FontWeight="Bold" Margin="2,14,0,6"/>
-                <DatePicker x:Name="dtpFechaInicio" Style="{StaticResource DatePickerEstilo}"/>
+                    <TextBlock Text="FECHA DE INICIO *"
+                               Foreground="{StaticResource TextMuted}"
+                               FontSize="10" FontWeight="Bold" Margin="2,8,0,6"/>
+                    <DatePicker x:Name="dtpFechaInicio" Style="{StaticResource DatePickerEstilo}"/>
 
-                <TextBlock Text="COMENTARIOS"
-                           Foreground="{StaticResource TextMuted}"
-                           FontSize="10" FontWeight="Bold" Margin="2,14,0,6"/>
-                <Border Background="{StaticResource Bg2}" CornerRadius="10"
-                        BorderBrush="{StaticResource Border1}" BorderThickness="1.5">
-                    <TextBox x:Name="txtComentarios" Background="Transparent"
-                             BorderThickness="0" Foreground="{StaticResource TextPrimary}"
-                             CaretBrush="{StaticResource GreenMain}" FontSize="13" Padding="14,10"
-                             AcceptsReturn="True" TextWrapping="Wrap"
-                             Height="70" VerticalScrollBarVisibility="Auto"/>
-                </Border>
-            </StackPanel>
+                    <TextBlock Text="COMENTARIOS"
+                               Foreground="{StaticResource TextMuted}"
+                               FontSize="10" FontWeight="Bold" Margin="2,8,0,6"/>
+                    <Border Background="{StaticResource Bg2}" CornerRadius="10"
+                            BorderBrush="{StaticResource Border1}" BorderThickness="1.5">
+                        <TextBox x:Name="txtComentarios" Background="Transparent"
+                                 BorderThickness="0" Foreground="{StaticResource TextPrimary}"
+                                 CaretBrush="{StaticResource GreenMain}" FontSize="13" Padding="14,10"
+                                 AcceptsReturn="True" TextWrapping="Wrap"
+                                 Height="105" VerticalScrollBarVisibility="Auto"/>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
 
-            <Grid Grid.Row="3" Margin="22,12,22,18">
+            <Grid Grid.Row="3" Margin="22,14,22,18">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>

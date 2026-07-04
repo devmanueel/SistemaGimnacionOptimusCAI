@@ -35,6 +35,7 @@ namespace SistemaGimnacionOptimusCAI.Helpers
 
         private bool _disponible;
         private LectorCaptura _activo;   // captura en curso (para poder cancelarla)
+        private readonly object _capturaLock = new object();
 
         public bool   Disponible    => _disponible;
         public string MensajeEstado { get; private set; } = "No inicializado";
@@ -93,87 +94,93 @@ namespace SistemaGimnacionOptimusCAI.Helpers
             if (!_disponible)
                 return (false, "El lector no está disponible.", null);
 
-            var extractor  = new DPFP.Processing.FeatureExtraction();
-            var enrollment = new DPFP.Processing.Enrollment();
-
-            using (var lector = new LectorCaptura())
+            lock (_capturaLock)
             {
-                _activo = lector;
-                try
-                {
-                    lector.Iniciar();
+                if (token.IsCancellationRequested)
+                    return (false, "Enrolamiento cancelado.", null);
 
-                    while (!token.IsCancellationRequested)
+                var extractor  = new DPFP.Processing.FeatureExtraction();
+                var enrollment = new DPFP.Processing.Enrollment();
+
+                using (var lector = new LectorCaptura())
+                {
+                    _activo = lector;
+                    try
                     {
-                        var estado = enrollment.TemplateStatus;
-                        if (estado == DPFP.Processing.Enrollment.Status.Ready ||
-                            estado == DPFP.Processing.Enrollment.Status.Failed)
-                            break;
+                        lector.Iniciar();
 
-                        int hechas = Math.Max(0,
-                            CAPTURAS_OBJETIVO - (int)enrollment.FeaturesNeeded);
-
-                        onProgreso(hechas, string.Format(
-                            "Apoyá tu dedo en el lector... ({0}/{1})",
-                            Math.Min(hechas + 1, CAPTURAS_OBJETIVO), CAPTURAS_OBJETIVO));
-
-                        var muestra = lector.EsperarMuestra(token);
-                        if (muestra == null) break; // cancelado
-
-                        var features = ExtraerFeatures(
-                            extractor, muestra, DPFP.Processing.DataPurpose.Enrollment);
-
-                        if (features == null)
+                        while (!token.IsCancellationRequested)
                         {
-                            onProgreso(hechas, "Captura de baja calidad. Levantá el dedo y reintentá.");
-                            continue;
+                            var estado = enrollment.TemplateStatus;
+                            if (estado == DPFP.Processing.Enrollment.Status.Ready ||
+                                estado == DPFP.Processing.Enrollment.Status.Failed)
+                                break;
+
+                            int hechas = Math.Max(0,
+                                CAPTURAS_OBJETIVO - (int)enrollment.FeaturesNeeded);
+
+                            onProgreso(hechas, string.Format(
+                                "Apoyá tu dedo en el lector... ({0}/{1})",
+                                Math.Min(hechas + 1, CAPTURAS_OBJETIVO), CAPTURAS_OBJETIVO));
+
+                            var muestra = lector.EsperarMuestra(token);
+                            if (muestra == null) break; // cancelado
+
+                            var features = ExtraerFeatures(
+                                extractor, muestra, DPFP.Processing.DataPurpose.Enrollment);
+
+                            if (features == null)
+                            {
+                                onProgreso(hechas, "Captura de baja calidad. Levantá el dedo y reintentá.");
+                                continue;
+                            }
+
+                            try { enrollment.AddFeatures(features); }
+                            catch
+                            {
+                                onProgreso(hechas, "Captura no válida. Reintentá apoyando bien el dedo.");
+                                continue;
+                            }
+
+                            if (enrollment.TemplateStatus ==
+                                DPFP.Processing.Enrollment.Status.Failed)
+                            {
+                                enrollment.Clear();
+                                onProgreso(0, "No se logró formar la huella. Empezá de nuevo.");
+                                continue;
+                            }
+
+                            int hechasAhora = Math.Max(0,
+                                CAPTURAS_OBJETIVO - (int)enrollment.FeaturesNeeded);
+                            if (enrollment.TemplateStatus !=
+                                DPFP.Processing.Enrollment.Status.Ready)
+                                onProgreso(hechasAhora, "Levantá el dedo y volvé a apoyar");
                         }
 
-                        try { enrollment.AddFeatures(features); }
-                        catch
+                        if (token.IsCancellationRequested)
+                            return (false, "Enrolamiento cancelado.", null);
+
+                        if (enrollment.TemplateStatus == DPFP.Processing.Enrollment.Status.Ready)
                         {
-                            onProgreso(hechas, "Captura no válida. Reintentá apoyando bien el dedo.");
-                            continue;
+                            onProgreso(CAPTURAS_OBJETIVO, "Procesando template...");
+                            byte[] bytes = enrollment.Template.Bytes;
+                            if (bytes == null || bytes.Length == 0)
+                                return (false, "No se pudo serializar la huella. Intentá de nuevo.", null);
+
+                            return (true, "Huella registrada correctamente.", bytes);
                         }
 
-                        if (enrollment.TemplateStatus ==
-                            DPFP.Processing.Enrollment.Status.Failed)
-                        {
-                            enrollment.Clear();
-                            onProgreso(0, "No se logró formar la huella. Empezá de nuevo.");
-                            continue;
-                        }
-
-                        int hechasAhora = Math.Max(0,
-                            CAPTURAS_OBJETIVO - (int)enrollment.FeaturesNeeded);
-                        if (enrollment.TemplateStatus !=
-                            DPFP.Processing.Enrollment.Status.Ready)
-                            onProgreso(hechasAhora, "Levantá el dedo y volvé a apoyar");
+                        return (false, "No se pudo completar el enrolamiento. Intentá de nuevo.", null);
                     }
-
-                    if (token.IsCancellationRequested)
-                        return (false, "Enrolamiento cancelado.", null);
-
-                    if (enrollment.TemplateStatus == DPFP.Processing.Enrollment.Status.Ready)
+                    catch (Exception ex)
                     {
-                        onProgreso(CAPTURAS_OBJETIVO, "Procesando template...");
-                        byte[] bytes = enrollment.Template.Bytes;
-                        if (bytes == null || bytes.Length == 0)
-                            return (false, "No se pudo serializar la huella. Intentá de nuevo.", null);
-
-                        return (true, "Huella registrada correctamente.", bytes);
+                        return (false, "Error inesperado durante el enrolamiento: " + ex.Message, null);
                     }
-
-                    return (false, "No se pudo completar el enrolamiento. Intentá de nuevo.", null);
-                }
-                catch (Exception ex)
-                {
-                    return (false, "Error inesperado durante el enrolamiento: " + ex.Message, null);
-                }
-                finally
-                {
-                    lector.Detener();
-                    _activo = null;
+                    finally
+                    {
+                        lector.Detener();
+                        _activo = null;
+                    }
                 }
             }
         }
@@ -213,44 +220,49 @@ namespace SistemaGimnacionOptimusCAI.Helpers
                 }
             }
 
-            using (var lector = new LectorCaptura())
+            lock (_capturaLock)
             {
-                _activo = lector;
-                try
-                {
-                    lector.Iniciar();
+                if (token.IsCancellationRequested) return;
 
-                    while (!token.IsCancellationRequested)
+                using (var lector = new LectorCaptura())
+                {
+                    _activo = lector;
+                    try
                     {
-                        var muestra = lector.EsperarMuestra(token);
-                        if (muestra == null) break; // cancelado
+                        lector.Iniciar();
 
-                        var features = ExtraerFeatures(
-                            extractor, muestra, DPFP.Processing.DataPurpose.Verification);
-                        if (features == null) continue; // mala captura: reintentar
-
-                        Guid? match = null;
-                        foreach (var item in lista)
+                        while (!token.IsCancellationRequested)
                         {
-                            var result = new DPFP.Verification.Verification.Result();
-                            try { verificador.Verify(features, item.tpl, ref result); }
-                            catch { continue; }
+                            var muestra = lector.EsperarMuestra(token);
+                            if (muestra == null) break; // cancelado
 
-                            if (result.Verified)
+                            var features = ExtraerFeatures(
+                                extractor, muestra, DPFP.Processing.DataPurpose.Verification);
+                            if (features == null) continue; // mala captura: reintentar
+
+                            Guid? match = null;
+                            foreach (var item in lista)
                             {
-                                match = item.guid;
-                                break;
-                            }
-                        }
+                                var result = new DPFP.Verification.Verification.Result();
+                                try { verificador.Verify(features, item.tpl, ref result); }
+                                catch { continue; }
 
-                        callback(match); // null = huella no registrada
-                        Thread.Sleep(match.HasValue ? 1500 : 800);
+                                if (result.Verified)
+                                {
+                                    match = item.guid;
+                                    break;
+                                }
+                            }
+
+                            callback(match); // null = huella no registrada
+                            Thread.Sleep(match.HasValue ? 1500 : 800);
+                        }
                     }
-                }
-                finally
-                {
-                    lector.Detener();
-                    _activo = null;
+                    finally
+                    {
+                        lector.Detener();
+                        _activo = null;
+                    }
                 }
             }
         }
@@ -323,7 +335,23 @@ namespace SistemaGimnacionOptimusCAI.Helpers
             public void Iniciar()
             {
                 _activo = true;
-                _capture.StartCapture();
+                Exception ultimoError = null;
+                for (int intento = 1; intento <= 3; intento++)
+                {
+                    try
+                    {
+                        _capture.StartCapture();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        ultimoError = ex;
+                        Thread.Sleep(350);
+                    }
+                }
+
+                _activo = false;
+                throw ultimoError ?? new InvalidOperationException("No se pudo iniciar la captura.");
             }
 
             public void Detener()
