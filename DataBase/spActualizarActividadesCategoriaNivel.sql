@@ -12,20 +12,20 @@ IF NOT EXISTS (
     ALTER TABLE actividades ADD categoria VARCHAR(50) NULL;
 GO
 
--- Actualizar categorias segun la logica del negocio
-UPDATE actividades SET categoria = 'Boxeo' WHERE nombre = 'Boxeo Cai 2 Vxs';
-UPDATE actividades SET categoria = 'Boxeo' WHERE nombre = 'Boxeo Cai 3 Vxs';
-UPDATE actividades SET categoria = 'Boxeo' WHERE nombre = 'Boxeo Todos Los Dias';
+-- Actualizar categorias segun la logica del negocio.
+-- Se usa LIKE para soportar nombres abreviados, por ejemplo:
+-- "Gimnasio 2 Vxs", "Gimnasio 3 Vxs" o "Gimnasio 3 Veces Por Semana".
+UPDATE actividades SET categoria = 'Boxeo'
+WHERE nombre LIKE '%Boxeo%';
 
-UPDATE actividades SET categoria = 'Gimnasio' WHERE nombre = 'Gimnasio 2 Veces Por Semana';
-UPDATE actividades SET categoria = 'Gimnasio' WHERE nombre = 'Gimnasio 3 Veces Por Semana';
-UPDATE actividades SET categoria = 'Gimnasio' WHERE nombre = 'Gimnasio Todos Los Dias';
+UPDATE actividades SET categoria = 'Gimnasio'
+WHERE nombre LIKE '%Gimnasio%' OR nombre LIKE '%Gym%';
 
-UPDATE actividades SET categoria = 'Deportistas' WHERE nombre = 'Deportistas Cai';
-UPDATE actividades SET categoria = 'Deportistas' WHERE nombre = 'Deportistas Cai 3 Vxs';
-UPDATE actividades SET categoria = 'Deportistas' WHERE nombre = 'Deportistas Cai Todos Los Dias';
+UPDATE actividades SET categoria = 'Deportistas'
+WHERE nombre LIKE '%Deportista%';
 
-UPDATE actividades SET categoria = 'Clase' WHERE nombre = 'Clase';
+UPDATE actividades SET categoria = 'Clase'
+WHERE nombre LIKE '%Clase%';
 
 -- Verificacion
 SELECT id, nombre, categoria, dias_sesiones, precio

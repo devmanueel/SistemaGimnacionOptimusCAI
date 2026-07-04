@@ -30,6 +30,14 @@ namespace Models.Dao
             return null;
         }
 
+        private static DateTime? LeerColumnaSeguraDateTime(SqlDataReader r, string columna)
+        {
+            for (int i = 0; i < r.FieldCount; i++)
+                if (r.GetName(i).Equals(columna, StringComparison.OrdinalIgnoreCase))
+                    return r[columna] != DBNull.Value ? (DateTime?)Convert.ToDateTime(r[columna]) : null;
+            return null;
+        }
+
         private static Membresia MapearMembresia(SqlDataReader r)
         {
             return new Membresia
@@ -39,6 +47,7 @@ namespace Models.Dao
                 ActividadId = Convert.ToInt64(r["actividad_id"]),
                 InstructorId = r["instructor_id"] != DBNull.Value ? (long?)Convert.ToInt64(r["instructor_id"]) : null,
                 FechaInicio = Convert.ToDateTime(r["fecha_inicio"]),
+                FechaInicioOriginal = LeerColumnaSeguraDateTime(r, "fecha_inicio_original"),
                 FechaVencimiento = Convert.ToDateTime(r["fecha_vencimiento"]),
                 MontoPagado = Convert.ToDecimal(r["monto_pagado"]),
                 MetodoPago = r["metodo_pago"].ToString(),
@@ -148,7 +157,7 @@ namespace Models.Dao
         // ──────────────────────────────────────────────────────
         // INSERTAR
         // ──────────────────────────────────────────────────────
-        public long InsertarMembresia(Membresia m)
+        public long InsertarMembresia(Membresia m, bool usarFechaInicioManual = false)
         {
             using (var conn = GetConnection())
             {
@@ -161,6 +170,7 @@ namespace Models.Dao
                     cmd.Parameters.AddWithValue("@InstructorId", (object)m.InstructorId ?? DBNull.Value);
                     cmd.Parameters.AddWithValue("@FechaInicio", m.FechaInicio);
                     cmd.Parameters.AddWithValue("@FechaVencimiento", m.FechaVencimiento);
+                    cmd.Parameters.AddWithValue("@UsarFechaInicioManual", usarFechaInicioManual);
                     cmd.Parameters.AddWithValue("@TipoPlan", m.TipoPlan ?? "mensual");
                     cmd.Parameters.AddWithValue("@MontoPagado", m.MontoPagado);
                     cmd.Parameters.AddWithValue("@MetodoPago", m.MetodoPago ?? "efectivo");

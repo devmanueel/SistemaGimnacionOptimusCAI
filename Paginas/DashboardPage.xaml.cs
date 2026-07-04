@@ -27,6 +27,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private DispatcherTimer _timerOcultar;
         private int _versionResultado;
+        private static readonly TimeSpan TiempoVisibleResultado = TimeSpan.FromMinutes(1);
 
         // ── Reconocimiento de huella ───────────────────────────────
         private CancellationTokenSource _huellaCts;
@@ -51,6 +52,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void DashboardPage_Unloaded(object sender, RoutedEventArgs e)
         {
+            DetenerTimerOcultar();
             DetenerReconocimientoHuella();
         }
 
@@ -563,20 +565,26 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
         private void IniciarTimerOcultar()
         {
-            if (_timerOcultar != null)
-            {
-                _timerOcultar.Stop();
-                _timerOcultar = null;
-            }
+            DetenerTimerOcultar();
 
-            _timerOcultar = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            txtDni.Text = string.Empty;
+            txtDni.Focus();
+
+            _timerOcultar = new DispatcherTimer { Interval = TiempoVisibleResultado };
             _timerOcultar.Tick += (s, e) =>
             {
-                _timerOcultar.Stop();
-                _timerOcultar = null;
+                DetenerTimerOcultar();
                 OcultarResultado();
             };
             _timerOcultar.Start();
+        }
+
+        private void DetenerTimerOcultar()
+        {
+            if (_timerOcultar == null) return;
+
+            _timerOcultar.Stop();
+            _timerOcultar = null;
         }
 
         private void OcultarResultado()

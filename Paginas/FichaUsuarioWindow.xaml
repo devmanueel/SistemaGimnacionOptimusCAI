@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:helpers="clr-namespace:SistemaGimnacionOptimusCAI.Helpers"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
         Title="Ficha de Usuario"
         Height="480" Width="520"
         WindowStartupLocation="CenterOwner"
@@ -175,6 +176,79 @@
                             </Border>
                         </StackPanel>
                     </Grid>
+
+                    <StackPanel x:Name="panelHuella" Margin="0,18,0,0"
+                                Visibility="Collapsed">
+                        <TextBlock Text="HUELLA DIGITAL"
+                                   Foreground="{StaticResource TextMuted}"
+                                   FontSize="10" FontWeight="Bold"
+                                   Margin="0,0,0,6"/>
+
+                        <Border Background="{StaticResource Bg3}"
+                                CornerRadius="10"
+                                BorderBrush="{StaticResource Border2}"
+                                BorderThickness="0.5"
+                                Padding="12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="lblHuellaEstado"
+                                               Text="—"
+                                               FontSize="12"
+                                               Foreground="{StaticResource TextSecondary}"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+
+                                <Button x:Name="btnHuella"
+                                        Grid.Column="1"
+                                        Height="38"
+                                        Padding="14,0"
+                                        Margin="14,0,0,0"
+                                        Cursor="Hand"
+                                        Background="{StaticResource GreenMain}"
+                                        BorderThickness="0"
+                                        Click="btnHuella_Click">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="borde"
+                                                    Background="{TemplateBinding Background}"
+                                                    CornerRadius="8"
+                                                    Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="borde" Property="Opacity" Value="0.85"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="borde" Property="Opacity" Value="0.45"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <StackPanel Orientation="Horizontal">
+                                        <fa:ImageAwesome x:Name="iconBtnHuella"
+                                                         Icon="HandPaperOutline"
+                                                         Width="14" Height="14"
+                                                         Foreground="#071207"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,7,0"/>
+                                        <TextBlock x:Name="lblBtnHuella"
+                                                   Text="Registrar Huella"
+                                                   FontSize="11"
+                                                   FontWeight="Bold"
+                                                   Foreground="#071207"
+                                                   VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

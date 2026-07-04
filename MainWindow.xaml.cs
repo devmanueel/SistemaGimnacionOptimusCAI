@@ -26,6 +26,8 @@ namespace SistemaGimnacionOptimusCAI
 
         private List<Border> _botonesMenu = new List<Border>();
         private Border _botonActivo = null;
+        private bool _maximizadoPersonalizado = false;
+        private Rect _boundsRestaurar;
 
         public MainWindow()
         {
@@ -356,16 +358,42 @@ namespace SistemaGimnacionOptimusCAI
 
         private void btnMaximizar_Click(object sender, RoutedEventArgs e)
         {
-            if (WindowState == WindowState.Maximized)
+            if (_maximizadoPersonalizado)
             {
-                WindowState = WindowState.Normal;
+                RestaurarVentana();
                 lblMaxIcon.Text = "🗖";
             }
             else
             {
-                WindowState = WindowState.Maximized;
+                MaximizarHastaBarraTareas();
                 lblMaxIcon.Text = "🗗";
             }
+        }
+
+        private void MaximizarHastaBarraTareas()
+        {
+            if (WindowState == WindowState.Minimized)
+                WindowState = WindowState.Normal;
+
+            _boundsRestaurar = new Rect(Left, Top, Width, Height);
+
+            Rect areaTrabajo = SystemParameters.WorkArea;
+            Left = areaTrabajo.Left;
+            Top = areaTrabajo.Top;
+            Width = areaTrabajo.Width;
+            Height = areaTrabajo.Height;
+
+            _maximizadoPersonalizado = true;
+        }
+
+        private void RestaurarVentana()
+        {
+            WindowState = WindowState.Normal;
+            Left = _boundsRestaurar.Left;
+            Top = _boundsRestaurar.Top;
+            Width = _boundsRestaurar.Width;
+            Height = _boundsRestaurar.Height;
+            _maximizadoPersonalizado = false;
         }
 
         private void btnCerrarVentana_Click(object sender, RoutedEventArgs e)
@@ -580,7 +608,7 @@ namespace SistemaGimnacionOptimusCAI
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton != MouseButton.Left) return;
-            if (WindowState == WindowState.Maximized) return;
+            if (_maximizadoPersonalizado) return;
             try { DragMove(); } catch { }
         }
     }

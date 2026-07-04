@@ -2370,9 +2370,9 @@ Usando la paleta oficial de Optimus CAI
 
     <!-- ── Dashboard Acceso Rápido ──────────────────────────── -->
     <Style x:Key="DashboardAccesoStyle" TargetType="Button">
-        <Setter Property="Height" Value="56"/>
+        <Setter Property="Height" Value="48"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="Margin" Value="4"/>
+        <Setter Property="Margin" Value="4,3"/>
         <Setter Property="Background" Value="{StaticResource ColorInput}"/>
         <Setter Property="BorderBrush" Value="{StaticResource ColorBorde}"/>
         <Setter Property="BorderThickness" Value="1"/>

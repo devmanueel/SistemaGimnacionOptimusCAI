@@ -40,7 +40,9 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
         {
             InitializeComponent();
             CargarCombos();
+            dpInicio.SelectedDate = DateTime.Today;
             dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
+            ConfigurarFechaInicioManual();
         }
 
         // ── Carga de combos ───────────────────────────────────
@@ -129,7 +131,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
             _socioId     = resultadoSocio.socioCreado.Id;
             _numeroSocio = resultadoSocio.socioCreado.NumeroSocio;
 
-            // ── 2. Guardar la membresía ───────────────────────
+// ── 2. Guardar la membresía ───────────────────────
             var actividad = cmbActividad.SelectedItem as Actividad;
             var metodoPagoItem = cmbMetodoPago.SelectedItem as ComboBoxItem;
             string metodoPago = metodoPagoItem?.Tag?.ToString() ?? "efectivo";
@@ -141,19 +143,36 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 if (inst != null) instructorId = inst.Id;
             }
 
+            bool usarFechaManual = SesionManager.EsAdmin
+                && chkFechaInicioManual != null
+                && chkFechaInicioManual.IsChecked == true;
+
+            DateTime fechaInicioFinal = usarFechaManual && dpInicio.SelectedDate.HasValue
+                ? dpInicio.SelectedDate.Value.Date
+                : DateTime.Today;
+
+            DateTime fechaVencimientoFinal = fechaInicioFinal.AddMonths(1);
+
             var resultadoMem = _membresiaCtrl.Insertar(
                 socioId:          _socioId,
                 actividadId:      actividad.Id,
                 instructorId:     instructorId,
-                fechaInicio:      DateTime.Today,
-                fechaVencimiento: DateTime.Today.AddMonths(1),
+                fechaInicio:      fechaInicioFinal,
+                fechaVencimiento: fechaVencimientoFinal,
                 montoPagado:      actividad.Precio,
                 metodoPago:       metodoPago,
                 registradoPor:    SesionManager.HaySesion ? SesionManager.UsuarioId : 0L,
-                observaciones:    null);
+                observaciones:    null,
+                tipoPlan:         "mensual",
+                usarFechaInicioManual: usarFechaManual);
 
             if (!resultadoMem.ok)
             {
+                if (_socioId > 0)
+                {
+                    try { _socioCtrl.Eliminar(_socioId); } catch { }
+                }
+
                 NotificacionWindow.MostrarError(resultadoMem.mensaje);
                 return;
             }
@@ -199,6 +218,9 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
             lblSubtitulo.Text   = "Asigná una actividad al nuevo socio";
             btnAccion.Content   = "COBRAR ✓";
             btnCancelar.Content = "← Volver";
+            dpInicio.SelectedDate = DateTime.Today;
+            dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
+            ConfigurarFechaInicioManual();
         }
 
         // ── Navegación: Paso 2 → Paso 1 ──────────────────────
@@ -216,6 +238,58 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
             lblSubtitulo.Text   = "Completá los datos del nuevo socio";
             btnAccion.Content   = "SIGUIENTE →";
             btnCancelar.Content = "Cancelar";
+        }
+
+        private bool FechaInicioManualActiva()
+        {
+            return SesionManager.EsAdmin
+                && chkFechaInicioManual != null
+                && chkFechaInicioManual.IsChecked == true;
+        }
+
+        private DateTime ObtenerFechaInicioMembresia()
+        {
+            if (FechaInicioManualActiva() && dpInicio.SelectedDate.HasValue)
+                return dpInicio.SelectedDate.Value.Date;
+
+            return DateTime.Today;
+        }
+
+        private void ConfigurarFechaInicioManual()
+        {
+            if (chkFechaInicioManual == null || dpInicio == null) return;
+
+            chkFechaInicioManual.Visibility = SesionManager.EsAdmin
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+
+            if (!SesionManager.EsAdmin)
+                chkFechaInicioManual.IsChecked = false;
+
+            dpInicio.IsEnabled = FechaInicioManualActiva();
+        }
+
+        private void chkFechaInicioManual_Checked(object sender, RoutedEventArgs e)
+        {
+            ConfigurarFechaInicioManual();
+
+            if (!FechaInicioManualActiva())
+            {
+                dpInicio.SelectedDate = DateTime.Today;
+                dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
+                return;
+            }
+
+            if (!dpInicio.SelectedDate.HasValue)
+                dpInicio.SelectedDate = DateTime.Today;
+
+            dpVencimiento.SelectedDate = dpInicio.SelectedDate.Value.Date.AddMonths(1);
+        }
+
+        private void dpInicio_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!FechaInicioManualActiva() || !dpInicio.SelectedDate.HasValue) return;
+            dpVencimiento.SelectedDate = dpInicio.SelectedDate.Value.Date.AddMonths(1);
         }
 
         // ── Cambio de actividad → mostrar precio ──────────────

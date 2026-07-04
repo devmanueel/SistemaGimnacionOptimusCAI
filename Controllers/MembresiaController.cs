@@ -51,13 +51,22 @@ namespace Controllers
             string metodoPago,
             long registradoPor,
             string observaciones,
-            string tipoPlan = "mensual")
+            string tipoPlan = "mensual",
+            bool usarFechaInicioManual = false)
         {
             string err = ValidarCampos(socioId, actividadId, montoPagado, metodoPago);
             if (err != null) return (false, err, 0);
 
-            fechaInicio = DateTime.Today;
-            fechaVencimiento = DateTime.Today.AddMonths(1);
+            if (!usarFechaInicioManual)
+            {
+                fechaInicio = DateTime.Today;
+                fechaVencimiento = DateTime.Today.AddMonths(1);
+            }
+            else
+            {
+                fechaInicio = fechaInicio.Date;
+                fechaVencimiento = fechaInicio.AddMonths(1);
+            }
 
             var membresia = new Membresia
             {
@@ -75,7 +84,7 @@ namespace Controllers
 
             try
             {
-                long id = _dao.InsertarMembresia(membresia);
+                long id = _dao.InsertarMembresia(membresia, usarFechaInicioManual);
                 if (id <= 0) return (false, "No se pudo registrar la membresía.", 0);
                 
                 Auditor.Registrar("crear", "membresia", id, new Dictionary<string, object> {

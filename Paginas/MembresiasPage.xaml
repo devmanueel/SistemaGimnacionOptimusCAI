@@ -439,17 +439,35 @@
                                     </ComboBox.Resources>
                                 </ComboBox>
 
-                            <!-- FECHAS lado a lado (automáticas, no editables) -->
+                            <!-- FECHAS lado a lado (automáticas, no editables salvo admin al crear) -->
                             <Grid Margin="0,0,0,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0" Margin="0,0,6,0">
-                                    <TextBlock Text="INICIO *" Style="{StaticResource LabelCampoEstilo}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="INICIO *" Style="{StaticResource LabelCampoEstilo}"/>
+                                        <CheckBox x:Name="chkFechaInicioManual"
+                                                  Grid.Column="1"
+                                                  Content="Editar"
+                                                  Foreground="{StaticResource TextSecondary}"
+                                                  FontSize="10"
+                                                  FontWeight="Bold"
+                                                  VerticalAlignment="Center"
+                                                  Margin="6,10,0,0"
+                                                  Visibility="Collapsed"
+                                                  Checked="chkFechaInicioManual_Checked"
+                                                  Unchecked="chkFechaInicioManual_Checked"/>
+                                    </Grid>
                                     <DatePicker x:Name="dpInicio"
                                                     Style="{StaticResource DatePickerEstilo}"
-                                                    IsEnabled="False"/>
+                                                    IsEnabled="False"
+                                                    SelectedDateChanged="dpInicio_SelectedDateChanged"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="6,0,0,0">
                                     <TextBlock Text="VENCIMIENTO *" Style="{StaticResource LabelCampoEstilo}"/>

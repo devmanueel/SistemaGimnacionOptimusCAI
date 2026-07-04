@@ -309,14 +309,14 @@
         </Grid>
 
         <!-- ══ VISTA POS ═════════════════════════════════════ -->
-        <Grid x:Name="vistaPOS" Margin="24,20,24,20" Visibility="Collapsed">
+        <Grid x:Name="vistaPOS" Margin="24,16,24,16" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <!-- Header POS -->
-            <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid Grid.Row="0" Margin="0,0,0,14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -376,7 +376,7 @@
                                  TextChanged="txtBuscarProducto_TextChanged"/>
 
                         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Style="{StaticResource PanelScrollViewerStyle}"
-                                      HorizontalScrollBarVisibility="Disabled" Padding="14,12,14,14">
+                                      HorizontalScrollBarVisibility="Disabled" Padding="12,10,12,12">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -414,7 +414,7 @@
 
                         <Border Grid.Row="0" Background="#00E676"/>
 
-                        <Grid Grid.Row="1" Margin="22,18,22,12">
+                        <Grid Grid.Row="1" Margin="18,14,18,10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
@@ -434,7 +434,7 @@
                         </Grid>
 
                         <!-- Socio + metodo -->
-                        <StackPanel Grid.Row="2" Margin="22,0,22,12">
+                        <StackPanel Grid.Row="2" Margin="18,0,18,10">
                             <TextBlock Text="CLIENTE" Style="{StaticResource LabelCampoEstilo}"/>
                             <ComboBox x:Name="cmbSocio" Style="{StaticResource ComboBoxBuscableEstilo}"
                                       FontSize="12"
@@ -468,7 +468,7 @@
 
                         <!-- Items carrito -->
                         <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" 
-                                      Margin="14,8,14,0" Style="{StaticResource PanelScrollViewerStyle}">
+                                      Margin="12,6,12,0" Style="{StaticResource PanelScrollViewerStyle}">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -495,8 +495,8 @@
                         <!-- Total + cobrar -->
                         <Border Grid.Row="4" Background="#0A1A0A"
                                 BorderBrush="#1A3A1A" BorderThickness="1,1,0,0">
-                            <StackPanel Margin="22,16,22,18">
-                                <Grid Margin="0,0,0,12">
+                            <StackPanel Margin="18,12,18,14">
+                                <Grid Margin="0,0,0,10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
@@ -506,12 +506,12 @@
                                                FontWeight="Bold" VerticalAlignment="Center"/>
                                     <TextBlock Grid.Column="1" x:Name="lblTotal" Text="$0"
                                                FontFamily="Bahnschrift SemiBold, Consolas"
-                                               FontSize="32" FontWeight="Bold" Foreground="#00E676"/>
+                                               FontSize="28" FontWeight="Bold" Foreground="#00E676"/>
                                 </Grid>
                                 <Button x:Name="btnCobrar" Content="CERRAR Y COBRAR"
                                         Tag="CreditCard"
                                         Style="{StaticResource BotonCobrarEstilo}"
-                                        Height="50" FontSize="14" Click="btnCobrar_Click"/>
+                                        Height="46" FontSize="13" Click="btnCobrar_Click"/>
                             </StackPanel>
                         </Border>
                     </Grid>

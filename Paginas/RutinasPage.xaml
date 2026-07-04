@@ -54,14 +54,14 @@
         </ResourceDictionary>
     </Page.Resources>
 
-    <Grid x:Name="gridRaiz" Margin="24,20,24,20">
+    <Grid x:Name="gridRaiz" Margin="24,16,24,16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,18">
+        <Grid Grid.Row="0" Margin="0,0,0,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -85,7 +85,7 @@
                         Click="btnNuevaRutina_Click"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="0,0,0,16">
+        <Grid Grid.Row="1" Margin="0,0,0,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="8"/>
@@ -193,10 +193,10 @@
 
                     <TextBox x:Name="txtBuscar" Tag="Buscar rutina..." Grid.Row="1"
                              Style="{StaticResource BuscadorStyle}" Width="Auto" Height="42"
-                             Margin="12,16,12,12" TextChanged="txtBuscar_TextChanged"/>
+                             Margin="12,12,12,10" TextChanged="txtBuscar_TextChanged"/>
 
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="12, 8"
-                                    Padding="12,0,12,12" Style="{StaticResource PanelScrollViewerStyle}">
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="12,6"
+                                    Padding="12,0,12,10" Style="{StaticResource PanelScrollViewerStyle}">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>

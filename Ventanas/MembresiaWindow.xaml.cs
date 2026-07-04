@@ -128,7 +128,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
             btnGuardar.Content = "RENOVAR";
             cmbActividad.IsEnabled = permiteCambiarActividad;
 
-            dpInicio.SelectedDate = DateTime.Today;
+            dpInicio.SelectedDate = CalcularInicioRenovacion();
             dpVencimiento.SelectedDate = CalcularVencimientoRenovacion();
             panelUpgrade.Visibility = Visibility.Collapsed;
 
@@ -217,23 +217,17 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 return;
             }
 
-            bool esUpgrade = actividad.Id != _actividadActualId
-                && !string.IsNullOrEmpty(_actividadActualCategoria)
-                && actividad.Categoria == _actividadActualCategoria
-                && _actividadActualNivel.HasValue
-                && actividad.Nivel.HasValue
-                && actividad.Nivel.Value > _actividadActualNivel.Value;
+            OpcionUpgrade opcionUpgrade = ObtenerOpcionUpgradeSeleccionada(actividad.Id);
+            bool esUpgrade = opcionUpgrade != null;
 
             if (esUpgrade)
             {
-                decimal diferencia = Math.Abs(actividad.Precio - ObtenerPrecio(_actividadActualId));
-
                 bool confirmo = NotificacionWindow.MostrarConfirmacion(
                     "Vas a mejorar el plan de la membresía:\n\n" +
                     "📋 " + ObtenerNombre(_actividadActualId) + " → " + actividad.Nombre + "\n" +
-                    "💰 Diferencia a cobrar: $" + diferencia.ToString("N0") + "\n" +
+                    "💰 Diferencia a cobrar: $" + opcionUpgrade.DiferenciaAPagar.ToString("N0") + "\n" +
                     "💳 Método: " + metodoPago + "\n\n" +
-                    "⚠️ Solo se permite mejorar el plan una vez por membresía.\n\n" +
+                    "⚠️ Solo se permite cambiar de actividad una vez por membresía.\n\n" +
                     "¿Confirmás el cambio de plan y el cobro?",
                     "Confirmar cambio de plan");
 
@@ -317,7 +311,7 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
 
                 panelUpgrade.Visibility = Visibility.Collapsed;
                 txtMonto.Text = act.Precio.ToString("F0");
-                dpInicio.SelectedDate = DateTime.Today;
+                dpInicio.SelectedDate = CalcularInicioRenovacion();
                 dpVencimiento.SelectedDate = CalcularVencimientoRenovacion();
                 ActualizarPreviewCobro();
                 return;
@@ -329,31 +323,48 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 return;
             }
 
-            if (act.Id != _actividadActualId
-                && !string.IsNullOrEmpty(_actividadActualCategoria)
-                && act.Categoria == _actividadActualCategoria
-                && _actividadActualNivel.HasValue
-                && act.Nivel.HasValue
-                && act.Nivel.Value > _actividadActualNivel.Value)
-            {
-                decimal precioActual = ObtenerPrecio(_actividadActualId);
-                decimal diferencia = Math.Abs(act.Precio - precioActual);
+            OpcionUpgrade opcionUpgrade = ObtenerOpcionUpgradeSeleccionada(act.Id);
 
+            if (opcionUpgrade != null)
+            {
                 lblUpgradeDetalle.Text = "Diferencia a cobrar (" +
                     ObtenerNombre(_actividadActualId) + " → " + act.Nombre + "):";
-                lblUpgradeMonto.Text = "$" + diferencia.ToString("N0");
-                lblUpgradeNivel.Text = "⬆ Nivel " + _actividadActualNivel.Value + " → " + act.Nivel.Value;
+                lblUpgradeMonto.Text = "$" + opcionUpgrade.DiferenciaAPagar.ToString("N0");
+                lblUpgradeNivel.Text = "⬆ Nivel " + opcionUpgrade.NivelActual + " → " + opcionUpgrade.NivelNuevo;
                 panelUpgrade.Visibility = Visibility.Visible;
-                txtMonto.Text = diferencia.ToString("F0");
+                txtMonto.Text = opcionUpgrade.DiferenciaAPagar.ToString("F0");
             }
             else if (act.Id == _actividadActualId)
             {
                 panelUpgrade.Visibility = Visibility.Collapsed;
+                txtMonto.Text = act.Precio.ToString("F0");
             }
             else
             {
                 panelUpgrade.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private OpcionUpgrade ObtenerOpcionUpgradeSeleccionada(long actividadId)
+        {
+            if (_modoRenovacion || _membresiaId <= 0 || actividadId == _actividadActualId)
+                return null;
+
+            try
+            {
+                var opciones = _membresiaController.CalcularUpgrade(_membresiaId);
+                foreach (var opcion in opciones)
+                {
+                    if (opcion.ActividadId == actividadId)
+                        return opcion;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+
+            return null;
         }
 
         private void txtMonto_LostFocus(object sender, RoutedEventArgs e)
@@ -414,6 +425,15 @@ namespace SistemaGimnacionOptimusCAI.Ventanas
                 return _vencimientoActual.AddMonths(1);
 
             return hoy.AddMonths(1);
+        }
+
+        private DateTime CalcularInicioRenovacion()
+        {
+            DateTime hoy = DateTime.Today;
+            if (_estadoActual == "activa" && _vencimientoActual >= hoy)
+                return _vencimientoActual;
+
+            return hoy;
         }
 
         private void ActualizarPreviewCobro()

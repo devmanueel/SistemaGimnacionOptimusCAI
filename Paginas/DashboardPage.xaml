@@ -317,8 +317,8 @@
             <!-- ── PANEL DERECHO ── -->
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="240"/>
-                    <RowDefinition Height="12"/>
+                    <RowDefinition Height="205"/>
+                    <RowDefinition Height="10"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
@@ -334,7 +334,7 @@
                         <Border Grid.Row="0" Style="{StaticResource DashboardPanelTopBarStyle}"
                                 Background="#D4830A"/>
 
-                        <StackPanel Grid.Row="1" Margin="16,14,16,10"
+                        <StackPanel Grid.Row="1" Margin="16,12,16,8"
                                     Orientation="Horizontal">
                             <Border Style="{StaticResource DashboardPanelHeaderIconStyle}"
                                     Background="#1E1600">
@@ -349,7 +349,7 @@
 
                         <ScrollViewer Grid.Row="2"
                                       VerticalScrollBarVisibility="Auto"
-                                      Margin="12,0,12,12"
+                                      Margin="12,0,12,10"
                                       Style="{StaticResource PanelScrollViewerStyle}">
                             <StackPanel x:Name="panelVencimientos">
                                 <TextBlock Text="Cargando..."
@@ -362,7 +362,7 @@
 
                 <!-- ── ACCESOS RAPIDOS ── -->
                 <Border Grid.Row="2" Style="{StaticResource DashboardPanelStyle}"
-                        MinHeight="230">
+                        MinHeight="170">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="3"/>
@@ -373,7 +373,7 @@
                         <Border Grid.Row="0" Style="{StaticResource DashboardPanelTopBarStyle}"
                                 Background="{StaticResource GreenMain}"/>
 
-                        <StackPanel Grid.Row="1" Margin="16,14,16,12"
+                        <StackPanel Grid.Row="1" Margin="16,12,16,8"
                                     Orientation="Horizontal">
                             <Border Style="{StaticResource DashboardPanelHeaderIconStyle}"
                                     Background="#1E1840">
@@ -387,7 +387,7 @@
                         </StackPanel>
 
                         <UniformGrid Grid.Row="2" Rows="2" Columns="2"
-                                     Margin="12,0,12,18"
+                                     Margin="12,0,12,10"
                                      VerticalAlignment="Top">
 
                             <Button Style="{StaticResource DashboardAccesoStyle}"

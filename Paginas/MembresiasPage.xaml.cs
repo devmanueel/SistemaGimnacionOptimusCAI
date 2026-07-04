@@ -310,38 +310,21 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 return;
             }
 
-            // Modo editar: verificar si es upgrade
-            if (act.Id != _actividadActualId
-                && !string.IsNullOrEmpty(_actividadActualCategoria)
-                && act.Categoria == _actividadActualCategoria
-                && _actividadActualNivel.HasValue
-                && act.Nivel.HasValue
-                && act.Nivel.Value > _actividadActualNivel.Value)
+            OpcionUpgrade opcionUpgrade = ObtenerOpcionUpgradeSeleccionada(act.Id);
+
+            // Modo editar: verificar si es upgrade usando la regla de la base de datos.
+            if (opcionUpgrade != null)
             {
-                // Es un upgrade — calcular diferencia
-                decimal precioActual = 0;
-                foreach (var item in cmbActividad.Items)
-                {
-                    var a = item as ActividadComboItem;
-                    if (a != null && a.Id == _actividadActualId)
-                    {
-                        precioActual = a.Precio;
-                        break;
-                    }
-                }
-
-                decimal diferencia = Math.Abs(act.Precio - precioActual);
-
                 // Mostrar panel upgrade
                 lblUpgradeDetalle.Text = "Diferencia a cobrar (" +
                     ObtenerNombreActividad(_actividadActualId) + " → " + act.Nombre + "):";
-                lblUpgradeMonto.Text = "$" + diferencia.ToString("N0");
-                lblUpgradeNivel.Text = "⬆ Nivel " + _actividadActualNivel.Value +
-                                         " → " + act.Nivel.Value;
+                lblUpgradeMonto.Text = "$" + opcionUpgrade.DiferenciaAPagar.ToString("N0");
+                lblUpgradeNivel.Text = "⬆ Nivel " + opcionUpgrade.NivelActual +
+                                         " → " + opcionUpgrade.NivelNuevo;
                 panelUpgrade.Visibility = Visibility.Visible;
 
                 // Poner la diferencia en el campo monto
-                txtMonto.Text = diferencia.ToString("F0");
+                txtMonto.Text = opcionUpgrade.DiferenciaAPagar.ToString("F0");
                 ActualizarPreviewMonto();
             }
             else if (act.Id == _actividadActualId)
@@ -355,6 +338,28 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 panelUpgrade.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private OpcionUpgrade ObtenerOpcionUpgradeSeleccionada(long actividadId)
+        {
+            if (_esNuevo || _idEditar <= 0 || actividadId == _actividadActualId)
+                return null;
+
+            try
+            {
+                var opciones = _controller.CalcularUpgrade(_idEditar);
+                foreach (var opcion in opciones)
+                {
+                    if (opcion.ActividadId == actividadId)
+                        return opcion;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+
+            return null;
         }
 
         // Helper para obtener el nombre de una actividad por id
@@ -379,7 +384,9 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             LimpiarErrores();
 
             dpInicio.SelectedDate = DateTime.Today;
+            dpInicio.IsEnabled = false;
             dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
+            ConfigurarFechaInicioManual();
             cmbMetodoPago.SelectedIndex = 0;
             AbrirFormulario("COBRAR CUOTA");
         }
@@ -429,6 +436,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
 
             dpInicio.SelectedDate = m.FechaInicio;
             dpInicio.IsEnabled = false;
+            ConfigurarFechaInicioManual();
             dpVencimiento.SelectedDate = m.FechaVencimiento;
             dpVencimiento.IsEnabled = false;
             txtMonto.Text = m.MontoPagado.ToString("F0");
@@ -524,8 +532,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var instructor = cmbInstructor.SelectedItem as InstructorComboItem;
             var metodoItem = cmbMetodoPago.SelectedItem as ComboBoxItem;
 
-            DateTime inicio = DateTime.Today;
-            DateTime venc = DateTime.Today.AddMonths(1);
+            DateTime inicio = dpInicio.SelectedDate.HasValue ? dpInicio.SelectedDate.Value : DateTime.Today;
+            DateTime venc = dpVencimiento.SelectedDate.HasValue ? dpVencimiento.SelectedDate.Value : inicio.AddMonths(1);
             decimal monto = 0;
             decimal.TryParse(txtMonto.Text, out monto);
 
@@ -547,7 +555,8 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 var r = _controller.Insertar(
                     socio.Id, actividad.Id, instructorId,
                     inicio, venc, monto, metodoPago,
-                    USUARIO_ACTUAL_ID, txtObservaciones.Text, "mensual");
+                    USUARIO_ACTUAL_ID, txtObservaciones.Text, "mensual",
+                    FechaInicioManualActiva());
 
                 if (!r.ok) { NotificacionWindow.MostrarError(r.mensaje); return; }
                 NotificacionWindow.MostrarExito(r.mensaje, "¡Cuota cobrada!");
@@ -567,25 +576,21 @@ namespace SistemaGimnacionOptimusCAI.Paginas
                 string metodoPagoEditar = metodoItemEditar != null && metodoItemEditar.Tag != null
                     ? metodoItemEditar.Tag.ToString() : "efectivo";
 
-                // Verificar si es upgrade
-                bool esUpgrade = actividad != null
-                    && actividad.Id != _actividadActualId
-                    && !string.IsNullOrEmpty(_actividadActualCategoria)
-                    && actividad.Categoria == _actividadActualCategoria
-                    && _actividadActualNivel.HasValue
-                    && actividad.Nivel.HasValue
-                    && actividad.Nivel.Value > _actividadActualNivel.Value;
+                OpcionUpgrade opcionUpgrade = actividad != null
+                    ? ObtenerOpcionUpgradeSeleccionada(actividad.Id)
+                    : null;
+
+                // Verificar si es upgrade usando la misma regla del SP.
+                bool esUpgrade = opcionUpgrade != null;
 
                 if (esUpgrade)
                 {
-                    decimal diferencia = Math.Abs(actividad.Precio - ObtenerPrecioActividad(_actividadActualId));
-
                     bool confirmo = NotificacionWindow.MostrarConfirmacion(
                         "Vas a mejorar el plan de la membresía:\n\n" +
                         "📋 " + ObtenerNombreActividad(_actividadActualId) + " → " + actividad.Nombre + "\n" +
-                        "💰 Diferencia a cobrar: $" + diferencia.ToString("N0") + "\n" +
+                        "💰 Diferencia a cobrar: $" + opcionUpgrade.DiferenciaAPagar.ToString("N0") + "\n" +
                         "💳 Método: " + metodoPagoEditar + "\n\n" +
-                        "⚠️ Solo se permite mejorar el plan una vez por membresía.\n\n" +
+                        "⚠️ Solo se permite cambiar de actividad una vez por membresía.\n\n" +
                         "¿Confirmás el cambio de plan y el cobro?",
                         "Confirmar cambio de plan");
 
@@ -777,6 +782,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             {
                 dpInicio.SelectedDate = DateTime.Today;
                 dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
+                ConfigurarFechaInicioManual();
                 cmbActividad.IsEnabled = true;
             }
             else
@@ -817,6 +823,7 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             dpInicio.IsEnabled = false;
             dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
             dpVencimiento.IsEnabled = false;
+            ConfigurarFechaInicioManual();
             txtMonto.Text = string.Empty;
             txtMonto.IsEnabled = true;
             cmbMetodoPago.SelectedIndex = 0;
@@ -826,6 +833,50 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             _idEditar = 0;
             // No resetear _actividadActualId, _actividadActualCategoria, _actividadActualNivel aquí
             // porque se asignan después en btnEditar_Click
+        }
+
+        private bool FechaInicioManualActiva()
+        {
+            return SesionManager.EsAdmin
+                && _esNuevo
+                && chkFechaInicioManual != null
+                && chkFechaInicioManual.IsChecked == true;
+        }
+
+        private void ConfigurarFechaInicioManual()
+        {
+            if (chkFechaInicioManual == null || dpInicio == null) return;
+
+            bool visible = SesionManager.EsAdmin && _esNuevo;
+            chkFechaInicioManual.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+
+            if (!visible)
+                chkFechaInicioManual.IsChecked = false;
+
+            dpInicio.IsEnabled = FechaInicioManualActiva();
+        }
+
+        private void chkFechaInicioManual_Checked(object sender, RoutedEventArgs e)
+        {
+            ConfigurarFechaInicioManual();
+
+            if (!FechaInicioManualActiva())
+            {
+                dpInicio.SelectedDate = DateTime.Today;
+                dpVencimiento.SelectedDate = DateTime.Today.AddMonths(1);
+                return;
+            }
+
+            if (!dpInicio.SelectedDate.HasValue)
+                dpInicio.SelectedDate = DateTime.Today;
+
+            dpVencimiento.SelectedDate = dpInicio.SelectedDate.Value.AddMonths(1);
+        }
+
+        private void dpInicio_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!FechaInicioManualActiva() || !dpInicio.SelectedDate.HasValue) return;
+            dpVencimiento.SelectedDate = dpInicio.SelectedDate.Value.AddMonths(1);
         }
 
         private Membresia ObtenerMembresiaDeFila(object sender)

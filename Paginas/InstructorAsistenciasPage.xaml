@@ -26,7 +26,7 @@
         </ResourceDictionary>
     </Page.Resources>
 
-    <Grid x:Name="gridRaiz" Margin="24,20,24,20" Opacity="0">
+    <Grid x:Name="gridRaiz" Margin="24,16,24,16" Opacity="0">
         <Grid.Triggers>
             <EventTrigger RoutedEvent="Grid.Loaded">
                 <BeginStoryboard>
@@ -54,7 +54,7 @@
         </Grid.RowDefinitions>
 
         <!-- HEADER -->
-        <Grid Grid.Row="0" Margin="0,0,0,18">
+        <Grid Grid.Row="0" Margin="0,0,0,14">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -86,7 +86,7 @@
         </Grid>
 
         <!-- STATS -->
-        <Grid x:Name="panelStatsInstructores" Grid.Row="1" Margin="0,0,0,16">
+        <Grid x:Name="panelStatsInstructores" Grid.Row="1" Margin="0,0,0,12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="8"/>
@@ -97,7 +97,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0" CornerRadius="10"
-                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="14,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/>
@@ -110,7 +110,7 @@
                 </Grid>
             </Border>
             <Border Grid.Column="2" CornerRadius="10"
-                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="14,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/>
@@ -123,7 +123,7 @@
                 </Grid>
             </Border>
             <Border Grid.Column="4" CornerRadius="10"
-                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="14,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/>
@@ -136,7 +136,7 @@
                 </Grid>
             </Border>
             <Border Grid.Column="6" CornerRadius="10"
-                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="16,12">
+                    Background="{StaticResource Bg1}" BorderBrush="{StaticResource Border1}" BorderThickness="0.5" Padding="14,10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/>
@@ -166,7 +166,7 @@
                         <Border Grid.Row="0" Background="#4ADE80"/>
 
                         <!-- Tabs -->
-                        <StackPanel x:Name="panelTabsInstructores" Grid.Row="1" Orientation="Horizontal" Margin="8,20,0,0">
+                        <StackPanel x:Name="panelTabsInstructores" Grid.Row="1" Orientation="Horizontal" Margin="8,14,0,0">
                             <Button x:Name="btnTabHistorial" Content="HISTORIAL"
                                     Style="{StaticResource TabBtnEstilo}"
                                     Click="btnTabHistorial_Click"/>
@@ -187,7 +187,7 @@
                             </Grid.RowDefinitions>
 
                             <!-- Filtros -->
-                            <Grid x:Name="panelFiltrosHistorial" Grid.Row="0" Margin="22,14,22,10">
+                            <Grid x:Name="panelFiltrosHistorial" Grid.Row="0" Margin="20,12,20,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -196,16 +196,16 @@
                                     <TextBlock Text="DESDE:" Foreground="{StaticResource TextMuted}" FontSize="10"
                                                FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                     <DatePicker x:Name="dpDesde" Style="{StaticResource DatePickerEstilo}"
-                                                Width="140" Height="42" Margin="0,0,15,0"
+                                                Width="140" Height="38" Margin="0,0,15,0"
                                                 SelectedDateChanged="dpFecha_Changed"/>
                                     <TextBlock Text="HASTA:" Foreground="{StaticResource TextMuted}" FontSize="10"
                                                FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,8,0"/>
                                     <DatePicker x:Name="dpHasta" Style="{StaticResource DatePickerEstilo}"
-                                                Width="140" Height="42" Margin="0, 12"
+                                                Width="140" Height="38" Margin="0, 10"
                                                 SelectedDateChanged="dpFecha_Changed"/>
                                 </StackPanel>
                                 <TextBox x:Name="txtBuscar" Tag="Buscar instructor..." Grid.Column="1"
-                                         Style="{StaticResource BuscadorStyle}" Width="250" Height="42"
+                                         Style="{StaticResource BuscadorStyle}" Width="250" Height="38"
                                          VerticalAlignment="Center" TextChanged="txtBuscar_TextChanged"/>
                             </Grid>
 
@@ -214,7 +214,7 @@
                                       IsReadOnly="True" AutoGenerateColumns="False"
                                       CanUserAddRows="False" CanUserResizeRows="False"
                                       Background="Transparent" BorderThickness="0"
-                                      RowHeaderWidth="0" RowHeight="56"
+                                      RowHeaderWidth="0" RowHeight="52"
                                       GridLinesVisibility="Horizontal"
                                       HorizontalGridLinesBrush="#111811"
                                       SelectionMode="Single"

@@ -73,11 +73,16 @@ namespace SistemaGimnacionOptimusCAI.Paginas
             var token = _cts.Token;
             System.Threading.Tasks.Task.Run(() =>
             {
+                servicio.Cancelar();
+                Thread.Sleep(450);
+                if (token.IsCancellationRequested) return;
+
                 var (exito, mensaje, template) = servicio.Enrollar(
                     (capturas, msg) => Dispatcher.Invoke(() => ActualizarProgreso(capturas, msg)),
                     token);
 
-                Dispatcher.Invoke(() => OnEnrolamientoTerminado(exito, mensaje, nuevoGuid, template));
+                if (!token.IsCancellationRequested)
+                    Dispatcher.Invoke(() => OnEnrolamientoTerminado(exito, mensaje, nuevoGuid, template));
             });
         }
 

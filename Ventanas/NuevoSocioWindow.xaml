@@ -351,6 +351,33 @@
                             </Grid>
                         </Border>
 
+                        <!-- Fecha de inicio manual solo para admin -->
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="FECHA DE INICIO" Style="{StaticResource LabelCampoEstilo}"/>
+                                <CheckBox x:Name="chkFechaInicioManual"
+                                          Grid.Column="1"
+                                          Content="Editar"
+                                          Foreground="{StaticResource TextSecondary}"
+                                          FontSize="10"
+                                          FontWeight="Bold"
+                                          VerticalAlignment="Center"
+                                          Margin="6,0,0,10"
+                                          Visibility="Collapsed"
+                                          Checked="chkFechaInicioManual_Checked"
+                                          Unchecked="chkFechaInicioManual_Checked"/>
+                            </Grid>
+                            <DatePicker x:Name="dpInicio"
+                                        Style="{StaticResource DatePickerEstilo}"
+                                        IsEnabled="False"
+                                        SelectedDateChanged="dpInicio_SelectedDateChanged"
+                                        Margin="0,0,0,14"/>
+                        </StackPanel>
+
                         <!-- Fecha de vencimiento y Instructor en fila -->
                         <Grid Margin="0,0,0,0">
                             <Grid.ColumnDefinitions>

@@ -280,14 +280,17 @@
                             <Grid Grid.Row="0" Margin="0,0,0,4">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="120"/>
+                                    <ColumnDefinition Width="120"/>
                                     <ColumnDefinition Width="140"/>
-                                    <ColumnDefinition Width="150"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="Actividad" FontSize="10" FontWeight="Bold"
                                            Foreground="{StaticResource TextMuted}"/>
-                                <TextBlock Grid.Column="1" Text="Vencimiento" FontSize="10" FontWeight="Bold"
+                                <TextBlock Grid.Column="1" Text="Inicio" FontSize="10" FontWeight="Bold"
                                            Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center"/>
-                                <TextBlock Grid.Column="2" Text="Estado" FontSize="10" FontWeight="Bold"
+                                <TextBlock Grid.Column="2" Text="Vencimiento" FontSize="10" FontWeight="Bold"
+                                           Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="3" Text="Estado" FontSize="10" FontWeight="Bold"
                                            Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center"/>
                             </Grid>
                             <Border Grid.Row="1" Height="1" Background="{StaticResource Border1}" Margin="0,0,0,6"/>
@@ -301,16 +304,20 @@
                                                 <Grid Margin="0,0,0,8">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="120"/>
+                                                        <ColumnDefinition Width="120"/>
                                                         <ColumnDefinition Width="140"/>
-                                                        <ColumnDefinition Width="150"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Grid.Column="0" Text="{Binding ActividadNombre}"
                                                                FontSize="12" Foreground="{StaticResource TextSecondary}"
                                                                VerticalAlignment="Center"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding FechaVencimientoTexto}"
+                                                    <TextBlock Grid.Column="1" Text="{Binding FechaInicioOriginalTexto}"
                                                                FontSize="12" Foreground="{StaticResource TextMuted}"
                                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                                    <TextBlock Grid.Column="2" Text="{Binding FechaVencimientoTexto}"
+                                                               FontSize="12" Foreground="{StaticResource TextMuted}"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    <StackPanel Grid.Column="3" Orientation="Horizontal"
                                                                 HorizontalAlignment="Center" VerticalAlignment="Center">
                                                         <Ellipse Width="9" Height="9" VerticalAlignment="Center"
                                                                  Margin="0,0,6,0">
